@@ -1,0 +1,277 @@
+{
+    "English": {
+      "SubscriptionPlansScreen":"SubscriptionPlansScreen" ,
+      "ChooseYourLanguage": "Choose Your Language",
+      "English": "English",
+      "French": "French",
+      "Cancel": "Cancel",
+      "Welcome": "Welcome",
+      "SelectLanguage": "Please select your preferred language",
+      "Profile":"Profile",
+      "MyTeam": "My Team",
+      "ChangePassword": "Change Password",
+      "AboutFootball": "About Football",
+      "LegalInformation": "Legal Information",
+      "SendFeedback": "Send Feedback",
+      "Logout": "Logout",
+      "Language": "Language",
+      "ChatMessages": "Chat Messages",
+      "myprofile":"View my profile",
+      "full":"Full Name" ,
+      "confirmpass":"Confirm Password" ,
+      "SubscriptionPlans":"Subscription Plans",
+"delete":"delete account"
+,
+"namRequired":"Full Name is required."
+,
+"Players":"Players" ,
+"StartSection":"Start Section"
+,
+      "HelpCentre": "Help Centre",
+      "OurPlatform": "Our Platform",
+      "AchieveTraining": "Achieve Training",
+  
+      "Confirm": "Confirm",
+      "Save": "Save",
+      "Close": "Close",
+      "Submit": "Submit",
+      "Settings": "Settings" ,
+      "Edit":"Edit Profile",
+"mb":"Mobile Number" ,
+"currentpass":"Current Password",
+"newpass":"New Password",
+"Save":"Save" ,
+"noplayers":"No players found",
+"date":"Date or Time is not valid",
+"pleaseS":"Please select at least one player.",
+
+"endSection":"End Section" ,
+"Wed":"We'd love your thoughts" ,
+"let":"Let us know what we can improve or what you enjoyed.",
+"Writeyour":"Write your feedback here...",
+"sumit":"Submit" , 
+"LogOut":"Log Out",
+"feedback":"Please enter your feedback." ,
+"sure":"Are you sure you want to log out" ,
+"AddPlayer":"Add Player" ,
+"BasicInformation":"Basic Information" ,
+"PlayerID":"Player ID" ,
+"TrainingPerformance":"Training & Performance" ,
+"InjuryHistory":"Injury History" ,
+"aAdditionala":"Additional Player Details",
+"PerformanceNotes":"Performance Notes" ,
+"selectinjury":"Please select an injury history.",
+"Passwordrequired":"Password is required.",
+"Passwordcharacters":"Password must be at least 6 characters long." ,
+"Emailrequired":"Email is required." ,
+"validemail":"Please enter a valid email address.",
+"selectteam":"Please select a team." ,
+"Pleaseposition":"Please select a position." ,
+"Pleasetraining":"Please select a training type.",
+"Performancerequired":"Performance notes are required.",
+"Profilerequired":"Profile image is required.",
+"Daterequired":"Date of Birth is required." ,
+"Playerrequired":"Player ID is required." ,
+"PlayerDetails":"Player Details" ,
+"CoachNotes":"Coach Notes" ,
+"Edit":"Edit" ,
+"EditPlayer":"Edit Player" ,
+"Nochat":"No chat history found" ,
+"Write":"Write your message" ,
+"State":"State" ,
+"PlayersAttendin":"Players Attending Session" ,
+"GotoSettings":"Go to Settings" ,
+"Start":"Start" ,
+"SelectedPlayers":"Selected Players" ,
+"Time":"Time" ,
+"SelectTime":"Select Time" ,
+"Sessionrequired":"Session is required.",
+"Daterequired":"Date is required.",
+"Commentsbeempty":"Comments cannot be empty." ,
+"Effort":"Effort must be a valid number." ,
+"SubmitRPE":"Submit RPE",
+"SelectSession":"Select Session" ,
+"AddComments":"Add Comments (Optional):" ,
+"TrainingSession":"Training  Session",
+"Submit":"Submit",
+"AddAttendance" :"Add Attendance" ,
+"Doyou":"Do you want to add attendance" ,
+"Yes":"Yes" ,
+"No":"No" ,
+"DeleteAccount":"Delete Account?" ,
+"Are":"Are you sure you want to delete this account?." ,
+"YesDelete":"Yes, Delete",
+   "SelectType":"Select Type" ,
+   "Select":"Select Questionnaire" ,
+   "Startq":"Start Time" ,
+   "EndTime":"End Time"
+},
+    "French": { 
+      "EndTime":"Fin des temps"
+,  
+    "Startq":"Heure de début"
+,
+      "Select":"Questionnaire de sélection"
+,
+      "SelectType":"Sélectionnez le type"
+,
+      "YesDelete":"Oui, supprimer"
+,
+      "Are":"Êtes-vous sûr de vouloir supprimer ce compte ?."
+,
+      "Doyou":"Voulez-vous ajouter une présence"
+, 
+"DeleteAccount":"Supprimer le compte ?",
+"delete":"supprimer le compte"
+,
+"No":"Non" 
+,
+"Yes":"Oui",
+      "AddAttendance" :"Ajouter une présence"
+,
+      "AddComments":"Ajouter des commentaires "
+,
+"Submit":"Soumettre"
+,
+"TrainingSession":"Séance de formation"
+,
+      "SubmitRPE":"Soumettre RPE"
+,
+"SelectSession":"Sélectionner une session"
+,
+      "Effort":"L'effort doit être un nombre valide."
+,
+      "Daterequired":"La date est obligatoire."
+,
+"Commentsbeempty":"Les commentaires ne peuvent pas être vides."
+,
+      "Sessionrequired":"Une session est requise."
+,
+      "SelectTime":"Sélectionnez l'heure"
+,
+      "Time":"Temps"
+,
+      "SelectedPlayers":"Joueurs sélectionnés"
+,
+      "Start":"Commencer"
+,
+      "State":"État"
+,
+"GotoSettings":"aller dans les paramètres"
+,
+"PlayersAttendin":"Joueurs participant à la séance"
+,
+      "Write":"Aucun historique de discussion trouvé"
+,
+      "Nochat":"Aucun historique de discussion trouvé"
+,
+      "CoachNotes":"Notes de l'entraîneur"
+,
+"EditPlayer":"Modifier le lecteur"
+,
+"Edit":"Modifier"
+,
+      "Playerrequired":"L'identifiant du joueur est requis."
+,
+"PlayerDetails":"Détails du joueur"
+,
+      "Performancerequired":"Des notes de performance sont requises."
+,
+"Daterequired":"La date de naissance est obligatoire.",
+
+"Profilerequired":"L'image de profil est requise."
+,
+      "Pleaseposition":"Veuillez sélectionner un poste.",
+      "Pleasetraining":"Veuillez sélectionner un type de formation."
+,
+      "validemail":"S'il vous plaît, mettez une adresse email valide."
+,
+"selectteam":"Veuillez sélectionner une équipe.",
+
+      "Emailrequired":"L'e-mail est obligatoire."
+,
+      "selectinjury":"Veuillez sélectionner un historique de blessure."
+,
+"Passwordcharacters":"Le mot de passe doit comporter au moins 6 caractères."
+,
+"Passwordrequired":"Password is required.",
+
+      "PerformanceNotes":"Notes de performance"
+,
+      "aAdditionala":"Détails supplémentaires sur le joueur"
+,
+      "TrainingPerformance":"Formation et performance"
+,
+      "BasicInformation":"Informations de base",
+      "InjuryHistory":"Antécédents de blessures"
+,
+"PlayerID":"ID du joueur"
+,
+      "AddPlayer":"Ajouter un joueur"
+,
+      "LogOut":"Se déconnecter",
+"sure":"Êtes-vous sûr de vouloir vous déconnecter ?"
+,
+      "StartSection":"Section de départ"
+,
+      "Wed":"nous aimons vos pensées"
+,
+"feedback":"Veuillez entrer vos commentaires.",
+"StrengthTraining":"Strength Training & Cardio Fitness"
+,
+"sumit":"Soumettre"
+,
+"Writeyour":"Écrivez vos commentaires ici..."
+,
+"let":"Faites-nous savoir ce que nous pouvons améliorer ou ce que vous avez apprécié."
+,
+      "pleaseS":"Veuillez sélectionner au moins un joueur.",
+
+      "date":"La date ou l'heure n'est pas valide",
+
+      "ChooseYourLanguage": "Choisissez votre langue",
+      "English": "Anglais",
+      "Profile":"Profil",
+"endSection":"Section de fin"
+,
+"noplayers":"Aucun joueur trouvé",
+      "French": "Français",
+      "Cancel": "Annuler",
+      "Welcome": "Bienvenue",
+      "SelectLanguage": "Veuillez sélectionner votre langue préférée",
+      
+      "MyTeam": "Mon Équipe",
+      "ChangePassword": "Changer le mot de passe",
+      "AboutFootball": "À propos du football",
+      "LegalInformation": "Informations légales",
+      "SendFeedback": "Envoyer des commentaires",
+      "Logout": "Déconnexion",
+      "Language": "Langue",
+      "ChatMessages": "Messages de discussion",
+  
+      "HelpCentre": "Centre d'aide",
+      "OurPlatform": "Notre Plateforme",
+      "AchieveTraining": "Formation Réussie",
+      "myprofile":"Voir mon profil",
+
+      "Confirm": "Confirmer",
+      "Save": "Enregistrer",
+      "Close": "Fermer",
+      "Submit": "Soumettre",
+      "Settings": "Paramètres" ,
+      "Edit":"Modifier le profil" ,
+      "mb":"Numéro de portable" ,
+      "full":"Nom et prénom" ,
+      "namRequired":"Le nom complet est obligatoire." ,
+      "currentpass":"Mot de passe actuel" ,
+      "newpass":"Nouveau mot de passe",
+      "confirmpass":"Confirmez le mot de passe"
+,
+"Save":"Sauvegarder" ,
+"StrengthTraining":"Musculation et cardio-training",
+"Players":"Joueurs" ,
+"SubscriptionPlans":"SubscriptionPlans"
+
+    }
+  }
+  

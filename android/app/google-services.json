@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "613342758501",
+    "project_id": "reelrecs-5b73e",
+    "storage_bucket": "reelrecs-5b73e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:613342758501:android:0b4a375ac99ed27b71288c",
+        "android_client_info": {
+          "package_name": "com.reelrecs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkKOJkSaJt2pmN4muxBQoK-EMIkAlIcZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
