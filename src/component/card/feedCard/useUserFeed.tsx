@@ -20,8 +20,7 @@ const useUserFeed = (token: string,) => {
     try {
       // ✅ page parameter bhejna important hai
       const res = await getUserFeed(token, type, username, reset ? 1 : page);
- 
-       setFeedData((prev) =>
+        setFeedData((prev) =>
         reset ? res.results : [...prev, ...res.results] // ✅ overwrite ya append
       );
             setLoadingFeed(false);

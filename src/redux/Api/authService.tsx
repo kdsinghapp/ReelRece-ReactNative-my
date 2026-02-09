@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import axiosInstance from '@redux/Api/axiosInstance';
 import { ApiResponse, UpdateProfileData, UserProfile } from '@types/api.types';
-import { safeApiCall } from '@utils/apiErrorHandler';
+import { createErrorResponse, safeApiCall } from '@utils/apiErrorHandler';
 import Logger from '@utils/Logger';
 import {
   createSafeParams,
@@ -11,6 +11,8 @@ import {
 } from '@utils/apiInputValidator';
 import { validateResponse, unwrapValidation } from '@utils/apiResponseValidator';
 import { z } from 'zod';
+import toastConfig, { errorToast, normalToast, successToast } from '@utils/customToast';
+import { ErrorToast } from 'react-native-toast-message';
 
 const loginResponseSchema = z.object({
   token: z.string(),
@@ -158,32 +160,30 @@ export const confirmEmailCodeApi = (
   );
 
 
-export const checkUsernameAvailability = async (
-  username: string
-): Promise<ApiResponse<{ available: boolean }>> => {
+export const checkUsernameAvailability = async (username) => {
+  
   try {
-    const sanitizedUsername = ensureStringField(username, 'Username', {
-      minLength: 2,
-      maxLength: 50,
-    });
+    const response = await axiosInstance.get(`/check-username-availability?username=${username}`);
+  if (response?.data?.username_available === "yes") {
+  // successToast("Username is available.");
+} else {
+  errorToast("Username is already in use.");
+}
 
-    const response = await axiosInstance.get('/check-username-availability', {
-      params: createSafeParams({
-        username: sanitizedUsername,
-      }),
-    });
-     return {
+    return {
       success: true,
-      data: { available: response?.data?.username_available === "yes" },
+      available: response?.data?.username_available === "yes",
     };
-  } catch (error: unknown) {
-    const err = error as { response?: { data?: { message?: string } }; message?: string };
+
+  } catch (error) {
+ 
      return {
       success: false,
-      message: err?.response?.data?.message || 'Something went wrong',
+      message: error?.response?.data?.message || 'Something went wrong',
     };
   }
 };
+
 
 
 // ✅ authService.js

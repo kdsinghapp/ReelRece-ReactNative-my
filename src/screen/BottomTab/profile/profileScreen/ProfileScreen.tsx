@@ -92,7 +92,7 @@ const ProfileScreen = () => {
 
       // Auto-reload when coming back online
       if (prevOnlineRef.current === false && online === true) {
-        console.log('Network restored - auto-refreshing profile data');
+        // console.log('Network restored - auto-refreshing profile data');
         handleRefresh();
       }
 

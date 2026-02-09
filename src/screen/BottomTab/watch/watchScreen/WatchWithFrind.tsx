@@ -543,7 +543,7 @@ const WatchWithFrind = () => {
     const imdbId = movie?.imdb_id;
     return (
       <>
-        <View style={styles.thumpCard}>
+        <View style={[styles.thumpCard ]}>
           <TouchableOpacity
             onPress={() =>
               handlePreference({
@@ -580,7 +580,7 @@ const WatchWithFrind = () => {
             }
             style={[
               styles.thumpContainer,
-
+ 
               {
                 backgroundColor: dislikes[imdbId] ? Color.red : Color.grey,
 
@@ -596,10 +596,9 @@ const WatchWithFrind = () => {
           </TouchableOpacity>
         </View>
         <TouchableOpacity  
-        
-        onPress={()=>    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
+          onPress={()=>    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
 }
-        >
+         >
         <Text numberOfLines={1} style={[styles.title, {
           bottom: 20,
           lineHeight: 31
@@ -644,7 +643,7 @@ const WatchWithFrind = () => {
         </TouchableOpacity>
 
         <View 
-        // pointerEvents="box-none"
+     pointerEvents="box-none"
           style={{
             bottom: 18
 
@@ -675,25 +674,24 @@ const WatchWithFrind = () => {
             Watch Now
           </CustomText>
         </TouchableOpacity> */}
-        <TouchableOpacity
-          // hitSlop={10}
-          onPress={() =>
-            watchModalFunc({ imdb_id: imdbId })
-          }
-          activeOpacity={0.8}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignSelf: 'center',
-            backgroundColor: Color.primary,
-            height: 42,
-            alignItems: 'center',
-            width: width * 0.4,
-            borderRadius: 10,
-            marginTop: Platform.OS === 'ios' ? 5 : 5,
-            // position:"relative" ,
-            // top:11
-          }}
+        <Pressable
+          onPress={() => watchModalFunc({ imdb_id: imdbId })}
+          style={({ pressed }) => [
+            {
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignSelf: 'center',
+              backgroundColor: Color.primary,
+              height: 42,
+              alignItems: 'center',
+              width: width * 0.4,
+              borderRadius: 10,
+              marginTop: Platform.OS === 'ios' ? 5 : 5,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+          // Prevent ScrollView from stealing the touch on iOS
+          delayLongPress={200}
         >
           <Image source={imageIndex.puased} style={styles.watchNowImg} />
           <CustomText
@@ -703,7 +701,7 @@ const WatchWithFrind = () => {
           >
             Watch Now
           </CustomText>
-        </TouchableOpacity>
+        </Pressable>
       </>
     );
   };
@@ -764,6 +762,7 @@ const WatchWithFrind = () => {
           />
 
           <Animated.View
+            collapsable={false}
             style={[
               styles.movieInfo,
               {

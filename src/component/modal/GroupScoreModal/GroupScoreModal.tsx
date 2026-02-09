@@ -93,8 +93,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
 
       if (filteredResults) {
         setMembers(filteredResults)
-        console.log(filteredResults)
-      }
+       }
     } catch (error) {
       throw error
     }

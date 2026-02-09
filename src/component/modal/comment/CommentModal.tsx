@@ -16,19 +16,19 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
-import { Color } from '@theme/color';
+ import { Color } from '@theme/color';
 import font from '@theme/font';
-import imageIndex from '@assets/imageIndex';
+ import imageIndex from '@assets/imageIndex';
 import { shallowEqual, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { TextInput } from 'react-native-gesture-handler';
 import { getCommentsByMovie, postComment } from '@redux/Api/commentService';
-import FastImage from 'react-native-fast-image';
-import RankingWithInfo from '@components/ranking/RankingWithInfo';
+  import FastImage from 'react-native-fast-image';
+ import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import ShimmerReviewItem from '@components/common/ShimmerReviewItem/ShimmerReviewItem';
 import { t } from 'i18next';
-
+  
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -52,12 +52,12 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
   useEffect(() => {
     has_rated_movie_Ref.current = has_rated_movie;
   }, [has_rated_movie]);
-  const [commetText, setCommentText] = useState('')
+   const [commetText, setCommentText] = useState('')
   const userData1 = useSelector((state: RootState) => state.auth.userGetData);
   const userData = useSelector((state: RootState) => state.auth?.userGetData);
   const [hasCommented, setHasCommented] = useState(false);
 
-  // const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${userData?.avatar}?t=${Date.now()}`, [userData]);
+    // const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${userData?.avatar}?t=${Date.now()}`, [userData]);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [usernameCom, setUsernameCom] = useState('')
   const checkMyCommRef = useRef(false)
@@ -75,7 +75,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     (state: RootState) => state.auth.userGetData?.username,
     shallowEqual
   );
-  const lastFetchedImdbRef = useRef<string | null>(null);
+   const lastFetchedImdbRef = useRef<string | null>(null);
   // const userData = useSelector((state: RootState) => state.auth.userGetData);
   // const userprofile = useSelector((state: RootState) => state. auth.userGetData?.username);
   // useEffect(() => {
@@ -100,7 +100,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     replies: Array.isArray(c.replies) ? c.replies : []
   });
 
-  const [comments, setComments] = useState(
+  const [comments, setComments] = useState (
     () => (reviews || []).map((r, i) => normalizeComment(r, i))
   );
 
@@ -109,12 +109,12 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     if (visible && reviews && comments.length === 0) {
       // setCommentText('')
       setComments((reviews || []).map((r, i) => normalizeComment(r, i)));
-    }
+     }
   }, [visible, reviews]);
 
   useEffect(() => {
     if (visible) {
-      setPage(1);
+       setPage(1);
       setHasMore(true);
       fetchComments(1); // fetch first page
     }
@@ -131,7 +131,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     try {
       // API call with pagination params
       const data = await getCommentsByMovie(token, imdb_id, nextPage, PAGE_SIZE);
-
+ 
 
       // Normalize comment structure
       const mapped = (data.results || []).map((c, idx) => ({
@@ -170,7 +170,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
 
     } catch (e) {
-    } finally {
+     } finally {
       setCommmetLoad(false)
       setLoadingMore(false);
       setCommentText('')
@@ -178,12 +178,12 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
   };
 
   const handlePostComment = async (text_Touch?: boolean) => {
-    if (!has_rated_movie_Ref.current) {
+     if (!has_rated_movie_Ref.current) {
       showCommenRankingCheck()
       // text_Touch_ref.current  = true
       return
     }
-    const trimmedComment = commetText.trim();
+     const trimmedComment = commetText.trim();
     if (!trimmedComment) return;
 
 
@@ -210,7 +210,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
       if (userData?.username) {
         userIndex = prev.findIndex(c => c.user?.username === userData.username);
-      }
+       }
 
       if (userIndex === -1 && isMyCommnetRef.current) {
         const updated = [...prev];
@@ -255,14 +255,14 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
       await postComment(token, imdb_id, trimmedComment);
 
     } catch (e) {
-    } finally {
+     } finally {
       has_rated_movie_Ref.current = true
     }
   };
 
-
+ 
   useEffect(() => {
-
+ 
     setCommentText('')
     setComments([])
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -325,7 +325,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                 }}
               >
                 <Text style={styles.name}>{item.user?.name}
-                  <Text style={{ marginLeft: 18, fontSize: 16, fontFamily: font.PoppinsRegular }}>{t("profile.ranked")}</Text>
+                  <Text style={{ marginLeft: 18, fontSize: 16, fontFamily: font.PoppinsRegular }}> Ranked</Text>
 
                 </Text>
               </TouchableOpacity>
@@ -340,8 +340,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                 scoreType === "Rec"
                   ? t("discover.recscoredes")
                   : t("discover.frienddes")
-                // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                // : "This score shows the rating from your friend for this title."
+                  // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                  // : "This score shows the rating from your friend for this title."
               }
             />
           </TouchableOpacity>
@@ -423,7 +423,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                 <View style={styles.inputContainer}>
                   <TextInput
                     allowFontScaling={false}
-                    placeholder={hasCommented ? t("common.editYour") : t("common.submitReview")}
+                    placeholder={hasCommented ?  t("common.editYour")  : t("common.submitReview") }
                     placeholderTextColor={Color.placeHolder}
                     style={styles.input}
                     value={commetText}
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     maxHeight:
       Dimensions.get('window').height *
-      (Platform.OS === 'ios' ? 0.63 : 0.58),
+      (Platform.OS === 'ios' ? 0.63 : 0.58 ),    
 
     // maxHeight: Dimensions.get('window').height * 0.63,
     height: Dimensions.get('window').height * 0.66,

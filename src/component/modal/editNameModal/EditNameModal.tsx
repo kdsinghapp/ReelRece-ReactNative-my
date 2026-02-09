@@ -86,7 +86,7 @@ const handleSave = async () => {
     try {
      
     const response =   await renameGroup(token, groupId, trimmedValue);
-       // Alert.alert(response.status_code)
+         Alert.alert(response.status_code)
       if (response) {
         setGroup_name(trimmedValue)
        }

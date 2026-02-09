@@ -82,7 +82,7 @@ const MovieInfoModal: React.FC<Props> = ({
                                 <Text style={styles.text}>{releaseDate}</Text>
 
                                 {/* Genre */}
-                                <Text style={styles.sectionTitle}>{t("common.genre")}</Text>
+                                <Text style={styles.sectionTitle}>{t("common.genres")}</Text>
                                 <Text style={styles.text}>{genre}</Text>
 
 

@@ -100,8 +100,7 @@ export const getRatedMovies = async (token: string, page: number = 1): Promise<P
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ page: pageValidation.value }),
     });
-    console.log(response)
-     return response.data;
+      return response.data;
   } catch (error) {
      throw error;
   }

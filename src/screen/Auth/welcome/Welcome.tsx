@@ -58,14 +58,12 @@ useEffect(()=>{
       setLoading(true);
       try {
         const response = await getRatedMovies(token);
-        console.log(response, 'this is responce')
-        // setMovies(response?.results || []);
+         // setMovies(response?.results || []);
       } catch (error) {
        
         if(error?.status == 401){
           setValid(false)
- console.log(error?.status, 'pls login againg')
-        }
+         }
         // Error handled silently
       } finally {
         setLoading(false);
