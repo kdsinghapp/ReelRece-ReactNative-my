@@ -49,8 +49,7 @@ lineHeight:18,
     position: 'relative',
   },
   headerSide: {
-    flex: 1,
-  },
+   },
   action: {
     fontSize: 14,
     fontFamily: font.PoppinsRegular,

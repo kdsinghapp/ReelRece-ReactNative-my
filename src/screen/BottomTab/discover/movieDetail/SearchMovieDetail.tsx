@@ -8,7 +8,7 @@ import {
   Dimensions,
   Animated,
   Platform,
- } from 'react-native';
+} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import styles from './style';
 import useMovie from './useMovie';
@@ -101,7 +101,7 @@ const MovieDetailScreen = () => {
   const saveBookMark_Ref = useRef(false)
   const [modalMovieId, setModalMovieId] = useState(null);
   const [titleLines, setTitleLines] = useState(1);
-   const dispatch = useDispatch()
+  const dispatch = useDispatch()
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -695,7 +695,7 @@ const MovieDetailScreen = () => {
   // ✅ Pause video when modal opens, Resume when modal closes
   useEffect(() => {
     const isModalOpen = isFeedbackModal || thinkModal;
-    
+
     if (isModalOpen) {
       // Modal opened - pause video
       prevModalState.current = true;
@@ -947,9 +947,9 @@ const MovieDetailScreen = () => {
                   {/* <RankingCard ranked={item?.rec_score} /> */}
                   <RankingWithInfo
                     score={item?.rec_score}
-                    title= {t("discover.recscore")}
+                    title={t("discover.recscore")}
                     description={t("discover.recscoredes")}
-                    // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                  // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
                   />
                   <TouchableOpacity disabled={true}>
                     <CustomText
@@ -959,7 +959,7 @@ const MovieDetailScreen = () => {
                       style={{ marginLeft: 6 }}
                       font={font.PoppinsMedium}
                     >
-                    
+
                       {t("discover.recscore")}
                     </CustomText>
                   </TouchableOpacity>
@@ -977,10 +977,10 @@ const MovieDetailScreen = () => {
                     <RankingWithInfo
                       score={item?.friends_rec_score}
                       title={t("discover.friendscore")}
-                      description= 
-                             {t("discover.ratingscoreshows")}
-                      
-                      // "This score shows the rating from your friend for this title."
+                      description=
+                      {t("discover.ratingscoreshows")}
+
+                    // "This score shows the rating from your friend for this title."
                     />
                   </View>
 
@@ -991,7 +991,7 @@ const MovieDetailScreen = () => {
                     font={font.PoppinsMedium}
                   >
                     {t("discover.friendscore")}
-        
+
                   </CustomText>
                 </TouchableOpacity>
 
@@ -1128,8 +1128,8 @@ const MovieDetailScreen = () => {
                     color={Color.whiteText}
                     style={styles.watchNowText}
                     font={font.PoppinsBold}
-                  > 
-                   {(t("movieDetail.rankNow"))}
+                  >
+                    {(t("movieDetail.rankNow"))}
                   </CustomText>
                 </TouchableOpacity>
               </View>
@@ -1297,8 +1297,8 @@ const MovieDetailScreen = () => {
       <MovieInfoModal
         visible={InfoModal}
         onClose={() => setInfoModal(false)}
-        title={selectedMovie?.title ||    (t("movieDetail.movietitle"))}
-        synopsis={selectedMovie?.description ||(t("movieDetail.moviedescription"))}
+        title={selectedMovie?.title || (t("movieDetail.movietitle"))}
+        synopsis={selectedMovie?.description || (t("movieDetail.moviedescription"))}
         releaseDate={selectedMovie?.release_date || "Unknown"}
         genre={(selectedMovie?.genres || []).join(', ')}
       />
