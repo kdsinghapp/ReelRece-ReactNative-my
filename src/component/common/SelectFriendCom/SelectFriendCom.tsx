@@ -268,7 +268,7 @@ const filteredUsers = formattedFriends?.filter(user => {
           renderItem={renderItem}
           scrollEnabled={false}
           style={styles.listContainer}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, type === 'createGroup' && styles.listContentCreateGroup]}
           initialNumToRender={18}
           removeClippedSubviews
           // horizontal
@@ -334,6 +334,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 70,
+  },
+  listContentCreateGroup: {
+    paddingBottom: 160, // Space for CreateGroupName bar (~160) + extra so last friend is fully visible
   },
   memberRow: {
     flexDirection: 'row',
