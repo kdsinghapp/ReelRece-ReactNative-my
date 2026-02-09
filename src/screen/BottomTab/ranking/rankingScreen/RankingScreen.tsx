@@ -870,13 +870,17 @@ const RankingScreen = () => {
               />
             )
           )}
-          {TooltipModal && totalSteps == 5 && currentStep >= 0 && (
-            <StepProgressBar
-              totalSteps={totalSteps}
-              disable={true}
-              currentStepModal={currentStep}
-            />
-          )}
+
+{totalSteps === 5 &&
+ currentStep >= 0 &&
+ order.slice(0, visibleCount).length === 0 && (
+   <StepProgressBar
+     totalSteps={totalSteps}
+     disable={true}
+     currentStepModal={currentStep}
+   />
+ )}
+
 
 
           {!showList ? null : (

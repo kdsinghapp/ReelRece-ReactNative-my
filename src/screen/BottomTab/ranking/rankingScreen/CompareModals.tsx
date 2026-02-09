@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
  import { useDispatch } from 'react-redux';
  import { ComparisonModal, FeedbackModal, StepProgressModal } from '@components/index';
 import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
   
 
 const CompareModals = ({
@@ -62,8 +63,34 @@ const CompareModals = ({
       onModalClose?.();
     }
   }, [isFeedbackVisible, isComparisonVisible, isStepsModalVisible]);
+    const [fetchStep1,setfetchStep]= useState<string| object>(); 
 
+  const getCurrentStep = async () => {
+    try {
+      const value = await AsyncStorage.getItem('currentStep');
+      if (value !== null) {
+        return Number(value);
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+  
+  useEffect(() => {
+    const fetchStep = async () => {
+      const step = await getCurrentStep();
+      setfetchStep(step);
+    };
 
+    fetchStep();
+  }, [isFeedbackVisible, isComparisonVisible, isStepsModalVisible]);
+useEffect(() => { 
+  if (fetchStep1 == 5) {
+    setStepsModalVisible(false);
+  }
+}, [fetchStep1]);
+ 
   return (
     <>
       {isFeedbackVisible && (
@@ -131,24 +158,24 @@ const CompareModals = ({
         // currentComparisonIndex={currentComparisonIndex}
         />
       )}
-      {/* {currentStep > 6 ?
-        null : */}
-        <StepProgressModal
-          visible={isStepsModalVisible}
-          onClose={() => {
-            setStepsModalVisible(false);
-            onModalClose?.(); // Call parent callback when modal closes
-          }}
-          progress={currentStep / comparisonMovies.length}
-          navigationProps={() => { }}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          setStepsModal={setStepsModalVisible}
-          selectedMovieId={selectedMovie?.imdb_id}
-          setMoviereommNav={() => { }}
-          totalSteps={5}
-        />
-      {/* } */}
+     {fetchStep1 < 5 && (
+  <StepProgressModal
+    visible={isStepsModalVisible}
+    onClose={() => {
+      setStepsModalVisible(false);
+      onModalClose?.();
+    }}
+    progress={currentStep / comparisonMovies.length}
+    navigationProps={() => {}}
+    currentStep={currentStep}
+    setCurrentStep={setCurrentStep}
+    setStepsModal={setStepsModalVisible}
+    selectedMovieId={selectedMovie?.imdb_id}
+    setMoviereommNav={() => {}}
+    totalSteps={5}
+  />
+)}
+
 
     </>
   );

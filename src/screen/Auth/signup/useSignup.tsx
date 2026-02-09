@@ -177,22 +177,26 @@ const useSignup = () => {
     try {
       setLoading(true);
       const check = await checkUsernameAvailability(trimmedUsername);
+ 
       if (!check.success) {
         Toast.show({ type: 'error', text1: check.message || 'Failed to check username' });
         return;
       }
-      if (check.available) {
-        setUsernameError(t('errorMessage.usernamealready'))
+      // if (check.available) {
+      //   setUsernameError(t('errorMessage.usernamealready'))
 
-        return;
-      }
+      //   return;
+      // }
       const result = await signupWithUsername(email, password, trimmedUsername);
+            console.log("🚀 ~ file: useSignup.tsx:161 ~ handleFinalSignup ~ token:", result  )
+
       if (!result?.success) {
          // Toast.show({ type: 'error', text1: result?.message || 'Signup failed' });
         Toast.show({ type: 'error', text1: 'Username already exists' });
         return;
       }
       const token = await loginUser_Api(email, password);
+      console.log("🚀 ~ file: useSignup.tsx:161 ~ handleFinalSignup ~ token:", token  )
       const token1 = token?.data
       dispatch(loginSuccess({ token: token1 }));
       Toast.show({ type: 'success', text1: 'Account created 🎉' });
