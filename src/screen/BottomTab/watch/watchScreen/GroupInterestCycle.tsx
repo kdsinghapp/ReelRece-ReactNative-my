@@ -294,12 +294,12 @@ const creatorAvatar = creator?.avatar || imageIndex.Addplus;
 {/* {interest?.action && ( */}
      <CustomText
                 size={12}
-                lineHeight={12}
+                lineHeight={14}
                 color={Color.whiteText}
                 style={{
                   color: interest?.action ? 'lightgreen' : 'red',
-                  marginRight: 4,
-                }}
+                  marginRight: 3,
+                 }}
                 font={font.PoppinsRegular}
                 numberOfLines={1}
               > {user?.userInterest?.action === "other" ? null : (<>

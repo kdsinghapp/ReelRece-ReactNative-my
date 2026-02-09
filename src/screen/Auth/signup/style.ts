@@ -31,7 +31,7 @@ fontFamily:font.PoppinsBold,
     // bottom: 5
   },
   imgLogo: {
-    height: 40, width: 40,
+    height: 44, width: 40,
     resizeMode: "contain"
   },
 

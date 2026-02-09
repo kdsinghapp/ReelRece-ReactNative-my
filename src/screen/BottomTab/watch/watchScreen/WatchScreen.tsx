@@ -649,14 +649,14 @@ const WatchScreen = () => {
           setNotificationModal={setNotificationModal}
         />
         <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[Color.primary]}
-              tintColor={Color.primary}
-            />
-          }
+          // refreshControl={
+          //   <RefreshControl
+          //     refreshing={refreshing}
+          //     onRefresh={onRefresh}
+          //     colors={[Color.primary]}
+          //     tintColor={Color.primary}
+          //   />
+          // }
         >
           <UserActions
             isSettingsMode={isSettingsMode}

@@ -5,12 +5,12 @@ import font from '@theme/font';
 import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import imageIndex from '@assets/imageIndex';
- import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
- import { followUser, unfollowUser } from '@redux/Api/followService';
- import FastImage from 'react-native-fast-image';
+import { followUser, unfollowUser } from '@redux/Api/followService';
+import FastImage from 'react-native-fast-image';
 import { BASE_IMAGE_URL } from '@config/api.config';
-  
+
 interface members {
   avatar?: string,
   following?: boolean,
@@ -37,11 +37,11 @@ const WatchGroupMemberModal: React.FC<WatchGroupMemberModal1> = ({ visible,
   const [searchText, setSearchText] = useState('');
   const ProfileUserName = useSelector((state: RootState) => state.auth.userGetData?.username);
   const [members, setMembers] = useState(groupMembers);
-   const [loadingUsername, setLoadingUsername] = useState<string | null>(null);  
- 
-const filteredMembers = members?.filter(member =>
-  (member?.name ?? member?.username)?.toLowerCase().includes(searchText.toLowerCase())
-);
+  const [loadingUsername, setLoadingUsername] = useState<string | null>(null);
+
+  const filteredMembers = members?.filter(member =>
+    (member?.name ?? member?.username)?.toLowerCase().includes(searchText.toLowerCase())
+  );
   const currentUser = filteredMembers?.find(member => member?.username === ProfileUserName);
   const otherUsers = filteredMembers?.filter(member => member?.username !== ProfileUserName);
   const toggleFollow = async (username: string) => {
@@ -49,9 +49,9 @@ const filteredMembers = members?.filter(member =>
     try {
 
       const isFollowing = members.find(m => m?.username === username)?.following;
-       // API call
+      // API call
       if (isFollowing) {
-        
+
         await unfollowUser(token, username);
         setLoadingUsername(null); // ✅ reset
 
@@ -67,22 +67,22 @@ const filteredMembers = members?.filter(member =>
           ? { ...member, following: !member.following }
           : member
       );
- 
+
       setMembers(updatedMembers);
       setLoadingUsername(null); // ✅ reset
 
-    }catch (error) {
-  if (error?.response?.data?.error) {
-   setLoadingUsername(null); // ✅ reset
-
-   } else {
+    } catch (error) {
+      if (error?.response?.data?.error) {
         setLoadingUsername(null); // ✅ reset
 
-   }
-}
+      } else {
+        setLoadingUsername(null); // ✅ reset
+
+      }
+    }
 
   };
- 
+
   return (
     <Modal
       visible={visible}
@@ -113,9 +113,9 @@ const filteredMembers = members?.filter(member =>
 
                 <View style={styles.header}>
                   <View style={{
-                        height: 20,
-    width: 20,
-                  }}/>
+                    height: 20,
+                    width: 20,
+                  }} />
                   <Text style={styles.title}>{heading || 'Group Members'}</Text>
                   <TouchableOpacity onPress={() => onClose()} >
 
@@ -148,15 +148,15 @@ const filteredMembers = members?.filter(member =>
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
-                           <FastImage
-          style={styles.avatar}
-          source={{
-          uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
-            priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-            cache: FastImage.cacheControl.web // 👈 Cache permanently
-          }}
-          resizeMode={FastImage.resizeMode.cover}
-        />
+                          <FastImage
+                            style={styles.avatar}
+                            source={{
+                              uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
+                              priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                              cache: FastImage.cacheControl.web // 👈 Cache permanently
+                            }}
+                            resizeMode={FastImage.resizeMode.cover}
+                          />
                           {currentUser?.online && <View style={styles.onlineIndicator} />}
                         </View>
                       </View>
@@ -179,19 +179,19 @@ const filteredMembers = members?.filter(member =>
 
                               {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
 
-                               <FastImage
-          style={styles.avatar}
-          source={{
-           uri: `${BASE_IMAGE_URL}${item?.avatar}`,
-            priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-            cache: FastImage.cacheControl.web // 👈 Cache permanently
-          }}
-          resizeMode={FastImage.resizeMode.stretch}
-        />
+                              <FastImage
+                                style={styles.avatar}
+                                source={{
+                                  uri: `${BASE_IMAGE_URL}${item?.avatar}`,
+                                  priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                                  cache: FastImage.cacheControl.web // 👈 Cache permanently
+                                }}
+                                resizeMode={FastImage.resizeMode.stretch}
+                              />
                               {item?.online && <View style={styles.onlineIndicator} />}
                             </View>
                           </TouchableOpacity>
-                          <Text style={styles.memberName}>{item?.name  ?  item?.name : item?.username}</Text>
+                          <Text style={styles.memberName}>{item?.name ? item?.name : item?.username}</Text>
                           <TouchableOpacity
                             onPress={() => toggleFollow(item?.username)}
                             disabled={loadingUsername !== null} // ✅ disable only during API
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalContent: {
-        backgroundColor: 'rgba(37, 37, 37, 0.9)',
+    backgroundColor: 'rgba(37, 37, 37, 0.9)',
     borderTopRightRadius: 22,
     borderTopLeftRadius: 22,
     paddingHorizontal: 20,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
 
     lineHeight: 16,
-    textAlign:"center"
+    textAlign: "center"
   },
 
 

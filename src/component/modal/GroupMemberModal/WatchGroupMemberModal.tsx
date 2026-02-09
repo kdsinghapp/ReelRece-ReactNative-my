@@ -10,6 +10,7 @@ import { RootState } from '@redux/store';
  import { followUser, unfollowUser } from '@redux/Api/followService';
  import FastImage from 'react-native-fast-image';
 import { BASE_IMAGE_URL } from '@config/api.config';
+import { t } from 'i18next';
   
 interface members {
   avatar?: string,
@@ -116,7 +117,7 @@ const filteredMembers = members?.filter(member =>
                         height: 20,
     width: 20,
                   }}/>
-                  <Text style={styles.title}>{heading || 'Group Members'}</Text>
+                  <Text style={styles.title}>{heading ||  t("home.groupMembers") }</Text>
                   <TouchableOpacity onPress={() => onClose()} >
 
                     <Image style={styles.closeImg} source={imageIndex.closeimg} />
@@ -129,7 +130,7 @@ const filteredMembers = members?.filter(member =>
                 <View style={styles.searchContaainer} >
                   <Image source={imageIndex.search} resizeMode='contain' style={{ height: 20, width: 20, marginRight: 6, }} />
                   <TextInput
-                    placeholder="Search members"
+                    placeholder= {t("home.searchMembers")} 
                     placeholderTextColor={Color.placeHolder}
                     style={styles.searchInput}
                     value={searchText}

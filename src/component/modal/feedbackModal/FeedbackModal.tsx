@@ -4,10 +4,11 @@ import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import FastImage from 'react-native-fast-image';
-  import { postComment } from '@redux/Api/commentService';
- import { fileLogger } from '@utils/FileLogger';
+import { postComment } from '@redux/Api/commentService';
+import { fileLogger } from '@utils/FileLogger';
 import CustomText from '@components/common/CustomText/CustomText';
 import CustomReviewInput from '@components/common/inputField/CustomReviewInput';
+import { t } from 'i18next';
 
 interface FeedbackModalProps {
   visible: boolean;
@@ -145,7 +146,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     // Flow close kar do
     setFeedbackVisible(false); // ya navigate back
     // } catch (error) {
-     // }
+    // }
   };
 
   const nextPress = async () => {
@@ -158,7 +159,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     });
 
     Keyboard.dismiss();
- 
+
     if (preference) {
       fileLogger.info('Preference selected', { preference });
       try {
@@ -170,9 +171,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           //  API Call
           const response = await postComment(token, selectedMovie?.imdb_id, text);
           fileLogger.info('Comment posted successfully', { response });
-         } else {
+        } else {
           fileLogger.info('Comment text empty, skipping post');
-         }
+        }
 
         fileLogger.info('Calling onSubmit callback', { preference });
         // ✅ Callback & UI updates
@@ -195,14 +196,14 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           message: error?.message,
           stack: error?.stack
         });
-         setFeedbackVisible(false); // Added semicolon
+        setFeedbackVisible(false); // Added semicolon
       }
     } else {
       fileLogger.warn('No preference selected, showing warning');
       setPreferenceMsg(true)
     }
   };
- 
+
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <TouchableWithoutFeedback>
@@ -218,12 +219,13 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
 
               <CustomText
-                size={20}
+                size={21}
                 color={Color.whiteText}
                 style={styles.heading}
                 font={font.PoppinsBold}
               >
-                How was it?
+                {t("modal.howWasIt")}
+
               </CustomText>
             </Animated.View>
 
@@ -261,7 +263,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             {preferenceMsg &&
               (
                 <View>
-                  <Text style={styles.continueAlert} >Please pick one to continue</Text>
+                  <Text style={styles.continueAlert} >{t("errorMessage.pickOneContinue")}</Text>
                 </View>
               )}
 
@@ -290,7 +292,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   ]}
                   font={font.PoppinsRegular}
                 >
-                  Love It
+
+                  {t("modal.loveIt")}
                 </CustomText>
               </View>
 
@@ -303,7 +306,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     style={styles.icon}
                   />
                 </TouchableOpacity>
-                
+
 
                 <CustomText
                   size={14}
@@ -314,7 +317,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   ]}
                   font={font.PoppinsRegular}
                 >
-                  It Was Okay
+
+                  {t("modal.itWasOkay")}
                 </CustomText>
               </View>
 
@@ -339,7 +343,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   ]}
                   font={font.PoppinsRegular}
                 >
-                  Didn't Like It
+
+                  {t("modal.didntLikeIt")}
                 </CustomText>
               </View>
 
@@ -349,7 +354,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             <Animated.View style={[{ width: Dimensions.get('window').width * 0.95, marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
               <TouchableOpacity style={styles.reviewConatainer} >
                 <CustomReviewInput
-                  placeholder="Write a review"
+                  placeholder={t("modal.writeReview")}
                   text={text}
                   setText={setText}
                 />
@@ -361,7 +366,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   style={styles.nextText}
                   font={font.PoppinsRegular}
                 >
-                  Next
+                  {t("common.next")}
+
                 </CustomText>
               </TouchableOpacity>
 
@@ -414,6 +420,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
+    marginLeft: 22,
   },
   lovedIt: {
     paddingVertical: 10,

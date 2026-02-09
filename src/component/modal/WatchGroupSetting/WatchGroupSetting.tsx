@@ -18,15 +18,16 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { useNavigation } from '@react-navigation/native';
-  import { getAllGroups, getGroupMembers, leaveGroup, renameGroup, toggleGroupNotification } from '@redux/Api/GroupApi';
- import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
+import { getAllGroups, getGroupMembers, leaveGroup, renameGroup, toggleGroupNotification } from '@redux/Api/GroupApi';
+import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
 import AddFrindModal from '@components/modal/AddFrindModal/AddFrindModal';
- import LogoutModal from '@components/modal/logoutModal/logoutModal';
+import LogoutModal from '@components/modal/logoutModal/logoutModal';
 import GroupAllAvatars from '@components/common/GroupAllAvatars/GroupAllAvatars';
 import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
 import SuccessMessageCustom from '@components/common/successMessage/SuccessMessageCustom';
 import EditNameModal from '@components/modal/editNameModal/EditNameModal';
 import CustomSwitch from '@components/common/CustomSwitch/CustomSwitch';
+import { t } from 'i18next';
 
 const { width, height } = Dimensions.get('window');
 
@@ -46,11 +47,11 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
   const [isGroupMute, setIsGroupMute] = useState(group?.isMuted);
 
 
- const [toestMess, setToestMess] = useState(false)
+  const [toestMess, setToestMess] = useState(false)
   const [toestMessColorGreen, setToestMessGreen] = useState(true)
   const [toastMessage, setToastMessage] = useState('');
 
- 
+
   const toggleNotification = () => {
     setNotificationEnabled(prev => !prev);
   };
@@ -58,83 +59,83 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
   // const renameGroupHandle = async (token, groupId, groupName) => {
   //   try {
   //     const response = await renameGroup(token, groupId, groupName);
-   //   } catch (error) {
-   //   }
+  //   } catch (error) {
+  //   }
   // }
 
   const handleNotification = async (token, groupId, currentStatus) => {
     const newStatus = currentStatus ? 'off' : 'on'; // true => 'off', false => 'on'
-     try {
+    try {
       setIsGroupMute(!isGroupMute)
       const response = await toggleGroupNotification(token, groupId, newStatus);
- 
+
     } catch (error) {
-     }
+    }
   };
-  useEffect(()=>{
+  useEffect(() => {
     fetchGroups()
-  },[]) 
+  }, [])
   const [group1, setGroup] = useState([]);
-const fetchGroups = async () => {
-  try {
-    const groupsRes = await getGroupMembers(token, groupId);
-       setGroup(groupsRes);
-  } catch (error) {
-   }
-};
+  const fetchGroups = async () => {
+    try {
+      const groupsRes = await getGroupMembers(token, groupId);
+      setGroup(groupsRes);
+    } catch (error) {
+    }
+  };
 
 
 
-const handleLogOutMsg = ()=> {
- setToestMess(true)
-}
+  const handleLogOutMsg = () => {
+    setToestMess(true)
+  }
 
   const hanldeleaveGroup = async (token, groupId) => {
     try {
       const response = await leaveGroup(token, groupId)
       onClose()
-     navigation.navigate(ScreenNameEnum.WatchScreen, {
+      navigation.navigate(ScreenNameEnum.WatchScreen, {
         getAllGroupReferace: Date.now()
       })
-   
- 
-     } catch (error) {
-     }
+
+
+    } catch (error) {
+    }
   };
 
-const [userCount, setUserCount] = useState(group1?.results?.length ||group);
-const [userCount1, setUserCount1] = useState(0);
-useEffect(() => {
-  if (group1?.results?.length !== undefined) {
-    setUserCount1(group1.results.length);
+  const [userCount, setUserCount] = useState(group1?.results?.length || group);
+  const [userCount1, setUserCount1] = useState(0);
+  useEffect(() => {
+    if (group1?.results?.length !== undefined) {
+      setUserCount1(group1.results.length);
 
- 
-   }
-}, [group1?.results?.length ||group]);
 
-useEffect(() => {
-      fetchGroups();
-}, [groupMember,addFrindModal]);
+    }
+  }, [group1?.results?.length || group]);
 
-const formatGroupName = (name?: string) => {
-  if (!name) return '';
+  useEffect(() => {
+    fetchGroups();
+  }, [groupMember, addFrindModal]);
 
-  return name
-    .replace(/\bnull\b/gi, '')        // remove "null"
-    .replace(/\s+/g, ' ')             // extra spaces remove
-    .trim()
-    // 🔥 agar last name comma ke bina hai → usse ", lastName" bana do
-    .replace(/ ([^,]+)$/g, ', $1')
-    .split(',')                       
-    .map(n => n.trim())
-    .filter(n => n.length > 0)
-    .join(', ');
-};
+  const formatGroupName = (name?: string) => {
+    if (!name) return '';
+
+    return name
+      .replace(/\bnull\b/gi, '')        // remove "null"
+      .replace(/\s+/g, ' ')             // extra spaces remove
+      .trim()
+      // 🔥 agar last name comma ke bina hai → usse ", lastName" bana do
+      .replace(/ ([^,]+)$/g, ', $1')
+      .split(',')
+      .map(n => n.trim())
+      .filter(n => n.length > 0)
+      .join(', ');
+  };
 
 
   return (
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}
- >
+    >
       <View style={{ flex: 1, backgroundColor: Color.modalTransperant }}  >
 
         <StatusBarCustom
@@ -145,33 +146,34 @@ const formatGroupName = (name?: string) => {
         {/* <StatusBar translucent backgroundColor="transparent" barStyle="light-content" /> */}
 
         {/* <BlurViewCom /> */}
-        <View style={[styles.modalContainer,{
-          marginTop:  Platform.OS === "ios" ? 30 : 0,
+        <View style={[styles.modalContainer, {
+          marginTop: Platform.OS === "ios" ? 30 : 0,
         }]}>
           <View style={styles.headerContainer} >
-            <TouchableOpacity onPress={()=>{
+            <TouchableOpacity onPress={() => {
               onClose(userCount)
             }} >
               <Image source={imageIndex.backArrow} style={styles.icon} resizeMode="contain" />
 
             </TouchableOpacity>
             <Text style={styles.title} >
-              Group Setting
-            </Text> 
+
+              {t("common.groupSetting")}
+            </Text>
           </View>
-          
+
           <View style={styles.headerSection}>
             <View style={styles.avatarsContainer}>
               <GroupAllAvatars group={group1?.results} />
             </View>
             <View style={styles.groupNameRow}  >
-                              <Image source={imageIndex.edit} style={{ height: 24, width: 24, tintColor: Color.background , }} resizeMode='contain' />
+              <Image source={imageIndex.edit} style={{ height: 24, width: 24, tintColor: Color.background, }} resizeMode='contain' />
 
-               {/* <Text style={styles.groupName} numberOfLines={2} >{formatGroupName(group_name)}</Text> */}
-               <Text style={styles.groupName} numberOfLines={2} >{group_name}</Text>
+              {/* <Text style={styles.groupName} numberOfLines={2} >{formatGroupName(group_name)}</Text> */}
+              <Text style={styles.groupName} numberOfLines={2} >{group_name}</Text>
 
-              <TouchableOpacity  onPress={() => setEditNameModal(true)} >
-                <Image source={imageIndex.edit} style={{ height: 24, width: 24, tintColor: Color.primary , marginLeft:5,}} resizeMode='contain' />
+              <TouchableOpacity onPress={() => setEditNameModal(true)} >
+                <Image source={imageIndex.edit} style={{ height: 24, width: 24, tintColor: Color.primary, marginLeft: 5, }} resizeMode='contain' />
               </TouchableOpacity  >
             </View>
           </View>
@@ -184,8 +186,8 @@ const formatGroupName = (name?: string) => {
             {/* <Feather name="users" size={20} color="#fff" /> */}
             {/* <Text style={styles.optionText}>Members {`(${userCount1})`} </Text> */}
             <Text style={styles.optionText}>
-  Members {`(${group1?.results?.length || 0})`}
-</Text>
+              {t("common.members")}{`(${group1?.results?.length || 0})`}
+            </Text>
 
           </TouchableOpacity>
 
@@ -193,19 +195,21 @@ const formatGroupName = (name?: string) => {
             <Image source={imageIndex.UserAdd} style={{ marginLeft: 6, height: 24, width: 24 }} resizeMode='contain' />
 
             {/* <Feather name="user-plus" size={20} color="#fff" /> */}
-            <Text style={styles.optionText}>Add Friends</Text>
+            <Text style={styles.optionText}>{t("common.addFriends")}</Text>
           </TouchableOpacity>
 
-          <View style={[styles.optionRow, { justifyContent: 'space-between' , }]}>
+          <View style={[styles.optionRow, { justifyContent: 'space-between', }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image
                 source={imageIndex.bellNotification}
-                style={{ marginLeft: 6, height: 24, width: 24  ,
- 
-                 }}
+                style={{
+                  marginLeft: 6, height: 24, width: 24,
+
+                }}
                 resizeMode="contain"
-               />
-              <Text style={styles.optionText}>Notification</Text>
+              />
+              <Text style={styles.optionText}> {t("common.notification")}
+              </Text>
             </View>
 
             <CustomSwitch
@@ -217,13 +221,13 @@ const formatGroupName = (name?: string) => {
             {/* <Feather name="log-out" size={20} color="#fff" /> */}
             <Image source={imageIndex.settingExit} style={{ marginLeft: 6, height: 24, width: 24 }} resizeMode='contain' />
 
-            <Text style={styles.optionText}>Exit Group</Text>
+            <Text style={styles.optionText}>{t("common.exitGroup")}</Text>
           </TouchableOpacity>
         </View>
 
         <EditNameModal
           modalVisible={editNameModal}
-          fieldLabel="Change Group Name"
+          fieldLabel= {t("common.changeGroup")} 
           initialValue={group_name}
           setGroup_name={setGroup_name}
           setModalVisible={setEditNameModal}
@@ -247,53 +251,53 @@ const formatGroupName = (name?: string) => {
           groupMembers={group1?.results || group?.members}
           onClose={() => setGroupMember(false)}
           token={token}
-          heading={"Group Members"} />
+          heading= {t("home.groupMembers")}   />
         <AddFrindModal
           visible={addFrindModal}
           token={token}
           groupId={groupId}
           fetchGroups={fetchGroups}
           onClose={(d) => {
-    if (Array.isArray(d)) {
-    setUserCount1(prev => prev + d?.length);
-  }
-fetchGroups()
-  setAddFrindModal(false);
-}}
+            if (Array.isArray(d)) {
+              setUserCount1(prev => prev + d?.length);
+            }
+            fetchGroups()
+            setAddFrindModal(false);
+          }}
 
         />
         {exitGroupModal && <LogoutModal
           visible={exitGroupModal}
-          title={"Exit Group"}
-          details={"You're about to leave this group Proceed?"}
+          title={t("common.exitGroup")}
+          details={t("common.groupProceed")}
           onCancel={() => setExitGroupModal(false)}
           onConfirm={() => {
             hanldeleaveGroup(token, groupId);
             setExitGroupModal(false);
-handleLogOutMsg()
+            handleLogOutMsg()
             // TODO: Call logout logic here (e.g., clearing tokens, navigating to login screen)
-           }}
+          }}
         />}
- {toestMess && (
-        <SuccessMessageCustom
-          textColor={Color.whiteText}
-          color={toestMessColorGreen ? Color.green : Color.red}
-          message={'You have left the group.'}
-        />
-      )}
-     
-{deletegroupModal && 
-<LogoutModal
+        {toestMess && (
+          <SuccessMessageCustom
+            textColor={Color.whiteText}
+            color={toestMessColorGreen ? Color.green : Color.red}
+            message={t("errorMessage.leftthe")}
+          />
+        )}
 
-  visible={deletegroupModal}
-  title={"Delete Group"}
-  details={"are you sure  you want to delete this group?"}
-  onCancel={() => setDeletegroupModal(false)}
-  onConfirm={() => {
-    setDeletegroupModal(false);
-   }}
-/>
-}
+        {deletegroupModal &&
+          <LogoutModal
+
+            visible={deletegroupModal}
+            title={t("home.deleteGroup")}
+            details={t("home.deleteGroupConfirmation")}
+            onCancel={() => setDeletegroupModal(false)}
+            onConfirm={() => {
+              setDeletegroupModal(false);
+            }}
+          />
+        }
         {/* </Pressable> */}
       </View>
     </Modal>
@@ -329,7 +333,7 @@ const styles = StyleSheet.create({
     // marginTop:14,
     alignItems: 'center',
 
-    justifyContent:'center',
+    justifyContent: 'center',
     // marginBottom: 10,
   },
   avatarsContainer: {
@@ -360,11 +364,11 @@ const styles = StyleSheet.create({
   groupNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop:20,
-    marginBottom:10,
+    marginTop: 20,
+    marginBottom: 10,
     // backgroundColor:'center',
-    justifyContent:'center',
-    width:'90%'
+    justifyContent: 'center',
+    width: '90%'
 
   },
   groupName: {
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsBold,
     lineHeight: 24,
     textAlign: 'center',
-   },
+  },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -386,8 +390,8 @@ const styles = StyleSheet.create({
     marginRight: 33,
     fontSize: 16,
     color: '#fff',
-    fontFamily:font.PoppinsMedium ,
-    textAlign:"center"
+    fontFamily: font.PoppinsMedium,
+    textAlign: "center"
 
   },
   headerContainer: {

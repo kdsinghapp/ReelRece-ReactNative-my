@@ -281,7 +281,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                     />
                   ) : (
                     <View style={styles.noResultContainer}>
-                      <Text style={styles.noResultText}>No user found</Text>
+                      <Text style={styles.noResultText}>{t("common.cancel")}</Text>
                     </View>
                   )}
                 </View>

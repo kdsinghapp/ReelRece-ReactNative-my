@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
+import { t } from 'i18next';
 
 interface Movie {
   title: string;
@@ -126,7 +127,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
         <View style={styles.overlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.heading}>Which do you prefer?</Text>
+            <Text style={styles.heading}>{t("profile.whichDo")}</Text>
             <View style={styles.moviesContainer}>
 
 
@@ -249,7 +250,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
             </View>
             <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
-              <Text style={styles.skipText}>Skip</Text>
+              <Text style={styles.skipText}>{t("profile.skip")}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.orContainer}>

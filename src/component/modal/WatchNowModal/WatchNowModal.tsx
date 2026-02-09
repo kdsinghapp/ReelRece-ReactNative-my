@@ -19,6 +19,7 @@ import font from '@theme/font';
  import FastImage from 'react-native-fast-image';
 import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from 'i18next';
 
 const filterOptions = [
   { id: 1, option: 'All' },
@@ -148,7 +149,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
             },
           ]}
         >
-          <Text style={styles.watchBtnText}>▶ Watch Now</Text>
+          <Text style={styles.watchBtnText}>▶{t("common.watchNow")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -176,7 +177,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
                       >
               <View style={styles.headerContainer}>
                 <View style={{ width: 22 }} />
-                <Text style={styles.headingTitle}>Watch Now</Text>
+                <Text style={styles.headingTitle}>{t("common.watchNow")}</Text>
                 <TouchableOpacity onPress={onClose}>
                   <Image source={imageIndex.closeimg} style={styles.closeImg} />
                 </TouchableOpacity>
@@ -220,7 +221,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
                 </View>
               ) : Array.isArray(platforms) && platforms.length === 0 ? (
                 <View style={styles.loaderContainer}>
-                  <Text style={styles.NotAvaibleText}>Not Available right now</Text>
+                  <Text style={styles.NotAvaibleText}>{t("emptyState.noresults")}</Text>
                 </View>
               ) : (
                 <FlatList

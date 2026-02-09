@@ -53,14 +53,15 @@ export default function PasswordReset() {
               style={styles.imgLogo}
               resizeMode="contain"
             />
-            <CustomText
-              size={22}
-              color={Color.whiteText}
-              style={[styles.txtHeading, { marginTop: 6 }]}
-              font={font.PoppinsRegular}
-            >
-               {t("login.appText",)}
-            </CustomText>
+             <Image
+                         source={imageIndex.reelRecs}
+                         style={{
+                       height: 18,
+               width: 95,
+               marginTop: 6,
+               resizeMode: 'contain', // important for proper image fit
+                         }}  
+                       />
             {/* <Text style={styles.txtHeading}>ReelRecs</Text> */}
           </View>
 

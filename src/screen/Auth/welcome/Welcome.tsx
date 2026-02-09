@@ -46,6 +46,8 @@ useEffect(()=>{
       navigation.replace(ScreenNameEnum.TabNavigator, {
         screen: ScreenNameEnum.RankingTab,
       });
+            // navigation.navigate(ScreenNameEnum.OnboardingScreen);
+
     } else {
       navigation.navigate(ScreenNameEnum.LoginScreen);
     }
@@ -73,7 +75,7 @@ useEffect(()=>{
   return (
     <View style={styles.container}>
       <CustomStatusBar backgroundColor="transparent" translucent />
-{loading && <LoadingModal visible={loading}/>}
+{/* {loading && <LoadingModal visible={loading}/>} */}
       <View style={styles.posterWrapper}>
         {moviePosters.map((column, columnIndex) => {
           const isAtTop = columnIndex % 2 === 0;

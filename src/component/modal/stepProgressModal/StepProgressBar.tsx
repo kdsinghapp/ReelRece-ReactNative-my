@@ -5,6 +5,7 @@ import imageIndex from '@assets/imageIndex';
  import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
+import { t } from 'i18next';
 
 // interface StepProgressBarProps {
 //   totalSteps: number;  
@@ -183,7 +184,10 @@ const StepProgressBar: React.FC<StepProgressBarProps> = ({
     <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
       <View style={styles.scoreHeader}>
         <Image source={imageIndex.bluePlay} style={{ height: 24, width: 24 }} resizeMode='contain' />
-        <Text style={styles.scoreTitle}> Recs Score Progress</Text>
+        <Text style={styles.scoreTitle}>
+          
+           {t("common.recsscoreprogress")}
+          </Text>
       </View>
       <View style={styles.progressWrapper}>
         <View style={styles.progressBackground}>
@@ -212,7 +216,8 @@ const StepProgressBar: React.FC<StepProgressBarProps> = ({
       </View>
       <Text allowFontScaling={false} style={styles.subText}>
        {/* Rate a few more movies/shows to get your personalized recommendations. */}
-       You’ve completed ranking for 5 movies! Your personalized Rec Score is now available.
+           {t("discover.youve")}
+       
       </Text>
     </TouchableOpacity>
   );

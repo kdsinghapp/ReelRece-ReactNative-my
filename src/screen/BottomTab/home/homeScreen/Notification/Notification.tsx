@@ -11,6 +11,7 @@ import {
   Modal,
   Dimensions,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -182,28 +183,42 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
         ]}
       >
         <CustomStatusBar />
-        <View style={styles.headerContainer}>
-          <TouchableOpacity onPress={onClose}>
-            <Image source={imageIndex.backArrow} style={styles.icon} resizeMode="contain" />
-          </TouchableOpacity>
-          <Text style={styles.title}>{(t("home.notification"))}</Text>
-            <View style={{ width: 40 }} />
-
+        <View style={[styles.headerContainer,{
+          marginTop: Platform.OS === 'ios' ? 55 : 4
+        }]}>
+          <View style={styles.headerSide}>
+            <TouchableOpacity onPress={onClose}>
+              <Image source={imageIndex.backArrow} style={styles.icon} resizeMode="contain" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.titleCenter}>
+            <Text style={styles.title}>{(t("home.notification"))}</Text>
+          </View>
+          <View style={styles.headerSide} />
         </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+          contentContainerStyle={[
+            { padding: 16, paddingBottom: 40 },
+            isNonNotification && {
+              flexGrow: 1,
+              minHeight: SCREEN_HEIGHT - 180,
+            },
+          ]}
         >
-          {isNonNotification ?
-
-
-            <View style={{ justifyContent: 'center', alignItems: 'center', height: '100%' }} >
-              {/* <ActivityIndicator  size={'large'} color={Color.primary}  /> */}
-              <Text style={styles.noNotiText} >{(t("emptyState.notificartionn_not"))}</Text>
-
-
-            </View> :
+          {isNonNotification ? (
+            <View
+              style={[
+                styles.emptyStateContainer,
+                Platform.OS === 'ios' && { minHeight: SCREEN_HEIGHT - 220 },
+              ]}
+            >
+              <Text style={styles.noNotiText}>
+                {t('emptyState.notificartionn_not')}
+              </Text>
+            </View>
+          ) : (
 
             <View>
               {combinedFeed.map((item) => (
@@ -218,7 +233,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
               ))}
 
             </View>
-          }
+          )}
         </ScrollView>
       </SafeAreaView>
     </Modal>

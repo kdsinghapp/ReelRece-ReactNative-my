@@ -56,10 +56,17 @@ export default function Signup() {
               source={imageIndex.appLogo}
               style={styles.imgLogo} resizeMode='contain'
             />
-            <Text style={styles.txtHeading}>{t("login.appText",)}</Text>
-
+            <Image
+                                   source={imageIndex.reelRecs}
+                                   style={{
+                                 height: 18,
+                         width: 95,
+                         marginTop: 6,
+                         resizeMode: 'contain', // important for proper image fit
+                                   }}  
+                                 />
           </View>
-          <View style={{ marginTop: 36 }}>
+          <View style={{ marginTop: 34 }}>
             <Text style={styles.loginHeading}>{t("login.create_account",)}</Text>
 
           </View>

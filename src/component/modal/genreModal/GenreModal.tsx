@@ -15,7 +15,8 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import imageIndex from '@assets/imageIndex';
 import CustomText from '@components/common/CustomText/CustomText';
- 
+import { t } from 'i18next';
+
 
 const { height } = Dimensions.get('window');
 
@@ -79,7 +80,8 @@ const GenreModal = ({
                 style={styles.title}
                 font={font.PoppinsBold}
               >
-                Genres
+                {t("common.genres")}
+
               </CustomText>
               <TouchableOpacity onPress={onClose} >
                 <Image source={imageIndex.closeimg} resizeMode='contain' style={styles.closeImg} />
@@ -128,7 +130,9 @@ const GenreModal = ({
                   style={styles.buttonTxt}
                   font={font.PoppinsBold}
                 >
-                  Apply
+
+                  {t("discover.apply")}
+
                 </CustomText>
               </TouchableOpacity>
             </View>

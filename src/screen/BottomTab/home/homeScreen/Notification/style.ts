@@ -4,8 +4,10 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
  
 const styles = StyleSheet.create({
-  container: { flex: 1,backgroundColor:Color.background,     marginTop: Platform.OS === 'ios' ? 15 : 4,
- },
+  container: {
+    flex: 1,
+    backgroundColor: Color.background,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -38,13 +40,16 @@ fontFamily:font.PoppinsBold,
 lineHeight:18,
     fontSize: 16,
   },
-  headerContainer:{
-    flexDirection:'row',
-    alignItems:'center',
-    marginBottom:20,
-    paddingHorizontal:18,
-    marginTop: Platform.OS === 'ios' ? 0 : 18,
-    justifyContent:"center"
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 18,
+    marginTop: Platform.OS === 'ios' ? 8 : 18,
+    position: 'relative',
+  },
+  headerSide: {
+    flex: 1,
   },
   action: {
     fontSize: 14,
@@ -72,13 +77,15 @@ lineHeight:16,
    
 
   },
-    title: {
-  flex: 1,
-  textAlign: 'center',
-  fontSize: 20,
-  color: Color.whiteText,
-  fontFamily: font.PoppinsBold, // 👈 Poppins font added
-    
+  title: {
+    fontSize: 20,
+    color: Color.whiteText,
+    fontFamily: font.PoppinsBold,
+  },
+  titleCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonGroup: {
     // backgroundColor:"red",
@@ -148,12 +155,17 @@ lineHeight:16,
     borderWidth: 2.5,
     borderColor: Color.background, // or whatever your background color is
   },
-  noNotiText:{
-    fontFamily:font.PoppinsMedium,
-    fontSize:14.5,
-    color:Color.lightGrayText,
-   textAlign:"center" ,
- 
+  emptyStateContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    minHeight: 300,
+  },
+  noNotiText: {
+    fontFamily: font.PoppinsMedium,
+    fontSize: 14.5,
+    color: Color.lightGrayText,
+    textAlign: 'center',
   },
 });
 export default styles;

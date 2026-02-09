@@ -112,14 +112,15 @@ const response  = await sendOTPToEmail_GET(email)
               style={styles.imgLogo}
               resizeMode="contain"
             />
-            <CustomText
-              size={24}
-              color={Color.whiteText}
-              style={[styles.txtHeading, { marginTop: 1 }]}
-              font={font.PoppinsBold}
-            >
-              {t("login.appText")}
-            </CustomText>
+                      <Image
+                        source={imageIndex.reelRecs}
+                        style={{
+                      height: 18,
+              width: 95,
+              marginTop: 6,
+              resizeMode: 'contain', // important for proper image fit
+                        }}  
+                      />
           </View>
 
 
@@ -130,7 +131,7 @@ const response  = await sendOTPToEmail_GET(email)
 
             size={24}
             color={Color.whiteText}
-            style={styles.loginHeading}
+            style={[styles.loginHeading, { marginTop: 25 }]}
             font={font.PoppinsBold}
           >
             {t("login.verifyEmail")}

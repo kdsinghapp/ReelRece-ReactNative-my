@@ -344,6 +344,7 @@ const styles = StyleSheet.create({
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
         paddingVertical: 14,
         paddingHorizontal: 20,
         marginVertical: 10,

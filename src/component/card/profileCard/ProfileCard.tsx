@@ -43,18 +43,20 @@ const ProfileCard = ({
                 shimmerColors={['#181818ff', '#464545ff', '#181717ff']}
 
             >
+                
                 <FastImage
-                    source={{
-                        uri: imageUri,
-                        priority: FastImage.priority.low,
-                        cache: FastImage.cacheControl.web
-                    }}
-                    style={styles.profileImage}
-                    resizeMode={FastImage.resizeMode.stretch}
-                    onLoadStart={() => setImageLoading(true)}
-                    onLoadEnd={() => setImageLoading(false)}
-                    onError={() => setImageLoading(false)}
-                />
+  source={{
+    uri: imageUri,
+    priority: FastImage.priority.low,
+    cache: FastImage.cacheControl.web,
+  }}
+  style={styles.profileImage}
+  resizeMode={FastImage.resizeMode.cover}
+  onLoadStart={() => setImageLoading(true)}
+  onLoadEnd={() => setImageLoading(false)}
+  onError={() => setImageLoading(false)}
+/>
+
             </ShimmerPlaceholder>
 
 

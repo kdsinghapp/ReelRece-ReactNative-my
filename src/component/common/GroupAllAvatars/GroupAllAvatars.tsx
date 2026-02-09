@@ -47,7 +47,7 @@ const totalUsers = users.length;
                 priority: FastImage.priority.low
             }}
             style={style}
-            resizeMode={FastImage.resizeMode.stretch}
+            resizeMode={FastImage.resizeMode.cover}
             />
             // <Image
             //     key={key}

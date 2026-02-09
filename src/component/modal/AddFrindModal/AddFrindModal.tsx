@@ -6,6 +6,7 @@ import { Color } from '@theme/color';
  import { BlurView } from '@react-native-community/blur';
 import { addMembersToGroup, getGroupMembers } from '@redux/Api/GroupApi';
 import SelectFriendCom from '@components/common/SelectFriendCom/SelectFriendCom';
+import { t } from 'i18next';
  
 
 interface props {
@@ -31,10 +32,10 @@ const AddFrindModal = ({ visible, onClose, groupId, token ,fetchGroups}) => {
     /> */}
             {/* </View> */}
             <TouchableOpacity style={styles.selectButton} onPress={onClose}>
-                <Text  allowFontScaling={false}  style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]}>Cancel</Text>
+                <Text  allowFontScaling={false}  style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]}>{t("common.cancel")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.addBtn} onPress={onClose} >
-                <Text  allowFontScaling={false}  style={styles.buttonTxt}>Add</Text>
+                <Text  allowFontScaling={false}  style={styles.buttonTxt}>{t("common.add")}</Text>
             </TouchableOpacity>
         </View>
     }
@@ -44,7 +45,7 @@ const AddFrindModal = ({ visible, onClose, groupId, token ,fetchGroups}) => {
                 <View style={styles.modalContainer}>
                     <View style={styles.header}>
                         <Text  allowFontScaling={false}  style={styles.headerText}></Text>
-                        <Text  allowFontScaling={false}  style={styles.headerText}>Add Friend</Text>
+                        <Text  allowFontScaling={false}  style={styles.headerText}>{t("discover.addFriend")}</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Image source={imageIndex.closeimg}
                                 style={{
@@ -85,7 +86,8 @@ groupId={groupId}
                                 onClose(addmembers);
                             }}
                         >
-                            <Text  allowFontScaling={false}  style={styles.buttonTxt}>Add</Text>
+                            <Text  allowFontScaling={false}  style={styles.buttonTxt}>{t("common.add")}
+                                </Text>
                         </TouchableOpacity>
                     </View>
                 </View>

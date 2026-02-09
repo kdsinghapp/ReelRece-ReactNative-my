@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
 
   tabText: { color: Color.placeHolder, fontSize: 14, fontFamily: font.PoppinsMedium },
 
-  tabTextActive: { color: Color.whiteText, fontWeight: 'bold' },
+  tabTextActive: { color: Color.whiteText, fontFamily: font.PoppinsBold ,fontSize: 14, },
   tabUnderline: { height: 3, backgroundColor: Color.primary, width: '60%', marginTop: 4, },
   userRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   avatarContainer: { position: 'relative', marginRight: 12 },

@@ -123,6 +123,7 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
               fontSize: 16,
                color: Color.whiteText,
               height: 50,
+              textAlignVertical: 'center',
             }}
             onChangeText={onChangeText}
             value={text}

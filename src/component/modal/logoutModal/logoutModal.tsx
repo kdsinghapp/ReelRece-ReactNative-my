@@ -15,7 +15,7 @@
 // const LogoutModal = ({ visible, onCancel, onConfirm , title , details}) => {
 
 
-  
+
 //   return (
 //     <Modal
 //       animationType="slide"
@@ -98,17 +98,18 @@
 //   },
 // });
 import React, { useRef, useEffect } from 'react';
-import { 
-  Modal, 
-  View, 
-  Text, 
-  Pressable, 
-  StyleSheet, 
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
   TouchableWithoutFeedback,
-  Animated 
+  Animated
 } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
+import { t } from 'i18next';
 
 type Props = {
   visible: boolean;
@@ -147,7 +148,7 @@ const LogoutModal = ({ visible, onCancel, onConfirm, title, details }: Props) =>
       <TouchableWithoutFeedback onPress={onCancel}>
         <View style={styles.modalContainer}>
           <TouchableWithoutFeedback>
-            <Animated.View 
+            <Animated.View
               style={[
                 styles.modalBox,
                 {
@@ -159,7 +160,9 @@ const LogoutModal = ({ visible, onCancel, onConfirm, title, details }: Props) =>
               <Text style={styles.title}>{details}</Text>
               <View style={styles.buttonRow}>
                 <Pressable onPress={onCancel}>
-                  <Text style={styles.cancelText}>Cancel</Text>
+                  <Text style={styles.cancelText}>       
+                                                                        {t("home.cancel")}
+                  </Text>
                 </Pressable>
                 <Pressable onPress={onConfirm}>
                   <Text style={styles.logoutText}>{title}</Text>

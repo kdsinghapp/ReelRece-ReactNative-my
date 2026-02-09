@@ -517,7 +517,8 @@ activity={item?.activity}
             following={`${otherUserData?.following ?? ""}`}
             butt={otherUserData?.username != userData?.username}
             bio={otherUserData?.bio}
-            onFollow={() => navigation.navigate(ScreenNameEnum.Followers)}
+          onFollow={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name })}
+            // onFollow={() => navigation.navigate(ScreenNameEnum.Followers)}
             onFollowing={() =>
               // navigation.navigate('Followers', { tabToOpen: 1, type: 'Following', userName:otherUserData?.name })
               navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name })

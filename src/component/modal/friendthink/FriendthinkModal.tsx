@@ -20,6 +20,7 @@ import { RootState } from '@redux/store';
 import { useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
+import { t } from 'i18next';
 
 interface Review {
   id: number;
@@ -159,12 +160,12 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
       score={ranking_react}
       title={"Friend Score"}
       description={
-      
+         t("discover.frienddes") 
           // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-         "This score shows the rating from your friend for this title."
+        //  "This score shows the rating from your friend for this title."
       }
     />
-              <Text style={{ fontSize: 12, color: Color.whiteText, fontFamily: font.PoppinsBold, marginLeft: 12, }} >Group Score</Text>
+              <Text style={{ fontSize: 12, color: Color.whiteText, fontFamily: font.PoppinsBold, marginLeft: 12, }} >{t("discover.groupScore")}</Text>
             </TouchableOpacity>
           }
 
@@ -178,7 +179,8 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
 
           {reviews?.length === 0 && (
             <Text style={styles.emptyText}>
-              No reactions for this video yet.
+              {t("emptyState.videoyet")}
+          
             </Text>
           )}
 

@@ -14,6 +14,7 @@ import {
  import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
+import { t } from 'i18next';
 
 interface Props {
     visible: boolean;
@@ -49,7 +50,7 @@ const MovieInfoModal: React.FC<Props> = ({
 
                             <View style={styles.header}>
 <View  style={{ height: 24, width: 24 }}></View>
-                                <Text style={styles.headerText}>Info</Text>
+                                <Text style={styles.headerText}>{t("common.info")}</Text>
                                 <TouchableOpacity onPress={onClose}>
                                     <Image
                                         source={imageIndex.closeimg}
@@ -65,7 +66,7 @@ const MovieInfoModal: React.FC<Props> = ({
                                 <Text style={styles.title}>{title}</Text>
 
                                 {/* Synopsis */}
-                                <Text style={styles.sectionTitle}>Synopsis</Text>
+                                <Text style={styles.sectionTitle}>{t("common.synopsis")}</Text>
                                 <Text style={styles.text}>
                                     {synopsis}
                                     {/* {expanded ? synopsis : `${shortText}... `}
@@ -77,11 +78,11 @@ const MovieInfoModal: React.FC<Props> = ({
                                 </Text>
 
                                 {/* Release Date */}
-                                <Text style={styles.sectionTitle}>Release date</Text>
+                                <Text style={styles.sectionTitle}>{t("common.releaseDate")}</Text>
                                 <Text style={styles.text}>{releaseDate}</Text>
 
                                 {/* Genre */}
-                                <Text style={styles.sectionTitle}>Genre</Text>
+                                <Text style={styles.sectionTitle}>{t("common.genre")}</Text>
                                 <Text style={styles.text}>{genre}</Text>
 
 

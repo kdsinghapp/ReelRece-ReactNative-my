@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import SearchBarCustom from '@components/common/searchBar/SearchBarCustom';
- const friendsData = [
+import { t } from 'i18next';
+const friendsData = [
     { id: '1', name: 'Jordan Sanzo', avatar: 'https://i.pravatar.cc/150?img=1' },
     { id: '2', name: 'Anika Kenter', avatar: 'https://i.pravatar.cc/150?img=2' },
     { id: '3', name: 'Anna Watson', avatar: 'https://i.pravatar.cc/150?img=3' },
@@ -66,7 +67,10 @@ const InviteModal: React.FC<Props> = ({ visible, onClose }) => {
                     <SafeAreaView style={styles.modalContent}>
                         <View style={styles.header}>
                             <Text style={styles.title}></Text>
-                            <Text style={styles.title}>Invite Friends</Text>
+                            <Text style={styles.title}>      
+                                                           {t("home.invite")}
+                                                           
+                            </Text>
                             <TouchableOpacity onPress={onClose}>
                                 <Image
                                     source={imageIndex.closeimg}

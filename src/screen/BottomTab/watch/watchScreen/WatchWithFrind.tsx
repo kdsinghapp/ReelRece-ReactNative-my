@@ -45,8 +45,7 @@ import {
   getGroupMembers,
 } from '@redux/Api/GroupApi';
 import { RootState } from '@redux/store';
-import { BASE_IMAGE_URL } from '@redux/Api/axiosInstance';
-import GroupMovieModal from '@components/modal/groupMovieModal/groupMovieModal';
+ import GroupMovieModal from '@components/modal/groupMovieModal/groupMovieModal';
 import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
 import GroupSettingModal from '@components/modal/WatchGroupSetting/WatchGroupSetting';
 import imageIndex from '@assets/imageIndex';
@@ -57,6 +56,9 @@ import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notifi
 import { BlurView } from '@react-native-community/blur';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import GroupScoreModal from '@components/modal/GroupScoreModal/GroupScoreModal';
+import { BASE_IMAGE_URL } from '@config/api.config';
+import { Alert } from 'react-native';
+import ScreenNameEnum from '@routes/screenName.enum';
 const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.4;
 const SPACING = 7.9;
@@ -113,7 +115,7 @@ const BackgroundImage = memo(({ imageUri }) => {
         ) : (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: Color.background }]} />
         )}
-        {/* <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.7)' }]} /> */}
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.7)' }]} />
       </Animated.View>
     </View>
   );
@@ -593,6 +595,11 @@ const WatchWithFrind = () => {
               }]} />
           </TouchableOpacity>
         </View>
+        <TouchableOpacity  
+        
+        onPress={()=>    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
+}
+        >
         <Text numberOfLines={1} style={[styles.title, {
           bottom: 20,
           lineHeight: 31
@@ -600,7 +607,7 @@ const WatchWithFrind = () => {
         }]}>
           {movie?.title}
         </Text>
-
+</TouchableOpacity>
         <CustomText
           size={12}
           color={Color.lightGrayText}
@@ -792,13 +799,13 @@ const WatchWithFrind = () => {
     >
       {/* Background Image - NO DELAY */}
       <BackgroundImage imageUri={activeMovieImage} />
-      <BlurView
+      {/* <BlurView
         style={styles.absolute}
         blurType="dark"
         blurAmount={1}
         reducedTransparencyFallbackColor="white"
         // overlayColor='transparent'
-      />
+      /> */}
       <SafeAreaView style={[styles.mincontainer, { flex: 1 }]}>
         <CustomStatusBar translucent={true} />
 

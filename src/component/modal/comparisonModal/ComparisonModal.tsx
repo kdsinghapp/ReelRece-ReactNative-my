@@ -17,6 +17,7 @@ import { Grayscale } from 'react-native-color-matrix-image-filters';
 import FastImage from 'react-native-fast-image';
  import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import CustomText from '@components/common/CustomText/CustomText';
+import { t } from 'i18next';
  
 interface Movie {
   title: string;
@@ -333,8 +334,9 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
                               score={currentSecondMovie?.rating}
                               title={"Rec Score"}
                               description={
+                t("discover.recscoredes") 
 
-                                "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                                // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
                                 //  "This score shows the rating from your friend for this title."
                               }
                             />
@@ -396,7 +398,8 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 style={styles.skipText}
                 font={font.PoppinsMedium}
               >
-                Skip
+                {t("profile.skip")}
+    
               </CustomText>
             </TouchableOpacity>
           </View>

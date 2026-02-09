@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Modal,Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Color } from '@theme/color';
+import { t } from 'i18next';
  
 interface CustomModalProps {
   isVisible: boolean;
@@ -16,15 +17,19 @@ const WatchModal: React.FC<CustomModalProps> = ({source, isVisible, onCancel, on
     <View style={styles.centeredView}>
       <View style={styles.modalContainer}>
         <Image source={source} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.title}>Watch on Netflix app</Text>
+        <Text style={styles.title}> 
+           {t("common.watchonNetflix")}
+          
+          </Text>
   
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
+ 
           </TouchableOpacity>
   
           <TouchableOpacity style={styles.watchButton} onPress={onWatch}>
-            <Text style={styles.watchText}>Watch</Text>
+            <Text style={styles.watchText}>{t("common.watch")}</Text>
           </TouchableOpacity>
         </View>
       </View>

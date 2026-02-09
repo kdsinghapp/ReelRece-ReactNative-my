@@ -303,6 +303,7 @@ import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import RankingCard from '@components/ranking/RankingCard';
 import CustomText from '@components/common/CustomText/CustomText';
+import { t } from 'i18next';
 
 interface Movie {
   id: string;
@@ -444,7 +445,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                 style={styles.headerText}
                 font={font.PoppinsBold}
               >
-                More Like This
+              
+                  {t("movieDetail.morelike")}
               </CustomText>
               <TouchableOpacity onPress={onClose}>
                 <Image
@@ -467,7 +469,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.loadingText}
                   font={font.PoppinsRegular}
                 >
-                  Loading similar movies...
+                    {t("emptyState.similar")}
+                   
                 </CustomText>
               </View>
             ) : moreMovie.length > 0 ? (
@@ -516,7 +519,9 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.emptyText}
                   font={font.PoppinsBold}
                 >
-                  No similar movies found
+                                      {t("emptyState.similarmovies")}
+
+             
                 </CustomText>
                 <CustomText
                   size={isSmallDevice ? 13 : 14}
@@ -524,7 +529,7 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.emptySubText}
                   font={font.PoppinsRegular}
                 >
-                  We couldn't find any movies similar to this one.
+                     {t("common.moviesSimilar")}
                 </CustomText>
               </View>
             )}

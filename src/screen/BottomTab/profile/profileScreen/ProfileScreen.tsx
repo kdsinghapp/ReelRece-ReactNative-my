@@ -652,7 +652,7 @@ const ProfileScreen = () => {
           following={`${userProfile?.following}`}
           butt={false}
           bio={userProfile?.bio}
-          onFollow={() => navigation.navigate(ScreenNameEnum.Followers)}
+          onFollow={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: userNameFollow })}
           onFollowing={() =>
             // navigation.navigate('Followers', { tabToOpen: 1, type: 'Following', userName:userProfile?.name })
             navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: userNameFollow })

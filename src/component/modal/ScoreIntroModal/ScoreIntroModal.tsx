@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { Color } from '@theme/color';
+import { t } from 'i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -44,9 +45,12 @@ const ScoreIntroModal = ({ visible, onClose, variant = 'first' }: ScoreIntroModa
                   {isFirstVariant ? 'Rec Score' : 'Friend Score'}
                 </Text>
                 <Text style={styles.description}>
-                  {isFirstVariant 
-                    ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                    : "This score predicts how much your friends will enjoy this movie/show."}
+                  {isFirstVariant
+                    ? t("discover.moviedes")
+                    : t("discover.recscoredes")
+
+
+                  }
                 </Text>
               </View>
             </View>
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   rightTriangle: {
-    marginRight:100,
+    marginRight: 100,
   },
   bubble: {
     // backgroundColor: '#2DB3F0',

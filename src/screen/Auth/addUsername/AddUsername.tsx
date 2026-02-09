@@ -54,14 +54,15 @@ export default function AddUsername() {
               style={styles.imgLogo}
               resizeMode="contain"
             />
-            <CustomText
-              size={24}
-              color={Color.whiteText}
-              style={[styles.txtHeading, { marginTop: 1 }]}
-              font={font.PoppinsBold}
-            >
-              {t("login.appText",)}
-            </CustomText>
+                     <Image
+                       source={imageIndex.reelRecs}
+                       style={{
+                     height: 18,
+             width: 95,
+             marginTop: 6,
+             resizeMode: 'contain', // important for proper image fit
+                       }}  
+                     />
           </View>
           <View style={{ marginTop: 30 }}>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions, Image } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
+import { t } from 'i18next';
 
 interface ImagePickerModalProps {
     modalVisible: boolean;
@@ -30,7 +31,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     <View style={styles.modalContainer}>
                         <View style={styles.header}>
                             <Text allowFontScaling={false} style={styles.headerText}></Text>
-                            <Text allowFontScaling={false} style={styles.headerText}>Change profile picture</Text>
+                            <Text allowFontScaling={false} style={styles.headerText}>
+                                
+                                 {t("home.changepicture")}
+                               </Text>
                             <TouchableOpacity onPress={onClose}>
                                 <Image source={imageIndex.closeimg}
                                     style={{
