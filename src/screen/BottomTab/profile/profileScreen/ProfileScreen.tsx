@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, ScrollView,  FlatList, TouchableOpacity, ActivityIndicator, VirtualizedList, Dimensions } from 'react-native';
-  import styles from './style';
+import { View, Text, Image, ScrollView, FlatList, TouchableOpacity, ActivityIndicator, VirtualizedList, Dimensions } from 'react-native';
+import styles from './style';
 import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
-  import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import HorizontalMovieList from '@components/common/HorizontalMovieList/HorizontalMovieList';
 import font from '@theme/font';
 import useProfile from './useProfile';
@@ -13,9 +13,9 @@ import { RootState } from '@redux/store';
 import { useSelector } from 'react-redux';
 import { getRatedMovies } from '@redux/Api/movieApi';
 import useUserFeed from '@components/card/feedCard/useUserFeed';
- import { getSuggestedFriends } from '@redux/Api/followService';
+import { getSuggestedFriends } from '@redux/Api/followService';
 import SuggestedFriendCard from '@components/common/SuggestedFriendCard/SuggestedFriendCard';
- import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import MemoFeedCardHome from '@components/card/feedCard/MemoFeedCardHome';
@@ -24,7 +24,9 @@ import { CustomStatusBar, HeaderCustom, ProfileCard } from '@components/index';
 import useHome from '@screens/BottomTab/home/homeScreen/useHome';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
-
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { errorToast } from '@utils/customToast';
 
 const ProfileScreen = () => {
 
@@ -32,13 +34,13 @@ const ProfileScreen = () => {
   const avatar = userGetData?.avatar;
   const autoPlayEnabled = userGetData?.autoplay_trailer ?? true;
   const isMuted = userGetData?.videos_start_with_sound;
-const restoredRef = useRef(false);
+  const restoredRef = useRef(false);
 
   // const token = useSelector((state: RootState) => state.auth.token); // ✅ outside  condition
   // const userprofile = useSelector((state: RootState) => state.auth.userGetData.avatar); // ✅ outside  condition
   const email_da_data = useSelector((state: RootState) => state?.auth?.userGetData);
-   const userprofile = useSelector((state: RootState) => state.auth.userGetData?.avatar);
-   const {
+  const userprofile = useSelector((state: RootState) => state.auth.userGetData?.avatar);
+  const {
     loading,
     userProfile,
     // userProfileDate,
@@ -55,7 +57,7 @@ const restoredRef = useRef(false);
     hasMore,
     getUserFeed,
   } = useUserFeed(token);
-   const { navigation,
+  const { navigation,
     isVisible, setIsVisible,
     modalVisible, setModalVisible,
   } = useHome()
@@ -69,7 +71,7 @@ const restoredRef = useRef(false);
   const [imageLoading, setImageLoading] = useState(true);
   // scroll
   const [hasScrolled, setHasScrolled] = useState(false);
-   const [playIndex, setPlayIndex] = useState<number | null>(null); // this controls when to autoplay after 2 seconds
+  const [playIndex, setPlayIndex] = useState<number | null>(null); // this controls when to autoplay after 2 seconds
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
   const lastPlayedIndexRef = useRef<number | null>(null);
@@ -78,9 +80,76 @@ const restoredRef = useRef(false);
   const [loadingBookmark, setLoadingBookmark] = useState(true);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const isFocused = useIsFocused();
+  const [refreshing, setRefreshing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const prevOnlineRef = useRef(true);
 
+  // Add this useEffect after your other effects
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+
+      // Auto-reload when coming back online
+      if (prevOnlineRef.current === false && online === true) {
+        console.log('Network restored - auto-refreshing profile data');
+        handleRefresh();
+      }
+
+      prevOnlineRef.current = online;
+    });
+
+    // Get initial network state
+    NetInfo.fetch().then(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      prevOnlineRef.current = online;
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Add this function before your return statement
+  const handleRefresh = useCallback(async () => {
+    if (!isOnline) {
+      errorToast('No Internet! \n Please check your network connection')
+
+      return;
+    }
+
+    setRefreshing(true);
+
+    try {
+      // Refresh all data in parallel
+      await Promise.allSettled([
+        // User profile
+        refetchUserProfile(),
+
+        // Bookmarks
+        fetchBookmarks(),
+
+        // Rated movies
+        fetchRatedMovies(),
+
+        // History
+        fetchHistory1(),
+
+        // Feed data
+        fetchFeed("profile", email_da_data?.username, true), // true = force refresh
+
+        // Suggested friends
+        fetchSuggestedFriends(),
+      ]);
+
+      console.log('Profile screen refreshed successfully');
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [isOnline, token, email_da_data?.username]);
   //   const combinedData = useMemo(() => {
-   //   return [{ type: 'header' }, ...feedData.map(item => ({ ...item, type: 'feed' }))];
+  //   return [{ type: 'header' }, ...feedData.map(item => ({ ...item, type: 'feed' }))];
   // }, [feedData]);
 
   const combinedData = useMemo(() => {
@@ -94,74 +163,74 @@ const restoredRef = useRef(false);
 
   // const combinedData = useMemo(() => feedData.map(item => ({ ...item, type: 'feed' })), [feedData]);
 
- 
 
-  
-// ✅ Refetch profile when screen is focused AND token exists but no profile
-useFocusEffect(
-  useCallback(() => {
-     if (token && !userProfile) {
-       refetchUserProfile();
-    }
-  }, [token, userProfile])
-);
 
-// ✅ Safety timeout to prevent infinite loading
-useEffect(() => {
-  // Reset timeout flag when loading starts
-  if (loading) {
-    setLoadingTimeout(false);
-  }
-  
-  const timeout = setTimeout(() => {
+
+  // ✅ Refetch profile when screen is focused AND token exists but no profile
+  useFocusEffect(
+    useCallback(() => {
+      if (token && !userProfile) {
+        refetchUserProfile();
+      }
+    }, [token, userProfile])
+  );
+
+  // ✅ Safety timeout to prevent infinite loading
+  useEffect(() => {
+    // Reset timeout flag when loading starts
     if (loading) {
-       setLoadingTimeout(true);
+      setLoadingTimeout(false);
     }
-  }, 10000); // 10 seconds max
 
-  return () => clearTimeout(timeout);
-}, [loading]);
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoadingTimeout(true);
+      }
+    }, 10000); // 10 seconds max
 
-useFocusEffect(
-  useCallback(() => {
-    let isActive = true;
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
-    const restoreIndex = async () => {
-      try {
-        const savedIndex = await AsyncStorage.getItem('profileIndex');
-         if (savedIndex !== null && isActive && !restoredRef.current) {
-        // if (savedIndex !== null && isActive) {
-          const index = parseInt(savedIndex, 10);
-          setCurrentVisibleIndex(index + 1); // scroll to last index
-          setPlayIndex(index); // play previous video
-           restoredRef.current = true;
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const restoreIndex = async () => {
+        try {
+          const savedIndex = await AsyncStorage.getItem('profileIndex');
+          if (savedIndex !== null && isActive && !restoredRef.current) {
+            // if (savedIndex !== null && isActive) {
+            const index = parseInt(savedIndex, 10);
+            setCurrentVisibleIndex(index + 1); // scroll to last index
+            setPlayIndex(index); // play previous video
+            restoredRef.current = true;
+          }
+        } catch (err) {
         }
+      };
+
+      restoreIndex();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
+
+
+  useEffect(() => {
+    const saveIndex = async () => {
+      let indexForVideo = currentVisibleIndex - 1
+      try {
+        await AsyncStorage.setItem('profileIndex', indexForVideo.toString());
       } catch (err) {
-       }
+      }
     };
 
-    restoreIndex();
-
-    return () => {
-      isActive = false;
-    };
-  }, [])
-);
-
-
-useEffect(() => {
-  const saveIndex = async () => {
-    let indexForVideo = currentVisibleIndex -1 
-    try {
-      await AsyncStorage.setItem('profileIndex', indexForVideo.toString());
-     } catch (err) {
-     }
-  };
-
-  if (currentVisibleIndex !== null) {
-    saveIndex();
-  }
-}, [currentVisibleIndex]);
+    if (currentVisibleIndex !== null) {
+      saveIndex();
+    }
+  }, [currentVisibleIndex]);
 
   // fetch feed data
   // feed api 
@@ -169,11 +238,11 @@ useEffect(() => {
   // scroll
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 90,
-     minimumViewTime: 250
+    minimumViewTime: 250
   });
   // scroll
   // const onViewableItemsChanged = useCallback(({ viewableItems }) => {
-   //   if (!isFocused) return;
+  //   if (!isFocused) return;
   //   if (viewableItems.length > 0) {
   //     const firstVisible = viewableItems[0];
   //     const index = firstVisible?.index ?? 0;
@@ -199,7 +268,7 @@ useEffect(() => {
   //         setCurrentVisibleIndex(index);
   //         setPlayIndex(index - 1);
   //         lastPlayedIndexRef.current = index - 1;
-   //       }
+  //       }
   //     }, 800);
   //   } else {
   //     setPlayIndex(null);
@@ -207,64 +276,64 @@ useEffect(() => {
   // }, [isFocused]);
 
 
-const onViewableItemsChanged = useCallback(({ viewableItems }) => {
-   if (!isFocused) return;
+  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+    if (!isFocused) return;
 
-  const headerVisible = viewableItems.some(item => item?.item?.type === 'header');
+    const headerVisible = viewableItems.some(item => item?.item?.type === 'header');
 
-  if (headerVisible) {
-    setPlayIndex(null);
-    lastPlayedIndexRef.current = null;
-    return;
-  }
-   if (viewableItems.length > 0) {
-    const firstVisible = viewableItems[0];
-    const index = firstVisible?.index ?? 0;
- // If header or profileStatus is visible, stop video
-  const nonFeedVisible = viewableItems.some(item => 
-    item?.item?.type === 'header' || item?.item?.type === 'profileStatus'
-  );
-  if (nonFeedVisible) {
-    setPlayIndex(null);
-    return;
-  }
- 
-    const isFeedCardVisible = viewableItems.some(
-      item => item?.item?.movie && item?.item?.user
-    );
-
-    if (!isFeedCardVisible) {
+    if (headerVisible) {
       setPlayIndex(null);
-      lastPlayedIndexRef.current = 0;
+      lastPlayedIndexRef.current = null;
       return;
     }
+    if (viewableItems.length > 0) {
+      const firstVisible = viewableItems[0];
+      const index = firstVisible?.index ?? 0;
+      // If header or profileStatus is visible, stop video
+      const nonFeedVisible = viewableItems.some(item =>
+        item?.item?.type === 'header' || item?.item?.type === 'profileStatus'
+      );
+      if (nonFeedVisible) {
+        setPlayIndex(null);
+        return;
+      }
 
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
- 
-    timeoutRef.current = setTimeout(() => {
-      if (playIndex !== index - 1) {
-        setCurrentVisibleIndex(index);
-        setPlayIndex(index - 1);
-        lastPlayedIndexRef.current = index - 1;
-       }
-    }, 800);
-  } else {
-    setPlayIndex(null);
- 
-  }
-}, [isFocused, playIndex, isVisible ]);
+      const isFeedCardVisible = viewableItems.some(
+        item => item?.item?.movie && item?.item?.user
+      );
+
+      if (!isFeedCardVisible) {
+        setPlayIndex(null);
+        lastPlayedIndexRef.current = 0;
+        return;
+      }
+
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(() => {
+        if (playIndex !== index - 1) {
+          setCurrentVisibleIndex(index);
+          setPlayIndex(index - 1);
+          lastPlayedIndexRef.current = index - 1;
+        }
+      }, 800);
+    } else {
+      setPlayIndex(null);
+
+    }
+  }, [isFocused, playIndex, isVisible]);
 
 
 
-  
+
 
   const fetchBookmarks = async () => {
     try {
       setLoadingBookmark(true);
       const bookmarks = await getUserBookmarks(token);
       setSavedMovies(bookmarks?.results || []);
-     } catch (err) {
-     } finally {
+    } catch (err) {
+    } finally {
       setLoadingBookmark(false);
     }
   };
@@ -284,11 +353,11 @@ const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     try {
       setLoadingTrending(true);
       const rated = await getRatedMovies(token);
- await AsyncStorage.setItem('profileIndex', videoNUllVideo.toString());
+      await AsyncStorage.setItem('profileIndex', videoNUllVideo.toString());
 
-       setRankingMovie(rated?.results || []);
+      setRankingMovie(rated?.results || []);
     } catch (err) {
-     } finally {
+    } finally {
       setLoadingTrending(false);
     }
   };
@@ -310,7 +379,7 @@ const onViewableItemsChanged = useCallback(({ viewableItems }) => {
   //     const history = await getHistoryApi(token);
   //     setHistoryMovies(history?.results || []);
   //   } catch (err) {
-   //   } finally {
+  //   } finally {
   //     setLoadingRecs(false);
   //   }
   // };
@@ -320,34 +389,34 @@ const onViewableItemsChanged = useCallback(({ viewableItems }) => {
   //   fetchHistory();
   // }, [token]);
 
-useEffect(() => {
-  if (!token) return;
+  useEffect(() => {
+    if (!token) return;
 
-  let isMounted = true;
+    let isMounted = true;
 
-  const fetchHistory = async () => {
-    try {
-      if (isMounted) setLoadingRecs(true);
+    const fetchHistory = async () => {
+      try {
+        if (isMounted) setLoadingRecs(true);
 
-      const history = await getHistoryApi(token);
+        const history = await getHistoryApi(token);
 
-      if (isMounted) {
-        setHistoryMovies(history?.results || []);
+        if (isMounted) {
+          setHistoryMovies(history?.results || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+        }
+      } finally {
+        if (isMounted) setLoadingRecs(false);
       }
-    } catch (err) {
-      if (isMounted) {
-       }
-    } finally {
-      if (isMounted) setLoadingRecs(false);
-    }
-  };
+    };
 
-  fetchHistory();
+    fetchHistory();
 
-  return () => {
-    isMounted = false;
-  };
-}, [token]);
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
 
   const fetchHistory1 = async () => {
     try {
@@ -355,11 +424,11 @@ useEffect(() => {
       const history = await getHistoryApi(token);
       setHistoryMovies(history?.results || []);
     } catch (err) {
-     } finally {
+    } finally {
       setLoadingRecs(false);
     }
   };
- 
+
 
   useFocusEffect(
     useCallback(() => {
@@ -367,10 +436,10 @@ useEffect(() => {
 
       const fetchData = async () => {
         try {
-           await fetchBookmarks();
+          await fetchBookmarks();
           await fetchHistory1();
         } catch (error) {
-         }
+        }
       };
       if (isActive) {
         fetchData();
@@ -391,7 +460,7 @@ useEffect(() => {
       // fetchFeed("home");
       fetchFeed("profile", email_da_data?.username);
 
-     }
+    }
   }, [token]);
 
   // Fetch suggested friends
@@ -417,7 +486,7 @@ useEffect(() => {
   const handleFollowCallback = useCallback((username: string, isFollowing: boolean) => {
     // Refresh profile to update following count
     refetchUserProfile();
-    
+
     // Optionally remove from suggested list after following
     if (isFollowing) {
       setSuggestedFriend(prev => prev.filter(friend => friend.username !== username));
@@ -451,13 +520,13 @@ useEffect(() => {
   // const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${avatar}?t=${Date.now()}`, [avatar]);
   const avatarUrl = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined;
 
- 
+
 
   const renderHeader = () => {
     return (
       <>
-      
-        <View style={{ paddingHorizontal: 15, marginTop:20 }} >
+
+        <View style={{ paddingHorizontal: 15, marginTop: 20 }} >
           <HorizontalMovieList
             title={t("profile.ranked")}
             data={rankingMovie}
@@ -497,7 +566,6 @@ useEffect(() => {
             username={userProfile?.name}
             imageUri={avatarUrl}
             my_profile={true}
-
             navigateTo={ScreenNameEnum.OtherTaingPrfofile}
             disableBottomSheet={true}
             loading={loadingBookmark}
@@ -546,7 +614,7 @@ useEffect(() => {
                 <SuggestedFriendCard
                   item={item}
                   BASE_IMAGE_URL={BASE_IMAGE_URL}
-                  onFollow={(username) => {}}
+                  onFollow={(username) => { }}
                 />
               ) : null
             }
@@ -618,6 +686,7 @@ useEffect(() => {
           poster={posterSource}
           activity={item.activity}
           user={item.user?.name || item.user?.username}
+          username={item.user?.username}
           title={item.movie?.title}
           comment={item.comment}
           release_year={item.movie?.release_year?.toString()}
@@ -640,7 +709,7 @@ useEffect(() => {
     return null;
   };
 
- const renderFooter = useCallback(() => {
+  const renderFooter = useCallback(() => {
     // 🟢 Normal loading
     if (loadingFeed && combinedData.length <= 50) {
       return <FeedCardShimmer />;
@@ -667,7 +736,7 @@ useEffect(() => {
       return (
         <View style={{ paddingVertical: 20 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-         
+
             {t("emptyState.nomore")}
           </Text>
         </View>
@@ -694,67 +763,68 @@ useEffect(() => {
     loading && (
       <View style={{ flex: 1, backgroundColor: Color.background, alignItems: 'center', justifyContent: 'center' }} >
         <ActivityIndicator size="large" color={Color.primary} />
-      </View>)};
+      </View>)
+  };
 
 
-function mergeFeedByImdbId(data = []) {
-  const result = [];
-  const feedMap = new Map();
+  function mergeFeedByImdbId(data = []) {
+    const result = [];
+    const feedMap = new Map();
 
-  data.forEach(item => {
-    // 1️⃣ Non-feed items
-    if (item?.type !== "feed") {
+    data.forEach(item => {
+      // 1️⃣ Non-feed items
+      if (item?.type !== "feed") {
+        result.push(item);
+        return;
+      }
+
+      const imdbId = item?.movie?.imdb_id;
+
+      // 2️⃣ Invalid feed → skip
+      if (!imdbId || !item.activity || item.rec_score === -1) {
+        return;
+      }
+
+      // 3️⃣ First occurrence
+      if (!feedMap.has(imdbId)) {
+        feedMap.set(imdbId, {
+          ...item,
+          _activities: new Set([item.activity]),
+        });
+        return;
+      }
+
+      // 4️⃣ Merge
+      const existing = feedMap.get(imdbId);
+
+      existing._activities.add(item.activity);
+
+      // // ranked has priority
+      // if (item.activity === "ranked") {
+      //   existing.rec_score = item.rec_score;
+      //   existing.comment = item.comment;
+      // }
+
+      // bookmarked once → always bookmarked
+      if (item.is_bookmarked === true) {
+        existing.is_bookmarked = true;
+      }
+    });
+
+    // 5️⃣ Finalize
+    feedMap.forEach(item => {
+      const activityOrder = ["ranked", "bookmarked"];
+
+      item.activity = activityOrder
+        .filter(a => item._activities.has(a))
+        .join(", ");
+
+      delete item._activities;
       result.push(item);
-      return;
-    }
+    });
 
-    const imdbId = item?.movie?.imdb_id;
-
-    // 2️⃣ Invalid feed → skip
-    if (!imdbId || !item.activity || item.rec_score === -1) {
-      return;
-    }
-
-    // 3️⃣ First occurrence
-    if (!feedMap.has(imdbId)) {
-      feedMap.set(imdbId, {
-        ...item,
-        _activities: new Set([item.activity]),
-      });
-      return;
-    }
-
-    // 4️⃣ Merge
-    const existing = feedMap.get(imdbId);
-
-    existing._activities.add(item.activity);
-
-    // // ranked has priority
-    // if (item.activity === "ranked") {
-    //   existing.rec_score = item.rec_score;
-    //   existing.comment = item.comment;
-    // }
-
-    // bookmarked once → always bookmarked
-    if (item.is_bookmarked === true) {
-      existing.is_bookmarked = true;
-    }
-  });
-
-  // 5️⃣ Finalize
-  feedMap.forEach(item => {
-    const activityOrder = ["ranked", "bookmarked"];
-
-    item.activity = activityOrder
-      .filter(a => item._activities.has(a))
-      .join(", ");
-
-    delete item._activities;
-    result.push(item);
-  });
-
-  return result;
-}
+    return result;
+  }
   const fiter = mergeFeedByImdbId(combinedData)
   return (
     <SafeAreaView style={styles.container}>
@@ -765,7 +835,7 @@ function mergeFeedByImdbId(data = []) {
         <HeaderCustom
           title={userProfile?.name}
           rightIcon={imageIndex.settings}
-           onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
+          onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
         />
         <FlatList
           data={fiter}
@@ -773,7 +843,17 @@ function mergeFeedByImdbId(data = []) {
           renderItem={renderItem}
           //  keyExtractor={(item, index) => item?.id?.toString() || `index-${index}`}
           keyExtractor={(item, index) => item?.id?.toString?.() || `header-${index}`}
-
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[Color.primary]}
+              tintColor={Color.primary}
+              title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
+              titleColor={Color.grey700}
+            // enabled={isOnline} // Disable when offline
+            />
+          }
           onEndReached={() => {
             if (hasMore && !loadingFeed) fetchFeed("profile", email_da_data?.username);
             ;
@@ -781,15 +861,15 @@ function mergeFeedByImdbId(data = []) {
           onEndReachedThreshold={0.2}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
-         initialNumToRender={2}
-      maxToRenderPerBatch={6}
-      // removeClippedSubviews={true} 
-      windowSize={10}
-      // removeClippedSubviews
-   decelerationRate={0.86}
-      // removeClippedSubviews={true} 
+          initialNumToRender={2}
+          maxToRenderPerBatch={6}
+          // removeClippedSubviews={true} 
+          windowSize={10}
+          // removeClippedSubviews
+          decelerationRate={0.86}
+          // removeClippedSubviews={true} 
 
-                        //  windowSize={14}             
+          //  windowSize={14}             
           updateCellsBatchingPeriod={50}
           //  ListFooterComponent={renderFooter}
           onScrollBeginDrag={() => {
@@ -807,3 +887,4 @@ function mergeFeedByImdbId(data = []) {
 };
 // export default ProfileScreen;
 export default React.memo(ProfileScreen);
+

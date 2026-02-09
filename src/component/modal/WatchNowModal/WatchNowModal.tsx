@@ -6,6 +6,7 @@ import {
   FlatList,
   Image,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,6 +18,7 @@ import imageIndex from '@assets/imageIndex';
 import font from '@theme/font';
  import FastImage from 'react-native-fast-image';
 import { getMoviePlatforms } from '@redux/Api/ProfileApi';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const filterOptions = [
   { id: 1, option: 'All' },
@@ -25,6 +27,8 @@ const filterOptions = [
   { id: 4, option: 'Buy' },
   { id: 5, option: 'Free' },
 ];
+
+    const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
 const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad, setWatchModalLoad, country = 'US' }) => {
   const [selectedSortOption, setSelectedSortOption] = useState('All');
@@ -86,8 +90,28 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
         return ''; // 'All' default case
     }
   };
-
+  const insets = useSafeAreaInsets();
+   const getModalHeight = () => {
+     const videoHeight = screenHeight * 0.40;
+     const availableHeight = screenHeight - videoHeight;
+     
+     let modalHeight = availableHeight  
+     
+     return Math.min(modalHeight, screenHeight * 0.65);
+   };
  
+  const getModalBottomPadding = () => {
+     let bottomPadding = 0;
+     
+     if (Platform.OS === 'ios') {
+       bottomPadding = Math.max(insets.bottom, 12);
+     } else {
+       // For Android with gesture navigation, add more padding
+       bottomPadding = Math.max(insets.bottom + 10, 20);
+     }
+     
+     return bottomPadding;
+   };
   const renderPlatform = ({ item }) => {
 
     return (
@@ -135,9 +159,21 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
+         <View style={styles.mainContainer}>
+                {/* This empty view represents the 40% video area */}
+                <View style={styles.videoAreaPlaceholder} />
+            
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
-            <View style={styles.container}>
+            <View
+                        style={[
+                          styles.modalContent,
+                          {
+                            height: getModalHeight(),
+                            paddingBottom: getModalBottomPadding(),
+                          }
+                        ]}
+                      >
               <View style={styles.headerContainer}>
                 <View style={{ width: 22 }} />
                 <Text style={styles.headingTitle}>Watch Now</Text>
@@ -205,6 +241,11 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
             </View>
           </TouchableWithoutFeedback>
         </View>
+          {Platform.OS === 'android' && insets.bottom > 0 && (
+                          <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
+                        )}
+        </View>
+       
       </TouchableWithoutFeedback>
     </Modal>
   );
@@ -255,6 +296,13 @@ const styles = StyleSheet.create({
     backgroundColor: Color.grey700,
     borderWidth: 1,
     borderColor: Color.grey,
+  },
+    gestureSafeArea: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
   },
   activeFilter: {
     backgroundColor: Color.primary,
@@ -353,5 +401,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Color.grey700,
     fontFamily: font.PoppinsRegular
+  },
+
+   mainContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  videoAreaPlaceholder: {
+    height: '39%', 
+  },
+   modalContent: {
+    backgroundColor: Color.modalBg,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: '100%',
+    // Add shadow for better visibility
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
 });

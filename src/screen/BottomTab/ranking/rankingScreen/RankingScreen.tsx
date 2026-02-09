@@ -30,7 +30,9 @@ import {
 } from '@components/index';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import { t } from 'i18next';
-
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { errorToast } from '@utils/customToast';
 
 const ITEM_HEIGHT = 180; // Adjust based on your movie card height
 
@@ -95,6 +97,67 @@ const RankingScreen = () => {
     }
   };
   const flatListRef = useRef(null);
+  // const [refreshing, setRefreshing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const prevOnlineRef = useRef(true);
+
+  // Add this useEffect after your other effects
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+
+      // Auto-reload when coming back online
+      if (prevOnlineRef.current === false && online === true) {
+        console.log('Network restored - auto-refreshing ranking data');
+        handleRefresh();
+      }
+
+      prevOnlineRef.current = online;
+    });
+
+    // Get initial network state
+    NetInfo.fetch().then(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      prevOnlineRef.current = online;
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Add this function before your return statement
+  const handleRefresh = useCallback(async () => {
+    if (!isOnline) {
+       errorToast('No Internet! \n Please check your network connection')
+      
+      return;
+    }
+
+    setRefreshing(true);
+
+    try {
+      // Reset all states
+      setFilteredMovies([]);
+      setRatedMovie([]);
+      setSuggestionPage(1);
+      setSuggestionHasMore(true);
+      pageRef.current = 1;
+
+      // Fetch all data in parallel
+      await Promise.allSettled([
+        fetchRatedMovies(),
+        fetchSuggestionMovies(),
+      ]);
+
+      console.log('Ranking screen refreshed successfully');
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [isOnline, token]);
+
 
   useEffect(() => {
     if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -618,9 +681,9 @@ const RankingScreen = () => {
             <View style={{ alignSelf: 'flex-end' }}>
               <RankingWithInfo
                 score={item?.rec_score}
-                title=  {(t("discover.recscore"))}   
-                description={(t("discover.recscoredes"))}   
-                // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                title={(t("discover.recscore"))}
+                description={(t("discover.recscoredes"))}
+              // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
               />
             </View>
 
@@ -697,7 +760,20 @@ const RankingScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[Color.primary]}
+              tintColor={Color.primary}
+              title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
+              titleColor={Color.grey700}
+              // enabled={isOnline} // Disable when offline
+            />
+          }
+          //  contentContainerStyle={{ flexGrow: 1 }}
+        >
 
 
           {/* Rated Movies Section */}
@@ -762,49 +838,45 @@ const RankingScreen = () => {
                 onEndReachedThreshold={0.2}
                 onEndReached={loadMoreItems}
                 ListHeaderComponent={() =>
-                
-                <>
-                
-            
 
-                </>
+                  <>
+
+
+
+                  </>
                 }
-                 
+
                 ListFooterComponent={() =>
                   <>
 
-     
-              <ButtonCustom
-                title= {(t("discover.dis_cover"))}  
-                onPress={() => navigation.navigate(ScreenNameEnum.DiscoverTab, {
-                  screen: ScreenNameEnum.DiscoverScreen,
-                  params: { type: 'recs' },
-                })}
-                textStyle={
-                  {
-                    color: Color.whiteText
-                  }
-                }
-                buttonStyle={{
-                  marginTop: 5
-                }}
-              />
 
-
-
-                   
+                    <ButtonCustom
+                      title={(t("discover.dis_cover"))}
+                      onPress={() => navigation.navigate(ScreenNameEnum.DiscoverTab, {
+                        screen: ScreenNameEnum.DiscoverScreen,
+                        params: { type: 'recs' },
+                      })}
+                      textStyle={
+                        {
+                          color: Color.whiteText
+                        }
+                      }
+                      buttonStyle={{
+                        marginTop: 5
+                      }}
+                    />
                   </>
                 }
               />
             )
           )}
-      {TooltipModal && totalSteps == 5 && currentStep >= 0 && (
-  <StepProgressBar
-    totalSteps={totalSteps}
-    disable={true}
-   currentStepModal={currentStep}
-  />
-)}
+          {TooltipModal && totalSteps == 5 && currentStep >= 0 && (
+            <StepProgressBar
+              totalSteps={totalSteps}
+              disable={true}
+              currentStepModal={currentStep}
+            />
+          )}
 
 
           {!showList ? null : (
@@ -844,11 +916,11 @@ const RankingScreen = () => {
     currentStepModal={currentStep}
   />
 )} */}
- {/* {(t("login.next"))}  */}
+              {/* {(t("login.next"))}  */}
               <Text style={styles.heading}>
-              {(t("discover.haveyou"))} {"\n"}
+                {(t("discover.haveyou"))} {"\n"}
                 <Text style={{ color: Color.whiteText }}>
-                 {(t("discover.wed"))}  
+                  {(t("discover.wed"))}
                 </Text>
               </Text>
               <FlatList

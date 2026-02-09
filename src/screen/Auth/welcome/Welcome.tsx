@@ -1,5 +1,5 @@
 import imageIndex from "@assets/imageIndex";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Image, Animated, Dimensions, StyleSheet } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import useWelcome from "./useWelcome";
@@ -13,6 +13,8 @@ import font from "@theme/font";
 
 // ✅ add this
 import { useTranslation } from "react-i18next";
+import { getRatedMovies } from "@redux/Api/movieApi";
+import LoadingModal from "@utils/Loader";
 
 const { width } = Dimensions.get("window");
 const columnWidth = 120;
@@ -31,12 +33,16 @@ const Welcome = () => {
   const { navigation } = useWelcome();
   const token = useSelector((state: RootState) => state.auth.token);
   const userProfile = useSelector((state: RootState) => state.auth.userGetData);
-
+  const [valid, setValid] = useState(true)
+  const [loading, setLoading] = useState(true)
+useEffect(()=>{
+  bothBookMovie()
+},[])
   // ✅ add this
   const { t } = useTranslation();
 
   const goToInitialScreen = () => {
-    if (userProfile?.email_id) {
+    if (userProfile?.email_id && valid) {
       navigation.replace(ScreenNameEnum.TabNavigator, {
         screen: ScreenNameEnum.RankingTab,
       });
@@ -45,10 +51,29 @@ const Welcome = () => {
     }
   };
 
+
+  const bothBookMovie = async () => {
+      setLoading(true);
+      try {
+        const response = await getRatedMovies(token);
+        console.log(response, 'this is responce')
+        // setMovies(response?.results || []);
+      } catch (error) {
+       
+        if(error?.status == 401){
+          setValid(false)
+ console.log(error?.status, 'pls login againg')
+        }
+        // Error handled silently
+      } finally {
+        setLoading(false);
+      }
+    };
+
   return (
     <View style={styles.container}>
       <CustomStatusBar backgroundColor="transparent" translucent />
-
+{loading && <LoadingModal visible={loading}/>}
       <View style={styles.posterWrapper}>
         {moviePosters.map((column, columnIndex) => {
           const isAtTop = columnIndex % 2 === 0;

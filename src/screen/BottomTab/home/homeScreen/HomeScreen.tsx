@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { CustomStatusBar } from '@components';
 import imageIndex from '@assets/imageIndex';
@@ -31,6 +32,10 @@ import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
+import NetInfo from '@react-native-community/netinfo';
+import { errorToast } from '@utils/customToast';
+
+
 
 const App = () => {
   const token = useSelector((state: RootState) => state.auth.token);
@@ -69,6 +74,56 @@ const App = () => {
   const hasFetchedRecsRef = useRef(false);
   const hasFetchedTrendingRef = useRef(false);
   const hasFetchedBookmarksRef = useRef(false);
+
+   const [refreshing, setRefreshing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const prevOnlineRef = useRef(true);
+  const flatListRef = useRef<FlatList>(null);
+
+  // Network listener
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      
+      // Auto-reload when coming back online
+      if (prevOnlineRef.current === false && online === true) {
+        onRefresh();
+      }
+      
+      prevOnlineRef.current = online;
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Refresh function
+  const onRefresh = useCallback(async () => {
+    if (!isOnline){
+       errorToast('No Internet! \n Please check your network connection')
+       return;
+    } 
+    
+    setRefreshing(true);
+    
+    // Reset fetch flags
+    hasFetchedRecsRef.current = false;
+    hasFetchedTrendingRef.current = false;
+    hasFetchedBookmarksRef.current = false;
+    
+    try {
+      await Promise.allSettled([
+        fetchTrendingData(),
+        fetchRecommendData(),
+        fetchBookmarkData(),
+        fetchRecentUsers(),
+        fetchFeed("home", true),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [isOnline]);
+
   
   const combinedData = useMemo(() => {
     return [
@@ -190,9 +245,10 @@ const App = () => {
     try {
       const users = await getRecentActiveUsers(token);
                 setUserLoading(false);
-
       setRecentUsers(users.data?.results || []);
+
     } catch (err) {
+    
      } finally {
       setUserLoading(false);
     }
@@ -204,11 +260,12 @@ const App = () => {
     try {
       hasFetchedTrendingRef.current = true;
       const res = await homeDiscoverApi(token, trendingUrl);
+      
       if (res?.results) {
-        setTrendingData(res.results);
+       setTrendingData(res?.results)
       }
     } catch (error) {
-       hasFetchedTrendingRef.current = false; // Reset on error to retry
+       hasFetchedTrendingRef.current = false; 
     } finally {
       setLoadingTrending(false);
     }
@@ -338,7 +395,7 @@ const App = () => {
       return (
         <View style={{ paddingVertical: 20, marginBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-             {t("emptyState.pleasewait",)}
+             {t("emptyState.pleasewait")}
           </Text>
           <ActivityIndicator
             size="small"
@@ -457,20 +514,21 @@ const App = () => {
           style={styles.sectionTitle}
           onLayout={() => setFeedReached(true)}
         >
-             {t("home.yourFeed",)}
+             {t("home.yourFeed")}
         </Text>
       </View>
     );
   });
 
   const MemoFeedCardRender = useCallback((item, index, avatarUri, posterUri) => {
-     return (
+      return (
       <MemoFeedCardHome
         avatar={{ uri: avatarUri }}
         poster={{ uri: posterUri }}
         activity={item?.activity}
         key={item.movie?.imdb_id}
         user={item.user?.name ||item.user?.username}
+        username = {item.user?.username}
         title={item.movie?.title}
         comment={item.comment}
         release_year={item?.movie?.release_year?.toString()}
@@ -657,6 +715,15 @@ const App = () => {
         onScrollBeginDrag={() => {
           if (!hasScrolled) setHasScrolled(true);
         }}
+ ref={flatListRef}
+         refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Color.primary]}
+            tintColor={Color.primary}
+          />
+        }
         ListFooterComponent={renderFooter}
         viewabilityConfigCallbackPairs={useRef([{
           viewabilityConfig: viewabilityConfigRef.current,

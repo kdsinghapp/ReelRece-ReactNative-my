@@ -188,7 +188,9 @@ const useSignup = () => {
       }
       const result = await signupWithUsername(email, password, trimmedUsername);
       if (!result?.success) {
-        Toast.show({ type: 'error', text1: result?.message || 'Signup failed' });
+        console.log(result)
+        // Toast.show({ type: 'error', text1: result?.message || 'Signup failed' });
+        Toast.show({ type: 'error', text1: 'Username already exists' });
         return;
       }
       const token = await loginUser_Api(email, password);

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -67,6 +68,7 @@ export const sessionData = [
 ]
 
 
+
 const EpisodesModal: React.FC<Props> = ({
   visible,
   onClose,
@@ -80,44 +82,59 @@ const EpisodesModal: React.FC<Props> = ({
   bagImges,
   EpisodesLoder,
 }) => {
-  const [sessionOption, setSessionOption] = useState(false)
+  const insets = useSafeAreaInsets();
+  const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+  const [sessionOption, setSessionOption] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<SessionItem | null>(null);
-useEffect(() => {
-  if (visible && sessionList?.length > 0) {
-    const defaultSeason = sessionList[0]; // ✅ Season 1
-    setSelectedSortId(defaultSeason.session);
-    onFetchEpisodes(defaultSeason.id);
-  } 
-  if(visible == false) {
-      setSelectedSortId(sessionData[0]?.session);
-  }
-    
-
-
-}, [visible, sessionList]);
-
-const { height } = Dimensions.get('window');
-
   const [selectedSortId, setSelectedSortId] = useState(sessionData[0]?.session || "session 1");
- 
-  const renderItem = ({ item, index }: { item: Episode; index: number }) => {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  useEffect(() => {
+    if (visible && sessionList?.length > 0) {
+      const defaultSeason = sessionList[0];
+      setSelectedSortId(defaultSeason.session);
+      onFetchEpisodes(defaultSeason.id);
+    }
+    if (visible == false) {
+      setSelectedSortId(sessionData[0]?.session);
+    }
+  }, [visible, sessionList]);
+
+  const getModalHeight = () => {
+    const videoHeight = screenHeight * 0.40;
+    const availableHeight = screenHeight - videoHeight;
+    
+    let modalHeight = availableHeight  
+    
+    return Math.min(modalHeight, screenHeight * 0.65);
+  };
+
+ const getModalBottomPadding = () => {
+    let bottomPadding = 0;
+    
+    if (Platform.OS === 'ios') {
+      bottomPadding = Math.max(insets.bottom, 12);
+    } else {
+      // For Android with gesture navigation, add more padding
+      bottomPadding = Math.max(insets.bottom + 10, 20);
+    }
+    
+    return bottomPadding;
+  };
+
+  const renderItem = ({ item, index }: { item: Episode; index: number }) => {
     const isSelected = item.id === selectedId;
     return (
       <TouchableOpacity
-        style={[styles.episodeContainer,]}
+        style={styles.episodeContainer}
         onPress={() => onSelect(item?.id)}
       >
-
-        <Image source={{ uri: bagImges }}
-
+        <Image
+          source={{ uri: bagImges }}
           resizeMode='stretch'
-          style={styles.thumbnail} />
-
-        <View style={[styles.textContainer, {
-          flex: 1
-        }]}>
-
+          style={styles.thumbnail}
+        />
+        <View style={styles.textContainer}>
           <CustomText
             numberOfLines={2}
             size={14}
@@ -125,20 +142,13 @@ const { height } = Dimensions.get('window');
             style={[
               styles.title,
               {
-                color : Color.whiteText ,
-                fontFamily:  font.PoppinsMedium  ,
-                // color: item?.id === 2 ? Color.lightPrimary : Color.whiteText,
-                // fontFamily: item?.id === 2 ? font.PoppinsBold : font.PoppinsMedium,
-
-
+                fontFamily: font.PoppinsMedium,
               }
             ]}
             font={font.PoppinsBold}
           >
             {item?.title}
           </CustomText>
-
-
           <CustomText
             size={14}
             color={Color.placeHolder}
@@ -152,106 +162,101 @@ const { height } = Dimensions.get('window');
     );
   };
 
-
   const GenreButton = ({ title, onPress }: { title: string; onPress: () => void }) => (
     <TouchableOpacity
-      style={[styles.genreButton]}
-      onPress={() => { onPress(); setSessionOption(false) }}
+      style={styles.genreButton}
+      onPress={() => { onPress(); setSessionOption(false); }}
     >
       <CustomText
         size={14}
         color={Color.whiteText}
-        style={[styles.genreText,]}
+        style={styles.genreText}
         font={font.PoppinsRegular}
       >
         {title?.session}
       </CustomText>
-
-      <View style={{
-        borderBottomWidth: 1,
-        borderColor: Color.whiteText,
-        width: 156,
-        // marginTop: 12,
-        alignItems: "center",
-        justifyContent: "center"
-      }} />
+      <View style={styles.genreUnderline} />
     </TouchableOpacity>
   );
 
-
-
   return (
-    <Modal animationType="slide" transparent visible={visible}
-    style={{
-     }}
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      statusBarTranslucent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.mainContainer}>
+        {/* This empty view represents the 40% video area */}
+        <View style={styles.videoAreaPlaceholder} />
+        
+        {/* Modal overlay that takes remaining space */}
+        <TouchableOpacity
+          style={[
+            styles.modalOverlay,
+            Platform.OS === 'android' && styles.androidModalOverlay
+          ]}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              {
+                height: getModalHeight(),
+                paddingBottom: getModalBottomPadding(),
+              }
+            ]}
+          >
+            <View style={styles.header}>
+              <View style={styles.emptySpace} />
+              <CustomText
+                size={16}
+                color={Color.whiteText}
+                style={styles.headerText}
+                font={font.PoppinsBold}
+              >
+                Episodes
+              </CustomText>
+              <TouchableOpacity onPress={onClose}>
+                <Image
+                  source={imageIndex.closeimg}
+                  style={styles.closeIcon}
+                />
+              </TouchableOpacity>
+            </View>
 
-      onRequestClose={onClose} >
-      <TouchableOpacity style={[styles.overlay,{
- 
- }]}
-
-        disabled
-        onPress={onClose} >
-         
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            {/* <Text style={styles.headerText}></Text> */}
-             <View style={{
-                height: 24,
-                width: 24,
-             }}></View>
-            <CustomText
-              size={16}
-              color={Color.whiteText}
-              style={styles.headerText}
-              font={font.PoppinsBold}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.sectionHeader}
+              onPress={() => setSessionOption(!sessionOption)}
             >
-              Episodes
-            </CustomText>
-            <TouchableOpacity onPress={onClose}>
-              <Image source={imageIndex.closeimg} style={{
-                height: 24,
-                width: 24,
-                resizeMode: "contain"
-              }} />
+              <View style={styles.emptySpace} />
+              <CustomText
+                size={16}
+                color={Color.whiteText}
+                style={styles.sectionTitle}
+                font={font.PoppinsBold}
+              >
+                {selectedSortId}
+              </CustomText>
+              {sessionOption ? (
+                <Image source={imageIndex.arrowUp} style={styles.arrowStyle} />
+              ) : (
+                <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+              )}
             </TouchableOpacity>
 
-          </View>
-
-          <TouchableOpacity
-            activeOpacity={0.8} // Opacity when pressed
-
-            style={styles.sectionHeader}
-            onPress={() => setSessionOption(!sessionOption)}
-          >
-              <View style={{
-                 height: 22,
-    width: 22,
-             }}></View>
-            <CustomText
-              size={16}
-              color={Color.whiteText}
-              style={styles.sectionTitle}
-              font={font.PoppinsBold}
-            >
-              {selectedSortId}
-            </CustomText>
-            {sessionOption ? <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />}
-
-
-          </TouchableOpacity>
-
-          {
-            EpisodesLoder  ? (
-
-              <ActivityIndicator color={Color.primary} />
+            {EpisodesLoder ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator color={Color.primary} size="large" />
+              </View>
             ) : (
-
-
               <>
                 {sessionOption ? (
                   <FlatList
-                  data={sessionList} // ✅ use dynamic list
+                    data={sessionList}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
@@ -259,41 +264,37 @@ const { height } = Dimensions.get('window');
                         title={item}
                         onPress={() => {
                           setSelectedSortId(item?.session);
-                          onFetchEpisodes(item?.id);  // Fetch that season's episodes
+                          onFetchEpisodes(item?.id);
                           setSessionOption(false);
                         }}
-                        isSelected={selectedSortId === item?.session}
                       />
                     )}
                     initialNumToRender={10}
                     maxToRenderPerBatch={10}
                     windowSize={12}
                     removeClippedSubviews
-
                   />
-                ) :
+                ) : (
                   <FlatList
                     showsVerticalScrollIndicator={false}
-                    style={{ marginTop: 12 }}
+                    style={styles.episodesList}
                     data={episodes}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={[
-                      styles.list,
-                      episodes?.length === 0 && { flex: 1 }
+                      styles.listContent,
+                      episodes?.length === 0 && styles.emptyList
                     ]}
                     ListEmptyComponent={() => (
-                      <View style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginTop: 50
-                      }}>
-                        <Text style={{
-                          fontSize: 15.5,
-                          color: Color.grey200 ,
-                          fontFamily:font.PoppinsMedium
-                        }}>No Episodes found</Text>
+                      <View style={styles.emptyContainer}>
+                        <CustomText
+                          size={15.5}
+                          color={Color.grey200}
+                          style={styles.emptyText}
+                          font={font.PoppinsMedium}
+                        >
+                          No Episodes found
+                        </CustomText>
                       </View>
                     )}
                     initialNumToRender={10}
@@ -301,94 +302,84 @@ const { height } = Dimensions.get('window');
                     windowSize={7}
                     removeClippedSubviews
                   />
-
-                }
+                )}
               </>
-            )
-          }
-
-
-
-
-        </View>
-   
-      </TouchableOpacity>
+            )}
+          </View>
+          {/* Add a transparent view at the bottom for gestures */}
+      
+        {Platform.OS === 'android' && insets.bottom > 0 && (
+                  <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
+                )}
+        </TouchableOpacity>
+      </View>
     </Modal>
   );
 };
-// good time to see
-export default EpisodesModal;
 
 const styles = StyleSheet.create({
-  overlay: {
+  mainContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-   },
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  videoAreaPlaceholder: {
+    height: '39%', 
+  },
+  modalOverlay: {
+    flex: 1, 
+  },
+  androidModalOverlay: {
+    marginBottom: Platform.select({
+      android: 0,
+      ios: 0,
+    }),
+  },
   modalContent: {
     backgroundColor: Color.modalBg,
     paddingTop: 16,
-    paddingBottom: 12,
     paddingHorizontal: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    // height:  Dimensions.get('window').height * 0.7,
-maxHeight:
-      Dimensions.get('window').height *
-      (Platform.OS === 'ios' ? 0.63 : 0.62 ),    
-
-    // maxHeight: Dimensions.get('window').height * 0.63,
-    height: Dimensions.get('window').height * 0.66,
+    width: '100%',
+    // Add shadow for better visibility
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
     marginTop: 12,
-    alignItems:"center"
-
+    alignItems: 'center',
   },
   headerText: {
     color: Color.whiteText,
-    
   },
-
-  episodeContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    overflow: 'hidden',
-    marginVertical: 3
+  emptySpace: {
+    height: 24,
+    width: 24,
   },
-
-  thumbnail: {
-    width: 100,
-    height: 72,
-    borderRadius: 10
-  },
-  textContainer: {
-    paddingLeft: 8,
-    // justifyContent: 'center',
-  },
-  title: {
-  },
-  titleSelected: {
-    color: Color.primary,
-  },
-  duration: {
-    marginTop: 2
-  },
-  list: {
-    paddingBottom: 16,
+  closeIcon: {
+    height: 24,
+    width: 24,
+    resizeMode: 'contain',
   },
   sectionHeader: {
-     flexDirection: 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 14,
     paddingHorizontal: 20,
     marginVertical: 10,
     backgroundColor: Color.grey,
     borderRadius: 10,
-      alignItems:"center"
-   },
+    alignItems: 'center',
+  },
   sectionTitle: {
     fontSize: 14,
     color: Color.whiteText,
@@ -399,8 +390,52 @@ maxHeight:
   arrowStyle: {
     height: 22,
     width: 22,
-    resizeMode: "contain",
+    resizeMode: 'contain',
     tintColor: Color.primary,
+  },
+  episodesList: {
+    marginTop: 12,
+  },
+  listContent: {
+    paddingBottom: 16,
+  },
+  emptyList: {
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  emptyText: {
+    fontSize: 15.5,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  episodeContainer: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    overflow: 'hidden',
+    marginVertical: 3,
+  },
+  thumbnail: {
+    width: 100,
+    height: 72,
+    borderRadius: 10,
+  },
+  textContainer: {
+    paddingLeft: 8,
+    flex: 1,
+  },
+  title: {
+    // Title styles
+  },
+  duration: {
+    marginTop: 2,
   },
   genreButton: {
     alignItems: 'center',
@@ -409,7 +444,18 @@ maxHeight:
   genreText: {
     marginBottom: 18,
   },
+  genreUnderline: {
+    borderBottomWidth: 1,
+    borderColor: Color.whiteText,
+    width: 156,
+  },
+  gestureSafeArea: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
+  },
 });
 
-
-
+export default EpisodesModal;

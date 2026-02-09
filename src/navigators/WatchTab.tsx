@@ -10,7 +10,7 @@ import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
 import GroupSearchScreen from '@screens/BottomTab/watch/watchScreen/GroupSearchScreen';
 import WatchWithFrind from '@screens/BottomTab/watch/watchScreen/WatchWithFrind';
 import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
- 
+
 const Stack = createNativeStackNavigator();
 
 const WatchTab: FunctionComponent = () => {
@@ -19,8 +19,8 @@ const WatchTab: FunctionComponent = () => {
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-    { name: ScreenNameEnum.GroupSearch, Component: GroupSearchScreen },  
-    { name: ScreenNameEnum.WatchWithFrind , Component:WatchWithFrind},  
+    { name: ScreenNameEnum.GroupSearch, Component: GroupSearchScreen },
+    { name: ScreenNameEnum.WatchWithFrind, Component: WatchWithFrind },
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
 
     // { name: ScreenNameEnum.WatchWithFrind , Component:wa},  
@@ -32,7 +32,7 @@ const WatchTab: FunctionComponent = () => {
         headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
- contentStyle: { backgroundColor: '#ff0404ff' }, 
+        contentStyle: { backgroundColor: '#ff0404ff' },
       }}>
       {_routess.map((screen, index) => (
         <Stack.Screen

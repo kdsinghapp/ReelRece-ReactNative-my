@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   defaultText: {
     color: Color.whiteText,
     fontFamily: font.PoppinsRegular,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 20,
   },
 });

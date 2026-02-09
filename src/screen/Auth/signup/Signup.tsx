@@ -92,6 +92,7 @@ export default function Signup() {
               showEye={false}
             />
             {confirmPasswordError ? <Text style={styles.redText}>{confirmPasswordError}</Text> : null}
+            {passwordError ? <Text style={styles.redText}>{passwordError}</Text> : null}
 
           </View>
           <View style={{

@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     width: 98,
     height: 135,
     borderRadius: 8,
+    
   },
   info: {
     flex: 1,

@@ -205,39 +205,6 @@ const styles = StyleSheet.create({
   },
 
 
-  //   searchHeaderContainer: {
-  //     marginTop: 15,
-  //     flexDirection: 'row',
-  //     alignItems: 'center',
-  //     marginHorizontal: 16,
-  //     // backgroundColor:'red'
-  //   },
-  //   backImg: {
-  //     height: 24,
-  //     width: 24,
-  //     tintColor: Color.whiteText,
-  //     marginRight: 12,
-  //   },
-  //   searchContainer: {
-  //     flex: 1,
-  //     flexDirection: 'row',
-  //     backgroundColor: Color.modalBg,
-  //     borderRadius: 40,
-  //     paddingHorizontal: 16,
-  //     alignItems: 'center',
-  //     alignContent:'center',
-  //     height: 45,
-  //   },
-  //   input: {
-  //     flex: 1,
-  //     color: Color.whiteText,
-  //     fontSize: 14,
-  //     lineHeight:45,
-  //     fontFamily:font.PoppinsRegular,
-  //     textAlignVertical:'center',
-  // // marginTop:4
-  //     // paddingVertical: 0,
-  //   },
   clearIcon: {
     height: 18,
     width: 18,

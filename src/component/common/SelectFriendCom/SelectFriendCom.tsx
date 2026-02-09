@@ -13,6 +13,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import font from '@theme/font';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
+import { useSelector } from 'react-redux';
+import { RootState } from '@redux/store';
 
 interface Member {
   id: string;
@@ -39,6 +41,9 @@ const SelectFriendCom: React.FC<Props> = ({
   setAddMembers,
   groupId
 }: Props) => {
+  // Get current user's username to exclude from friend list
+  const currentUsername = useSelector((state: RootState) => state.auth.userGetData?.username);
+  
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState('');
 const [page, setPage] = useState(1);
@@ -226,6 +231,11 @@ const loadData = async () => {
 };
 
 const filteredUsers = formattedFriends?.filter(user => {
+  // Exclude current user (group creator) from the selectable friend list
+  if (currentUsername && user?.id?.toLowerCase() === currentUsername?.toLowerCase()) {
+    return false;
+  }
+  // Exclude existing group members (for adding members to existing group)
   return !addmembers1?.some(a =>
     a?.username?.toLowerCase() === user?.id?.toLowerCase()
   );

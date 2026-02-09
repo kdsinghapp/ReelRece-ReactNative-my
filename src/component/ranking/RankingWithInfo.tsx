@@ -104,17 +104,7 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
  
 
       </TouchableOpacity>
-      {/* )} */}
-
-
-      {/* <TouchableOpacity
-        ref={touchableRef}
-        onPress={handlePress}
-        activeOpacity={0.8}
-        style={styles.cardWrapper}
-      >
-        <RankingCard ranked={score} />
-      </TouchableOpacity> */}
+   
     </View>
   );
 };

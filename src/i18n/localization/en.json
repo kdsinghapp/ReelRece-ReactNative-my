@@ -61,7 +61,9 @@
     "didntReceiveCode": "Didn't receive the code?",
     "currentpassword": "Current password",
     "newpassword": "New password",
-    "confirmnewpassword": "Confirm new password"
+    "confirmnewpassword": "Confirm new password",
+    "verifyEmail":"Verify Your Email",
+    "enterCode":"Please enter the 4 digit code sent to"
   },
   "errorMessage": {
     "email": "Email is required",
@@ -130,7 +132,8 @@
     "wed": "We'd like to know your thoughts!",
     "searchmovies": "Search movies, shows ...",
     "moviedes": "This score predicts how much you'll enjoy this movie/show.",
-    "recscoredes": "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+    "recscoredes": "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm.",
+"groupScore":"Group Score"
   },
   "emptyState": {
     "noMoviesFound": "No movies found",

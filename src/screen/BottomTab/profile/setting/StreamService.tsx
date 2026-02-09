@@ -1,4 +1,4 @@
-import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenNameEnum from '@routes/screenName.enum'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -14,6 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import imageIndex from '@assets/imageIndex'
 import { CustomStatusBar, HeaderCustom } from '@components/index'
 import { t } from 'i18next'
+import NetInfo from '@react-native-community/netinfo';
+
 
 const numColumns = 4;
 const screenWidth = Dimensions.get('window').width;
@@ -23,8 +25,7 @@ const StreamService = () => {
   const token = useSelector((state: RootState) => state.auth.token);
   const route = useRoute();
   const { fromSignUp } = route.params || {};
-  const navigation = useNavigation()
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const navigation = useNavigation() 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMode, setFilterMode] = useState<| 'popular' | 'more'>('popular');
   const [platefromdata, setPlatefromdata] = useState([])
@@ -41,6 +42,7 @@ const StreamService = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [filteredPlatforms, setFilteredPlatforms] = useState(allPlatforms);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
 
   /** ---- Fetch User Subscriptions ---- */
   useEffect(() => {
@@ -87,8 +89,7 @@ const StreamService = () => {
         query,
         page: pageToLoad,
         signal,
-      });
-
+      }); 
       const results =
         (resp?.results || []).map((item) => ({
           ...item,
@@ -147,6 +148,7 @@ const StreamService = () => {
   /** ---- Helpers ---- */
   const fixImageUrl = (imageUrl: string): string => {
     try {
+  
       const urlParts = imageUrl.split('/');
       const fileName = urlParts.pop();
       const encodedFileName = encodeURIComponent(fileName ?? '');
@@ -162,63 +164,7 @@ const StreamService = () => {
     }
   }, [searchQuery]);
 
-  // const getFilteredData = () => {
-  //   let data = platformData;
-  //   if (searchQuery) {
-  //     data = data.filter(item =>
-  //       item?.supported_platform?.toLowerCase().includes(searchQuery.toLowerCase())
-  //     );
-  //   }
-
-  //   if (filterMode === 'popular') {
-  //     data = data.filter(item => item?.popular === true);
-  //   } else if (filterMode === 'more') {
-  //     data = data.filter(item => item?.popular === false);
-  //   }
-  //   return data;
-  // };
-
-
-  // const getFilteredData = () => {
-  //   let data = platformData;
-
-  //   if (searchQuery) {
-
-  //     data = data.filter((item) =>
-  //       item?.supported_platform
-  //         ?.toLowerCase()
-  //         .includes(searchQuery.toLowerCase())
-  //     );
-
-  //     // // 🔍 Step 2: अब filterMode चेक करो
-  //     // if (filterMode === 'popular') {
-  //     //   // सिर्फ popular वाले search result
-  //     //   data = data.filter((item) => item?.popular === true);
-  //     // } else if (filterMode === 'more') {
-  //     //   // सब दिखाओ लेकिन popular पहले आएंगे
-
-  //       data = data.sort((a, b) => {
-  //         if (a.popular === b.popular) return 0;
-  //         return a.popular ? -1 : 1; // popular true पहले
-
-  //       });
-  //     // }
-  //   } else {
-  //     if (filterMode === 'popular') {
-  //       data = data.filter((item) => item?.popular === true);
-  //     } else if (filterMode === 'more') {
-  //       data = data.sort((a, b) => {
-  //         if (a.popular === b.popular) return 0;
-  //         return a.popular ? -1 : 1;
-  //       });
-  //     }
-  //   }
-
-  //   return data;
-  // };
-
-
-  // 🔍 Filtered data only for UI
+  
   const getFilteredData = () => {
     let data = [...platformData];
 
@@ -282,6 +228,24 @@ const StreamService = () => {
   }, [selectedPlatforms,])
 
 
+  // Add network listener useEffect
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const wasOffline = !isConnected && state.isConnected;
+      setIsConnected(state.isConnected);
+
+      // Auto-reload when reconnecting and no platforms loaded
+      if (wasOffline && platformData.length === 0) {
+        fetchPlatformsPage({
+          pageToLoad: 1,
+          query: debouncedSearch,
+          replace: true
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isConnected, platformData.length]);
 
   /** ---- Search Debounce ---- */
   const handleSearchDebounce = debounce((text: string) => {
@@ -505,6 +469,19 @@ const StreamService = () => {
             // ListEmptyComponent={
             //   <Text style={styles.noResultsText}>No services found</Text>
             // }
+
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => fetchPlatformsPage({
+                  pageToLoad: 1,
+                  query: searchQuery,
+                  replace: true
+                })}
+                colors={[Color.primary]}
+                tintColor={Color.primary}
+              />
+            }
             ListEmptyComponent={() => {
               if (isLoading || isRefreshing) {
                 return <ActivityIndicator style={{ margin: 12 }} />;
@@ -535,7 +512,7 @@ const StreamService = () => {
         {fromSignUp ? (
           !isKeyboardVisible && (
             <ButtonCustom
-              title= {(t("login.next"))} 
+              title={(t("login.next"))}
               buttonStyle={styles.buttonStyle}
               onPress={goToRankingScreen}
             />

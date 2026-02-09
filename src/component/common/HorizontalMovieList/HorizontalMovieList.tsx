@@ -133,23 +133,15 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
         <TouchableOpacity style={styles.rankingOverlay}
         //  onPress={() => setShowFirstModal(!showFirstModal)}  
         >
-          {item?.rec_score &&
-          // 
+          {/* {item?.rec_score && */}
+        
             <RankingWithInfo
-              score={item?.rec_score}
+              score={item?.rec_score ?? '?'}
               title={scoreType === "Rec" ? t("discover.recscore") :  t("discover.friendscore")  }
-              description={
-                scoreType === "Rec"
-                  ? 
-                  t("discover.recscoredes")
-                  
-                  // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                  : 
-                  // "This score shows the rating from your friend for this title."
-                     t("discover.frienddes")
+              description={scoreType === "Rec"? t("discover.recscoredes") : t("discover.frienddes")
               }
             />
-          }
+          {/* } */}
         </TouchableOpacity>
 
         {/* <ImageBackground

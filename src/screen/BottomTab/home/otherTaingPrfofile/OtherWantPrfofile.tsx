@@ -62,8 +62,8 @@
 //       hasMoreRef.current = hasNext;
 //       pageRef.current = pageToLoad;
 
- //     } catch (error) {
- //     } finally {
+//     } catch (error) {
+//     } finally {
 //       loadingRef.current = false;
 //       setLoading(false);
 //     }
@@ -80,7 +80,7 @@
 //   const handleLoadMore = () => {
 //     if (loadingRef.current || !hasMoreRef.current) return;
 //     const nextPage = pageRef.current + 1;
- //     fetchBookmarks(nextPage, true);
+//     fetchBookmarks(nextPage, true);
 //   };
 
 //   // 🔹 Bookmark Toggle (save/unsave + UI update)
@@ -95,7 +95,7 @@
 //         )
 //       );
 //     } catch (error) {
- //     }
+//     }
 //   };
 
 //   // 🔹 Navigate to Movie Detail
@@ -238,12 +238,12 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-  
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
- import { getOtherUserBookmarks, toggleBookmark } from '@redux/Api/ProfileApi';
+import { getOtherUserBookmarks, toggleBookmark } from '@redux/Api/ProfileApi';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { useBookmarks } from '@hooks/useBookmark';
@@ -254,11 +254,14 @@ import imageIndex from '@assets/imageIndex';
 import { BottomSheet, CustomStatusBar, HeaderCustom, ProfileOther } from '@components/index';
 import useHome from '../homeScreen/useHome';
 import { t } from 'i18next';
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+
 
 const OtherWantPrfofile = () => {
   const route = useRoute();
   const { title, datamovie, username, imageUri, token, disableBottomSheet = false, my_profile = false } = route?.params
-   const { navigation, isVisible, setIsVisible, modalVisible, setModalVisible } = useHome();
+  const { navigation, isVisible, setIsVisible, modalVisible, setModalVisible } = useHome();
   // const { isBookmarked: save, toggle: handleBookmarkToggle } = useBookmark(token,imdb_id);
   const { isBookmarked, toggleBookmark } = useBookmarks(token);
   const [isSaved, setIsSaved] = useState(my_profile);
@@ -272,6 +275,32 @@ const OtherWantPrfofile = () => {
     // }))
 
   );
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    pageRef.current = 1; // Reset to first page
+    hasMoreRef.current = true; // Reset pagination
+    setMovies([]); // Clear existing data
+    bothBookMovie(1, false).finally(() => setRefreshing(false));
+  }, []);
+
+  const [isConnected, setIsConnected] = useState(true);
+
+  // Add this useEffect
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const wasOffline = !isConnected && state.isConnected;
+      setIsConnected(state.isConnected);
+
+      // Auto-refresh when coming back online AND no data exists
+      if (wasOffline && movies.length === 0) {
+        bothBookMovie(1, false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [movies.length]);
 
   const bothBookMovie = async (pageToLoad = 1, append = false) => {
     let response = []
@@ -289,8 +318,8 @@ const OtherWantPrfofile = () => {
 
       }
       const newResults = response.results || []
-       const hasNext = response?.next !== null;
-       setMovies(prev => ( append  ? [...prev , ...newResults] : newResults));
+      const hasNext = response?.next !== null;
+      setMovies(prev => (append ? [...prev, ...newResults] : newResults));
       //  setHasMore(hasNext);
 
       pageRef.current = pageToLoad;
@@ -298,28 +327,28 @@ const OtherWantPrfofile = () => {
 
       // response = await getCommonBookmarks(token );
       setMovies(response?.results)
-     } catch (error) {
-     }  finally {
+    } catch (error) {
+    } finally {
       loadingRef.current = false;
       // setLoading(false);
     }
   };
-useEffect(() => {
+  useEffect(() => {
     setMovies([]);
     // setPage(1);
     pageRef.current = 1
     bothBookMovie(1, false);
-  }, [token, ]);
+  }, [token,]);
 
 
-const handleLoadMore = () => {
+  const handleLoadMore = () => {
     if (loadingRef.current || !hasMoreRef.current) return;
     const nextPage = pageRef.current + 1;
-     bothBookMovie(nextPage, true);
+    bothBookMovie(nextPage, true);
   };
 
 
-   const [bottomModal, setBottomModal] = useState(false)
+  const [bottomModal, setBottomModal] = useState(false)
   // const token = useSelector((state: RootState) => state.auth.token);
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -338,33 +367,33 @@ const handleLoadMore = () => {
   const compareHook = useCompareComponent(token);
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
-   };
+  };
 
   // const handleToggleBookmark = async (imdb_id: string) => {
   //   try {
   //     const newStatus = await toggleBookmark(imdb_id);
-   //     if (!newStatus) {
+  //     if (!newStatus) {
   //       setMovies(prevMovies => prevMovies.filter(movie => movie.imdb_id !== imdb_id));
   //       changeMovie = 2
   //     }
   //   } catch (error) {
-   //   }
+  //   }
   // };
 
 
   // const { toggleBookmark } = useBookmarks(token);
 
-const handleToggleBookmark = async (imdb_id: string) => {
-  try {
-    const newStatus = await toggleBookmark(imdb_id);
-    if (!newStatus) {
-       changeMovie = 2
-      // removed successfully → update UI
-      setMovies(prev => prev.filter(movie => movie.imdb_id !== imdb_id));
+  const handleToggleBookmark = async (imdb_id: string) => {
+    try {
+      const newStatus = await toggleBookmark(imdb_id);
+      if (!newStatus) {
+        changeMovie = 2
+        // removed successfully → update UI
+        setMovies(prev => prev.filter(movie => movie.imdb_id !== imdb_id));
+      }
+    } catch (err) {
     }
-  } catch (err) {
-   }
-};
+  };
 
 
   const handleNavigation = (imdb_id: string, token: string) => {
@@ -373,7 +402,7 @@ const handleToggleBookmark = async (imdb_id: string) => {
   };
   const renderMovie = useCallback(({ item }) => {
     // setIsSaved(item?.is_bookmarked ?? false)
-     return (
+    return (
       <View style={styles.movieCard}>
         <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)}>
           {/* <Image source={{ uri : item?.cover_image_url}} style={styles.poster} /> */}
@@ -455,14 +484,23 @@ const handleToggleBookmark = async (imdb_id: string) => {
         <HeaderCustom
           title={username}
           backIcon={imageIndex.backArrow}
-          // rightIcon={imageIndex.menu}
-          // onRightPress={() => !disableBottomSheet && setBottomModal(true)}  
-
+        // rightIcon={imageIndex.menu}
+        // onRightPress={() => !disableBottomSheet && setBottomModal(true)}  
         />
 
         <FlatList
           showsVerticalScrollIndicator={false}
           data={movies}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[Color.primary]}
+              tintColor={Color.primary}
+            // title="Pull to refresh"
+            />
+          }
+
           ListHeaderComponent={() => (
             <View style={{ marginTop: 8 }}>
               <ProfileOther

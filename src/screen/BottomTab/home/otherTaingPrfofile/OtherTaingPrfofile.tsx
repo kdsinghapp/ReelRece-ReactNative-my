@@ -18,6 +18,8 @@ import { getHistoryApi } from '@redux/Api/ProfileApi';
 import OutlineTextIOS from '@components/NumbetTextIOS';
 import imageIndex from '@assets/imageIndex';
 import { t } from 'i18next';
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 
 const OtherTaingPrfofile = () => {
@@ -86,7 +88,33 @@ const [hasMore, setHasMore] = useState(true);
   // bothBookMovie(1, false);
    // }, [token])
 
+const [refreshing, setRefreshing] = useState(false);
 
+// Add this function
+const onRefresh = useCallback(() => {
+  setRefreshing(true);
+  setMovies([]); // Clear data
+  pageRef.current = 1; // Reset pagination
+  hasMoreRef.current = true;
+  bothBookMovie(1, false).finally(() => setRefreshing(false));
+}, []);
+const [isConnected, setIsConnected] = useState(true);
+
+// Add this useEffect for network detection
+useEffect(() => {
+  const unsubscribe = NetInfo.addEventListener(state => {
+    const wasOffline = !isConnected && state.isConnected;
+    setIsConnected(state.isConnected);
+    
+    // Auto-reload when coming online and no data
+    if (wasOffline && movies.length === 0) {
+      setMovies([]);
+      bothBookMovie(1, false);
+    }
+  });
+  
+  return () => unsubscribe();
+}, [isConnected, movies.length]);
 
   const bothBookMovie = async (pageToLoad = 1, append = false) => {
     if (loadingRef.current) return; // ✅ prevent duplicate API calls
@@ -336,6 +364,14 @@ const handleNavigation = (imdb_id: string, token: string) => {
               }
             </>
           )}
+           refreshControl={
+    <RefreshControl 
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      colors={[Color.primary]}
+      tintColor={Color.primary}
+    />
+  }
           onEndReachedThreshold={0.3}
           onEndReached={handleLoadMore}
           initialNumToRender={10}

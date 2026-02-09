@@ -1,4 +1,4 @@
- 
+
 import React, {
   memo,
   useCallback,
@@ -9,14 +9,14 @@ import React, {
 } from 'react';
 import {
   View,
-   Image,
+  Image,
   Text,
   StyleSheet,
   Dimensions,
   Animated,
   TouchableOpacity,
   ActivityIndicator,
-   TextInput,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
@@ -25,38 +25,41 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {   useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import debounce from 'lodash.debounce';
 import FastImage from 'react-native-fast-image';
 
- import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import font from '@theme/font';
-  
+
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
 import { DescriptionWithReadMore } from '@components/common/DescriptionWithReadMore/DescriptionWithReadMore';
 import CustomText from '@components/common/CustomText/CustomText';
 import { convertRuntime } from '@components/convertRuntime/ConvertRuntime';
 import {
   getGroupActivitiesAction,
-   recordGroupPreference,
+  recordGroupPreference,
   getFilteredGroupMovies,
   getGroupRecommendedMovies,
   getGroupSearchMovies,
-   getGroupMembers,
+  getGroupMembers,
 } from '@redux/Api/GroupApi';
 import { RootState } from '@redux/store';
 import { BASE_IMAGE_URL } from '@redux/Api/axiosInstance';
 import GroupMovieModal from '@components/modal/groupMovieModal/groupMovieModal';
 import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
 import GroupSettingModal from '@components/modal/WatchGroupSetting/WatchGroupSetting';
- import imageIndex from '@assets/imageIndex';
+import imageIndex from '@assets/imageIndex';
 import { CustomStatusBar, FriendthinkModal, MovieInfoModal } from '@components/index';
 import useMovie from '@screens/BottomTab/discover/movieDetail/useMovie';
 import { t } from 'i18next';
 import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notification';
-  const { width, height } = Dimensions.get('window');
+import { BlurView } from '@react-native-community/blur';
+import RankingWithInfo from '@components/ranking/RankingWithInfo';
+import GroupScoreModal from '@components/modal/GroupScoreModal/GroupScoreModal';
+const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.4;
-const SPACING = 20;
+const SPACING = 7.9;
 const ITEM_SIZE = ITEM_WIDTH + SPACING;
 
 
@@ -71,20 +74,20 @@ const BackgroundImage = memo(({ imageUri }) => {
       // Immediately update current image
       setPrevImage(currentImage);
       setCurrentImage(imageUri);
-      
+
       // Clear previous image after a very short time
       const timer = setTimeout(() => {
         setPrevImage(null);
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [imageUri, currentImage]);
 
   return (
-    <View style={StyleSheet.absoluteFill}>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none"> 
       {/* Previous image fading out */}
-      {prevImage && (
+      {/* {prevImage && (
         <Animated.View style={StyleSheet.absoluteFill}>
           <FastImage
             source={{ uri: prevImage }}
@@ -93,10 +96,10 @@ const BackgroundImage = memo(({ imageUri }) => {
           />
           <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.7)' }]} />
         </Animated.View>
-      )}
-      
+      )} */}
+
       {/* Current image */}
-      <Animated.View style={[StyleSheet.absoluteFill, { opacity }]}>
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity }]} pointerEvents="none">
         {currentImage ? (
           <FastImage
             source={{
@@ -110,7 +113,7 @@ const BackgroundImage = memo(({ imageUri }) => {
         ) : (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: Color.background }]} />
         )}
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.7)' }]} />
+        {/* <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.7)' }]} /> */}
       </Animated.View>
     </View>
   );
@@ -121,19 +124,19 @@ const WatchWithFrind = () => {
   const route = useRoute()
   const token = useSelector((state: RootState) => state.auth.token);
   const navigation = useNavigation();
-  const { groupProps: passedGroupProps, type, groupId ,maxActivitiescnt } = route?.params || {};
+  const { groupProps: passedGroupProps, type, groupId, maxActivitiescnt } = route?.params || {};
   const [group, setGroup] = useState(passedGroupProps);
   const [group1, setgroup1] = useState();
   const fetchGroups = async () => {
-     try {
-      const groupsRes = await getGroupMembers(token,groupId);
-       setgroup1(groupsRes); // ✅ state me set karo
+    try {
+      const groupsRes = await getGroupMembers(token, groupId);
+      setgroup1(groupsRes); // ✅ state me set karo
     } catch (error) {
-     }
+    }
   };
-  
+
   const [watchTogetherGroups, setWatchTogetherGroups] = useState(passedGroupProps);
-   const [comment, setcomment] = useState('');
+  const [comment, setcomment] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [groupMember, setGroupMember] = useState(false);
@@ -151,7 +154,10 @@ const WatchWithFrind = () => {
   const [likes, setLikes] = useState({});
   const [dislikes, setDislikes] = useState({});
   const [watchNow, setWatchNow] = useState(false);
+  const [groupScoreModal, setgroupScoreModal] = useState(false);
   const [selectedImdbId, setSelectedImdbId] = useState(null);
+  const [selectedImdbScore, setSelectedImdbScore] = useState(null);
+
   const [watchModalLoad, setWatchModalLoad] = useState(null);
   const [groupActivity, setGroupActivity] = useState([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
@@ -169,24 +175,24 @@ const WatchWithFrind = () => {
 
   // Modals
   const { setInfoModal, InfoModal, thinkModal, setthinkModal } = useMovie();
-useEffect(() => {
-     fetchGroups();
- 
-}, [groupMember]); // 👈 modal open hone par trigger
+  useEffect(() => {
+    fetchGroups();
+
+  }, [groupMember]); // 👈 modal open hone par trigger
   // Preload images function
   const preloadImages = useCallback((images) => {
     if (!images || images?.length === 0) return;
-    
+
     const uris = images
       .filter(movie => movie?.cover_image_url)
       .map(movie => ({ uri: movie?.cover_image_url }));
-    
+
     if (uris.length > 0) {
       FastImage.preload(uris);
     }
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchStoredGroup = async () => {
       if (!passedGroupProps) {
         try {
@@ -197,13 +203,13 @@ useEffect(() => {
             setWatchTogetherGroups(parsedGroup);
           }
         } catch (error) {
-         }
+        }
       }
     };
     fetchStoredGroup();
   }, [passedGroupProps]);
 
-   useEffect(() => {
+  useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       () => setKeyboardVisible(true)
@@ -218,7 +224,7 @@ useEffect(() => {
     };
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     if (groupRecommend?.length > 0) {
       preloadImages(groupRecommend);
     }
@@ -237,12 +243,12 @@ useEffect(() => {
     if (movies?.length === 0) return;
 
     const imagesToPreload = [];
-  
+
     const current = movies[activeIndex];
     if (current?.cover_image_url) {
       imagesToPreload.push({ uri: current.cover_image_url });
     }
-    
+
     // Preload next 2 images
     for (let i = 1; i <= 2; i++) {
       const nextIndex = activeIndex + i;
@@ -250,16 +256,16 @@ useEffect(() => {
         imagesToPreload.push({ uri: movies[nextIndex].cover_image_url });
       }
     }
-    
+
     if (imagesToPreload.length > 0) {
       FastImage.preload(imagesToPreload);
     }
   }, [activeIndex, groupRecommend, searchResult, comment]);
- 
+
   useEffect(() => {
-       fetchGroups();
- 
-     
+    fetchGroups();
+
+
   }, [notificationModal]);
   // Fetch group activities
   useEffect(() => {
@@ -296,11 +302,11 @@ useEffect(() => {
       fetchActivity();
     }
   }, [token, delayActionPreference, activeIndex]);
-  
+
   useEffect(() => {
-       fetchGroups();
- 
-     
+    fetchGroups();
+
+
   }, [notificationModal]);
   // Trigger preference update
   useEffect(() => {
@@ -319,7 +325,7 @@ useEffect(() => {
         setGroupRecommend(response.results);
         setGroupRecommendCopyData(response.results);
       } catch (err) {
-         setError(true);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -356,7 +362,7 @@ useEffect(() => {
       setSearchResult(response || []);
       setActiveIndex(0);
     } catch {
-       setSearchResult([]);
+      setSearchResult([]);
     } finally {
       setIsSearchLoading(false);
     }
@@ -379,7 +385,7 @@ useEffect(() => {
         setActiveIndex(0);
       }
     } catch (error) {
-       throw error;
+      throw error;
     }
   };
 
@@ -400,75 +406,77 @@ useEffect(() => {
     };
   }, []);
 
- const handlePreference = async ({
-  type,
-  imdbId,
-  token,
-  groupId,
-  setLikes,
-  setDislikes,
-  likes,
-  dislikes,
-}) => {
-  if (!imdbId) return;
+  const handlePreference = async ({
+    type,
+    imdbId,
+    token,
+    groupId,
+    setLikes,
+    setDislikes,
+    likes,
+    dislikes,
+  }) => {
+    if (!imdbId) return;
 
-  const isLike = type === "like";
+    const isLike = type === "like";
 
-  // 🔹 Previous state save (rollback ke liye)
-  const prevLike = !!likes[imdbId];
-  const prevDislike = !!dislikes[imdbId];
+    // 🔹 Previous state save (rollback ke liye)
+    const prevLike = !!likes[imdbId];
+    const prevDislike = !!dislikes[imdbId];
 
-  // 🔹 New toggle state
-  const newLikeState = isLike ? !prevLike : false;
-  const newDislikeState = !isLike ? !prevDislike : false;
+    // 🔹 New toggle state
+    const newLikeState = isLike ? !prevLike : false;
+    const newDislikeState = !isLike ? !prevDislike : false;
 
-  // 🚀 OPTIMISTIC UI UPDATE (instant)
-  setLikes(prev => ({
-    ...prev,
-    [imdbId]: newLikeState,
-  }));
-
-  setDislikes(prev => ({
-    ...prev,
-    [imdbId]: newDislikeState,
-  }));
-
-  // 🔹 Decide API action
-  let apiAction = null;
-
-  if (isLike) {
-    apiAction = newLikeState ? "like" : "unlike";
-  } else {
-    apiAction = newDislikeState ? "dislike" : "undislike";
-  }
-
-  try {
-    await recordGroupPreference(
-      token,
-      groupId,
-      imdbId,
-      apiAction
-    );
-  } catch (error) {
- 
-    // 🔁 ROLLBACK on failure
+    // 🚀 OPTIMISTIC UI UPDATE (instant)
     setLikes(prev => ({
       ...prev,
-      [imdbId]: prevLike,
+      [imdbId]: newLikeState,
     }));
 
     setDislikes(prev => ({
       ...prev,
-      [imdbId]: prevDislike,
+      [imdbId]: newDislikeState,
     }));
-  }
-};
+
+    // 🔹 Decide API action
+    let apiAction = null;
+
+    if (isLike) {
+      apiAction = newLikeState ? "like" : "unlike";
+    } else {
+      apiAction = newDislikeState ? "dislike" : "undislike";
+    }
+
+    try {
+      await recordGroupPreference(
+        token,
+        groupId,
+        imdbId,
+        apiAction
+      );
+    } catch (error) {
+
+      // 🔁 ROLLBACK on failure
+      setLikes(prev => ({
+        ...prev,
+        [imdbId]: prevLike,
+      }));
+
+      setDislikes(prev => ({
+        ...prev,
+        [imdbId]: prevDislike,
+      }));
+    }
+  };
 
   // Watch now function
   const watchModalFunc = ({ imdb_id }) => {
     setSelectedImdbId(imdb_id);
+
     setWatchNow(true);
   };
+
 
   // Determine which movies to display
   const trimmedComment = comment.trim();
@@ -482,18 +490,33 @@ useEffect(() => {
     return movies?.[activeIndex]?.cover_image_url || null;
   }, [displayMovies, activeIndex]);
 
+  // const groupScoreModalFunc = ({ imdb_id, score }) => {
+  //   setSelectedImdbId(imdb_id);
+  //   setSelectedImdbScore(score);
+
+  //   setgroupScoreModal(true);
+  // };
+
+  const groupScoreModalFunc = useCallback(() => {
+  const currentMovie = displayMovies[activeIndex];
+  if (currentMovie) {
+    setSelectedImdbId(currentMovie.imdb_id);
+    setSelectedImdbScore(currentMovie.rec_score);
+    setgroupScoreModal(true);
+  }
+}, [displayMovies, activeIndex]);
   // Scroll handler with background transition
   const onScroll = useMemo(
     () =>
       Animated.event(
         [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-        { 
+        {
           useNativeDriver: true,
           listener: (event) => {
             // Track scroll offset for immediate background update
             const offsetX = event?.nativeEvent?.contentOffset.x;
             scrollOffsetRef.current = offsetX;
-            
+
             // Calculate current index based on scroll position
             const calculatedIndex = Math.round(offsetX / ITEM_SIZE);
             if (calculatedIndex !== activeIndex) {
@@ -504,14 +527,14 @@ useEffect(() => {
       ),
     [activeIndex]
   );
- 
+
   // Handle scroll end to update active index
   const handleScrollEnd = (event) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / ITEM_SIZE);
     setActiveIndex(index);
   };
-    const [memberCount,setmemberCount] = useState()
+  const [memberCount, setmemberCount] = useState()
 
   // Render movie info
   const renderMovieInfo = (movie: string | object | string | number) => {
@@ -541,79 +564,101 @@ useEffect(() => {
           </TouchableOpacity>
 
           <TouchableOpacity
-          onPress={() =>
-            handlePreference({
-              type: "dislike",
-              imdbId,
-              token,
-              groupId,
-              setLikes,
-              setDislikes,
-              likes,
-              dislikes,
-            })
-          }
+            onPress={() =>
+              handlePreference({
+                type: "dislike",
+                imdbId,
+                token,
+                groupId,
+                setLikes,
+                setDislikes,
+                likes,
+                dislikes,
+              })
+            }
             style={[
               styles.thumpContainer,
 
-              { backgroundColor: dislikes[imdbId] ? Color.red : Color.grey ,
-                
-               },
+              {
+                backgroundColor: dislikes[imdbId] ? Color.red : Color.grey,
+
+              },
             ]}
           >
-            <Image 
-             source={imageIndex.thumpDown} style={[styles.thumpImage,{
-  marginTop:0.5 ,
- 
+            <Image
+              source={imageIndex.thumpDown} style={[styles.thumpImage, {
+                marginTop: 0.5,
 
-             }]} />
+
+              }]} />
           </TouchableOpacity>
         </View>
-        <Text numberOfLines={2} style={[styles.title,{
-              bottom:20 ,
-                  lineHeight:31
+        <Text numberOfLines={1} style={[styles.title, {
+          bottom: 20,
+          lineHeight: 31
 
         }]}>
           {movie?.title}
         </Text>
 
-     <CustomText
-  size={12}
-  color={Color.lightGrayText}
-  style={{ 
-    textAlign: "center", 
-    marginVertical: 6  ,
-    bottom:22 ,
+        <CustomText
+          size={12}
+          color={Color.lightGrayText}
+          style={{
+            textAlign: "center",
+            marginVertical: 6,
+            bottom: 22,
 
-  }}
-  font={font.PoppinsRegular}
-  numberOfLines={1}          // limits to 1 line
-  ellipsizeMode="tail"       // adds "..." if text is too long
->
-  {movie?.release_year} • {convertRuntime(movie?.runtime)} • {movie?.genres?.join(", ")}
-</CustomText>
- <View pointerEvents="box-none" 
- style={{
-      bottom:18
+          }}
+          font={font.PoppinsRegular}
+          numberOfLines={1}          // limits to 1 line
+          ellipsizeMode="tail"       // adds "..." if text is too long
+        >
+          {movie?.release_year} • {convertRuntime(movie?.runtime)} • {movie?.genres?.join(", ")}
+        </CustomText>
 
- }}
- >
+        <TouchableOpacity
+          style={[styles.groupScoreContainer, {
+            bottom: 22,
+            // marginBottom:22
+          }]}
+          onPress={() => groupScoreModalFunc({ imdb_id: imdbId, score: movie?.rec_score })}
+        >
+          {/* <Image source={imageIndex.puased} style={styles.watchNowImg} /> */}
 
-        <DescriptionWithReadMore
-          description={movie?.description} 
-          wordNo={80}
-        //      onViewMore={() =>
-        //     setInfoModal(true)
-        //   // setTimeout(() => {
-        //   //               if (!isScrollView.current) {
-        //   //                 setInfoModal(true);
-        //   //               }
-        //   //             }, 200)} 
-        //  }
-          descriptionStyle={{ textAlign: "center" }}
-          viewmoreStyle={{ textAlign: "center" }}
-        />
-</View>
+          <RankingWithInfo
+            score={movie?.rec_score ?? '?'}
+            title={t("discover.groupScore")}
+            description={t("discover.recscoredes")}
+           />
+          <CustomText size={14} color={Color.whiteText} font={font.PoppinsBold} style={{ marginLeft: 3 }}>
+            {t("discover.groupScore")}
+          </CustomText>
+        </TouchableOpacity>
+
+        <View 
+        // pointerEvents="box-none"
+          style={{
+            bottom: 18
+
+          }}
+        >
+
+          <DescriptionWithReadMore
+            description={movie?.description}
+            wordNo={80}
+            //      onViewMore={() =>
+            //     setInfoModal(true)
+            //   // setTimeout(() => {
+            //   //               if (!isScrollView.current) {
+            //   //                 setInfoModal(true);
+            //   //               }
+            //   //             }, 200)} 
+            //  }
+            descriptionStyle={{ textAlign: "center" }}
+            viewmoreStyle={{ textAlign: "center" }}
+          />
+        </View>
         {/* <TouchableOpacity
           style={styles.watchNowContainer}
           onPress={() => watchModalFunc({ imdb_id: imdbId })}
@@ -623,40 +668,43 @@ useEffect(() => {
             Watch Now
           </CustomText>
         </TouchableOpacity> */}
-        <Pressable
+        <TouchableOpacity
           // hitSlop={10}
-  onPress={() => watchModalFunc({ imdb_id: imdbId })}
-   style={{
-        flexDirection: 'row',
-     justifyContent: 'center',
-    alignSelf: 'center',
-    backgroundColor: Color.primary,
-    height: 42,
-    alignItems: 'center',
-    width: width * 0.4,
-    borderRadius: 10, 
-      marginTop: Platform.OS === 'ios' ? 5 : 30,
-    // position:"relative" ,
-    // top:11
-   }}
->
-  <Image source={imageIndex.puased} style={styles.watchNowImg} />
-  <CustomText
-    size={14}
-    color={Color.whiteText}
-    font={font.PoppinsBold}
-  >
-    Watch Now
-  </CustomText>
-</Pressable>
+          onPress={() =>
+            watchModalFunc({ imdb_id: imdbId })
+          }
+          activeOpacity={0.8}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignSelf: 'center',
+            backgroundColor: Color.primary,
+            height: 42,
+            alignItems: 'center',
+            width: width * 0.4,
+            borderRadius: 10,
+            marginTop: Platform.OS === 'ios' ? 5 : 5,
+            // position:"relative" ,
+            // top:11
+          }}
+        >
+          <Image source={imageIndex.puased} style={styles.watchNowImg} />
+          <CustomText
+            size={14}
+            color={Color.whiteText}
+            font={font.PoppinsBold}
+          >
+            Watch Now
+          </CustomText>
+        </TouchableOpacity>
       </>
     );
   };
-const totalMembers = memberCount ?? group1?.results?.length ?? 0;
-// const remainingMembers = Math.max(totalMembers, 0);
-// const remainingMembers = totalMembers;
-const remainingMembers = Math.max(totalMembers - 1, 0);
-   // Movie cards with animations
+  const totalMembers = memberCount ?? group1?.results?.length ?? 0;
+  // const remainingMembers = Math.max(totalMembers, 0);
+  // const remainingMembers = totalMembers;
+  const remainingMembers = Math.max(totalMembers - 1, 0);
+  // Movie cards with animations
   const movieCard = useMemo(() => {
     // ✅ Guard: Ensure displayMovies is an array
     if (!Array.isArray(displayMovies) || displayMovies.length === 0) {
@@ -702,8 +750,8 @@ const remainingMembers = Math.max(totalMembers - 1, 0);
               priority: FastImage.priority.high,
               cache: FastImage.cacheControl.immutable,
             }}
-            style={[styles.poster,{
-              bottom:22.5
+            style={[styles.poster, {
+              bottom: 22.5
             }]}
             resizeMode={FastImage.resizeMode.cover}
           />
@@ -723,57 +771,66 @@ const remainingMembers = Math.max(totalMembers - 1, 0);
       );
     }).filter(Boolean); // ✅ Remove null entries
   }, [displayMovies, likes, dislikes, scrollX]);
-const cleanGroupName = group_name
-  ?.replace(/\bnull\b/gi, '')             // remove "null"
-  ?.replace(/\s{2,}/g, ' ')               // extra spaces
-  ?.trim()
-  ?.replace(/ ([^,]+)$/g, ' , $1');       // last word se pehle comma
-// ✅ Safe member data selection with array guards
-const membersData =
-  (group?.members?.length || 0) >= (group1?.results?.length || 0)
-    ? (Array.isArray(group?.members) ? group.members : [])
-    : (Array.isArray(group1?.results) ? group1.results : []);
+  const cleanGroupName = group_name
+    ?.replace(/\bnull\b/gi, '')             // remove "null"
+    ?.replace(/\s{2,}/g, ' ')               // extra spaces
+    ?.trim()
+    ?.replace(/ ([^,]+)$/g, ' , $1');       // last word se pehle comma
+  // ✅ Safe member data selection with array guards
+  const membersData =
+    (group?.members?.length || 0) >= (group1?.results?.length || 0)
+      ? (Array.isArray(group?.members) ? group.members : [])
+      : (Array.isArray(group1?.results) ? group1.results : []);
 
-   return (
+  return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: "black" }}
+      behavior={Platform.OS === 'ios' ? 'height' : undefined}
+      style={{
+        flex: 1,
+        backgroundColor: "white"
+      }}
     >
       {/* Background Image - NO DELAY */}
       <BackgroundImage imageUri={activeMovieImage} />
-
+      <BlurView
+        style={styles.absolute}
+        blurType="dark"
+        blurAmount={1}
+        reducedTransparencyFallbackColor="white"
+        // overlayColor='transparent'
+      />
       <SafeAreaView style={[styles.mincontainer, { flex: 1 }]}>
         <CustomStatusBar translucent={true} />
 
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ flexDirection: "row", alignItems: "center",  }}>
-            <TouchableOpacity   onPress={() => {
-    fetchGroups();      // call API
-    navigation.goBack(); // navigate back
-  }}>
+          <View style={{ flexDirection: "row", alignItems: "center", }}>
+            <TouchableOpacity onPress={() => {
+              fetchGroups();      // call API
+              navigation.goBack(); // navigate back
+            }}>
               <Image source={imageIndex.backArrow} style={styles.backArrow} />
             </TouchableOpacity>
-            <View style={[styles.backArrow,{
-              marginRight:0
+            <View style={[styles.backArrow, {
+              marginRight: 0
             }]} >
-              
+
             </View>
           </View>
- <CustomText
-              size={16}
-              color={Color.whiteText}
-              style={styles.groupTitle}
-              font={font.PoppinsBold}
-              numberOfLines={1}
-            > 
-           {/* {cleanGroupName} */}
-              {group_name ?? 'Group Name'}
-              
-            </CustomText>
+          <CustomText
+            size={16}
+            color={Color.whiteText}
+            style={styles.groupTitle}
+            font={font.PoppinsBold}
+            numberOfLines={1}
+          >
+            {/* {cleanGroupName} */}
+            {group_name ?? 'Group Name'}
+
+          </CustomText>
           <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity onPress={() => 
-              
+            <TouchableOpacity onPress={() =>
+
               setNotificationModal(true)}>
               <Image source={imageIndex.normalNotification} style={styles.notificationIcon} />
             </TouchableOpacity>
@@ -788,34 +845,34 @@ const membersData =
           <TouchableOpacity
             onPress={() => setGroupMember(true)}
             style={[styles.membersContainer,
-              {
-                bottom:6
-              }
+            {
+              bottom: 6
+            }
             ]}
           >
             {type === 'createGroup'
               ? membersData?.slice(0, 3).map((user, index) => (
-                  <FastImage
-                    key={index}
-                    style={styles.memberAvatar}
-                    source={{
-                      uri: `${BASE_IMAGE_URL}${user.avatar}`,
-                      priority: FastImage.priority.low,
-                      cache: FastImage.cacheControl.immutable,
-                    }}
-                  />
-                ))
+                <FastImage
+                  key={index}
+                  style={styles.memberAvatar}
+                  source={{
+                    uri: `${BASE_IMAGE_URL}${user.avatar}`,
+                    priority: FastImage.priority.low,
+                    cache: FastImage.cacheControl.immutable,
+                  }}
+                />
+              ))
               : membersData?.slice(0, 3).map((user, index) => (
-                  <FastImage
-                    key={index}
-                    style={styles.memberAvatar}
-                    source={{
-                      uri: `${BASE_IMAGE_URL}${user.avatar}`,
-                      priority: FastImage.priority.low,
-                      cache: FastImage.cacheControl.immutable,
-                    }}
-                  />
-                ))}
+                <FastImage
+                  key={index}
+                  style={styles.memberAvatar}
+                  source={{
+                    uri: `${BASE_IMAGE_URL}${user.avatar}`,
+                    priority: FastImage.priority.low,
+                    cache: FastImage.cacheControl.immutable,
+                  }}
+                />
+              ))}
 
             <CustomText
               size={12}
@@ -844,27 +901,26 @@ const membersData =
                 </CustomText>
             )} */}
             {remainingMembers > 0 && (
-  <CustomText
-    size={12}
-    color={Color.whiteText}
-    style={{ marginLeft: 2, flexShrink: 1 }}
-    font={font.PoppinsRegular}
-    numberOfLines={1}
-    ellipsizeMode="tail"
-  >
-    {`and ${remainingMembers} ${
-      remainingMembers === 1 ? 'member' : 'members'
-    }`}
-  </CustomText>
-)}
+              <CustomText
+                size={12}
+                color={Color.whiteText}
+                style={{ marginLeft: 2, flexShrink: 1 }}
+                font={font.PoppinsRegular}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {`and ${remainingMembers} ${remainingMembers === 1 ? 'member' : 'members'
+                  }`}
+              </CustomText>
+            )}
 
           </TouchableOpacity>
         </View>
 
         {/* Search and Filter */}
-        <View style={[styles.searchFilterContainer,  {
-                bottom:6
-              }]}>
+        <View style={[styles.searchFilterContainer, {
+          bottom: 6
+        }]}>
           <View style={styles.searchContainer}>
             <Image source={imageIndex.search} style={styles.searchImg} />
             <TextInput
@@ -912,7 +968,7 @@ const membersData =
         {/* Movie Cards */}
         {loading ? (
           <View style={{
-            marginTop:20
+            marginTop: 20
           }}>
             <ActivityIndicator size="small" color={Color.primary} />
           </View>
@@ -923,16 +979,15 @@ const membersData =
             </CustomText>
           </View>
         ) : (
-          <Animated.ScrollView 
-       
-                        ref={scrollViewRef}
+          <Animated.ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             snapToInterval={ITEM_SIZE}
             pagingEnabled
             decelerationRate={0.8}
             contentContainerStyle={{
-              paddingHorizontal: (width - ITEM_WIDTH) / 1.8,
+              paddingHorizontal: (width - ITEM_WIDTH) / 2,
               alignItems: "center",
               height: height * 0.38,
             }}
@@ -992,70 +1047,74 @@ const membersData =
             heading={"Group Members"}
           />
         )} */}
-                <GroupMembersModal visible={groupMember}
+        <GroupMembersModal visible={groupMember}
           groupMembers={membersData}
           // groupMembers={group1?.results || group?.members}
           onClose={() => setGroupMember(false)}
           token={token}
           heading={"Group Members"} />
-        {/* {groupMember && (
-          <GroupMembersModal
-            visible={groupMember}
 
-        // groupMembers={group1}
+
+        {groupScoreModal && (
+          <GroupScoreModal
+            visible={groupScoreModal}
+
+            // groupMembers={group1}
             groupMembers={group.members}
-            onClose={() => setGroupMember(false)}
+            onClose={() => setgroupScoreModal(false)}
             token={token}
-            heading={"Group Members"}
+            heading={"Details"}
+            imdb_id={displayMovies[activeIndex]?.imdb_id}
+            groupId={groupId}
+            groupScore={displayMovies[activeIndex]?.rec_score}
           />
-        )} */}
+        )}
 
         {/* {groupSettingModal && ( */}
-          <GroupSettingModal
-            visible={groupSettingModal}
-            group={group1?.results}
-            // group={group}
-            groupId={groupId}
-            token={token}
-            group_name={group_name}
-            setGroup_name={setGroup_name}
+        <GroupSettingModal
+          visible={groupSettingModal}
+          group={group1?.results}
+          // group={group}
+          groupId={groupId}
+          token={token}
+          group_name={group_name}
+          setGroup_name={setGroup_name}
           onClose={(cc) => {
             fetchGroups()
-   setmemberCount(cc);
-  setGroupSettingModal(false)
-}}
-
-          />
+            setmemberCount(cc);
+            setGroupSettingModal(false)
+          }}
+        />
         {/* )} */}
-<Notification
-            visible={notificationModal}
-            onClose={() => {
-        fetchGroups();          // call API
-        setNotificationModal(false); // close modal
-    }}
-             bgColor={true}
-         />
+        <Notification
+          visible={notificationModal}
+          onClose={() => {
+            fetchGroups();          // call API
+            setNotificationModal(false); // close modal
+          }}
+          bgColor={true}
+        />
         {/* <View style={{
           bottom:120
         }}>
  
          </View> */}
-           <GroupMovieModal
-            visible={modalVisible}
-            group={group1?.results || group.member}
-            // group={group1?.results ||group.member}
-            // group={group}
-            groupId={groupId}
-            token={token}
-            filterFunc={(selectedUsers, groupValue) =>
-              filterGroupMovie(token, groupId, selectedUsers, groupValue)
-            }
-            onClose={() => setModalVisible(false)}
-            setTotalFilterApply={setTotalFilterApply}
-            groupTotalMember={maxActivitiescnt}
-            // groupTotalMember={group.members.length}
-          />
- 
+        <GroupMovieModal
+          visible={modalVisible}
+          group={group1?.results || group.member}
+          // group={group1?.results ||group.member}
+          // group={group}
+          groupId={groupId}
+          token={token}
+          filterFunc={(selectedUsers, groupValue) =>
+            filterGroupMovie(token, groupId, selectedUsers, groupValue)
+          }
+          onClose={() => setModalVisible(false)}
+          setTotalFilterApply={setTotalFilterApply}
+          groupTotalMember={maxActivitiescnt}
+        // groupTotalMember={group.members.length}
+        />
+
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -1085,9 +1144,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   groupTitle: {
-     textAlign: 'center',
-     flex:1 ,
-   },
+    textAlign: 'center',
+    flex: 1,
+  },
   notificationIcon: {
     height: 22,
     width: 22,
@@ -1095,7 +1154,7 @@ const styles = StyleSheet.create({
   },
   menuIcon: {
     height: 22,
-    
+
     width: 22,
   },
 
@@ -1176,7 +1235,7 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING / 2,
     position: 'relative',
     height: ITEM_WIDTH * 1.5,
-     marginLeft:4
+    marginLeft: 4
   },
   poster: {
     width: '88%',
@@ -1191,13 +1250,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: ITEM_WIDTH * 1.2,
     bottom: 40,
+    
   },
 
   // Movie info styles
   thumpCard: {
     flexDirection: 'row',
     alignSelf: 'center',
-    bottom:30
+    bottom: 30
   },
   thumpContainer: {
     alignItems: 'center',
@@ -1219,8 +1279,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: font.PoppinsBold,
     color: Color.whiteText,
- 
-   },
+
+  },
   watchNowContainer: {
     flexDirection: 'row',
     marginTop: 5,
@@ -1230,6 +1290,18 @@ const styles = StyleSheet.create({
     height: 42,
     alignItems: 'center',
     width: width * 0.4,
+    borderRadius: 10,
+  },
+
+  groupScoreContainer: {
+    flexDirection: 'row',
+    // marginTop: 5,
+    justifyContent: 'center',
+    // alignSelf: 'center',
+    // backgroundColor: Color.primary,
+    height: 42,
+    alignItems: 'center',
+    // width: width * 0.4,
     borderRadius: 10,
   },
   watchNowImg: {
@@ -1244,6 +1316,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: height * 0.5,
+  },
+  absolute: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
 });
 

@@ -13,6 +13,10 @@ import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
 import { HeaderCustom, SearchBarCustom } from '@components/index';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { errorToast } from '@utils/customToast';
+
 
 
 const FollowersScreen = () => {
@@ -20,7 +24,7 @@ const FollowersScreen = () => {
   const route = useRoute();
   const { tabToOpen, userName } = route.params || {};
   // const userName = useSelector((state: RootState) => state.auth.userGetData.name);
-   const initialData = {
+  const initialData = {
     Followers: [],
     Following: [],
     Suggested: [],
@@ -30,9 +34,19 @@ const FollowersScreen = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+
+  // Add network listener
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Add refresh function
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchUsers().finally(() => setRefreshing(false));
+  }, [activeTab]);
 
 
- 
   useEffect(() => {
     if (tabToOpen !== undefined && tabToOpen >= 0 && tabToOpen < tabs.length) {
       setActiveTab(tabToOpen);
@@ -77,7 +91,7 @@ const FollowersScreen = () => {
 
   const toggleFollow = useCallback(async (username: string) => {
     const key = tabs[activeTab];
-    
+
     // ✅ Guard: Ensure userData[key] is an array
     const currentUserList = Array.isArray(userData[key]) ? userData[key] : [];
     const updatedList = currentUserList.map((u: object | string) =>
@@ -85,7 +99,7 @@ const FollowersScreen = () => {
     );
 
     try {
-      const user = currentUserList.find((u:  object | string) => u?.username === username);
+      const user = currentUserList.find((u: object | string) => u?.username === username);
       if (!user) return;
 
       if (user.following) {
@@ -96,7 +110,7 @@ const FollowersScreen = () => {
 
       setUserData(prev => ({ ...prev, [key]: updatedList }));
     } catch (error) {
-     }
+    }
   }, [activeTab, userData, token]);
   useEffect(() => {
     if (tabs[activeTab] === 'Suggested') {
@@ -125,6 +139,24 @@ const FollowersScreen = () => {
       </TouchableOpacity>
     </View>
   ), [toggleFollow]);
+
+
+    useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const wasOffline = !isConnected && state.isConnected;
+      setIsConnected(state.isConnected);
+
+      // Auto-reload when reconnecting and data is empty
+      if (wasOffline && activeUsers.length === 0) {
+        fetchUsers();
+      }
+      if(!wasOffline){
+        //  errorToast('No Internet! \n Please check your network connection')
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isConnected, activeUsers.length]);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.background }}>
       <StatusBarCustom />
@@ -134,10 +166,10 @@ const FollowersScreen = () => {
         <View style={[styles.tabRow, { marginTop: 14 }]}>
           {tabs.map((tab, index) => (
             <TouchableOpacity key={index} onPress={() => setActiveTab(index)} style={styles.tabprimary}>
-           
+
               <Text style={[styles.tabText, activeTab === index && styles.tabTextActive]}>
-  {(tab === 'Followers' || tab === 'Following') ? userData[tab]?.length : ''} {tab}
-</Text>
+                {(tab === 'Followers' || tab === 'Following') ? userData[tab]?.length : ''} {tab}
+              </Text>
 
               {activeTab === index && <View style={styles.tabUnderline} />}
             </TouchableOpacity>
@@ -152,11 +184,11 @@ const FollowersScreen = () => {
 
           <SearchBarCustom
             placeholder={
-              tabs[activeTab] === t("home.suggested") 
-                ?  t("home.searchsuggested")   
+              tabs[activeTab] === t("home.suggested")
+                ? t("home.searchsuggested")
                 : tabs[activeTab] === 'Following'
-                  ? t("home.searchfollowing") 
-                  : t("home.searchfollowers") 
+                  ? t("home.searchfollowing")
+                  : t("home.searchfollowers")
             }
             value={search}
             onSearchChange={setSearch}
@@ -181,6 +213,14 @@ const FollowersScreen = () => {
               maxToRenderPerBatch={10}
               windowSize={7}
               removeClippedSubviews
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[Color.primary]}
+                  tintColor={Color.primary}
+                />
+              }
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>{t("emptyState.nousers")}</Text>

@@ -54,6 +54,7 @@ const OtherProfile = () => {
     const lastPlayedIndexRef = useRef<number | null>(null);
 
   const userData = useSelector((state: RootState) => state.auth?.userGetData);
+   
   // const autoPlayEnabled = useSelector((state: RootState) => state.auth.userGetData?.autoplay_trailer);
   const autoPlayEnabled = useSelector(
     (state: RootState) => state.auth.userGetData?.autoplay_trailer ?? true // default to true
@@ -361,7 +362,7 @@ const OtherProfile = () => {
     if (hasMore && !loadingFeed && otherUserData?.username) {
       // fetchFeed("home", otherUserData?.username);
       fetchFeed("otherprofile", othr_user_name);
-       // Alert.alert(otherUserData?.username, "wotherprofile feed")
+       Alert.alert(otherUserData?.username, "wotherprofile feed")
     }
   }, [token]);
   const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${otherUserData?.avatar}?t=${Date.now()}`, [otherUserData]);
@@ -514,7 +515,7 @@ activity={item?.activity}
             rank={`${otherUserData?.ranked ?? ''}`}
             followers={`${otherUserData?.followers ?? ''}`}
             following={`${otherUserData?.following ?? ""}`}
-            butt={true}
+            butt={otherUserData?.username != userData?.username}
             bio={otherUserData?.bio}
             onFollow={() => navigation.navigate(ScreenNameEnum.Followers)}
             onFollowing={() =>

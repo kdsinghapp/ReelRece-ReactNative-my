@@ -90,6 +90,7 @@ export const getRecentActiveUsers = async (token: string): Promise<AxiosResponse
 
 export const getOthereUsers = async (token: string, username: string): Promise<AxiosResponse<User> | User[]> => {
    try {
+    console.log(username)
     const response = await axiosInstance.get<User>('/user-profile', {
       params: { username },
       headers: { Authorization: `Token ${token}` },

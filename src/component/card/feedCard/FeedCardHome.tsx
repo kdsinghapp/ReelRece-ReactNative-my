@@ -198,7 +198,10 @@ const FeedCardHome = ({
     });
   }
   const item = {
-    username: username
+    username: username, 
+    name: user,
+    avatar:avatar.uri
+
   };
 
 

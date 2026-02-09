@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useCallback, useLayoutEffect, useRef, Suspense, useMemo, memo } from 'react';
 import {
   View,
-
-
   Image,
   TouchableOpacity,
-
   TouchableNativeFeedback,
   BackHandler,
   Animated,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { Color } from '@theme/color';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -36,6 +34,10 @@ import ShimmerGroupItem from './ShimmerGroupItem';
 import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notification';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
+import { RefreshControl } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import { errorToast } from '@utils/customToast';
+
 // 💤 Lazy load heavy components
 const WatchGroupCom = React.lazy(() => import('@components/common/WatchGroupCom/WatchGroupCom'));
 // const Notifi cation = React.lazy(() => import('../../home/homeScreen/Notification/Notification'));
@@ -73,6 +75,38 @@ const WatchScreen = () => {
   const dispatch = useDispatch();
   const enableMultiSelect = () => dispatch(setMultiSelectMode(true));
   const disableMultiSelect = () => dispatch(setMultiSelectMode(false));
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+
+    fetchGroups().finally(() => setRefreshing(false));
+  }, []);
+
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+      if (state.isConnected) {
+        setRefreshing(true);
+        // Auto-refresh when coming back online
+        fetchGroups();
+      } else {
+        errorToast('No Internet! \n Please check your network connection')
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const fetchGroupsWithRetry = async (retryCount = 0) => {
+    try {
+      await fetchGroups();
+    } catch (error) {
+      if (retryCount < 3) {
+        setTimeout(() => fetchGroupsWithRetry(retryCount + 1), 2000);
+      }
+    }
+  };
   const fetchUserProfile = useCallback(async () => {
     try {
       if (token) {
@@ -590,6 +624,9 @@ const WatchScreen = () => {
 
   return (
     <SafeAreaView style={WatchStyle.mincontainer}>
+
+
+
       <CustomStatusBar translucent={true} />
       {/* <View  style={{backgroundColor:'red',flex:1,zIndex:9345}} >
           <CacheManagerUI /> 
@@ -611,23 +648,33 @@ const WatchScreen = () => {
           goToSearchScreen={goToSearchScreen}
           setNotificationModal={setNotificationModal}
         />
-        <UserActions
-          isSettingsMode={isSettingsMode}
-          avatar={avatar}
-          navigation={navigation}
-          setIsSettingsMode={setIsSettingsMode}
-        />
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[Color.primary]}
+              tintColor={Color.primary}
+            />
+          }
+        >
+          <UserActions
+            isSettingsMode={isSettingsMode}
+            avatar={avatar}
+            navigation={navigation}
+            setIsSettingsMode={setIsSettingsMode}
+          />
 
-        <GroupList
-          groupsData={groupsData}
-          isSettingsMode={isSettingsMode}
-          handleGroupSelect={handleGroupSelect}
-          isMultiSelectMode={isMultiSelectMode}
-          selectedGroupIds={selectedGroupIds}
-          setSelectedGroup={setSelectedGroup}
-          setIsSettingsMode={setIsSettingsMode}
-        />
-
+          <GroupList
+            groupsData={groupsData}
+            isSettingsMode={isSettingsMode}
+            handleGroupSelect={handleGroupSelect}
+            isMultiSelectMode={isMultiSelectMode}
+            selectedGroupIds={selectedGroupIds}
+            setSelectedGroup={setSelectedGroup}
+            setIsSettingsMode={setIsSettingsMode}
+          />
+        </ScrollView>
 
       </View>
 
@@ -765,6 +812,7 @@ const WatchScreen = () => {
           setLogoutModalVisible(false);
         }}
       />
+
     </SafeAreaView>
   );
 };

@@ -1,0 +1,1316 @@
+{
+    "current_page": 1,
+    "total_pages": 1,
+    "results": [
+        {
+            "supported_platform": "AmazonPrimeVideo",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Amazon Prime Video.jpg"
+        },
+        {
+            "supported_platform": "AppleTV",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Apple TV.jpg"
+        },
+        {
+            "supported_platform": "DISHAnywhere",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "DisneyPlus",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Disney Plus.jpg"
+        },
+        {
+            "supported_platform": "FuboTV",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/fuboTV.jpg"
+        },
+        {
+            "supported_platform": "GooglePlay",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Google Play Movies.jpg"
+        },
+        {
+            "supported_platform": "HBOMax",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/HBO Max.jpg"
+        },
+        {
+            "supported_platform": "Hulu",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Hulu.jpg"
+        },
+        {
+            "supported_platform": "itunes",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Netflix",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Netflix.jpg"
+        },
+        {
+            "supported_platform": "Optimum",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Peacock",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Peacock Premium.jpg"
+        },
+        {
+            "supported_platform": "SlingTV",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "XfinityStream",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "YouTube",
+            "popular": true,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/YouTube.jpg"
+        },
+        {
+            "supported_platform": "YouTubeTV",
+            "popular": true,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ABC",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/ABC.jpg"
+        },
+        {
+            "supported_platform": "AcornTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Acorn TV.jpg"
+        },
+        {
+            "supported_platform": "Addatimes",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AdultSwim",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Adult Swim.jpg"
+        },
+        {
+            "supported_platform": "AE",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/A&E.jpg"
+        },
+        {
+            "supported_platform": "Aha",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Alchemiya",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Alchemiya Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Allblk",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/ALLBLK.jpg"
+        },
+        {
+            "supported_platform": "AmazonadsonViXGratis",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonAMCPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/AMC+ Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonBETPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Bet+ Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonCineverse",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Cineverse.jpg"
+        },
+        {
+            "supported_platform": "AmazonCrunchyroll",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Crunchyroll Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonDiscoveryPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Discovery+ Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonDocurama",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DocuramaFilms Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonEchoboomSports",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonFandor",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fandor Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonGaia",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Gaia Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonInstantVideo",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonMax",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Max Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonMGMPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MGM Plus Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonMIDNIGHTPULP",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonMUBI",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MUBI Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonParamountPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Paramount+ Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonPRIME",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Amazon Prime Video.jpg"
+        },
+        {
+            "supported_platform": "AmazonRyandFriendsPlus",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonScreambox",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Screambox Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonShoutFactoryTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Shout! Factory Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonShudder",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Shudder Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonStingrayKaraoke",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Stingray Karaoke Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AmazonSub_Unknown",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AmazonUnknown",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AMC",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/AMC.jpg"
+        },
+        {
+            "supported_platform": "AMCPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/AMC+.jpg"
+        },
+        {
+            "supported_platform": "AMCPremiere",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/AMC+ Roku Premium Channel.jpg"
+        },
+        {
+            "supported_platform": "AmericanIndianFilmGallery",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "AnimalPlanet",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Animal Planet.jpg"
+        },
+        {
+            "supported_platform": "Animal_Planet",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Animal Planet.jpg"
+        },
+        {
+            "supported_platform": "AppleTVPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Apple TV Plus.jpg"
+        },
+        {
+            "supported_platform": "ArchivioLuce",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Arrow",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Arrow Video Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "AsianCrush",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/AsianCrush.jpg"
+        },
+        {
+            "supported_platform": "AtomTickets",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "BBCAmerica",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/BBC America.jpg"
+        },
+        {
+            "supported_platform": "BET",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Bet+.jpg"
+        },
+        {
+            "supported_platform": "BETPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Bet+.jpg"
+        },
+        {
+            "supported_platform": "Bounce",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Bravo",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Bravo TV.jpg"
+        },
+        {
+            "supported_platform": "BritBox",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/BritBox.jpg"
+        },
+        {
+            "supported_platform": "BroadwayHD",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/BroadwayHD.jpg"
+        },
+        {
+            "supported_platform": "CanelaTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Cartoon_Network",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Cartoon Network Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "CBS",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "CBSAllAccess",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ChaiFlicks",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Chai Flicks.jpg"
+        },
+        {
+            "supported_platform": "CINEARPLAY",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Cineverse",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Cineverse.jpg"
+        },
+        {
+            "supported_platform": "CirqueConnect",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ComedyCentral",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Comedy Central Plus Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Comedy_Central",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Comedy Central Plus Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Crackle",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Crackle.jpg"
+        },
+        {
+            "supported_platform": "CriterionChannel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Criterion Channel.jpg"
+        },
+        {
+            "supported_platform": "CrunchyRoll",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Crunchyroll.jpg"
+        },
+        {
+            "supported_platform": "Cultpix",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Cultpix.jpg"
+        },
+        {
+            "supported_platform": "CuriosityStream",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Curiosity Stream.jpg"
+        },
+        {
+            "supported_platform": "DaFilms",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Dekkoo",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Dekkoo.jpg"
+        },
+        {
+            "supported_platform": "DemandAfrica",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "DigitalConcertHall",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "DigitalTheatre",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "DiscoveryPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Discovery+.jpg"
+        },
+        {
+            "supported_platform": "Disney_Channel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DisneyNOW.jpg"
+        },
+        {
+            "supported_platform": "DisneyNOW",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DisneyNOW.jpg"
+        },
+        {
+            "supported_platform": "DisneyPlusSub_Unknown",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Disney Plus.jpg"
+        },
+        {
+            "supported_platform": "DistroTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DistroTV.jpg"
+        },
+        {
+            "supported_platform": "DOCSVILLE",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DOCSVILLE.jpg"
+        },
+        {
+            "supported_platform": "DoveChannel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Dove Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "ESPNPlus",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "EstrellaTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Eventive",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Eventive.jpg"
+        },
+        {
+            "supported_platform": "EWTN",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "F1TV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FamilyPlayland",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Fanatiz",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FandangoAtHome",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fandango At Home.jpg"
+        },
+        {
+            "supported_platform": "FandangoMovies",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fandango At Home.jpg"
+        },
+        {
+            "supported_platform": "Fandor",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fandor.jpg"
+        },
+        {
+            "supported_platform": "FIFAPlus",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FilmboxPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/FilmBox+.jpg"
+        },
+        {
+            "supported_platform": "FilmMovementPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Film Movement Plus.jpg"
+        },
+        {
+            "supported_platform": "Filmzie",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Filmzie.jpg"
+        },
+        {
+            "supported_platform": "FiosOnDemand",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FlixFling",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/FlixFling.jpg"
+        },
+        {
+            "supported_platform": "FlixLatino",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FlixOle",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/FlixOlé.jpg"
+        },
+        {
+            "supported_platform": "FlixPremiere",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Flix Premiere.jpg"
+        },
+        {
+            "supported_platform": "FloSports",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FoodNetwork",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Food Network.jpg"
+        },
+        {
+            "supported_platform": "Food_Network",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Food Network.jpg"
+        },
+        {
+            "supported_platform": "FOX",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fox.jpg"
+        },
+        {
+            "supported_platform": "FoxNation",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FoxOne",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "FOXSports",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fox.jpg"
+        },
+        {
+            "supported_platform": "Freeform",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Freeform.jpg"
+        },
+        {
+            "supported_platform": "FreeVee",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Freevee.jpg"
+        },
+        {
+            "supported_platform": "FullMoonFeatures",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Full Moon Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "FXNOW",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/FXNow.jpg"
+        },
+        {
+            "supported_platform": "FYI",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/FYI Network.jpg"
+        },
+        {
+            "supported_platform": "Gaia",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Gaia Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "GlewedTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/GlewedTV.jpg"
+        },
+        {
+            "supported_platform": "GlobePlayer",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "GuideDoc",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/GuideDoc.jpg"
+        },
+        {
+            "supported_platform": "HallmarkTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Hallmark TV Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "HBO",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/HBO Max.jpg"
+        },
+        {
+            "supported_platform": "HENRI",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "HereTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Here TV.jpg"
+        },
+        {
+            "supported_platform": "HGTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/HGTV.jpg"
+        },
+        {
+            "supported_platform": "HIDIVE",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "HISTORY",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/History.jpg"
+        },
+        {
+            "supported_platform": "HistoryHit",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "HistoryVault",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/History Vault.jpg"
+        },
+        {
+            "supported_platform": "HiYAH",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Hoichoi",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Hoichoi.jpg"
+        },
+        {
+            "supported_platform": "Hoopla",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Hoopla.jpg"
+        },
+        {
+            "supported_platform": "IDGO",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "IFC",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "IFIArchivePlayer",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "IMDbTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "IndieFlix",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/IndieFlix.jpg"
+        },
+        {
+            "supported_platform": "Investigation_Discovery",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Investigation Discovery.jpg"
+        },
+        {
+            "supported_platform": "iQIYI",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/iQIYI.jpg"
+        },
+        {
+            "supported_platform": "IWantTFC",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "KartoonChannel",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "KidoodleTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Kidstream",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "KOCOWAPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Kocowa.jpg"
+        },
+        {
+            "supported_platform": "KweliTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Lifetime",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Lifetime.jpg"
+        },
+        {
+            "supported_platform": "LifetimeMovieClub",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Lifetime Movie Club.jpg"
+        },
+        {
+            "supported_platform": "LOGOTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "MagellanTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Magellan TV.jpg"
+        },
+        {
+            "supported_platform": "MagnoliaSelects",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Mangolia Network Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "MarqueeTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Marquee TV Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "MarthaStewartTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Max",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Max.jpg"
+        },
+        {
+            "supported_platform": "MeansTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "MetOperaonDemand",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Metrograph",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Metrograph.jpg"
+        },
+        {
+            "supported_platform": "MGMPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MGM Plus.jpg"
+        },
+        {
+            "supported_platform": "Mometu",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "MovieSaints",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MovieSaints.jpg"
+        },
+        {
+            "supported_platform": "MTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "MUBI",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MUBI.jpg"
+        },
+        {
+            "supported_platform": "MyOutdoorTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/MyOutdoorTV.jpg"
+        },
+        {
+            "supported_platform": "NationalGeographic",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/National Geographic.jpg"
+        },
+        {
+            "supported_platform": "NBA",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "NBC",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/NBC.jpg"
+        },
+        {
+            "supported_platform": "NFLPlus",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Nickelodeon",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "NightFlightPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Night Flight Plus.jpg"
+        },
+        {
+            "supported_platform": "NOT_SET",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "OCULTOTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "OnDemandKorea",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/OnDemandKorea.jpg"
+        },
+        {
+            "supported_platform": "OperaVision",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Oprah_Winfrey_Network",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "OvidTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/OVID.jpg"
+        },
+        {
+            "supported_platform": "OWN",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Oxygen",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ParamountNetwork",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Paramount Pictures.jpg"
+        },
+        {
+            "supported_platform": "ParamountPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Paramount Plus.jpg"
+        },
+        {
+            "supported_platform": "PBS",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/PBS.jpg"
+        },
+        {
+            "supported_platform": "PBSKids",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/PBS Kids Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Philo",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Philo.jpg"
+        },
+        {
+            "supported_platform": "Pinguinitos",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Pinguinitos Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Plex",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Plex.jpg"
+        },
+        {
+            "supported_platform": "Pluto",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Pluto TV.jpg"
+        },
+        {
+            "supported_platform": "PlutoTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Pluto TV.jpg"
+        },
+        {
+            "supported_platform": "PublicDomainMovies",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Public Domain Movies.jpg"
+        },
+        {
+            "supported_platform": "Pureflix",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Pure Flix.jpg"
+        },
+        {
+            "supported_platform": "QelloConcerts",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Qello Concerts by Stingray Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "RakutenViki",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Rakuten Viki.jpg"
+        },
+        {
+            "supported_platform": "RedBullTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Retrocrush",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Retrocrush.jpg"
+        },
+        {
+            "supported_platform": "Reveel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Reveel.jpg"
+        },
+        {
+            "supported_platform": "Revry",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Revry.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_ALLBLK",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/ALLBLK.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_BritBox",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/BritBox.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Cinemax",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Cinemax Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Crunchyroll",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Crunchyroll.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Docurama",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/DocuramaFilms Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Fandor",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Fandor.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Hidive",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Hidive Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Kocowa",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Kocowa.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_MagellanTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Magellan TV.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Screambox",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Screambox.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_ScreenPix",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/ScreenPix Apple TV Channel.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Shudder",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Shudder.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_STARZ",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/STARZPLAY.jpg"
+        },
+        {
+            "supported_platform": "RokuPremSub_Unknown",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "RokuPremSub_Viaplay",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Viaplay.jpg"
+        },
+        {
+            "supported_platform": "ScienceChannelGO",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Science Channel.jpg"
+        },
+        {
+            "supported_platform": "ScreamBox",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Screambox.jpg"
+        },
+        {
+            "supported_platform": "ShortoftheWeek",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ShoutFactoryTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Shout! Factory TV.jpg"
+        },
+        {
+            "supported_platform": "Showtime",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ShowtimeAnytime",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Shudder",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Shudder.jpg"
+        },
+        {
+            "supported_platform": "SimplySouth",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Starpicks",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Starz",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Starz.jpg"
+        },
+        {
+            "supported_platform": "SundanceNow",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Sundance Now.jpg"
+        },
+        {
+            "supported_platform": "SundanceTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Sundance Now.jpg"
+        },
+        {
+            "supported_platform": "SunNXT",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Sun Nxt.jpg"
+        },
+        {
+            "supported_platform": "Syfy",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Takflix",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Takflix.jpg"
+        },
+        {
+            "supported_platform": "TaskmasterSuperMaxPlus",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "TBS",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/TBS.jpg"
+        },
+        {
+            "supported_platform": "Teatrix",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "TED",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "TheCriterionChannel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Criterion Channel.jpg"
+        },
+        {
+            "supported_platform": "TheCW",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/The CW.jpg"
+        },
+        {
+            "supported_platform": "The_CW",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/The CW.jpg"
+        },
+        {
+            "supported_platform": "TheRokuChannel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/The Roku Channel.jpg"
+        },
+        {
+            "supported_platform": "TLC",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/TLC.jpg"
+        },
+        {
+            "supported_platform": "TNT",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/TNT.jpg"
+        },
+        {
+            "supported_platform": "ToonGoggles",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Toon Goggles.jpg"
+        },
+        {
+            "supported_platform": "TravelChannel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Travel Channel.jpg"
+        },
+        {
+            "supported_platform": "Travel_Channel",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Travel Channel.jpg"
+        },
+        {
+            "supported_platform": "TromaNOW",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Troma NOW.jpg"
+        },
+        {
+            "supported_platform": "TrueStory",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/True Story.jpg"
+        },
+        {
+            "supported_platform": "TruTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/tru TV.jpg"
+        },
+        {
+            "supported_platform": "Tubi",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Tubi TV.jpg"
+        },
+        {
+            "supported_platform": "UPFaithandFamily",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/UP Faith & Family Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "USANetwork",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/USA Network.jpg"
+        },
+        {
+            "supported_platform": "USA_Network",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/USA Network.jpg"
+        },
+        {
+            "supported_platform": "VH1",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/VH1.jpg"
+        },
+        {
+            "supported_platform": "Viddsee",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "ViX",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/ViX Premium Amazon Channel.jpg"
+        },
+        {
+            "supported_platform": "Vudu",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/VUDU Free.jpg"
+        },
+        {
+            "supported_platform": "WatchTCM",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "WeTV",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/WeTV.jpg"
+        },
+        {
+            "supported_platform": "WOWPresentsPlus",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/WOW Presents Plus.jpg"
+        },
+        {
+            "supported_platform": "XumoPlay",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Xumo Play.jpg"
+        },
+        {
+            "supported_platform": "YouTubePremium",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/YouTube Premium.jpg"
+        },
+        {
+            "supported_platform": "YuppTV",
+            "popular": false,
+            "image_url": null
+        },
+        {
+            "supported_platform": "Zee5",
+            "popular": false,
+            "image_url": "https://reelrecs.s3.us-east-1.amazonaws.com/static/movies/platforms/Zee5.jpg"
+        }
+    ]
+}

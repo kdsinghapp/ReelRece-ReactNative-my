@@ -8,7 +8,7 @@ import {
   Dimensions,
   Animated,
   Platform,
- } from 'react-native';
+} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import styles from './style';
 import useMovie from './useMovie';
@@ -101,7 +101,7 @@ const MovieDetailScreen = () => {
   const saveBookMark_Ref = useRef(false)
   const [modalMovieId, setModalMovieId] = useState(null);
   const [titleLines, setTitleLines] = useState(1);
-   const dispatch = useDispatch()
+  const dispatch = useDispatch()
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -693,8 +693,9 @@ const MovieDetailScreen = () => {
   const prevModalState = useRef(false);
 
   useEffect(() => {
-    const isModalOpen = isFeedbackModal || thinkModal;
-    
+    const isModalOpen = thinkModal
+    // const isModalOpen =  thinkModal || isFeedbackModal;
+
     if (isModalOpen) {
       // Modal opened - pause video
       prevModalState.current = true;
@@ -754,13 +755,14 @@ const MovieDetailScreen = () => {
                 onToggleMute={() => dispatch(toggleMute())}
                 isModalOpen={isFeedbackModal || thinkModal}
               /> */}
-    <CustomVideoPlayer
+              <CustomVideoPlayer
                 videoUrl={item.trailer_url}
-                paused={paused}
+                // paused={paused}
+                paused={paused || isFeedbackModal || thinkModal}
                 muted={isMuted}
                 onTogglePause={() => setPaused(p => !p)}
                 onToggleMute={() => dispatch(toggleMute())}
-                isModalOpen={isFeedbackModal || thinkModal}
+                isModalOpen={thinkModal}
               />
 
 
@@ -804,7 +806,7 @@ const MovieDetailScreen = () => {
 
             </> : <>
 
-              <VideoPlayer
+              {/* <VideoPlayer
                 // source={{ uri: item?.trailer_url }}
                 // movieId={item.imdb_id}
                 // posterUrl={item.horizontal_poster_url}
@@ -835,16 +837,16 @@ const MovieDetailScreen = () => {
                    // Optional: Handle native seek completion
                 }}
                 ref={videoRef}
-              />
-              {/* <CustomVideoPlayer
+              /> */}
+              <CustomVideoPlayer
                 videoUrl={item.trailer_url}
-                paused={paused || isFeedbackModal || thinkModal}
+                paused={paused}
                 muted={isMuted}
                 onTogglePause={() => setPaused(p => !p)}
                 onToggleMute={() => dispatch(toggleMute())}
-                isModalOpen={isFeedbackModal || thinkModal}
-              /> */}
-    {/* <CustomVideoPlayer
+                isModalOpen={thinkModal}
+              />
+              {/* <CustomVideoPlayer
                 videoUrl={item.trailer_url}
                 paused={paused}
                 muted={isMuted}
@@ -937,8 +939,6 @@ const MovieDetailScreen = () => {
                         {formatRuntime(item?.runtime)},{' '}
                       </CustomText>
                     }
-
-
                     <CustomText
                       size={12}
                       color={Color.lightGrayText}
@@ -966,9 +966,9 @@ const MovieDetailScreen = () => {
                   {/* <RankingCard ranked={item?.rec_score} /> */}
                   <RankingWithInfo
                     score={item?.rec_score}
-                    title= {t("discover.recscore")}
+                    title={t("discover.recscore")}
                     description={t("discover.recscoredes")}
-                    // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                  // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
                   />
                   <TouchableOpacity disabled={true}>
                     <CustomText
@@ -978,7 +978,7 @@ const MovieDetailScreen = () => {
                       style={{ marginLeft: 6 }}
                       font={font.PoppinsMedium}
                     >
-                    
+
                       {t("discover.recscore")}
                     </CustomText>
                   </TouchableOpacity>
@@ -996,10 +996,10 @@ const MovieDetailScreen = () => {
                     <RankingWithInfo
                       score={item?.friends_rec_score}
                       title={t("discover.friendscore")}
-                      description= 
-                             {t("discover.ratingscoreshows")}
-                      
-                      // "This score shows the rating from your friend for this title."
+                      description=
+                      {t("discover.ratingscoreshows")}
+
+                    // "This score shows the rating from your friend for this title."
                     />
                   </View>
 
@@ -1010,7 +1010,7 @@ const MovieDetailScreen = () => {
                     font={font.PoppinsMedium}
                   >
                     {t("discover.friendscore")}
-        
+
                   </CustomText>
                 </TouchableOpacity>
 
@@ -1130,8 +1130,6 @@ const MovieDetailScreen = () => {
 
                   }]}
                   onPress={() => {
-
-
                     handleRankingPress({
                       imdb_id: item?.imdb_id,
                       title: item?.title,
@@ -1139,6 +1137,7 @@ const MovieDetailScreen = () => {
                       cover_image_url: item?.cover_image_url || '',
                     });
                     setIsFeedbackModal(true)
+                    setPaused(true)
                   }}
                 >
                   <Image style={[styles.watchNowImg, { marginRight: 5, height: 20, width: 20 }]} source={imageIndex.ranking} resizeMode='contain' />
@@ -1147,8 +1146,8 @@ const MovieDetailScreen = () => {
                     color={Color.whiteText}
                     style={styles.watchNowText}
                     font={font.PoppinsBold}
-                  > 
-                   {(t("movieDetail.rankNow"))}
+                  >
+                    {(t("movieDetail.rankNow"))}
                   </CustomText>
                 </TouchableOpacity>
               </View>
@@ -1316,8 +1315,8 @@ const MovieDetailScreen = () => {
       <MovieInfoModal
         visible={InfoModal}
         onClose={() => setInfoModal(false)}
-        title={selectedMovie?.title ||    (t("movieDetail.movietitle"))}
-        synopsis={selectedMovie?.description ||(t("movieDetail.moviedescription"))}
+        title={selectedMovie?.title || (t("movieDetail.movietitle"))}
+        synopsis={selectedMovie?.description || (t("movieDetail.moviedescription"))}
         releaseDate={selectedMovie?.release_date || "Unknown"}
         genre={(selectedMovie?.genres || []).join(', ')}
       />
