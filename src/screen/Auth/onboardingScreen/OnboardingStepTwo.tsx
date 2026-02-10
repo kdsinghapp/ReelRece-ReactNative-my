@@ -4,6 +4,7 @@ import {
   View,
   Image,
   Animated,
+  Easing,
   Dimensions,
   StyleSheet,
   ImageBackground,
@@ -59,6 +60,25 @@ const moviePosters = [
 const OnboardingStepTwo = () => {
   const { navigation } = useWelcome();
   const token = useSelector((state: RootState) => state.auth.token);
+  const slideAnim = useRef(new Animated.Value(height)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const goToInitialScreen = () => {
     navigation.reset({
@@ -98,6 +118,15 @@ const OnboardingStepTwo = () => {
         barStyle="light-content"
       />
 
+      <Animated.View
+        style={[
+          styles.screenContent,
+          {
+            transform: [{ translateY: slideAnim }],
+            opacity: opacityAnim,
+          },
+        ]}
+      >
       {/* 🔹 Animated Posters */}
       <View style={styles.posterWrapper}>
         {moviePosters.map((column, index) => (
@@ -156,6 +185,7 @@ const OnboardingStepTwo = () => {
           buttonStyle={styles.button}
         />
       </View>
+      </Animated.View>
     </ImageBackground>
   );
 };
@@ -164,7 +194,7 @@ const OnboardingStepTwo = () => {
    FLOATING COLUMN
 -----------------------------------*/
 interface FloatingColumnProps {
-  posters:string;
+  posters: (typeof imageIndex)[keyof typeof imageIndex][];
   columnIndex: number;
   isUpward: boolean;
 }
@@ -224,6 +254,10 @@ const FloatingColumn: React.FC<FloatingColumnProps> = ({
 -----------------------------------*/
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+
+  screenContent: {
     flex: 1,
   },
 

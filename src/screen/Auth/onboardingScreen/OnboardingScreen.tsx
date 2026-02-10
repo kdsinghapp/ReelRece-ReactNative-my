@@ -155,37 +155,55 @@ const SlideItem = ({ item, index, currentIndex }: { item: object; index: number;
   useEffect(() => {
     // Only animate when this slide becomes active
     if (index === currentIndex) {
-      // Reset animation values
+      const isSecondStep = index === 1;
+      // Second step: bigger animation (longer, more scale pop)
+      const slideDuration = isSecondStep ? 1200 : 0;
+      const fadeDuration = isSecondStep ? 1800 : 2000;
+      const initialScale = isSecondStep ? 0.75 : 0.88;
+
       slideAnim.setValue(100);
       fadeAnim.setValue(0);
-      scaleAnim.setValue(0.88);
+      scaleAnim.setValue(initialScale);
 
       Animated.parallel([
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          useNativeDriver: true,
-          damping: 20,
-          stiffness: 80,
-          mass: 1,
-          overshootClamping: false,
-        }),
+        isSecondStep
+          ? Animated.timing(slideAnim, {
+              toValue: 0,
+              duration: slideDuration,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: true,
+            })
+          : Animated.spring(slideAnim, {
+              toValue: 0,
+              useNativeDriver: true,
+              damping: 20,
+              stiffness: 80,
+              mass: 1,
+              overshootClamping: false,
+            }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: fadeDuration,
           easing: Easing.out(Easing.exp),
           useNativeDriver: true,
         }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          damping: 20,
-          stiffness: 80,
-          mass: 1,
-          overshootClamping: false,
-        }),
+        isSecondStep
+          ? Animated.timing(scaleAnim, {
+              toValue: 1.05,
+              duration: 1400,
+              easing: Easing.out(Easing.back(1.2)),
+              useNativeDriver: true,
+            })
+          : Animated.spring(scaleAnim, {
+              toValue: 1,
+              useNativeDriver: true,
+              damping: 20,
+              stiffness: 80,
+              mass: 1,
+              overshootClamping: false,
+            }),
       ]).start();
     } else {
-      // Reset to initial state for inactive slides
       slideAnim.setValue(100);
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.88);
@@ -236,10 +254,13 @@ const SlideItem = ({ item, index, currentIndex }: { item: object; index: number;
 /* ----------------------------------
    MAIN SCREEN
 -----------------------------------*/
+const AUTO_NEXT_DELAY_MS = 500; // 2 seconds on second step then auto open next screen
+
 const OnboardingScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const ref = useRef<FlatList>(null);
   const navigation = useNavigation();
+  const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onNext = () => {
     if (currentIndex < data.length - 1) {
@@ -248,6 +269,20 @@ const OnboardingScreen = () => {
       navigation.navigate(ScreenNameEnum.OnboardingScreen2);
     }
   };
+
+  // On second step: after 2 seconds, auto-navigate to OnboardingScreen2
+  useEffect(() => {
+    if (currentIndex !== 1) return;
+    autoNextTimerRef.current = setTimeout(() => {
+      navigation.navigate(ScreenNameEnum.OnboardingScreen2);
+    }, AUTO_NEXT_DELAY_MS);
+    return () => {
+      if (autoNextTimerRef.current) {
+        clearTimeout(autoNextTimerRef.current);
+        autoNextTimerRef.current = null;
+      }
+    };
+  }, [currentIndex, navigation]);
 
   const handleScrollEnd = (e) => {
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);

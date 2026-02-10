@@ -117,13 +117,13 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             placeholderTextColor={Color.lightGrayText}
             ref={inputRef}
             style={{
-              flex: 1,
-              // fontWeight: '500',
+               // fontWeight: '500',
+               flex:1,
               fontFamily:font.PoppinsRegular,
               fontSize: 16,
                color: Color.whiteText,
-              height: 50,
-              textAlignVertical: 'center',
+               textAlignVertical: 'center',
+              lineHeight:24
             }}
             onChangeText={onChangeText}
             value={text}
