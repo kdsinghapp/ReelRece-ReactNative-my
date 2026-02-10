@@ -17,7 +17,7 @@ import FastImage from 'react-native-fast-image';
 import { t } from 'i18next';
 
 
-const OtherTaingPrfofile = () => {
+const OtherWatchingProfile = () => {
   const [bottomModal, setBottomModal] = useState(false)
   const [lovedImageMap, setLovedImageMap] = useState<{ [key: string]: boolean }>({});
 
@@ -251,7 +251,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
     </SafeAreaView>
   );
 };
-export default memo(OtherTaingPrfofile);
+export default memo(OtherWatchingProfile);
 
 // PROFILE1 MOVOIE 1
 

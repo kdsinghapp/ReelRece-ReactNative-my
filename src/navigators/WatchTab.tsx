@@ -8,7 +8,7 @@ import OtherProfile from '@screens/BottomTab/home/otherProfile/OtherProfile';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen';
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
 import GroupSearchScreen from '@screens/BottomTab/watch/watchScreen/GroupSearchScreen';
-import WatchWithFrind from '@screens/BottomTab/watch/watchScreen/WatchWithFrind';
+import WatchWithFriend from '@screens/BottomTab/watch/watchScreen/WatchWithFriend';
 import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
 
 const Stack = createNativeStackNavigator();
@@ -20,10 +20,10 @@ const WatchTab: FunctionComponent = () => {
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
     { name: ScreenNameEnum.GroupSearch, Component: GroupSearchScreen },
-    { name: ScreenNameEnum.WatchWithFrind, Component: WatchWithFrind },
+    { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
 
-    // { name: ScreenNameEnum.WatchWithFrind , Component:wa},  
+    // { name: ScreenNameEnum.WatchWithFriend , Component:wa},  
   ];
 
   return (

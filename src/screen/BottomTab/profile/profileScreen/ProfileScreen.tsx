@@ -8,7 +8,7 @@ import HorizontalMovieList from '@components/common/HorizontalMovieList/Horizont
 import font from '@theme/font';
 import useProfile from './useProfile';
 import LoadingModal from '@utils/Loader';
-import { getHistoryApi, getUserBookmarks, toggleBookmar } from '@redux/Api/ProfileApi';
+import { getHistoryApi, getUserBookmarks } from '@redux/Api/ProfileApi';
 import { RootState } from '@redux/store';
 import { useSelector } from 'react-redux';
 import { getRatedMovies } from '@redux/Api/movieApi';
@@ -534,7 +534,7 @@ const ProfileScreen = () => {
             imageUri={avatarUrl}
             token={token}
             my_profile={true}
-            navigateTo={ScreenNameEnum.OtherTaingPrfofile}
+            navigateTo={ScreenNameEnum.OtherWatchingProfile}
             disableBottomSheet={true}
             loading={loadingTrending}
             emptyData={t("emptyState.noratingsyet")}
@@ -549,7 +549,7 @@ const ProfileScreen = () => {
 
             username={userProfile?.name}
             imageUri={avatarUrl}
-            navigateTo={ScreenNameEnum.OtherWantPrfofile}
+            navigateTo={ScreenNameEnum.OtherWantProfile}
             disableBottomSheet={true}
             loading={loadingRecs}
 
@@ -566,7 +566,7 @@ const ProfileScreen = () => {
             username={userProfile?.name}
             imageUri={avatarUrl}
             my_profile={true}
-            navigateTo={ScreenNameEnum.OtherTaingPrfofile}
+            navigateTo={ScreenNameEnum.OtherWatchingProfile}
             disableBottomSheet={true}
             loading={loadingBookmark}
 
@@ -577,7 +577,7 @@ const ProfileScreen = () => {
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8, paddingHorizontal: 1, alignContent: 'center' }}>
             <Text style={styles.sectionTitle}>{t("profile.suggestedMembers")}</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 2 })}
+              onPress={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 2 , type: 'Suggested', userName: userNameFollow })}
             >
               <Image source={imageIndex.rightArrow} style={styles.listArrow} />
             </TouchableOpacity>
@@ -675,7 +675,7 @@ const ProfileScreen = () => {
       if (!item.movie || !item.user) return null;
 
       const avatarUri = item.user.avatar ? `${BASE_IMAGE_URL}${item.user.avatar}` : null;
-      const avatarSource = avatarUri ? { uri: avatarUri } : imageIndex.profielImg;
+      const avatarSource = avatarUri ? { uri: avatarUri } : imageIndex.profileImg;
       const posterUri = item.movie.horizontal_poster_url;
       const posterSource = posterUri ? { uri: posterUri } : imageIndex.SingleMovie5;
 

@@ -20,7 +20,7 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import { useNavigation } from '@react-navigation/native';
 import { getAllGroups, getGroupMembers, leaveGroup, renameGroup, toggleGroupNotification } from '@redux/Api/GroupApi';
 import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
-import AddFrindModal from '@components/modal/AddFrindModal/AddFrindModal';
+import AddFriendModal from '@components/modal/AddFriendModal/AddFriendModal';
 import LogoutModal from '@components/modal/logoutModal/logoutModal';
 import GroupAllAvatars from '@components/common/GroupAllAvatars/GroupAllAvatars';
 import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
@@ -37,7 +37,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
   const [isTrailer, setIsTrailer] = useState(false);
   const [editNameModal, setEditNameModal] = useState(false);
   const [groupMember, setGroupMember] = useState(false);
-  const [addFrindModal, setAddFrindModal] = useState(false);
+  const [addFriendModal, setAddFriendModal] = useState(false);
   const [groupName, setgroupName] = useState("Movie Night Crew")
   const [exitGroupModal, setExitGroupModal] = useState(false);
   const [deletegroupModal, setDeletegroupModal] = useState(false)
@@ -47,8 +47,8 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
   const [isGroupMute, setIsGroupMute] = useState(group?.isMuted);
 
 
-  const [toestMess, setToestMess] = useState(false)
-  const [toestMessColorGreen, setToestMessGreen] = useState(true)
+  const [toastMess, setToastMess] = useState(false)
+  const [toastMessColorGreen, setToastMessGreen] = useState(true)
   const [toastMessage, setToastMessage] = useState('');
 
 
@@ -87,7 +87,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
 
   const handleLogOutMsg = () => {
-    setToestMess(true)
+    setToastMess(true)
   }
 
   const hanldeleaveGroup = async (token, groupId) => {
@@ -95,7 +95,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
       const response = await leaveGroup(token, groupId)
       onClose()
       navigation.navigate(ScreenNameEnum.WatchScreen, {
-        getAllGroupReferace: Date.now()
+        getAllGroupReference: Date.now()
       })
 
 
@@ -115,7 +115,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
   useEffect(() => {
     fetchGroups();
-  }, [groupMember, addFrindModal]);
+  }, [groupMember, addFriendModal]);
 
   const formatGroupName = (name?: string) => {
     if (!name) return '';
@@ -191,7 +191,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionRow} onPress={() => setAddFrindModal(true)} >
+          <TouchableOpacity style={styles.optionRow} onPress={() => setAddFriendModal(true)} >
             <Image source={imageIndex.UserAdd} style={{ marginLeft: 6, height: 24, width: 24 }} resizeMode='contain' />
 
             {/* <Feather name="user-plus" size={20} color="#fff" /> */}
@@ -252,8 +252,8 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
           onClose={() => setGroupMember(false)}
           token={token}
           heading= {t("home.groupMembers")}   />
-        <AddFrindModal
-          visible={addFrindModal}
+        <AddFriendModal
+          visible={addFriendModal}
           token={token}
           groupId={groupId}
           fetchGroups={fetchGroups}
@@ -262,7 +262,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
               setUserCount1(prev => prev + d?.length);
             }
             fetchGroups()
-            setAddFrindModal(false);
+            setAddFriendModal(false);
           }}
 
         />
@@ -278,10 +278,10 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
             // TODO: Call logout logic here (e.g., clearing tokens, navigating to login screen)
           }}
         />}
-        {toestMess && (
+        {toastMess && (
           <SuccessMessageCustom
             textColor={Color.whiteText}
-            color={toestMessColorGreen ? Color.green : Color.red}
+            color={toastMessColorGreen ? Color.green : Color.red}
             message={t("errorMessage.leftthe")}
           />
         )}

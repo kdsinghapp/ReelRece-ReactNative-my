@@ -32,7 +32,7 @@ interface HorizontalMovieListProps {
   backnavigate?: string;
   backSceen?: string;
   navigateToLabel?: string;
-  username?: string;
+  username?: string | null;
   otheruser?: boolean;
   loading?: boolean;
   onEndReached?: () => void;

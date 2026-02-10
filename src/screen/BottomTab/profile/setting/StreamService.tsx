@@ -368,7 +368,7 @@ const StreamService = () => {
             title={(t("home.streamingservices"))}
             backIcon={fromSignUp ? null : imageIndex.backArrow}
             rightIcon={false}
-            onRightPress={() => navigation.navigate(ScreenNameEnum.OtherTaingPrfofile)}
+            onRightPress={() => navigation.navigate(ScreenNameEnum.OtherWatchingProfile)}
           />
           <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
           <View style={styles.serviceCountComntainer}>

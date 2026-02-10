@@ -29,8 +29,8 @@ const GroupListItem = ({
   //   } else if (isSettingsMode) {
   //     onGroupSelect(group);           // modal open logic
   //   } else if (!navigationOff) {
-  //     // navigation.navigate(ScreenNameEnum.WatchWithFrind, { group:group });
-  //      navigation.navigate(ScreenNameEnum.WatchWithFrind, {
+  //     // navigation.navigate(ScreenNameEnum.WatchWithFriend, { group:group });
+  //      navigation.navigate(ScreenNameEnum.WatchWithFriend, {
   //     groupProps: group,
   //     groupId: group?.groupId,
   //     // 👈 now groupId is also explicitly passed
@@ -52,7 +52,7 @@ const GroupListItem = ({
 
     else if (!navigationOff) {
       await AsyncStorage.setItem('selected_group', JSON.stringify(group)); // ✅ Store
-      navigation.navigate(ScreenNameEnum.WatchWithFrind, {
+      navigation.navigate(ScreenNameEnum.WatchWithFriend, {
         groupProps: group,
         groupId: group?.groupId,
         maxActivitiescnt: group?.max_activities_cnt

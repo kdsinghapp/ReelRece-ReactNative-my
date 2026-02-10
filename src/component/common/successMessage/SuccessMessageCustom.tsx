@@ -5,18 +5,18 @@ import font from '@theme/font';
 import CustomText from '../CustomText/CustomText';
 interface SuccessMessageCustomProps {
   message: string;
-  titie?: string;
+  title?: string;
   first?: boolean;
   color?: string;
   textColor?: string;
 }
 
-const SuccessMessageCustom = ({ message, titie, first = true, color, textColor }: SuccessMessageCustomProps) => {
+const SuccessMessageCustom = ({ message, title, first = true, color, textColor }: SuccessMessageCustomProps) => {
 
   return (
     <View style={[styles.container, { backgroundColor: color ? color : 'red' }]}>
-      {titie &&
-        //  <Text style={[styles.title, {color: textColor ? textColor : Color.whiteText}]}>{titie}</Text>}
+      {title &&
+        //  <Text style={[styles.title, {color: textColor ? textColor : Color.whiteText}]}>{title}</Text>}
 
         <CustomText
 
@@ -25,7 +25,7 @@ const SuccessMessageCustom = ({ message, titie, first = true, color, textColor }
           style={[styles.title, { color: textColor ? textColor : Color.whiteText }]}
           font={font.PoppinsRegular}
         >
-          {titie}
+          {title}
         </CustomText>}
 
       <CustomText

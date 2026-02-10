@@ -60,8 +60,8 @@ const FeatureRequest = () => {
   const [firstRight, setFirstRight] = useState(true);
   const [firstRightAni, setFirstRightAni] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
-  const [toestMess, setToestMess] = useState(false);
-  const [toestMessColorGreen, setToestMessGreen] = useState(false);
+  const [toastMess, setToastMess] = useState(false);
+  const [toastMessColorGreen, setToastMessGreen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
@@ -158,13 +158,13 @@ const FeatureRequest = () => {
 
 
     if (inputValue.trim() === '') {
-      setToestMess(true);
-      setToestMessGreen(false);
+      setToastMess(true);
+      setToastMessGreen(false);
       setToastMessage(t("errorMessage.pleasefeedback"));
     };
     if (feedBaCkText === '') {
-      setToestMess(true);
-      setToestMessGreen(false);
+      setToastMess(true);
+      setToastMessGreen(false);
       setToastMessage(t("errorMessage.feedbacktype"));
       return;
     }
@@ -184,8 +184,8 @@ const FeatureRequest = () => {
       });
     } catch (error) {
     } finally {
-      setToestMess(false);
-      setToestMessGreen(false);
+      setToastMess(false);
+      setToastMessGreen(false);
       setToastMessage('');
     }
   };
@@ -501,10 +501,10 @@ const FeatureRequest = () => {
 
 
 
-        {toestMess && (
+        {toastMess && (
           <SuccessMessageCustom
             textColor={Color.whiteText}
-            color={toestMessColorGreen ? Color.green : Color.red}
+            color={toastMessColorGreen ? Color.green : Color.red}
             message={toastMessage}
           />
         )}

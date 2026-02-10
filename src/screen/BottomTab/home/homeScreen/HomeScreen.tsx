@@ -433,7 +433,7 @@ const App = () => {
           renderItem={({ item }) => {
             const avatarSource = item?.avatar
               ? { uri: `${BASE_IMAGE_URL}${item.avatar}` }
-              : imageIndex.profielImg;
+              : imageIndex.profileImg;
             return (
               <TouchableOpacity
                 onPress={() =>

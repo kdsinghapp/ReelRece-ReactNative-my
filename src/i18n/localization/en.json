@@ -230,7 +230,7 @@
     "trending": "Trending",
     "recsForYou": "Recs for You",
     "history": "History",
-    "suggestedMembers": "Suggested members",
+    "suggestedMembers": "Suggested ",
     "searchMembers": "Search members",
     "enterGroupName": "Enter your group name",
     "groupMembers": "Group Members"
@@ -240,7 +240,7 @@
     "skip":"Skip",
     "wantToWatch": "Want to Watch",
     "history": "History",
-    "suggestedMembers": "Suggested members" ,
+    "suggestedMembers": "Suggested " ,
     "whichDo":"Which do you prefer?"
   },
   "modal": {

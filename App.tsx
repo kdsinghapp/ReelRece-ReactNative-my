@@ -5,8 +5,11 @@ import AppNavigator from './src/navigators/AppNavigator'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initializeLoggerConsoleBridge, setSuppressAllLogs } from '@utils/LoggerConsoleBridge';
 
-// ✅ STEP 1: Suppress LogBox visual warnings (yellow/red boxes)
-LogBox.ignoreAllLogs(true);
+// STEP 1: Only suppress specific known warnings (dev warnings stay visible)
+LogBox.ignoreLogs([
+  'Warning: componentWillMount has been renamed',
+  'Warning: componentWillReceiveProps has been renamed',
+]);
 
 // ✅ STEP 2: Suppress ALL console logs globally (including Metro/terminal output)
 // Set to true in production, false in development if you want to see logs
@@ -89,6 +92,3 @@ const App: FunctionComponent = () => {
 }
 
 export default App;
-
-// quavuwozoiwe-6484@yopmail.com
-// 123456

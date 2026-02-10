@@ -22,15 +22,15 @@ const useSignup = () => {
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState('');
-  const [toestMess, setToestMess] = useState(false)
+  const [toastMess, setToastMess] = useState(false)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const dispatch = useDispatch();
 
 
-  const toestMessFunc = () => {
-    setToestMess(true);
+  const toastMessFunc = () => {
+    setToastMess(true);
     setTimeout(() => {
-      setToestMess(false);
+      setToastMess(false);
     }, 2000);
   }
 
@@ -75,13 +75,12 @@ const useSignup = () => {
     }
 
     try {
-      // const result = await confirmEmailCodeApi("jk@yopmail.com", enteredCode); // ✅ Dynamic email
       const result = await confirmEmailCodeApi(email, enteredCode);
 
 
       if (result.success) {
         Toast.show({ type: 'success', text1: 'Email verified -  ✅' });
-        toestMessFunc()
+        toastMessFunc()
         // ✅ Navigate to next step
         setTimeout(() => {
           navigation.navigate(ScreenNameEnum.AddUsername, {
@@ -151,7 +150,7 @@ const useSignup = () => {
         Toast.show({ type: 'error', text1: result.message || 'Failed to send OTP' });
         return;
       }
-      setToestMess(true)
+      setToastMess(true)
 
       setTimeout(() => {
         navigation.navigate(ScreenNameEnum.EmailVerify, {
@@ -226,7 +225,7 @@ const useSignup = () => {
     handleFinalSignup,
     username,
     setUsername,
-    setToestMess, toestMess,
+    setToastMess, toastMess,
     usernameError,
   };
 };

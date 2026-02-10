@@ -12,7 +12,7 @@ import {
 } from 'react-native';
  import { filters } from './DisCoverData';
 import { Color } from '@theme/color';
-import PlatformModales from './PlatformModales';
+import PlatformModals from './PlatformModals';
    import { getUniqueGenres } from '@redux/Api/movieApi';
 import { getUniquePlatforms } from '@redux/Api/SettingApi';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -383,7 +383,7 @@ const FilterBar = ({ isSelectList,
       }
 
 {platformModalVisible &&
-      <PlatformModales
+      <PlatformModals
         visible={platformModalVisible}
         platformsData={platformsData}
         // platformsData={availablePlatforms}

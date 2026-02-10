@@ -21,7 +21,7 @@ const usePasswordReset = (options = {}) => {
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
-  // const [toestMess, setToestMess] = useState(false);
+  // const [toastMess, setToastMess] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

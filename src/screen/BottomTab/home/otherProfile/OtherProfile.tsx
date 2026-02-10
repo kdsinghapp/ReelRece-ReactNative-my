@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator, VirtualizedList, Alert } from 'react-native';
- import styles from './style';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import styles from './style';
 import { useFocusEffect, useIsFocused, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
- import useHome from '../homeScreen/useHome';
+import useHome from '../homeScreen/useHome';
 import { Color } from '@theme/color';
 import HorizontalMovieList from '@components/common/HorizontalMovieList/HorizontalMovieList';
 import { getOthereUsers, getOtherUserBookmarks } from '@redux/Api/ProfileApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
- import { getCommonBookmarkOtherUser, getCommonBookmarks, getOtherUserRatedMovies } from '@redux/Api/movieApi';
- import { followUser, unfollowUser } from '@redux/Api/followService';
- import useUserFeedWithName from '@components/card/feedCard/useUserFeedWithName';
+import { getCommonBookmarkOtherUser, getOtherUserRatedMovies } from '@redux/Api/movieApi';
+import { followUser, unfollowUser } from '@redux/Api/followService';
+import useUserFeedWithName from '@components/card/feedCard/useUserFeedWithName';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
@@ -20,13 +20,31 @@ import { BottomSheet, CustomStatusBar, HeaderCustom, ProfileCard } from '@compon
 import imageIndex from '@assets/imageIndex';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
+import { User } from '../../../../types/api.types';
+import { AxiosResponse } from 'axios';
+
+/** Other profile screen route params */
+type OtherProfileParams = { item?: User & { name?: string; username?: string } };
+
+/** Extended user data returned by profile API */
+type OtherUserProfile = User & {
+  following_bool?: boolean;
+  ranked?: number;
+  followers?: number;
+  following?: number;
+  bio?: string;
+};
+
+/** Bottom sheet option with optional action */
+type BottomSheetOption = { name: string; action?: () => void };
 
 const OtherProfile = () => {
   const token = useSelector((state: RootState) => state.auth?.token);
- 
+
   const route = useRoute();
-  const { item } = route?.params || {};
-  let othr_user_name = item?.username;
+  const params = (route?.params || {}) as OtherProfileParams;
+  const item = params?.item;
+  const othr_user_name = item?.username ?? '';
   const {
     navigation,
     isVisible,
@@ -40,13 +58,13 @@ const OtherProfile = () => {
     fetchFeed,
     loadingFeed,
     hasMore,
-  } = useUserFeedWithName(token);
+  } = useUserFeedWithName(token ?? '');
 
   const [bottomModal, setBottomModal] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [otherUserData, setOtherUserData] = useState([]);
-  const [otherUserRankingMovie, setOtherUserRankingMovie] = useState([]);
-  const [commonUserRankingMovie, setCommonUserRankingMovie] = useState([]);
+  const [otherUserData, setOtherUserData] = useState<OtherUserProfile | null>(null);
+  const [otherUserRankingMovie, setOtherUserRankingMovie] = useState<unknown[]>([]);
+  const [commonUserRankingMovie, setCommonUserRankingMovie] = useState<unknown[]>([]);
   const [loadingRanked, setLoadingRanked] = useState(true);
   const [loadingBookmarks, setLoadingBookmarks] = useState(true);
   const [loadingCommon, setLoadingCommon] = useState(true);
@@ -84,30 +102,30 @@ const OtherProfile = () => {
     return [
       { type: 'profileCard' },
       { type: 'header' },
-      ...feedData.map(item => ({ ...item, type: 'feed' })),
+      ...feedData.map((feedItem: unknown) => ({ ...(feedItem as Record<string, unknown>), type: 'feed' })),
     ];
   }, [feedData]);
   const [followLoading, setFollowLoading] = useState(false);
   //  const avatar = useSelector((state: RootState) => state.auth.userGetData?.avatar);
   //  const avatar = useSelector((state: RootState) => state.auth.userGetData?.avatar);
   const handleFollowUnfollow = async () => {
+    if (!token || !otherUserData?.username) return;
     setFollowLoading(true);
-    setLoadingFollow(true)
+    setLoadingFollow(true);
     try {
       if (isFollowing) {
-        await unfollowUser(token, otherUserData?.username);
-       } else {
-        await followUser(token, otherUserData?.username);
+        await unfollowUser(token, otherUserData.username);
+      } else {
+        await followUser(token, otherUserData.username);
       }
       setIsFollowing(!isFollowing);
     } catch (error) {
     } finally {
       setFollowLoading(false);
-      // setFollowLoading(false);
-      setLoadingFollow(false)
+      setLoadingFollow(false);
     }
   };
-  const BottomData = useMemo(() => [
+  const BottomData: BottomSheetOption[] = useMemo(() => [
     {
       name: isFollowing ? t("common.unfollow") : t("common.follow"),
       action: async () => {
@@ -153,13 +171,14 @@ const OtherProfile = () => {
 
 
   // 2) Stable onViewableItemsChanged handler (useRef .current pattern)
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: (object | string | null | number)[] }) => {
+  type ViewableItem = { item?: { type?: string; movie?: unknown; user?: unknown }; index?: number | null };
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewableItem[] }) => {
     // guard: do nothing if screen not focused
     if (!isFocusedRef.current) return;
 
     // safe empty-check
     if (!viewableItems || viewableItems.length === 0) {
-       if (timeoutRef.current) {
+      if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
@@ -171,7 +190,7 @@ const OtherProfile = () => {
     }
 
     // stop if header/profileStatus visible
-    const headerOrProfileVisible = viewableItems.some(v => v?.item?.type === 'header' || v?.item?.type === 'profileStatus');
+    const headerOrProfileVisible = viewableItems.some((v: ViewableItem) => v?.item?.type === 'header' || v?.item?.type === 'profileStatus');
     if (headerOrProfileVisible) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -187,10 +206,10 @@ const OtherProfile = () => {
 
     // find first visible index
     const firstVisible = viewableItems[0];
-    const index = firstVisible?.index ?? 0;
+    const index = firstVisible?.index != null ? firstVisible.index : 0;
 
     // ensure it's a feed card (has movie + user)
-    const isFeedCardVisible = viewableItems.some(item => item?.item?.movie && item?.item?.user);
+    const isFeedCardVisible = viewableItems.some((vi: ViewableItem) => vi?.item?.movie && vi?.item?.user);
     if (!isFeedCardVisible) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -280,25 +299,30 @@ const OtherProfile = () => {
   // SCROLL END
 
   const fetchOtherUserDetails = async () => {
-    let videoNUllVideo = 0;
- 
+    const username = item?.username;
+    if (!token || !username) return;
+    const videoNUllVideo = 0;
     try {
-      const res = await getOthereUsers(token, item?.username);
+      const res = await getOthereUsers(token, username);
       await AsyncStorage.setItem('otherProfileIndex', videoNUllVideo.toString());
-      setOtherUserData(res?.data)
-       setIsFollowing(res.data?.following_bool)
-      } catch (err) {
-     }
+      const data = Array.isArray(res) ? res[0] : (res as AxiosResponse<User>)?.data;
+      const profile = data as OtherUserProfile | undefined;
+      if (profile) {
+        setOtherUserData(profile);
+        setIsFollowing(profile.following_bool ?? false);
+      }
+    } catch (err) {
+    }
   };
 
   useEffect(() => {
     fetchOtherUserDetails();
-  }, []);
+  }, [token, item?.username]);
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 90,
   };
-  const [userBookmarks, setUserBookmarks] = useState([]);
+  const [userBookmarks, setUserBookmarks] = useState<unknown[]>([]);
 
 
  
@@ -359,13 +383,11 @@ const OtherProfile = () => {
 
 
   useEffect(() => {
-    if (hasMore && !loadingFeed && otherUserData?.username) {
-      // fetchFeed("home", otherUserData?.username);
+    if (hasMore && !loadingFeed && otherUserData?.username && othr_user_name) {
       fetchFeed("otherprofile", othr_user_name);
-       Alert.alert(otherUserData?.username, "wotherprofile feed")
     }
-  }, [token]);
-  const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${otherUserData?.avatar}?t=${Date.now()}`, [otherUserData]);
+  }, [token, hasMore, loadingFeed, otherUserData?.username, othr_user_name]);
+  const avatarUrl = useMemo(() => (otherUserData?.avatar ? `${BASE_IMAGE_URL}${otherUserData.avatar}?t=${Date.now()}` : undefined), [otherUserData]);
 
   const renderHeader = useCallback(() => (
 
@@ -378,15 +400,12 @@ const OtherProfile = () => {
         title={t("home.rankings",)}
         data={otherUserRankingMovie}
         loading={loadingRanked}
-        username={otherUserData?.username}
+        username={otherUserData?.username ?? undefined}
         token={token}
         imageUri={avatarUrl}
         my_profile={false}
-
-        // navigateTo={{ScreenNameEnum.OtherTaingPrfofile, scoreType :'Friend'}}
-        // OtherTaingPrfofile
-        navigateTo={ScreenNameEnum.OtherTaingPrfofile}
-         scoreType={t("home.friend",)}
+        navigateTo={ScreenNameEnum.OtherWatchingProfile}
+        scoreType={'Friend' as const}
         emptyData={t("emptyState.noratingsyet",)}
 
       />
@@ -394,16 +413,15 @@ const OtherProfile = () => {
       <HorizontalMovieList
         title= {t("home.wantwatch",)}  
         data={userBookmarks}
-        username={otherUserData?.username}
+        username={otherUserData?.username ?? undefined}
         otheruser
         token={token}
         imageUri={avatarUrl}
         loading={loadingBookmarks}
         my_profile={false}
-
-        navigateTo={ScreenNameEnum.OtherWantPrfofile}
-        emptyData= {t("emptyState.nobookmarks",)} 
-        scoreType={t("home.friend",)}
+        navigateTo={ScreenNameEnum.OtherWantProfile}
+        emptyData={t("emptyState.nobookmarks",)}
+        scoreType={'Friend' as const}
 
 
       />
@@ -414,12 +432,12 @@ const OtherProfile = () => {
         data={commonUserRankingMovie}
         imageUri={avatarUrl}
         loading={loadingCommon}
-        username={otherUserData?.username}
+        username={otherUserData?.username ?? undefined}
         token={token}
         my_profile={false}
         navigateTo={ScreenNameEnum.WatchSaveUser}
         emptyData={t("emptyState.nohistoryyet",)}
-        scoreType={t("home.friend",)}
+        scoreType={'Friend' as const}
       />
       <Text style={styles.sectionTitle}>{t("home.recentactivities",)}</Text>
     </View>
@@ -427,8 +445,17 @@ const OtherProfile = () => {
   ), [avatarUrl, loadingFollow, handleFollowUnfollow, imageLoading, otherUserData, isFollowing,]);
 
 
-  const MemoFeedCardRender = useCallback((item, index, avatarUri, posterUri) => {
-     return (
+  type FeedItemShape = {
+    movie?: { imdb_id?: string; title?: string; release_year?: number; trailer_url?: string; horizontal_poster_url?: string };
+    user?: { name?: string; username?: string; avatar?: string };
+    activity?: string;
+    comment?: string;
+    rec_score?: number;
+    is_bookmarked?: boolean;
+    created_date?: string;
+  };
+  const MemoFeedCardRender = useCallback((feedItem: FeedItemShape, index: number, avatarUri: string, posterUri: string) => {
+    return (
       // <MemoFeedCard
       //   key={item.movie?.imdb_id} // <-- unique key per video
 
@@ -462,83 +489,66 @@ const OtherProfile = () => {
       //   screenName='OtherProfile__Screen'
       // />
         <MemoFeedCardHome
-        key={item.movie?.imdb_id} // <-- unique key per video
-activity={item?.activity}
-        avatar={{ uri: avatarUri }}         //  string
-        poster={{ uri: posterUri }}        //  string
-        // user={item.user?.name}
-                user={item.user?.name ||item.user?.username}
-
-        title={item.movie?.title}
-        comment={item.comment}
-        release_year={item?.movie?.release_year?.toString()}
-        videoUri={item.movie?.trailer_url}
-        imdb_id={item.movie?.imdb_id}
-        isMuted={isMuted}
-        token={token} rankPress={() => setIsVisible(true)}
-        ranked={item?.rec_score}
-        scoreType='Friend'
-        shouldAutoPlay={autoPlayEnabled}
-        isVisible={index === currentVisibleIndex}
-        videoIndex={index} // FIX HERE
-        username={otherUserData?.username}
-        // shouldPlay={index - 1 === playIndex}
-        shouldPlay={index - 1 === playIndex}
-        isPaused={index - 1 !== playIndex}
-        is_bookMark={item?.is_bookmarked}
-        //   videoIndex={index } // FIX HERE
-        // username={otherUserData?.username}
-        // // shouldPlay={index - 1 === playIndex}
-        // shouldPlay={index -1 === currentVisibleIndex}
-        // isPaused={index - 1 !== playIndex}
-        // is_bookMark={item?.is_bookmarked}
-
-        screenName='OtherProfile__Screen'
-      />
+          key={feedItem.movie?.imdb_id}
+          activity={feedItem?.activity}
+          avatar={{ uri: avatarUri }}
+          poster={{ uri: posterUri }}
+          user={feedItem.user?.name || feedItem.user?.username}
+          title={feedItem.movie?.title}
+          comment={feedItem.comment}
+          release_year={feedItem?.movie?.release_year?.toString()}
+          videoUri={feedItem.movie?.trailer_url}
+          imdb_id={feedItem.movie?.imdb_id}
+          created_date={feedItem?.created_date}
+          token={token ?? ''}
+          rankPress={() => setIsVisible(true)}
+          ranked={feedItem?.rec_score}
+          scoreType="Friend"
+          shouldAutoPlay={autoPlayEnabled}
+          isVisible={index === currentVisibleIndex}
+          videoIndex={index}
+          username={otherUserData?.username}
+          shouldPlay={index - 1 === playIndex}
+          isPaused={index - 1 !== playIndex}
+          is_bookMark={feedItem?.is_bookmarked}
+          screenName="OtherProfile__Screen"
+        />
     );
-  }, [])
+  }, [currentVisibleIndex, playIndex, autoPlayEnabled, otherUserData?.username, token, isVisible, setIsVisible]);
 
 
-  const renderItem = useCallback(({ item, index }) => {
-     if (item.type === 'profileCard') {
+  type ListItem = { type: string; id?: number; movie?: FeedItemShape['movie']; user?: FeedItemShape['user'] } & FeedItemShape;
+  const renderItem = useCallback(({ item, index }: { item: ListItem; index: number }) => {
+    if (item.type === 'profileCard') {
       return (
         <View style={styles.profileCardContainer}>
           <ProfileCard
             imageUri={avatarUrl}
             loaderFollow={loadingFollow}
-            // butt={true}
-            // onFollowPress={() => setBottomModal(true)}
             onFollowPress={handleFollowUnfollow}
             imageLoading={imageLoading}
             setImageLoading={setImageLoading}
             name={otherUserData?.name}
             rank={`${otherUserData?.ranked ?? ''}`}
             followers={`${otherUserData?.followers ?? ''}`}
-            following={`${otherUserData?.following ?? ""}`}
-            butt={otherUserData?.username != userData?.username}
+            following={`${otherUserData?.following ?? ''}`}
+            butt={otherUserData?.username !== userData?.username}
             bio={otherUserData?.bio}
-          onFollow={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name })}
-            // onFollow={() => navigation.navigate(ScreenNameEnum.Followers)}
-            onFollowing={() =>
-              // navigation.navigate('Followers', { tabToOpen: 1, type: 'Following', userName:otherUserData?.name })
-              navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name })
-            }
-            onSuggested={() =>
-              navigation.navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: otherUserData?.name })
-            }
+            onFollow={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name })}
+            onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name })}
+            onSuggested={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: otherUserData?.name })}
             isFollowing={isFollowing}
-
           />
         </View>
-      )
+      );
     }
     if (item.type === 'header') {
-      return renderHeader(); // 🔁 same function as before
+      return renderHeader();
     }
 
-     if (!item?.movie || !item?.user) return null;
-    const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar}`;
-    const posterUri = item.movie?.horizontal_poster_url;
+    if (!item?.movie || !item?.user) return null;
+    const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar ?? ''}`;
+    const posterUri = item.movie?.horizontal_poster_url ?? '';
     //     return (
     //       <MemoFeedCard
     //         key={item.movie?.imdb_id} // <-- unique key per video
@@ -574,9 +584,8 @@ activity={item?.activity}
     //       />
     //     );
 
-    return MemoFeedCardRender(item, index, avatarUri, posterUri)
-
-  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled]);
+    return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
+  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, navigation]);
 
   const renderFooter = useCallback(() => {
     // 🟢 Normal loading
@@ -617,26 +626,26 @@ activity={item?.activity}
       </View>
     );
   }, [loadingFeed, hasMore, combinedData.length]);
-const filteredData = useMemo(() => {
-  return combinedData.filter((item, index, self) => {
-    if (item.type !== 'feed') return true;
-
-    return (
-      index ===
-      self.findIndex(
-        (t) =>
-          t.type === 'feed' &&
-          t.movie?.imdb_id === item.movie?.imdb_id
-      )
-    );
-  });
-}, [combinedData]); 
+  type CombinedItem = { type: string; id?: number; movie?: { imdb_id?: string }; [key: string]: unknown };
+  const filteredData = useMemo(() => {
+    return (combinedData as CombinedItem[]).filter((item, index, self) => {
+      if (item.type !== 'feed') return true;
+      return (
+        index ===
+        self.findIndex(
+          (elem) =>
+            elem.type === 'feed' &&
+            elem.movie?.imdb_id === item.movie?.imdb_id
+        )
+      );
+    });
+  }, [combinedData]); 
 
    return (
     <SafeAreaView style={styles.container}>
       <CustomStatusBar />
       <HeaderCustom
-        title={item?.name || item?.username ||t("home.userProfile")}  
+        title={item?.name ?? item?.username ?? t("home.userProfile")}  
         backIcon={imageIndex.backArrow}
         // rightIcon={imageIndex.menu}
         headerColor={Color.headerTransparent}
@@ -653,9 +662,9 @@ const filteredData = useMemo(() => {
         data={filteredData}
         // data={combinedData}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item?.id?.toString() || `index-${index}`}
+        keyExtractor={(item: CombinedItem, index: number) => item?.id?.toString() ?? `index-${index}`}
         onEndReached={() => {
-          if (hasMore && !loadingFeed) fetchFeed("otherprofile", othr_user_name);
+          if (hasMore && !loadingFeed && othr_user_name) fetchFeed("otherprofile", othr_user_name);
         }}
         onEndReachedThreshold={0.7}
         scrollEventThrottle={16}
@@ -739,7 +748,7 @@ const filteredData = useMemo(() => {
         visible={bottomModal}
         options={BottomData}
         onClose={() => setBottomModal(false)}
-        onSelect={(option) => option.action?.()}
+        onSelect={(option) => (option as BottomSheetOption).action?.()}
       />
     </SafeAreaView>
   );

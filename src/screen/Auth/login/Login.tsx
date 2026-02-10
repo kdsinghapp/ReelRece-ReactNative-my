@@ -10,8 +10,7 @@ import React, { useEffect } from 'react';
  import ScreenNameEnum from '@routes/screenName.enum';
 // import style from './style';
 import font from '@theme/font';
-import { Button, CustomStatusBar, InputFieldCustom, SuccessMessageCustom } from '@components';
-import style from '@screens/Auth/signup/style';
+ import style from '@screens/Auth/signup/style';
 import { Color } from '@theme/color';
 import CustomText from '@components/common/CustomText/CustomText';
 import ButtonCustom from '@components/common/button/ButtonCustom';
@@ -20,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LoadingModal from '@utils/Loader';
 import useLogin from './useLogin';
 import { t } from 'i18next';
+import { CustomStatusBar, InputFieldCustom, SuccessMessageCustom } from '@components/index';
 export default function Login() {
   const {
     navigation,
@@ -30,8 +30,8 @@ export default function Login() {
     emailError,
     passwordError,
     validSuccess,
-    toestMess,  
-    toestMessColorGreen, 
+    toastMess,  
+    toastMessColorGreen, 
     toastMessage,  
     email, password, emptyAlert } = useLogin()    
   useEffect(() => {
@@ -224,10 +224,10 @@ export default function Login() {
       </View>
       </ScrollView>
     
-      {toestMess && (
+      {toastMess && (
         <SuccessMessageCustom
           textColor={Color.whiteText}
-          color={toestMessColorGreen ? Color.green : Color.red}
+          color={toastMessColorGreen ? Color.green : Color.red}
           message={toastMessage}
         />
       )}

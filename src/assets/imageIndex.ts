@@ -38,7 +38,7 @@ export default {
   closeWhite: require('./images/closeWhite.png'),
   mx: require('./images/mx.png'),
   menu: require('./images/menu.png'),
-  profielImg: require('./images/profielImg.png'),
+  profileImg: require('./images/profileImg.png'),
   save: require('./images/save.png'),
   WatchNowButton: require('./images/WatchNowButton.png'),
   checkBox: require('./images/checkBox.png'),

@@ -11,13 +11,15 @@ import { t } from 'i18next';
 const useLogin = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
-  const [email, setEmail] = useState<string>('sunny.2309@yahoo.in');
+//   sunny.2309@yahoo.in 
+// test12345
+  const [email, setEmail] = useState<string>(' sunny.2309@yahoo.in');
   const [password, setPassword] = useState<string>('test12345');
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [toestMess, setToestMess] = useState(false)
-  const [toestMessColorGreen, setToestMessGreen] = useState(false)
+  const [toastMess, setToastMess] = useState(false)
+  const [toastMessColorGreen, setToastMessGreen] = useState(false)
   const [toastMessage, setToastMessage] = useState('');
 
   const emailRegex: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -45,15 +47,15 @@ const useLogin = () => {
       setPasswordError('');
     }
   };
-  const toestMessFunc = ({ green = false, message = '' }) => {
-    setToestMess(true);
+  const toastMessFunc = ({ green = false, message = '' }) => {
+    setToastMess(true);
     setToastMessage(message);
 
-    if (green) setToestMessGreen(true);
+    if (green) setToastMessGreen(true);
 
     setTimeout(() => {
-      setToestMess(false);
-      setToestMessGreen(false);
+      setToastMess(false);
+      setToastMessGreen(false);
       setToastMessage('');
     }, 2000);
   };
@@ -84,7 +86,7 @@ const useLogin = () => {
       setLoading(true);
       const netState = await NetInfo.fetch();
       if (!netState.isConnected) {
-        toestMessFunc({ message: 'No Internet Connection ❌' });
+        toastMessFunc({ message: 'No Internet Connection ❌' });
         setLoading(false);
         return;
       }
@@ -102,7 +104,7 @@ const useLogin = () => {
         // ✅ Save token to TokenService
         await TokenService.setToken(token);
 
-        toestMessFunc({ green: true, message: 'Login Success ' });
+        toastMessFunc({ green: true, message: 'Login Success ' });
 
         // ✅ Navigate only when login is successful
         setTimeout(() => {
@@ -116,12 +118,12 @@ const useLogin = () => {
         // ✅ Handle API error response
         const errorMessage = response.error || 'Invalid Credentials';
 
-        toestMessFunc({ message: errorMessage + ' ❌' });
+        toastMessFunc({ message: errorMessage + ' ❌' });
         setEmailError(t('errorMessage.invalidemailpassword'))
         setPasswordError(t('errorMessage.invalidemailpassword'))
       }
     } catch (error) {
-      toestMessFunc({ message: 'Login failed. Please try again ❌' });
+      toastMessFunc({ message: 'Login failed. Please try again ❌' });
     } finally {
       setLoading(false);
     }
@@ -143,8 +145,8 @@ const useLogin = () => {
     setEmail,
     password,
     setPassword,
-    toestMess, setToestMess,
-    toestMessColorGreen, setToestMessGreen,
+    toastMess, setToastMess,
+    toastMessColorGreen, setToastMessGreen,
     toastMessage, setToastMessage,
   };
 };

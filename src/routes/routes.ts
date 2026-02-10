@@ -45,7 +45,7 @@ const _routes = () => {
       { name: ScreenNameEnum.OnboardingScreen, Component: OnboardingScreen },
       { name: ScreenNameEnum.OnboardingScreen2, Component: OnboardingStepTwo },
       
-      // { name: ScreenNameEnum.WatchWithFrind, Component: WatchWithFrind },
+      // { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
       
     ],
 

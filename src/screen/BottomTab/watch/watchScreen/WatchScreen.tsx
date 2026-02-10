@@ -57,10 +57,10 @@ const WatchScreen = () => {
         cache: FastImage.cacheControl.immutable,
       };
     }
-    return imageIndex.profielImg;
+    return imageIndex.profileImg;
   }, [avatar]);
   const route: number | object | string = useRoute()
-  const { getAllGroupReferace } = route?.params || {};   // first come from groupsettingmodal
+  const { getAllGroupReference } = route?.params || {};   // first come from groupsettingmodal
   const navigation = useNavigation();
   const [notificationModal, setNotificationModal] = useState(false);
   const [isSettingsMode, setIsSettingsMode] = useState(false);
@@ -247,7 +247,7 @@ const WatchScreen = () => {
     disableMultiSelect()
 
     navigation.navigate(ScreenNameEnum.WatchScreen, {
-      getAllGroupReferace: Date.now()
+      getAllGroupReference: Date.now()
     });
 
   }, [selectedGroupIds]);
@@ -344,12 +344,12 @@ const WatchScreen = () => {
     }
   };
 
-  //  when getAllGroupReferace changes
+  //  when getAllGroupReference changes
   useEffect(() => {
-    if (getAllGroupReferace === true) {
+    if (getAllGroupReference === true) {
       fetchGroups();
     }
-  }, [getAllGroupReferace]);
+  }, [getAllGroupReference]);
 
 
   useFocusEffect(

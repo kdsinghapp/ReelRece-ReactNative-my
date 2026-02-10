@@ -31,11 +31,11 @@ const EmailVerify = () => {
   const {
     navigation,
     handleVerify,
-    toestMess,
-    setToestMess,
+    toastMess,
+    setToastMess,
     loading,
     toastMessage,
-    toestMessColorGreen,
+    toastMessColorGreen,
   } = purpose === 'reset_password'
       ? useVerifyResetPassword()
       : useSignup();
@@ -225,14 +225,14 @@ const response  = await sendOTPToEmail_GET(email)
           </TouchableOpacity>
         </View>
       </ScrollView>
-      {/* {toestMess && (
+      {/* {toastMess && (
               <SuccessMessageCustom
                 textColor={Color.whiteText}
-                color={toestMessColorGreen ? Color.green : Color.red}
+                color={toastMessColorGreen ? Color.green : Color.red}
                 message={toastMessage}
               />
             )} */}
-      {/* {toestMess && (
+      {/* {toastMess && (
         <SuccessMessageCustom textColor={Color.whiteText} color={Color.green} message="We’ve sent a new verification code to your email. Please check your inbox!" />
       )} */}
     </SafeAreaView>

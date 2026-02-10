@@ -24,34 +24,34 @@ const ChangePassSetting = () => {
   const [secureCurrent, setSecureCurrent] = useState(true);
   const [secureNew, setSecureNew] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
-  const [toestMess, setToestMess] = useState(false)
-  const [toestMessColorGreen, setToestMessGreen] = useState(false)
+  const [toastMess, setToastMess] = useState(false)
+  const [toastMessColorGreen, setToastMessGreen] = useState(false)
   const [toastMessage, setToastMessage] = useState('');
 
   const navigation = useNavigation();
 
 
-  const toestMessFunc = ({ green = false, message = '' }) => {
-    setToestMess(true);
+  const toastMessFunc = ({ green = false, message = '' }) => {
+    setToastMess(true);
     setToastMessage(message);
 
-    if (green) setToestMessGreen(true);
+    if (green) setToastMessGreen(true);
 
     setTimeout(() => {
-      setToestMess(false);
-      setToestMessGreen(false);
+      setToastMess(false);
+      setToastMessGreen(false);
       setToastMessage('');
     }, 2000);
   };
 
   const handleSave = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toestMessFunc({ green: false, message: t("errorMessage.checkPassword") });
+      toastMessFunc({ green: false, message: t("errorMessage.checkPassword") });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toestMessFunc({ green: false, message: t("errorMessage.confirmNotMatch") });
+      toastMessFunc({ green: false, message: t("errorMessage.confirmNotMatch") });
 
       return;
     }
@@ -60,7 +60,7 @@ const ChangePassSetting = () => {
       // 1. Current password verify (Login API)
       const tokenCheck = await loginUser_Api(email, currentPassword.trim());
       if (!tokenCheck) {
-        toestMessFunc({ green: false, message: t("errorMessage.currentNotMatch") });
+        toastMessFunc({ green: false, message: t("errorMessage.currentNotMatch") });
 
         return;
       }
@@ -69,7 +69,7 @@ const ChangePassSetting = () => {
       const res = await changePassword(tokenCheck, newPassword.trim());
       if (res?.password_reset === "success") {
 
-        toestMessFunc({ green: true, message: t("errorMessage.passwordChangeSuccess") });
+        toastMessFunc({ green: true, message: t("errorMessage.passwordChangeSuccess") });
 
         navigation.goBack();
       } else {
@@ -141,10 +141,10 @@ const ChangePassSetting = () => {
       </View>
 
 
-      {toestMess && (
+      {toastMess && (
         <SuccessMessageCustom
           textColor={Color.whiteText}
-          color={toestMessColorGreen ? Color.green : Color.red}
+          color={toastMessColorGreen ? Color.green : Color.red}
           message={toastMessage}
         />
       )}

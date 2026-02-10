@@ -68,8 +68,8 @@ export default function TabNavigator() {
   const tabConfig = useMemo(
     () => ({
       hideTabBarOnRoutes: [ScreenNameEnum.WoodsScreen],
-      transparentTabBar: [ScreenNameEnum.WatchWithFrind],
-      absolutePositionTabBar: [ScreenNameEnum.WatchWithFrind],
+      transparentTabBar: [ScreenNameEnum.WatchWithFriend],
+      absolutePositionTabBar: [ScreenNameEnum.WatchWithFriend],
     }),
     []
   );

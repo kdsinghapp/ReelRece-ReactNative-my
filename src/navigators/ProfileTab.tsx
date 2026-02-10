@@ -15,8 +15,8 @@ import ChangePassSetting from '@screens/BottomTab/profile/setting/ChangePassSett
 import PrivacySetting from '@screens/BottomTab/profile/setting/PrivacySetting';
 import HelpMessage from '@components/settingHelp/helpMessage';
 import WatchSaveUser from '@screens/BottomTab/home/watchSaveUser/WatchSaveUser';
-import OtherWantPrfofile from '@screens/BottomTab/home/otherTaingPrfofile/OtherWantPrfofile';
-import OtherTaingPrfofile from '@screens/BottomTab/home/otherTaingPrfofile/OtherTaingPrfofile';
+import OtherWantProfile from '@screens/BottomTab/home/otherWatchingProfile/OtherWantProfile';
+import OtherWatchingProfile from '@screens/BottomTab/home/otherWatchingProfile/OtherWatchingProfile';
 import GroupSearch from '@screens/BottomTab/watch/watchScreen/GroupSearch';
 import StreamService from '@screens/BottomTab/profile/setting/StreamService';
 import FeatureRequest from '@screens/BottomTab/profile/setting/FeatureRequest';
@@ -44,9 +44,9 @@ const ProfileTab: FunctionComponent = () => {
     { name: ScreenNameEnum.FeatureRequest, Component: FeatureRequest },
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-    { name: ScreenNameEnum.OtherTaingPrfofile, Component: OtherTaingPrfofile },
+    { name: ScreenNameEnum.OtherWatchingProfile, Component: OtherWatchingProfile },
     { name: ScreenNameEnum.WatchSaveUser, Component: WatchSaveUser },  
-    { name: ScreenNameEnum.OtherWantPrfofile, Component: OtherWantPrfofile }, 
+    { name: ScreenNameEnum.OtherWantProfile, Component: OtherWantProfile }, 
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
     

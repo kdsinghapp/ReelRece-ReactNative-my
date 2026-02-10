@@ -75,11 +75,11 @@ enum ScreenNameEnum {
   /** Other user's profile view */
   OtherProfile = "OtherProfile",
   
-  /** Other user's "Taing" (watching) profile */
-  OtherTaingPrfofile = "OtherTaingPrfofile",
+  /** Other user's watching profile */
+  OtherWatchingProfile = "OtherWatchingProfile",
   
   /** Other user's "Want to watch" profile */
-  OtherWantPrfofile = "OtherWantPrfofile",
+  OtherWantProfile = "OtherWantProfile",
   
   /** List of users who watched/saved a movie */
   WatchSaveUser = "WatchSaveUser",
@@ -118,7 +118,7 @@ enum ScreenNameEnum {
   WatchScreen = "WatchScreen",
   
   /** Watch with friends flow */
-  WatchWithFrind = "WatchWithFrind",
+  WatchWithFriend = "WatchWithFriend",
   
   /** Create new watch group */
   CreateGroupScreen = "CreateGroupScreen",

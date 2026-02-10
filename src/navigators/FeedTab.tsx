@@ -5,9 +5,9 @@ import _routes from '@routes/routes';
 import ScreenNameEnum from '@routes/screenName.enum';
 import OtherProfile from '@screens/BottomTab/home/otherProfile/OtherProfile';
 import HomeScreen from '@screens/BottomTab/home/homeScreen/HomeScreen'
-import OtherTaingPrfofile from '@screens/BottomTab/home/otherTaingPrfofile/OtherTaingPrfofile';
+import OtherWatchingProfile from '@screens/BottomTab/home/otherWatchingProfile/OtherWatchingProfile';
 import WatchSaveUser from '@screens/BottomTab/home/watchSaveUser/WatchSaveUser';
-import OtherWantPrfofile from '@screens/BottomTab/home/otherTaingPrfofile/OtherWantPrfofile';
+import OtherWantProfile from '@screens/BottomTab/home/otherWatchingProfile/OtherWantProfile';
 import Followers from '@screens/BottomTab/profile/followerTab/Followers';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen';
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
@@ -21,9 +21,9 @@ const FeedTab: FunctionComponent = () => {
     { name: ScreenNameEnum.HOME_SCREEN, Component: HomeScreen },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
     { name: ScreenNameEnum.Followers, Component: Followers },
-    { name: ScreenNameEnum.OtherTaingPrfofile, Component: OtherTaingPrfofile },  //PROFILE1
+    { name: ScreenNameEnum.OtherWatchingProfile, Component: OtherWatchingProfile },  //PROFILE1
     { name: ScreenNameEnum.WatchSaveUser, Component: WatchSaveUser },   // PROFILE3
-    { name: ScreenNameEnum.OtherWantPrfofile, Component: OtherWantPrfofile },   // PROFILE2
+    { name: ScreenNameEnum.OtherWantProfile, Component: OtherWantProfile },   // PROFILE2
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
 

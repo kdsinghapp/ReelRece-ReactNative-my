@@ -27,21 +27,28 @@ const CustomTheme = {
 };
 
 const AppNavigator: React.FC = () => {
- const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [wasDisconnected, setWasDisconnected] = useState<boolean>(false);
 
-  // NetInfo listener
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      setIsConnected(state.isConnected ?? true);
-      if(!state.isConnected){
-        errorToast('No Internet! \n Please check your network connection')
-      }else{
-        successToast(`Back Online! \n Your internet connection has been restored`)
+      const connected = state.isConnected ?? true;
+      setIsConnected(connected);
+
+       if (!connected) {
+        setWasDisconnected(true);
+  errorToast('No internet connection');
+      }
+
+      // 🔁 When internet comes back AFTER being disconnected
+      if (connected && wasDisconnected) {
+successToast('You are back online');
+        setWasDisconnected(false);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [wasDisconnected]);
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

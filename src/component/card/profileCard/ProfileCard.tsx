@@ -27,7 +27,24 @@ const ProfileCard = ({
     imageLoading,
     setImageLoading,
     loaderFollow,
-    // onSuggested
+    onSuggested,
+}: {
+    imageUri?: string;
+    name?: string;
+    rank?: string;
+    followers?: string;
+    following?: string;
+    bio?: string;
+    onFollowPress: () => void;
+    isFollowing?: boolean;
+    butt?: boolean;
+    onFollowing: () => void;
+    onFollow: () => void;
+    rankscreenData?: unknown[];
+    imageLoading?: boolean;
+    setImageLoading?: (v: boolean) => void;
+    loaderFollow?: boolean;
+    onSuggested?: () => void;
 }) => {
     const navigation = useNavigation();
  
@@ -78,7 +95,7 @@ const ProfileCard = ({
             <View style={styles.statsContainer}>
                 <TouchableOpacity style={styles.statBox}
                     onPress={() => {
-                        navigation.navigate(ScreenNameEnum.OtherTaingPrfofile,
+                        navigation.navigate(ScreenNameEnum.OtherWatchingProfile,
                             {
                                 datamovie: rankscreenData,
                                 username: name,

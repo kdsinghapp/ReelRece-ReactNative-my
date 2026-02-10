@@ -14,7 +14,7 @@ export type RootStackParamList = {
   MovieDetailScreen: { imdb_idData: string; token: string };
   OtherProfile: { userId: string; username?: string };
   RankingTab: { openTooltipModal?: boolean };
-  WatchScreen: { getAllGroupReferace?: number };
+  WatchScreen: { getAllGroupReference?: number };
   Settings: undefined;
   EditProfile: undefined;
   Login: undefined;
