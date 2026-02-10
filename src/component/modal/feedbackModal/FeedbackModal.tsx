@@ -219,7 +219,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
             <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
 
               <CustomText
-                size={21}
+                size={20}
                 color={Color.whiteText}
                 style={styles.heading}
                 font={font.PoppinsBold}
@@ -269,7 +269,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
 
 
-            <Animated.View style={[styles.actionsContainer, { transform: [{ translateX: actionsContainerAnim }] }]}>
+            <Animated.View style={[styles.actionsContainer, {
+              // backgroundColor:"red",
+              left:15,
+                 transform: [{ translateX: actionsContainerAnim }] }]}>
 
               {/* Loved It */}
               <View style={styles.lovedIt}>
@@ -419,12 +422,11 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginLeft: 22,
-  },
+    gap: 7,
+   },
   lovedIt: {
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 50,
     alignItems: "center",
   },

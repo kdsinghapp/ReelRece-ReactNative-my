@@ -11,9 +11,7 @@ import { t } from 'i18next';
 const useLogin = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
-//   sunny.2309@yahoo.in 
-// test12345
-  const [email, setEmail] = useState<string>(' sunny.2309@yahoo.in');
+  const [email, setEmail] = useState<string>('sunny.2309@yahoo.in');
   const [password, setPassword] = useState<string>('test12345');
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');

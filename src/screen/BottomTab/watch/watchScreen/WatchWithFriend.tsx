@@ -485,8 +485,7 @@ const WatchWithFriend = () => {
   const displayMovies = useMemo(() => {
     return trimmedComment !== '' ? searchResult : groupRecommend;
   }, [searchResult, groupRecommend, trimmedComment]);
-
-  // Get current background image - NO DELAY
+   // Get current background image - NO DELAY
   const activeMovieImage = useMemo(() => {
     const movies = displayMovies;
     return movies?.[activeIndex]?.cover_image_url || null;
@@ -1281,7 +1280,7 @@ const styles = StyleSheet.create({
   thumpCard: {
     flexDirection: 'row',
     alignSelf: 'center',
-    bottom: 28
+    bottom: 25
   },
   thumpContainer: {
     alignItems: 'center',

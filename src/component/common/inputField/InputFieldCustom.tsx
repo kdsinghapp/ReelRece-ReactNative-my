@@ -1,76 +1,4 @@
-// import { View, TextInput, Image, TouchableOpacity } from 'react-native';
-// import React, { useRef, useState } from 'react';
-// import imageIndex from '@assets/imageIndex';
-// import { Color } from '@theme/color';
-
-// export default function InputFieldCustom({ validSuccess, ...props }) {
-//   const [showPassword, setShowPassword] = useState(props.hide );
-//   const [isFocused, setIsFocused] = useState(false);
-//   const inputRef = useRef(null);
-//   const onChangeText = (value: string) => {
-//     if (props.onChangeText) {
-//       props.onChangeText(value);
-//     }
-//   };
-
-//   return (
-//     <View style={{ marginVertical: 12 }}>
-//       <View style={{ position: 'relative' }}>
-//         <View
-//           style={[
-//             {
-//               flexDirection: 'row',
-//               backgroundColor: Color.grey,
-//               height: 55,
-//               borderRadius: 10,
-//               paddingHorizontal: 10,
-//               alignItems: 'center',
-//               borderWidth: 0.5,
-//               borderColor: isFocused ? Color.whiteText : 'transparent',
-//             },
-//             props.style,
-//           ]}
-//         >
-//           <TextInput
-//             placeholder={props.placeholder}
-//             placeholderTextColor={Color.lightGrayText}
-//             ref={inputRef}
-//             style={{
-//               flex: 1,
-//               fontWeight: '500',
-//               fontSize: 16,
-//               paddingTop: 10,
-//               color: Color.whiteText,
-//               height: 50,
-//             }}
-//             onChangeText={onChangeText}
-//             value={props.text}
-//             secureTextEntry={showPassword} // ✅ Correct usage
-//             maxLength={props.maxLength}
-//             keyboardType={props.type}
-//             onFocus={() => setIsFocused(true)}
-//             onBlur={() => setIsFocused(false)}
-//             editable={props.editable}
-//             autoFocus={false}
-//             returnKeyType={props.returnKeyType}
-//             onSubmitEditing={props.onSubmitEditing}
-//           />
-
-//           {/* Eye Icon Toggle */}
-//           {props.showEye && (
-//             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-//               <Image
-//                 source={showPassword ? imageIndex.eyes : imageIndex.view}
-//                 style={{ width: 24, height: 24 }}
-//                 tintColor={'rgba(205, 205, 205, 1)'}
-//               />
-//             </TouchableOpacity>
-//           )}
-//         </View>
-//       </View>
-//     </View>
-//   );
-// }
+ 
 
 import { View, TextInput, Image, TouchableOpacity } from 'react-native';
 import React, { useRef, useState } from 'react';
@@ -117,14 +45,15 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             placeholderTextColor={Color.lightGrayText}
             ref={inputRef}
             style={{
-               // fontWeight: '500',
-               flex:1,
-              fontFamily:font.PoppinsRegular,
-              fontSize: 16,
-               color: Color.whiteText,
-               textAlignVertical: 'center',
-              lineHeight:25
-            }}
+         flex: 1,
+    fontFamily: font.PoppinsRegular,
+    fontSize: 16,
+    color: Color.whiteText,
+    textAlignVertical: 'center', // Android
+    paddingVertical: 0,          // important
+    includeFontPadding: false,   // Android fix
+
+             }}
             onChangeText={onChangeText}
             value={text}
             secureTextEntry={showPassword}

@@ -49,7 +49,9 @@ lineHeight:18,
     position: 'relative',
   },
   headerSide: {
-   },
+    minWidth: 44,
+    justifyContent: 'center',
+  },
   action: {
     fontSize: 14,
     fontFamily: font.PoppinsRegular,
@@ -70,21 +72,23 @@ lineHeight:16,
 lineHeight:16,
     marginTop: 2,
   },
-    icon: {
+  icon: {
     width: 24,
     height: 24,
-   
-
+  },
+  titleCenter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
   title: {
     fontSize: 20,
     color: Color.whiteText,
     fontFamily: font.PoppinsBold,
-  },
-  titleCenter: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    textAlign: 'center',
   },
   buttonGroup: {
     // backgroundColor:"red",

@@ -20,6 +20,7 @@ import font from '@theme/font';
 import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const filterOptions = [
   { id: 1, option: 'All' },
@@ -51,9 +52,9 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
         watch_type: selectFilterOp, // static
 
       });
-      // setPlatforms(data.data);
-      setPlatforms(Array.isArray(data?.data) ? data?.data : []);
-
+      console.log("platforms data", data.data);
+      setPlatforms(data.data);
+ 
      } catch (error) {
      } finally {
       setWatchModalLoad(false)
@@ -224,6 +225,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
                   <Text style={styles.NotAvaibleText}>{t("emptyState.noresults")}</Text>
                 </View>
               ) : (
+                <ScrollView showsVerticalScrollIndicator={false}>
                 <FlatList
                   data={platforms}
                   keyExtractor={(_, index) => index.toString()}
@@ -236,6 +238,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
                   removeClippedSubviews
 
                 />
+                </ScrollView>
               )}
 
              

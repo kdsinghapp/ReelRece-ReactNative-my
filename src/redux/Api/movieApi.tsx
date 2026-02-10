@@ -354,17 +354,3 @@ export const rollbackPairwiseDecisions = async (
      throw error;
   }
 };
-
-
-
-// const handleCalculateRating = async (token) => {
-//   try {
-//    // your token
-//     const response = await calculateMovieRating(token, {
-//       imdb_id: 'tt0898266',
-//       preference: 'love',
-//     });
-
- //   } catch (err) {
- //   }
-// };

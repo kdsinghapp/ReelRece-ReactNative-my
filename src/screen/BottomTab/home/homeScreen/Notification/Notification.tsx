@@ -184,7 +184,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
       >
         <CustomStatusBar />
         <View style={[styles.headerContainer,{
-          marginTop: Platform.OS === 'ios' ? 11 : 5
+          marginTop: Platform.OS === 'ios' ? 55 : 5
         }]}>
           <View style={styles.headerSide}>
             <TouchableOpacity onPress={onClose}>
