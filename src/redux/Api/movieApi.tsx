@@ -165,8 +165,7 @@ export const recordPairwiseDecision = async (token: string, payload: PairwiseDec
     payload,
     { headers: { Authorization: `Token ${token}` } }
   );
- 
-  return response.data;
+   return response.data;
 };
 
 export const recordPairwiseDecision1 = async (token: string, payload: PairwiseDecisionPayload) => {
@@ -327,7 +326,7 @@ export const calculateMovieRating = async (
         headers: { Authorization: `Token ${token}` },
       }
     );
-    
+    console.log('Rating calculation response:', response.data);
      return true;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown } };

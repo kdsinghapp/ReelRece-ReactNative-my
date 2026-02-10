@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Alert } from 'react-native';
-import { calculateMovieRating, CALCULATE_RATING_ROLLBACK_ERROR, getAllRated_with_preference, getRatedMovies, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
+import { calculateMovieRating, getAllRated_with_preference, getRatedMovies, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
@@ -211,7 +211,7 @@ export const useCompareComponent = (token: string) => {
             });
           } catch (error) {
             handleCloseRating();
-                                errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
 
             return;
           }
@@ -279,7 +279,7 @@ export const useCompareComponent = (token: string) => {
             dispatch(setModalClosed(true));
           } catch (error) {
             handleCloseRating();
-                                errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
 
             return;
           }
@@ -429,7 +429,7 @@ export const useCompareComponent = (token: string) => {
               });
             } catch (error) {
               handleCloseRating();
-                      errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+              errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
 
             }
           }
@@ -461,7 +461,7 @@ export const useCompareComponent = (token: string) => {
           } catch (error) {
             // handleRatingRollbackError(error); 
             handleCloseRating();
-                    errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
           }
         }
       }
@@ -470,7 +470,7 @@ export const useCompareComponent = (token: string) => {
   );
   // close modal and rollback last decisions
   const handleCloseRating = async () => {
-     try {
+    try {
       await rollbackPairwiseDecisions(token, userPreference?.preference,);
 
       setComparisonVisible(false);

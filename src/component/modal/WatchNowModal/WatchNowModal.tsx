@@ -52,8 +52,7 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
         watch_type: selectFilterOp, // static
 
       });
-      console.log("platforms data", data.data);
-      setPlatforms(data.data);
+       setPlatforms(data.data);
  
      } catch (error) {
      } finally {
