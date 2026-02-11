@@ -74,20 +74,52 @@ export const getUniqueGenres = async (
   }
 };
 
-export const searchMovies = async (query: string, token: string): Promise<{ data: Movie[] }> => {
-   try {
+export interface SearchMoviesResponse {
+  data: {
+    results: Movie[];
+    total_pages: number;
+    page?: number;
+  };
+}
+
+export const searchMovies = async (
+  query: string,
+  token: string,
+  page: number = 1
+): Promise<SearchMoviesResponse> => {
+  try {
+    const pageValidation = validatePage(page);
     const response = await axiosInstance.get('/search?', {
-      params: { query },
+      params: {
+        query: validateSearchQuery(query).sanitized || query,
+        page: pageValidation.isValid ? pageValidation.value : 1,
+      },
       headers: { Authorization: `Token ${token}` },
     });
-     return response;
+    const data = response?.data ?? {};
+    return {
+      data: {
+        results: data.results ?? [],
+        total_pages: data.total_pages ?? 1,
+        page: data.page ?? page,
+      },
+    };
   } catch (error: unknown) {
-    const err = error as { message?: string };
-     return { data: [] };
+    return { data: { results: [], total_pages: 1 } };
   }
 };
 
-
+// export const searchMovies = async (query: string, token: string, page: number = 1): Promise<any> => {
+//   try {
+//     const response = await axiosInstance.get('/v1/search?', {
+//       params: { query }, // ✅ Added page parameter
+//       headers: { Authorization: `Token ${token}` },
+//     });
+//     return response // Return the whole object to get total_pages
+//   } catch (error) {
+//     return { results: [], total_pages: 0 };
+//   }
+// };
 
 export const getRatedMovies = async (token: string, page: number = 1): Promise<PaginatedResponse<Movie>> => {
   try {

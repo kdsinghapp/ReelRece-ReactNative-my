@@ -144,7 +144,14 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                     <View style={styles.memberItem}>
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
+                      
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
+                         <TouchableOpacity
+                                onPress={() => {
+                                  onClose();
+                                  navigation.navigate(ScreenNameEnum.OtherProfile,{item:currentUser});
+                                }}
+                            >
                           <FastImage
                             style={styles.avatar}
                             source={{
@@ -154,6 +161,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                           />
+                          </TouchableOpacity>
                           {currentUser?.online && <View style={styles.onlineIndicator} />}
                         </View>
                       </View>
@@ -172,7 +180,10 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                           <View style={styles.memberItem}>
                             <TouchableOpacity
                               style={{ marginRight: 12 }}
-                              onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile)}
+                              onPress={() => {
+                                onClose();
+                                navigation.navigate(ScreenNameEnum.OtherProfile,{item:item});
+                              }}
                             >
                               <View style={styles.avatarContainer}>
 

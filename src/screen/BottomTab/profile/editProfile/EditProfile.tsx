@@ -153,9 +153,13 @@ const avatarUri = imagePrfile?.path
           onSave={async (key, newValue) => {
             try {
               setProfileFields((prev) => ({ ...prev, [key]: newValue }));
-              // if (!token) return {
-              // Alert.alert('Token missing');
-              // }
+              console.log(profileFields.username)
+              console.log(key)
+              console.log(newValue)
+            // if(profileFields.username == newValue) {
+            //   setModalVisible(false)
+            //   return
+            // }
               await updateUserProfile(token, { [key]: newValue });
               dispatch(updateUserProfileField({ key: 'avatar', value: 'new-avatar.png' }));
               await getUserProfile(token)

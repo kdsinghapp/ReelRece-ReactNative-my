@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -22,6 +22,8 @@ import GroupSearch from '@screens/BottomTab/watch/watchScreen/GroupSearch';
 import CompareModals from '../rankingScreen/CompareModals';
 import { t } from 'i18next';
 
+const SEARCH_DEBOUNCE_MS = 500;
+
 const WoodsScreen = () => {
   const route = useRoute();
   const type = route?.params?.type;
@@ -41,7 +43,10 @@ const WoodsScreen = () => {
     searchFromAPI,
     searchGroupFromApi,
     loading,
-    groupsData
+    groupsData, 
+    loadingMore,
+    currentPage,
+    totalPages,
   } = useWoodScreen();
 
   // const {
@@ -61,41 +66,120 @@ const WoodsScreen = () => {
   const compareHook = useCompareComponent(token);
 
 
-  const handleSearch = useCallback((query: string) => {
-    const lowerQuery = query.toLowerCase();
-    if (!lowerQuery.trim()) {
-      setFilteredItems([]);
+  // const handleSearch = useCallback((query: string) => {
+  //   const lowerQuery = query.toLowerCase();
+  //   if (!lowerQuery.trim()) {
+  //     setFilteredItems([]);
+  //     return;
+  //   }
+
+  //   if (type === 'movie') {
+  //     if (token) {
+  //       searchFromAPI(lowerQuery, token); //  API based search
+  //     } else {
+  //     }
+  //   };
+
+  //   if (type === 'group') {
+  //     if (token) {
+  //       searchGroupFromApi(lowerQuery, token); // ✅ API based search
+  //     } else {
+  //     }
+  //     // const results = watchTogetherGroups.filter((group) =>
+  //     //   group.groupName.toLowerCase().includes(lowerQuery) )
+
+
+  //     // setFilteredItems(results);
+  //   }
+  // }, [type, token, searchQuery]);
+
+
+ 
+  const handleSearch = useCallback(
+    (query: string, page: number = 1) => {
+      if (!query.trim()) {
+        setFilteredItems([]);
+        return;
+      }
+      if (type === 'movie' && token) {
+        searchFromAPI(query.toLowerCase().trim(), token, page);
+      }
+    },
+    [type, token, searchFromAPI]
+  );
+
+  const searchRunRef = useRef(handleSearch);
+  searchRunRef.current = handleSearch;
+  const setFilteredItemsRef = useRef(setFilteredItems);
+  setFilteredItemsRef.current = setFilteredItems;
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRunRef = useRef((query: string) => {
+    if (!query.trim()) {
+      setFilteredItemsRef.current([]);
       return;
     }
+    searchRunRef.current(query, 1);
+  });
 
-    if (type === 'movie') {
-      if (token) {
-        searchFromAPI(lowerQuery, token); //  API based search
-      } else {
-      }
-    };
-
-    if (type === 'group') {
-      if (token) {
-        searchGroupFromApi(lowerQuery, token); // ✅ API based search
-      } else {
-      }
-      // const results = watchTogetherGroups.filter((group) =>
-      //   group.groupName.toLowerCase().includes(lowerQuery) )
-
-
-      // setFilteredItems(results);
+  const runDebouncedSearch = useCallback((query: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
-  }, [type, token, searchQuery]);
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      debouncedRunRef.current(query);
+    }, SEARCH_DEBOUNCE_MS);
+  }, []);
+
+  const handleSearchInputChange = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      if (!text.trim()) {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+          debounceTimerRef.current = null;
+        }
+        setFilteredItems([]);
+        return;
+      }
+      runDebouncedSearch(text);
+    },
+    [runDebouncedSearch, setFilteredItems]
+  );
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleSearch(searchQuery);
-    }, 500);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery, handleSearch]);
-
+  const loadMoreData = useCallback(() => {
+    if (
+      type !== 'movie' ||
+      !searchQuery.trim() ||
+      !token ||
+      loading ||
+      loadingMore ||
+      currentPage >= totalPages
+    ) {
+      return;
+    }
+    handleSearch(searchQuery, currentPage + 1);
+  }, [
+    type,
+    searchQuery,
+    token,
+    loading,
+    loadingMore,
+    currentPage,
+    totalPages,
+    handleSearch,
+  ]);
   useEffect(() => {
     setSearchQuery('');
     setFilteredItems([]);
@@ -117,12 +201,12 @@ const WoodsScreen = () => {
             placeholder={title ? title :   (t("discover.searchby"))  }
             placeholderTextColor={Color.textGray}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchInputChange}
             returnKeyType="search"
             allowFontScaling={false}
           />
           {!!searchQuery && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => handleSearchInputChange('')}>
               <Image source={imageIndex.closeimg} style={styles.clearIcon} resizeMode="contain" />
             </TouchableOpacity>
           )}
@@ -150,7 +234,9 @@ const WoodsScreen = () => {
           setlovedImge={setlovedImge}
           selectedPlatforms={selectedPlatforms}
           searchQuery={searchQuery}
-          loading={loading}
+          loading={loading}  
+          loadingMore={loadingMore} // ✅ Pass loadingMore for footer spinner
+          onEndReached={loadMoreData} // ✅ Pass this to FlatList
         />
       )}
 

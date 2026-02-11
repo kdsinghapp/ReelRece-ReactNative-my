@@ -185,6 +185,14 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
+                        <TouchableOpacity
+                                                   style={{ marginRight: 12 }}
+                                                  //  onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser})}
+                                                   onPress={() => {
+                                onClose();
+                                navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser});
+                              }}
+                                                 >
                           <FastImage
                             style={styles.avatar}
                             source={{
@@ -194,6 +202,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                             }}
                             resizeMode={FastImage.resizeMode.cover}
                           />
+                          </TouchableOpacity>
                           {currentUser?.preference &&
                             <View style={[styles.onlineIndicator, { backgroundColor: currentUser?.preference == 'dislike' ? '#CA462A' : '#35C75A' }]}>
                               <Image source={currentUser?.preference == 'dislike' ? imageIndex.disLike : imageIndex.like} style={{ height: 16, width: 16 }} />
@@ -226,7 +235,10 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                           <View style={styles.memberItem}>
                             <TouchableOpacity
                               style={{ marginRight: 12 }}
-                              onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile)}
+                              onPress={() => {
+                                onClose();
+                                navigation.navigate(ScreenNameEnum.OtherProfile, {item:item});
+                              }}
                             >
                               <View style={styles.avatarContainer}>
 

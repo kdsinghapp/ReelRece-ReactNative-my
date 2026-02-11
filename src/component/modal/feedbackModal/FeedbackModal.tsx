@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, Image, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Animated, Dimensions, TextInput, Keyboard } from 'react-native';
+import { Modal, View, Text, Image, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Animated, Dimensions, TextInput, Keyboard, ActivityIndicator } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -31,9 +31,6 @@ interface FeedbackModalProps {
 const FeedbackModal: React.FC<FeedbackModalProps> = ({
   visible,
   onClose,
-  // onLovedIt,
-  // onOkay,
-  // onDidntLike,
   movieTitle,
   movieYear,
   poster,
@@ -43,7 +40,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   selectedMovie,
   setFeedbackVisible,
   onOpenSecondModal,
-  // check_has_rated,
+  isLoading = false,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
@@ -176,16 +173,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         }
 
         fileLogger.info('Calling onSubmit callback', { preference });
-        // ✅ Callback & UI updates
         onSubmit(preference);
-
-        fileLogger.info('Closing feedback modal');
-        onClose();
-
-        fileLogger.info('Opening second modal if available');
-        onOpenSecondModal?.();
-
-        fileLogger.info('Resetting text');
         setText("");
 
         fileLogger.info('nextPress COMPLETE - success');
@@ -208,13 +196,17 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <TouchableWithoutFeedback>
         <View style={styles.overlay}>
-          {/* <View style={styles.modalContent}> */}
           <TouchableOpacity style={{ alignSelf: 'flex-end', right: 22, position: 'absolute', top: 55, zIndex: 777 }}
             onPress={handleCloseRating}
           >
             <Image source={imageIndex.closeCircle} style={{ height: 24, width: 24, tintColor: Color.placeHolder, resizeMode: 'contain' }} />
           </TouchableOpacity>
           <View style={[styles.modalContent, { marginTop: modalMarginTop }]}>
+            {isLoading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color={Color.primary} />
+              </View>
+            )}
 
             <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
 
@@ -391,6 +383,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    zIndex: 10,
   },
   modalContent: {
     padding: 20,

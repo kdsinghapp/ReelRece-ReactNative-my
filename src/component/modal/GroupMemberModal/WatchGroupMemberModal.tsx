@@ -149,6 +149,9 @@ const filteredMembers = members?.filter(member =>
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser})}
+                          >
                            <FastImage
           style={styles.avatar}
           source={{
@@ -158,6 +161,7 @@ const filteredMembers = members?.filter(member =>
           }}
           resizeMode={FastImage.resizeMode.cover}
         />
+        </TouchableOpacity>
                           {currentUser?.online && <View style={styles.onlineIndicator} />}
                         </View>
                       </View>
@@ -174,7 +178,7 @@ const filteredMembers = members?.filter(member =>
                         <View style={styles.memberItem}>
                           <TouchableOpacity
                             style={{ marginRight: 12 }}
-                            onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile)}
+                            onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:item})}
                           >
                             <View style={styles.avatarContainer}>
 

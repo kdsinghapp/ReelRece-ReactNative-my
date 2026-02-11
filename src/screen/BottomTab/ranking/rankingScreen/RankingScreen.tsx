@@ -129,8 +129,8 @@ const RankingScreen = () => {
   // Add this function before your return statement
   const handleRefresh = useCallback(async () => {
     if (!isOnline) {
-       errorToast('No Internet! \n Please check your network connection')
-      
+      errorToast('No Internet! \n Please check your network connection')
+
       return;
     }
 
@@ -744,7 +744,7 @@ const RankingScreen = () => {
   useEffect(() => {
     setDisplayMovies(filteredMovies);
   }, [filteredMovies, visibleCount]);
-   return (
+  return (
     <SafeAreaView style={styles.maincontainer}>
       <CustomStatusBar />
 
@@ -758,7 +758,7 @@ const RankingScreen = () => {
             />
           </View>
         </TouchableOpacity>
- 
+
         <ScrollView showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -768,18 +768,18 @@ const RankingScreen = () => {
               tintColor={Color.primary}
               title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
               titleColor={Color.grey700}
-              // enabled={isOnline} // Disable when offline
+            // enabled={isOnline} // Disable when offline
             />
           }
-          //  contentContainerStyle={{ flexGrow: 1 }}
+        //  contentContainerStyle={{ flexGrow: 1 }}
         >
-{ currentStep !== 5 && (
-  <StepProgressBar
-    totalSteps={totalSteps}
-    disable={true}
-    currentStepModal={currentStep}
-  />
-)}
+          {currentStep < 5 && (
+            <StepProgressBar
+              totalSteps={totalSteps}
+              disable={true}
+              currentStepModal={currentStep}
+            />
+          )}
 
 
           {/* Rated Movies Section */}
@@ -877,12 +877,12 @@ const RankingScreen = () => {
             )
           )}
 
- 
+
 
           {!showList ? null : (
             <>
               <>
-               {/* <ButtonCustom
+                {/* <ButtonCustom
                       title="Discover"
                       onPress={() => navigation.navigate(ScreenNameEnum.DiscoverTab, {
                         screen: ScreenNameEnum.DiscoverScreen,
@@ -897,12 +897,12 @@ const RankingScreen = () => {
                         marginTop: 5
                       }}
                     />   */}
- 
+
 
               </>
 
-           
-       
+
+
               {/* {(t("login.next"))}  */}
               <Text style={styles.heading}>
                 {(t("discover.haveyou"))} {"\n"}

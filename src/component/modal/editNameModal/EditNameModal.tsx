@@ -62,9 +62,15 @@ React.useEffect(() => {
 
 
 const handleSave = async () => {
-  const trimmedValue = value.trim(); 
+  const trimmedValue = value.trim();
+  const trimmedInitial = (initialValue ?? '').trim();
 
   if (trimmedValue === '') return;
+
+  if (trimmedValue === trimmedInitial) {
+    onClose();
+    return;
+  }
 
   if (fieldKey === 'username') {
     try {

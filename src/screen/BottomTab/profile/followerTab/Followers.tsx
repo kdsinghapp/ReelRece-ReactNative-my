@@ -23,7 +23,6 @@ const Followers= () => {
   const token = useSelector((state: RootState) => state.auth.token);
   const route = useRoute();
   const { tabToOpen, userName } = route.params || {};
-  console.log('Received userName:', route.params?.userName);
   // const userName = useSelector((state: RootState) => state.auth.userGetData.name);
   const initialData = {
     Followers: [],

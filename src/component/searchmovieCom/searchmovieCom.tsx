@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,8 @@ const SearchMovieCom = ({
   loading,
   setSearchData,
   token,
+  onEndReached,
+  loadingMore
 }) => {
   
   
@@ -40,6 +42,29 @@ const SearchMovieCom = ({
   const compareHook = useCompareComponent(token);
   
   const formattedQuery = movieData.length === 0 ? searchQuery : '';
+  const onEndReachedInFlight = useRef(false);
+  const unlockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEndReached = useCallback(() => {
+    if (!onEndReached || onEndReachedInFlight.current) return;
+    onEndReachedInFlight.current = true;
+    if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
+    onEndReached();
+    unlockTimeoutRef.current = setTimeout(() => {
+      unlockTimeoutRef.current = null;
+      onEndReachedInFlight.current = false;
+    }, 250);
+  }, [onEndReached]);
+
+  useEffect(() => {
+    if (!loadingMore) {
+      onEndReachedInFlight.current = false;
+      if (unlockTimeoutRef.current) {
+        clearTimeout(unlockTimeoutRef.current);
+        unlockTimeoutRef.current = null;
+      }
+    }
+  }, [loadingMore]);
 
   // Bookmark Toggle Logic
   const toggleSave = async (imdb_id: string) => {
@@ -188,8 +213,20 @@ const SearchMovieCom = ({
               initialNumToRender={12}
               maxToRenderPerBatch={14}
               windowSize={10}
-              removeClippedSubviews
-
+              removeClippedSubviews={true}
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.3}
+              ListFooterComponent={
+                loadingMore
+                  ? () => (
+                      <ActivityIndicator
+                        size="small"
+                        color={Color.primary}
+                        style={styles.footerLoader}
+                      />
+                    )
+                  : null
+              }
             />
           )}
         </View>
@@ -250,6 +287,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 20,
     paddingHorizontal: 15,
+  },
+  footerLoader: {
+    margin: 10,
   },
   noResultsContainer: {
     flex: 1,

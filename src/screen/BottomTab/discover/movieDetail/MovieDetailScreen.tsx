@@ -211,7 +211,7 @@ const MovieDetailScreen = () => {
       scrollEnabled: outerScrollEnableds.current
     });
   }, [outerScrollEnableds.current]);
-  // Navigation effect
+  // Screen focus: resume video state when screen is focused
   useFocusEffect(
     useCallback(() => {
       setIsScreenFocused(true);
@@ -691,6 +691,15 @@ const MovieDetailScreen = () => {
 
   const [paused, setPaused] = useState(false); // Start playing by default
   const prevModalState = useRef(false);
+
+  // Stop video when user switches tab (screen loses focus)
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setPaused(true);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     const isModalOpen = thinkModal
@@ -1338,6 +1347,19 @@ const MovieDetailScreen = () => {
           rec_scoreComm={movieData[currentIndex]?.rec_score || 0}
           showCommenRankingCheck={() => showCommenRankingCheck()}
           has_rated_movie={has_rated_ref.current}
+          onCommentAdded={() => {
+            setMovieData(prev => {
+              const next = [...prev];
+              const item = next[currentIndex];
+              if (item && typeof item === 'object') {
+                next[currentIndex] = {
+                  ...item,
+                  n_comments: (item.n_comments ?? 0) + 1,
+                };
+              }
+              return next;
+            });
+          }}
         />
       }
       {isFeedbackModal &&

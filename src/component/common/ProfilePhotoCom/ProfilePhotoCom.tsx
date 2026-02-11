@@ -28,7 +28,8 @@ const ProfilePhotoCom: React.FC<ProfilePhotoComProps> = ({ item, navigationScree
     if (navigationScreen) {
       navigation.navigate(navigationScreen);
     } else {
-      navigation.navigate(ScreenNameEnum.OtherProfile);
+      navigation.navigate(ScreenNameEnum.OtherProfile ,{item:item});
+      // navigation.navigate(ScreenNameEnum.OtherProfile, );
     }
   }}
 >

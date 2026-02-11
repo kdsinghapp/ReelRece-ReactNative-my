@@ -122,37 +122,33 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
   // };
 
   const slideAndResetImages = (onBeforeSlide: () => void, onAfterSlide?: () => void) => {
-    // ✅ Update image immediately *before* animation
     onBeforeSlide?.();
 
     Animated.parallel([
       Animated.timing(leftAnim, {
         toValue: screenWidth,
-        duration: 700,
+        duration: 500,
         useNativeDriver: true,
       }),
       Animated.timing(rightAnim, {
         toValue: -screenWidth,
-        duration: 700,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start(() => {
       setSelected(null);
-
-      // Reset position
       leftAnim.setValue(screenWidth);
       rightAnim.setValue(-screenWidth);
 
-      // Animate back in with new data
       Animated.parallel([
         Animated.timing(leftAnim, {
           toValue: 0,
-          duration: 350,
+          duration: 180,
           useNativeDriver: true,
         }),
         Animated.timing(rightAnim, {
           toValue: 0,
-          duration: 350,
+          duration: 180,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -180,12 +176,12 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
       Animated.parallel([
         Animated.timing(leftAnim, {
           toValue: 0,
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }),
         Animated.timing(rightAnim, {
           toValue: 0,
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }),
       ]).start();

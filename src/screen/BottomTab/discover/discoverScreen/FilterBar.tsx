@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -39,12 +39,33 @@ const FilterBar = ({ isSelectList,
 
   const [tempGenres, setTempGenres] = useState([]);             // modal internal state
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     if (isSelectList && ['1', '2', '5'].includes(isSelectList)) {
       setSelectedSimpleFilter(isSelectList);
     }
   }, [isSelectList]);
+
+  // Auto-scroll filter bar so the selected tab is in view (and centered)
+  useEffect(() => {
+    if (!selectedSimpleFilter || !['1', '2', '5'].includes(selectedSimpleFilter)) return;
+    const index = filters.findIndex(f => f.id === selectedSimpleFilter);
+    if (index < 0) return;
+    const t = setTimeout(() => {
+      try {
+        flatListRef.current?.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      } catch (_) {
+        // fallback: scrollToOffset if scrollToIndex fails (e.g. item not measured yet)
+        flatListRef.current?.scrollToOffset?.({ offset: index * 120, animated: true });
+      }
+    }, 100);
+    return () => clearTimeout(t);
+  }, [selectedSimpleFilter]);
 
   useEffect(() => {
     if (platformModalVisible) {
@@ -63,7 +84,6 @@ const FilterBar = ({ isSelectList,
 
   const handlePress = (item) => {
     if (item.id === '3') {
-
       setGenreModalVisible(true);
     } else if (item.id === '4') {
       setPlatformModalVisible(true);
@@ -71,6 +91,13 @@ const FilterBar = ({ isSelectList,
       setSelectedSimpleFilter(item.id);
     }
   };
+
+  const FILTER_ITEM_WIDTH = 130;
+  const getItemLayout = (_, index) => ({
+    length: FILTER_ITEM_WIDTH,
+    offset: FILTER_ITEM_WIDTH * index,
+    index,
+  });
 
   const isSelected = (item) => {
     if (['1', '2', '5'].includes(item.id)) {
@@ -346,17 +373,19 @@ const FilterBar = ({ isSelectList,
   return (
     <View style={styles.container}>
       <FlatList
+        ref={flatListRef}
         data={filters}
         horizontal
-        keyExtractor={(item) => item?.supported_platform}
+        keyExtractor={(item) => item?.id ?? String(item?.title)}
         showsHorizontalScrollIndicator={false}
         renderItem={renderItem}
         contentContainerStyle={styles.flatListContent}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
         windowSize={7}
-        removeClippedSubviews
-
+        removeClippedSubviews={false}
+        getItemLayout={getItemLayout}
+        onScrollToIndexFailed={() => {}}
       />
       {/* GENRE MODAL */}
       {genreModalVisible &&

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -69,7 +69,12 @@ const TabPaginationScreen = () => {
 
   const [filterGenreString, setFilterGenreString] = useState('');
   const [platformFilterString, setPlatformFilterString] = useState('');
-  const [selectedSimpleFilter, setSelectedSimpleFilter] = useState('1');
+  const [selectedSimpleFilter, setSelectedSimpleFilter] = useState(() => {
+    const list = route?.params?.isSelectList;
+    return list != null && ['1', '2', '5'].includes(String(list))
+      ? String(list)
+      : '1';
+  });
 
   // Pagination states
   const [loading, setLoading] = useState(false);
@@ -164,6 +169,7 @@ const TabPaginationScreen = () => {
         return;
       }
 
+      const requestedFingerprint = filterFingerprintRef.current;
       isFetchingRef.current = true;
       shouldLoadMoreRef.current = false;
 
@@ -171,7 +177,7 @@ const TabPaginationScreen = () => {
         setLoading(true);
         setHasMore(true);
         setCurrentPage(1);
-        setTrending([]); // clear list for UX
+        setTrending([]);
       } else {
         setLoadingMore(true);
       }
@@ -180,6 +186,8 @@ const TabPaginationScreen = () => {
         const url = buildUrl(page);
         const params = { token, url };
         const result = await Trending_without_Filter(params);
+
+        if (filterFingerprintRef.current !== requestedFingerprint) return;
 
         const safeResults: MovieItem[] = Array.isArray(result?.results) ? result.results : [];
 
@@ -196,18 +204,19 @@ const TabPaginationScreen = () => {
 
         const currentPageNum = Number(result?.current_page ?? page);
         const totalPagesNum = Number(result?.total_pages ?? 1);
-
         const hasMoreData = safeResults.length > 0 && currentPageNum < totalPagesNum;
 
         setCurrentPage(currentPageNum);
         setTotalPages(totalPagesNum);
         setHasMore(hasMoreData);
       } catch (e) {
-        setHasMore(false);
+        if (filterFingerprintRef.current === requestedFingerprint) setHasMore(false);
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        setRefreshing(false);
+        if (filterFingerprintRef.current === requestedFingerprint) {
+          setLoading(false);
+          setLoadingMore(false);
+          setRefreshing(false);
+        }
         isFetchingRef.current = false;
         shouldLoadMoreRef.current = true;
       }
@@ -215,12 +224,15 @@ const TabPaginationScreen = () => {
     [token, buildUrl, setTrending]
   );
 
-  // initial load
-  useEffect(() => {
-    fetchMovies(1, true);
-  }, [fetchMovies]);
+  // Sync tab from route params as early as possible; also when params arrive after mount (e.g. tab)
+  useLayoutEffect(() => {
+    if (isSelectList != null && ['1', '2', '5'].includes(String(isSelectList))) {
+      const next = String(isSelectList);
+      setSelectedSimpleFilter(prev => (prev !== next ? next : prev));
+    }
+  }, [isSelectList]);
 
-  // filters change => reset and fetch page 1
+  // Single source: fetch when filters (including selected tab) change; runs on mount and when user changes tab/filters
   useEffect(() => {
     const currentFingerprint = `${selectedSimpleFilter}-${filterGenreString}-${platformFilterString}-${selectedSortId}-${contentSelect}`;
     if (filterFingerprintRef.current !== currentFingerprint) {
@@ -262,14 +274,20 @@ const TabPaginationScreen = () => {
     ({ item }: { item: MovieItem }) => {
       if (!item) return null;
 
+      // const coverSource = item?.cover_image_url?.trim()
+      //   ? {
+      //       uri: item.cover_image_url,
+      //       priority: FastImage.priority.low,
+      //       cache: FastImage.cacheControl.immutable,
+      //     }
+      //   : imageIndex.SingleMovie5;
       const coverSource = item?.cover_image_url?.trim()
-        ? {
-            uri: item.cover_image_url,
-            priority: FastImage.priority.low,
-            cache: FastImage.cacheControl.immutable,
-          }
-        : imageIndex.SingleMovie5;
-
+      ? {
+          uri: item.cover_image_url,
+          priority: FastImage.priority.low,
+          cache: FastImage.cacheControl.immutable,
+        }
+      : null;
       return (
         <TouchableOpacity
           onPress={() => goToDetail(item)}

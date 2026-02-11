@@ -19,6 +19,7 @@ export const useCompareComponent = (token: string) => {
   // Modal states (public API same)
   const [isFeedbackVisible, setFeedbackVisible] = useState(false);
   const [isComparisonVisible, setComparisonVisible] = useState(false);
+  const [isComparisonLoading, setComparisonLoading] = useState(false);
   const [stepsModal, setStepsModal] = useState<boolean>(false); // kept for compatibility
   const [isStepsModalVisible, setStepsModalVisible] = useState(false);
   const dispatch = useDispatch();
@@ -140,20 +141,30 @@ export const useCompareComponent = (token: string) => {
   const handleFeedbackSubmit = useCallback(
     async (pref: 'love' | 'like' | 'dislike') => {
       setUserPreference({ preference: pref });
-      setFeedbackVisible(false);
+      setComparisonLoading(true);
 
-      const list = await fetchComparisonMovies(pref);
-      if (list.length > 0) {
-        setComparisonVisible(true);
-      } else if (selectedMovie?.imdb_id) {
-        try {
-          await calculateMovieRating(token, {
-            imdb_id: selectedMovie?.imdb_id,
-            preference: pref,
-          });
-        } catch (error) {
-          handleCloseRating();
+      try {
+        const list = await fetchComparisonMovies(pref);
+        setComparisonLoading(false);
+        if (list.length > 0) {
+          setComparisonVisible(true);
+          setFeedbackVisible(false);
+        } else {
+          setFeedbackVisible(false);
+          if (selectedMovie?.imdb_id) {
+            try {
+              await calculateMovieRating(token, {
+                imdb_id: selectedMovie?.imdb_id,
+                preference: pref,
+              });
+            } catch (error) {
+              handleCloseRating();
+            }
+          }
         }
+      } catch (_) {
+        setComparisonLoading(false);
+        setFeedbackVisible(false);
       }
     },
     [fetchComparisonMovies, selectedMovie, token]
@@ -211,7 +222,7 @@ export const useCompareComponent = (token: string) => {
             });
           } catch (error) {
             handleCloseRating();
-            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("movie ranking failed, please try again.");
 
             return;
           }
@@ -233,25 +244,28 @@ export const useCompareComponent = (token: string) => {
       // Record user preference
       setLastAction('first');
 
-      // await recordUserPreferences(
-      //   token,
-      //   userPreference.preference,
-      //   selectedMovie.imdb_id,
-      //   secondMovieData.imdb_id,
-      //   selectedMovie.imdb_id
-      // );
-      await recordPairwiseDecision(
-        token,
-        {
+      // Record with retry: try once, on failure retry once, then show error and close
+      try {
+        await recordPairwiseDecision(token, {
           preference: userPreference.preference,
           imdb_id_1: selectedMovie.imdb_id,
           imdb_id_2: secondMovieData.imdb_id,
-          winner: selectedMovie.imdb_id
-          // winner: selectedMovie.imdb_id
-
+          winner: selectedMovie.imdb_id,
+        });
+      } catch (_) {
+        try {
+          await recordPairwiseDecision(token, {
+            preference: userPreference.preference,
+            imdb_id_1: selectedMovie.imdb_id,
+            imdb_id_2: secondMovieData.imdb_id,
+            winner: selectedMovie.imdb_id,
+          });
+        } catch (_) {
+          handleCloseRating();
+          errorToast('movie ranking failed, please try again.');
+          return;
         }
-
-      );
+      }
 
 
       // Update high and mid using refs (binary search logic)
@@ -279,7 +293,7 @@ export const useCompareComponent = (token: string) => {
             dispatch(setModalClosed(true));
           } catch (error) {
             handleCloseRating();
-            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("movie ranking failed, please try again.");
 
             return;
           }
@@ -301,26 +315,28 @@ export const useCompareComponent = (token: string) => {
     try {
       setLastAction('second');
 
-      // await recordUserPreferences(
-      //   token,
-      //   userPreference.preference,
-      //   selectedMovie.imdb_id,
-      //   secondMovieData.imdb_id,
-      //   secondMovieData.imdb_id
-      // );
-
-      await recordPairwiseDecision(
-        token,
-        {
+      // Record with retry: try once, on failure retry once, then show error and close
+      try {
+        await recordPairwiseDecision(token, {
           preference: userPreference.preference,
           imdb_id_1: selectedMovie.imdb_id,
           imdb_id_2: secondMovieData.imdb_id,
-          // winner: selectedMovie.imdb_id
-          winner: secondMovieData.imdb_id
-
+          winner: secondMovieData.imdb_id,
+        });
+      } catch (_) {
+        try {
+          await recordPairwiseDecision(token, {
+            preference: userPreference.preference,
+            imdb_id_1: selectedMovie.imdb_id,
+            imdb_id_2: secondMovieData.imdb_id,
+            winner: secondMovieData.imdb_id,
+          });
+        } catch (_) {
+          handleCloseRating();
+          errorToast('movie ranking failed, please try again.');
+          return;
         }
-
-      );
+      }
 
       // Update low and mid using refs
       const newLow = midRef.current + 1;
@@ -392,7 +408,7 @@ export const useCompareComponent = (token: string) => {
       }
       catch (error) {
         handleCloseRating();
-        errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+        errorToast("movie ranking failed, please try again.");
 
         return;
       }
@@ -429,7 +445,7 @@ export const useCompareComponent = (token: string) => {
               });
             } catch (error) {
               handleCloseRating();
-              errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+              errorToast("movie ranking failed, please try again.");
 
             }
           }
@@ -461,7 +477,7 @@ export const useCompareComponent = (token: string) => {
           } catch (error) {
             // handleRatingRollbackError(error); 
             handleCloseRating();
-            errorToast("Could not save rating. Your choices have been rolled back. Please try again from the beginning.");
+            errorToast("movie ranking failed, please try again.");
           }
         }
       }
@@ -540,6 +556,7 @@ export const useCompareComponent = (token: string) => {
     // Modals
     isFeedbackVisible,
     isComparisonVisible,
+    isComparisonLoading,
     openFeedbackModal,
     setFeedbackVisible,
     setComparisonVisible,

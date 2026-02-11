@@ -1,6 +1,6 @@
 
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchMovies as fetchSearchMovies } from '@redux/Api/movieApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
@@ -20,7 +20,13 @@ const useWoodScreen = () => {
   const [loading, setLoading] = useState(false);
   const [filteredItems, setFilteredItems] = useState<string | object[]>([]);
   const [groupsData, setGroupsData] = useState<string | object[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [loadingGroups, setLoadingGroups] = useState(true); 
+  const [loadingMore, setLoadingMore] = useState(false); ;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  /** Ignore responses for older queries so only the latest search updates the list (fixes jumping data). */
+  const latestSearchQueryRef = useRef('');
 
   const togglePlatform = (item: string | object) => {
     const id = item.id;
@@ -30,17 +36,51 @@ const useWoodScreen = () => {
   };
 
   // 🔍 Search for Movies
-  const searchFromAPI = async (query: string) => {
+  // const searchFromAPI = async (query: string, page: number = 1) => {
+  //   try {
+  //     setLoading(true);
+  //     const result = await fetchSearchMovies(query, token);
+  //     setFilteredItems(result?.data?.results || []);
+  //   } catch (error) {
+  //      setFilteredItems([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const searchFromAPI = useCallback(async (query: string, authToken: string, page: number = 1) => {
+    if (!query?.trim()) return;
+    const normalizedQuery = query.toLowerCase().trim();
+    if (page === 1) latestSearchQueryRef.current = normalizedQuery;
+
     try {
-      setLoading(true);
-      const result = await fetchSearchMovies(query, token);
-      setFilteredItems(result?.data?.results || []);
+      if (page === 1) {
+        setLoading(true);
+        setCurrentPage(1);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const result = await fetchSearchMovies(query, authToken, page);
+      const newResults = result?.data?.results ?? [];
+
+      if (latestSearchQueryRef.current !== normalizedQuery) return;
+
+      setFilteredItems(prev =>
+        page === 1 ? newResults : [...(Array.isArray(prev) ? prev : []), ...newResults]
+      );
+      setTotalPages(result?.data?.total_pages ?? 1);
+      setCurrentPage(page);
     } catch (error) {
-       setFilteredItems([]);
+      if (latestSearchQueryRef.current === normalizedQuery && page === 1) {
+        setFilteredItems([]);
+      }
     } finally {
-      setLoading(false);
+      if (latestSearchQueryRef.current === normalizedQuery) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
-  };
+  }, []);
 
   // 🔍 Search for Groups by Query
   const searchGroupFromApi = useCallback(async (query: string) => {
@@ -125,7 +165,11 @@ const useWoodScreen = () => {
     searchGroupFromApi,
     handleToggleMute,
     groupsData,
-    loadingGroups
+    loadingGroups,
+    loadingMore,
+    currentPage,
+    totalPages,
+    setCurrentPage,
   };
 };
 
