@@ -8,9 +8,14 @@ import { loginSuccess } from '@redux/feature/authSlice';
 import NetInfo from "@react-native-community/netinfo";
 import { loginUser_Api } from '@redux/Api/authService';
 import { t } from 'i18next';
+import { Alert } from 'react-native';
+import { errorToast } from '@utils/customToast';
 const useLogin = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
+  // const [email, setEmail] = useState<string>('');
+  // const [password, setPassword] = useState<string>('');
+  // const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('sunny.2309@yahoo.in');
   const [password, setPassword] = useState<string>('test12345');
   const [emailError, setEmailError] = useState<string>('');
@@ -38,9 +43,9 @@ const useLogin = () => {
   const handlePassText = (value: string): void => {
     setPassword(value);
     if (!value.trim()) {
-      setPasswordError(t('errorMessage.password'));
+    //  setPasswordError(t('errorMessage.password'));
     } else if (value.trim().length < 6) {
-      setPasswordError(t('errorMessage.invalidPassword'));
+      // setPasswordError(t('errorMessage.invalidPassword'));
     } else {
       setPasswordError('');
     }
@@ -64,8 +69,8 @@ const useLogin = () => {
     const trimmedPassword = password.trim();
     // 🔴 Basic Validation
     if (!trimmedEmail || !trimmedPassword) {
-      // Alert.alert('Error', 'Email AND  Password SEND BOTH are required');
-      return;
+      errorToast(t('errorMessage.enterboth'));
+       return;
     }
 
     if (!emailRegex.test(trimmedEmail)) {

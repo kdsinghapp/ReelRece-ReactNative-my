@@ -1,4 +1,4 @@
- 
+
 
 import { View, TextInput, Image, TouchableOpacity } from 'react-native';
 import React, { useRef, useState } from 'react';
@@ -45,15 +45,15 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             placeholderTextColor={Color.lightGrayText}
             ref={inputRef}
             style={{
-         flex: 1,
-    fontFamily: font.PoppinsRegular,
-    fontSize: 16,
-    color: Color.whiteText,
-    textAlignVertical: 'center', // Android
-    paddingVertical: 0,          // important
-    includeFontPadding: false,   // Android fix
+              flex: 1,
+              fontFamily: font.PoppinsRegular,
+              fontSize: 16,
+              color: Color.whiteText,
+              textAlignVertical: 'center', // Android
+              paddingVertical: 0,          // important
+              includeFontPadding: false,   // Android fix
 
-             }}
+            }}
             onChangeText={onChangeText}
             value={text}
             secureTextEntry={showPassword}
@@ -65,7 +65,7 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             autoFocus={false}
             returnKeyType={props.returnKeyType}
             onSubmitEditing={props.onSubmitEditing}
-                   allowFontScaling={false} 
+            allowFontScaling={false}
           />
 
           {/* Eye Icon Toggle */}

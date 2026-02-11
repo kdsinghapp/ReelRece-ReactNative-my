@@ -744,8 +744,7 @@ const RankingScreen = () => {
   useEffect(() => {
     setDisplayMovies(filteredMovies);
   }, [filteredMovies, visibleCount]);
-
-  return (
+   return (
     <SafeAreaView style={styles.maincontainer}>
       <CustomStatusBar />
 
@@ -759,7 +758,7 @@ const RankingScreen = () => {
             />
           </View>
         </TouchableOpacity>
-
+ 
         <ScrollView showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -774,6 +773,13 @@ const RankingScreen = () => {
           }
           //  contentContainerStyle={{ flexGrow: 1 }}
         >
+{ currentStep !== 5 && (
+  <StepProgressBar
+    totalSteps={totalSteps}
+    disable={true}
+    currentStepModal={currentStep}
+  />
+)}
 
 
           {/* Rated Movies Section */}
@@ -871,22 +877,12 @@ const RankingScreen = () => {
             )
           )}
 
-{totalSteps === 5 &&
- currentStep >= 0 &&
- order.slice(0, visibleCount).length === 0 && (
-   <StepProgressBar
-     totalSteps={totalSteps}
-     disable={true}
-     currentStepModal={currentStep}
-   />
- )}
-
-
+ 
 
           {!showList ? null : (
             <>
               <>
-                {/* <ButtonCustom
+               {/* <ButtonCustom
                       title="Discover"
                       onPress={() => navigation.navigate(ScreenNameEnum.DiscoverTab, {
                         screen: ScreenNameEnum.DiscoverScreen,
@@ -900,26 +896,13 @@ const RankingScreen = () => {
                       buttonStyle={{
                         marginTop: 5
                       }}
-                    /> */}
-
+                    />   */}
+ 
 
               </>
 
-              {/* {showList  && (
-      <Text style={styles.heading}>
-        Have you had a chance to watch these yet?{"\n"}
-        <Text style={{ color: Color.whiteText }}>
-          We'd like to know your thoughts!
-        </Text>
-      </Text>
-    )} */}
-              {/* {totalSteps == 5 && currentStep >= 0 && (
-  <StepProgressBar
-    totalSteps={totalSteps}
-    disable={true}
-    currentStepModal={currentStep}
-  />
-)} */}
+           
+       
               {/* {(t("login.next"))}  */}
               <Text style={styles.heading}>
                 {(t("discover.haveyou"))} {"\n"}

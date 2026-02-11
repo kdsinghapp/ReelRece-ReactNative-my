@@ -45,7 +45,7 @@ import {
   getGroupMembers,
 } from '@redux/Api/GroupApi';
 import { RootState } from '@redux/store';
- import GroupMovieModal from '@components/modal/groupMovieModal/groupMovieModal';
+import GroupMovieModal from '@components/modal/groupMovieModal/groupMovieModal';
 import GroupMembersModal from '@components/modal/GroupMemberModal/GroupMemberModal';
 import GroupSettingModal from '@components/modal/WatchGroupSetting/WatchGroupSetting';
 import imageIndex from '@assets/imageIndex';
@@ -87,7 +87,7 @@ const BackgroundImage = memo(({ imageUri }) => {
   }, [imageUri, currentImage]);
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none"> 
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
       {/* Previous image fading out */}
       {/* {prevImage && (
         <Animated.View style={StyleSheet.absoluteFill}>
@@ -485,7 +485,7 @@ const WatchWithFriend = () => {
   const displayMovies = useMemo(() => {
     return trimmedComment !== '' ? searchResult : groupRecommend;
   }, [searchResult, groupRecommend, trimmedComment]);
-   // Get current background image - NO DELAY
+  // Get current background image - NO DELAY
   const activeMovieImage = useMemo(() => {
     const movies = displayMovies;
     return movies?.[activeIndex]?.cover_image_url || null;
@@ -499,13 +499,13 @@ const WatchWithFriend = () => {
   // };
 
   const groupScoreModalFunc = useCallback(() => {
-  const currentMovie = displayMovies[activeIndex];
-  if (currentMovie) {
-    setSelectedImdbId(currentMovie.imdb_id);
-    setSelectedImdbScore(currentMovie.rec_score);
-    setgroupScoreModal(true);
-  }
-}, [displayMovies, activeIndex]);
+    const currentMovie = displayMovies[activeIndex];
+    if (currentMovie) {
+      setSelectedImdbId(currentMovie.imdb_id);
+      setSelectedImdbScore(currentMovie.rec_score);
+      setgroupScoreModal(true);
+    }
+  }, [displayMovies, activeIndex]);
   // Scroll handler with background transition
   const onScroll = useMemo(
     () =>
@@ -542,7 +542,7 @@ const WatchWithFriend = () => {
     const imdbId = movie?.imdb_id;
     return (
       <>
-        <View style={[styles.thumpCard ]}>
+        <View style={[styles.thumpCard]}>
           <TouchableOpacity
             onPress={() =>
               handlePreference({
@@ -579,7 +579,7 @@ const WatchWithFriend = () => {
             }
             style={[
               styles.thumpContainer,
- 
+
               {
                 backgroundColor: dislikes[imdbId] ? Color.red : Color.grey,
 
@@ -594,18 +594,18 @@ const WatchWithFriend = () => {
               }]} />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity  
-          onPress={()=>    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
-}
-         >
-        <Text numberOfLines={1} style={[styles.title, {
-          bottom: 20,
-          lineHeight: 31
+        <TouchableOpacity
+          onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
+          }
+        >
+          <Text numberOfLines={1} style={[styles.title, {
+            bottom: 20,
+            lineHeight: 31
 
-        }]}>
-          {movie?.title}
-        </Text>
-</TouchableOpacity>
+          }]}>
+            {movie?.title}
+          </Text>
+        </TouchableOpacity>
         <CustomText
           size={12}
           color={Color.lightGrayText}
@@ -635,14 +635,14 @@ const WatchWithFriend = () => {
             score={movie?.rec_score ?? '?'}
             title={t("discover.groupScore")}
             description={t("discover.recscoredes")}
-           />
+          />
           <CustomText size={14} color={Color.whiteText} font={font.PoppinsBold} style={{ marginLeft: 3 }}>
             {t("discover.groupScore")}
           </CustomText>
         </TouchableOpacity>
 
-        <View 
-     pointerEvents="box-none"
+        <View
+          pointerEvents="box-none"
           style={{
             bottom: 18.5
 
@@ -693,9 +693,9 @@ const WatchWithFriend = () => {
           // Prevent ScrollView from stealing the touch on iOS
           delayLongPress={200}
         >
-          <Image source={imageIndex.puased} style={styles.watchNowImg}  
-          
-          resizeMode='contain'/>
+          <Image source={imageIndex.puased} style={styles.watchNowImg}
+
+            resizeMode='contain' />
           <CustomText
             size={14}
             color={Color.whiteText}
@@ -751,18 +751,24 @@ const WatchWithFriend = () => {
           key={movie?.imdb_id || `movie-${index}`}
           style={[styles.cardContainer, { transform: [{ scale }] }]}
         >
-          <FastImage
-            source={{
-              uri: movie?.cover_image_url || '',
-              priority: FastImage.priority.high,
-              cache: FastImage.cacheControl.immutable,
-            }}
-            style={[styles.poster, {
-              bottom: 22.5
-            }]}
-            resizeMode={FastImage.resizeMode.cover}
-          />
+          <TouchableOpacity
 
+            onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: movie?.imdb_id, token: token })
+            }
+
+          >
+            <FastImage
+              source={{
+                uri: movie?.cover_image_url || '',
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              style={[styles.poster, {
+                bottom: 22.5
+              }]}
+              resizeMode={FastImage.resizeMode.cover}
+            />
+          </TouchableOpacity>
           <Animated.View
             collapsable={false}
             style={[
@@ -789,7 +795,7 @@ const WatchWithFriend = () => {
     (group?.members?.length || 0) >= (group1?.results?.length || 0)
       ? (Array.isArray(group?.members) ? group.members : [])
       : (Array.isArray(group1?.results) ? group1.results : []);
-const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   return (
     <KeyboardAvoidingView
@@ -995,24 +1001,24 @@ const insets = useSafeAreaInsets();
             snapToInterval={ITEM_SIZE}
             pagingEnabled
             decelerationRate={0.8}
-      //       contentContainerStyle={{
-      //         paddingHorizontal: (width - ITEM_WIDTH) / 2,
-      //         alignItems: "center",
-      // // bottom: 180,
-      //         // height: height * 0.38,
-      //         position:"relative",
-      //         bottom: Platform.OS === 'ios' ? 15 : 0,
+            //       contentContainerStyle={{
+            //         paddingHorizontal: (width - ITEM_WIDTH) / 2,
+            //         alignItems: "center",
+            // // bottom: 180,
+            //         // height: height * 0.38,
+            //         position:"relative",
+            //         bottom: Platform.OS === 'ios' ? 15 : 0,
 
-      //       }}
-      contentContainerStyle={{
-    paddingHorizontal: (width - ITEM_WIDTH) / 2,
-  alignItems: "center",
-  // paddingBottom: insets.bottom + 355,
-  // height: height * 0.38,
-      ...(Platform.OS === 'ios'
-      ? { paddingBottom: insets.bottom + 355 }
-      : { height: height * 0.38 }),
-}}
+            //       }}
+            contentContainerStyle={{
+              paddingHorizontal: (width - ITEM_WIDTH) / 2,
+              alignItems: "center",
+              // paddingBottom: insets.bottom + 355,
+              // height: height * 0.38,
+              ...(Platform.OS === 'ios'
+                ? { paddingBottom: insets.bottom + 355 }
+                : { height: height * 0.38 }),
+            }}
 
             onScroll={onScroll}
             onMomentumScrollEnd={handleScrollEnd}
@@ -1273,7 +1279,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: ITEM_WIDTH * 1.2,
     bottom: 40,
-    
+
   },
 
   // Movie info styles

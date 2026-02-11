@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
- import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
- import { SafeAreaView } from 'react-native-safe-area-context';
- import Toast from 'react-native-toast-message';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import toastConfig, { errorToast, successToast } from '@utils/customToast';
 import { persistor, store } from '@redux/store';
 import RegistrationRoutes from '@navigators/RegistrationRoutes';
- import "../.././src/i18n";
+import "../.././src/i18n";
 import NetworkStatusModal from '@components/NetworkStatusModal';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 
@@ -34,15 +34,12 @@ const AppNavigator: React.FC = () => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       const connected = state.isConnected ?? true;
       setIsConnected(connected);
-
-       if (!connected) {
+      if (!connected) {
         setWasDisconnected(true);
-  errorToast('No internet connection');
+        errorToast('You’re offline. Please check your internet connection.');
       }
-
-      // 🔁 When internet comes back AFTER being disconnected
-      if (connected && wasDisconnected) {
-successToast('You are back online');
+       if (connected && wasDisconnected) {
+        successToast('You are back online');
         setWasDisconnected(false);
       }
     });
@@ -62,7 +59,7 @@ successToast('You are back online');
               theme={CustomTheme}
             >
               <RegistrationRoutes />
-               <Toast config={toastConfig} />
+              <Toast config={toastConfig} />
             </NavigationContainer>
           </SafeAreaView>
         </GestureHandlerRootView>

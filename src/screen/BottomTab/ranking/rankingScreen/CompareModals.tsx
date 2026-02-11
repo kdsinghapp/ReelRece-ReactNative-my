@@ -90,8 +90,7 @@ useEffect(() => {
     setStepsModalVisible(false);
   }
 }, [fetchStep1]);
- 
-  return (
+   return (
     <>
       {isFeedbackVisible && (
         <FeedbackModal
@@ -158,7 +157,7 @@ useEffect(() => {
         // currentComparisonIndex={currentComparisonIndex}
         />
       )}
-     {fetchStep1 < 5 && (
+     {fetchStep1  !== 5 && (
   <StepProgressModal
     visible={isStepsModalVisible}
     onClose={() => {

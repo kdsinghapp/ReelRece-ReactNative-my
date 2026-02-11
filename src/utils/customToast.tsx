@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     height: 55,
     width: '93%',
-    backgroundColor: '#990707',
+    backgroundColor: 'rgba(246, 65, 65, 1)',
     borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
