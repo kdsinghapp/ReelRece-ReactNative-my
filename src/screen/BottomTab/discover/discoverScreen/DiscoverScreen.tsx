@@ -290,8 +290,9 @@ const DiscoverScreen = () => {
        const coverSource = item?.cover_image_url?.trim()
       ? {
           uri: item.cover_image_url,
-          priority: FastImage.priority.low,
+          priority: FastImage.priority.high,
           cache: FastImage.cacheControl.immutable,
+          
         }
       : null;
       return (
@@ -304,6 +305,7 @@ const DiscoverScreen = () => {
             style={styles.image}
             source={coverSource}
             resizeMode={FastImage.resizeMode.stretch}
+
           />
           <View style={styles.rating}>
             <RankingWithInfo

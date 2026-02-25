@@ -132,6 +132,16 @@ const OtherProfile = () => {
       setLoadingFollow(false);
     }
   };
+
+  const handleEditProfile = useCallback(() => {
+    const avatar = userData?.avatar ?? '';
+    (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.EditProfile, {
+      avatar: `${BASE_IMAGE_URL}${avatar}`,
+    });
+  }, [navigation, userData?.avatar]);
+
+  const isOwnProfile = otherUserData?.username === userData?.username;
+
   const BottomData: BottomSheetOption[] = useMemo(() => [
     {
       name: isFollowing ? t("common.unfollow") : t("common.follow"),
@@ -463,7 +473,6 @@ const OtherProfile = () => {
   };
   const MemoFeedCardRender = useCallback((feedItem: FeedItemShape, index: number, avatarUri: string, posterUri: string) => {
     return (
-   
         <MemoFeedCardHome
           key={feedItem.movie?.imdb_id}
           activity={feedItem?.activity}
@@ -500,7 +509,7 @@ const OtherProfile = () => {
           <ProfileCard
             imageUri={avatarUrl}
             loaderFollow={loadingFollow}
-            onFollowPress={handleFollowUnfollow}
+            onFollowPress={isOwnProfile ? handleEditProfile : handleFollowUnfollow}
             imageLoading={imageLoading}
             setImageLoading={setImageLoading}
             name={otherUserData?.name || otherUserData?.username}
@@ -508,7 +517,7 @@ const OtherProfile = () => {
             rank={`${otherUserData?.ranked ?? ''}`}
             followers={`${otherUserData?.followers_count ?? otherUserData?.followers ?? 0}`}
             following={`${otherUserData?.following_count ?? otherUserData?.following ?? 0}`}
-            butt={otherUserData?.username !== userData?.username || item?.username || otherUserData?.username}
+            butt={!isOwnProfile}
             bio={otherUserData?.bio}
             onFollow={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
             onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
@@ -526,7 +535,7 @@ const OtherProfile = () => {
     const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar ?? ''}`;
     const posterUri = item.movie?.horizontal_poster_url ?? '';
       return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
-  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, navigation]);
+  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, handleEditProfile, isOwnProfile, navigation]);
 
   const renderFooter = useCallback(() => {
      if (loadingFeed && combinedData.length <= 50) {

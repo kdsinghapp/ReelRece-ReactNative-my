@@ -65,18 +65,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   useEffect(() => {
     const eventListeners = [];
 
-    // Listen for video ready with duration
+    // Listen for video ready – hide poster as soon as video is ready (duration may be 0 for HLS)
     const readyListener = DeviceEventEmitter.addListener("onVideoReady", (event) => {
       setIsVideoLoaded(true);
-
-      if (event && event.duration) {
-        const durationInSeconds = event.duration;
-        // Send duration to parent component via onLoad
-        onLoad?.({
-          duration: durationInSeconds
-        });
-        hidePoster();
-      }
+      hidePoster();
+      const durationInSeconds = event?.duration ?? 0;
+      onLoad?.({ duration: durationInSeconds });
     });
 
     // Listen for play/pause events from native controller – hide poster when playback starts (fallback if onVideoReady is delayed)

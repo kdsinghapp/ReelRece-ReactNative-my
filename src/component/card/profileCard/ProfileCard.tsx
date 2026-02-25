@@ -80,21 +80,6 @@ const ProfileCard = ({
             </ShimmerPlaceholder>
 
 
-            {/* <FastImage
-  source={{
-    uri: imageUri,
-    priority: FastImage.priority.high,
-    cache: FastImage.cacheControl.web,
-  }}
-  style={styles.profileImage}
-  resizeMode={FastImage.resizeMode.cover}
-  onLoadStart={() => setImageLoading(true)}
-  onLoadEnd={() => setImageLoading(false)}
-  onError={() => {
-    setImageLoading(false); 
-  }}
-/> */}
-
             <View style={styles.statsContainer}>
                 <TouchableOpacity style={styles.statBox}
                     onPress={() => {

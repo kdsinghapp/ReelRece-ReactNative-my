@@ -38,6 +38,59 @@ function getPaginationPages(current: number, total: number): (number | 'ellipsis
   return pages;
 }
 
+/** Memoized pagination bar to avoid re-renders when only modal/list state changes */
+const PaginationBar = React.memo(({
+  currentPage,
+  totalPages,
+  loading,
+  searchQuery,
+  onPageChange,
+  styles: s,
+}: {
+  currentPage: number;
+  totalPages: number;
+  loading: boolean;
+  searchQuery: string;
+  onPageChange: (page: number) => void;
+  styles: Record<string, object>;
+}) => {
+  const pages = useMemo(() => getPaginationPages(currentPage, totalPages), [currentPage, totalPages]);
+  const disabledPrev = currentPage <= 1 || loading;
+  const disabledNext = currentPage >= totalPages || loading;
+  return (
+    <View style={s.paginationBar}>
+      <TouchableOpacity style={s.paginationBtn} onPress={() => onPageChange(1)} disabled={disabledPrev}>
+        <Text style={[s.paginationBtnText, disabledPrev && s.paginationBtnDisabled]}>{'\u00AB'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={s.paginationBtn} onPress={() => onPageChange(Math.max(1, currentPage - 1))} disabled={disabledPrev}>
+        <Text style={[s.paginationBtnText, disabledPrev && s.paginationBtnDisabled]}>&lt;</Text>
+      </TouchableOpacity>
+      <View style={s.paginationNumbers}>
+        {pages.map((item, idx) =>
+          item === 'ellipsis' ? (
+            <Text key={`ellipsis-${idx}`} style={s.paginationEllipsis}>{'\u2026'}</Text>
+          ) : (
+            <TouchableOpacity
+              key={item}
+              style={[s.paginationPageBtn, item === currentPage && s.paginationPageBtnActive]}
+              onPress={() => onPageChange(item)}
+              disabled={loading}
+            >
+              <Text style={[s.paginationPageText, item === currentPage && s.paginationPageTextActive]}>{item}</Text>
+            </TouchableOpacity>
+          )
+        )}
+      </View>
+      <TouchableOpacity style={s.paginationBtn} onPress={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={disabledNext}>
+        <Text style={[s.paginationBtnText, disabledNext && s.paginationBtnDisabled]}>&gt;</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={s.paginationBtn} onPress={() => onPageChange(totalPages)} disabled={disabledNext}>
+        <Text style={[s.paginationBtnText, disabledNext && s.paginationBtnDisabled]}>{'\u00BB'}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+});
+
 const WoodsScreen = () => {
   const route = useRoute();
   const type = route?.params?.type;
@@ -211,20 +264,32 @@ const WoodsScreen = () => {
     setFilteredItems([]);
   }, [type]);
 
+  const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
+  const handleClearSearch = useCallback(() => handleSearchInputChange(''), [handleSearchInputChange]);
+
+  const movieSectionStyle = useMemo(
+    () => [styles.movieSection, { paddingBottom: Math.max(insets.bottom, 16) }],
+    [insets.bottom]
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => handleSearch(searchQuery, page, true),
+    [handleSearch, searchQuery]
+  );
+
   return (
     <SafeAreaView style={styles.maincontainer} edges={['top', 'bottom']}>
       <CustomStatusBar />
 
       <View style={styles.searchHeaderContainer}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={handleGoBack}>
           <Image source={imageIndex.backArrow} style={styles.backImg} resizeMode='contain' />
         </TouchableOpacity>
 
         <View style={styles.searchContainer}>
-          {/* {(t("discover.dis_cover"))}   */}
           <TextInput
             style={styles.input}
-            placeholder={title ? title :   (t("discover.searchby"))  }
+            placeholder={title ? title : (t("discover.searchby"))}
             placeholderTextColor={Color.textGray}
             value={searchQuery}
             onChangeText={handleSearchInputChange}
@@ -232,7 +297,7 @@ const WoodsScreen = () => {
             allowFontScaling={false}
           />
           {!!searchQuery && (
-            <TouchableOpacity onPress={() => handleSearchInputChange('')}>
+            <TouchableOpacity onPress={handleClearSearch}>
               <Image source={imageIndex.closeimg} style={styles.clearIcon} resizeMode="contain" />
             </TouchableOpacity>
           )}
@@ -246,7 +311,7 @@ const WoodsScreen = () => {
       )}
 
       {type === 'movie' && (
-        <View style={[styles.movieSection, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={movieSectionStyle}>
           <View style={styles.movieListWrapper}>
             <SearchMovieCom
               movieData={filteredItems}
@@ -270,52 +335,14 @@ const WoodsScreen = () => {
             />
           </View>
           {searchQuery.trim() && totalPages > 1 && (
-            <View style={styles.paginationBar}>
-              <TouchableOpacity
-                style={styles.paginationBtn}
-                onPress={() => handleSearch(searchQuery, 1, true)}
-                disabled={currentPage <= 1 || loading}
-              >
-                <Text style={[styles.paginationBtnText, (currentPage <= 1 || loading) && styles.paginationBtnDisabled]}>{'\u00AB'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.paginationBtn}
-                onPress={() => handleSearch(searchQuery, Math.max(1, currentPage - 1), true)}
-                disabled={currentPage <= 1 || loading}
-              >
-                <Text style={[styles.paginationBtnText, (currentPage <= 1 || loading) && styles.paginationBtnDisabled]}>&lt;</Text>
-              </TouchableOpacity>
-              <View style={styles.paginationNumbers}>
-                {getPaginationPages(currentPage, totalPages).map((item, idx) =>
-                  item === 'ellipsis' ? (
-                    <Text key={`ellipsis-${idx}`} style={styles.paginationEllipsis}>{'\u2026'}</Text>
-                  ) : (
-                    <TouchableOpacity
-                      key={item}
-                      style={[styles.paginationPageBtn, item === currentPage && styles.paginationPageBtnActive]}
-                      onPress={() => handleSearch(searchQuery, item, true)}
-                      disabled={loading}
-                    >
-                      <Text style={[styles.paginationPageText, item === currentPage && styles.paginationPageTextActive]}>{item}</Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-              <TouchableOpacity
-                style={styles.paginationBtn}
-                onPress={() => handleSearch(searchQuery, Math.min(totalPages, currentPage + 1), true)}
-                disabled={currentPage >= totalPages || loading}
-              >
-                <Text style={[styles.paginationBtnText, (currentPage >= totalPages || loading) && styles.paginationBtnDisabled]}>&gt;</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.paginationBtn}
-                onPress={() => handleSearch(searchQuery, totalPages, true)}
-                disabled={currentPage >= totalPages || loading}
-              >
-                <Text style={[styles.paginationBtnText, (currentPage >= totalPages || loading) && styles.paginationBtnDisabled]}>{'\u00BB'}</Text>
-              </TouchableOpacity>
-            </View>
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              loading={loading}
+              searchQuery={searchQuery}
+              onPageChange={handlePageChange}
+              styles={styles}
+            />
           )}
         </View>
       )}

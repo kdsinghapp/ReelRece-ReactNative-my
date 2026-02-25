@@ -44,7 +44,7 @@ const CompareModals = ({
     userPreference,
     currentComparisonIndex,
     handleNextComparison,
-     isStepsModalVisible,      //  step modal visibility
+     isStepsModalVisible,     
     currentStep,              //  current step count
     setCurrentStep,           //  set step count
     setStepsModalVisible,     //  set step modal visibility

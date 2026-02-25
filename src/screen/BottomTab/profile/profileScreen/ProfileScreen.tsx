@@ -244,6 +244,7 @@ const ProfileScreen = () => {
     const headerVisible = viewableItems.some(item => item?.item?.type === 'header');
     if (headerVisible) {
       setPlayIndex(null);
+      setCurrentVisibleIndex(-1); // no feed item visible when header is in view
       lastPlayedIndexRef.current = null;
       return;
     }
@@ -255,6 +256,7 @@ const ProfileScreen = () => {
       );
       if (nonFeedVisible) {
         setPlayIndex(null);
+        setCurrentVisibleIndex(-1);
         return;
       }
       const isFeedCardVisible = viewableItems.some(
@@ -262,6 +264,7 @@ const ProfileScreen = () => {
       );
       if (!isFeedCardVisible) {
         setPlayIndex(null);
+        setCurrentVisibleIndex(-1);
         lastPlayedIndexRef.current = 0;
         return;
       }
@@ -275,6 +278,7 @@ const ProfileScreen = () => {
       }, 800);
     } else {
       setPlayIndex(null);
+      setCurrentVisibleIndex(-1);
     }
   }, [isFocused]);
 
@@ -857,7 +861,7 @@ const ProfileScreen = () => {
     <SafeAreaView style={styles.container}>
       <CustomStatusBar />
       <LoadingModal visible={(loading && !loadingTimeout) || (!userProfile && !loadingTimeout)} />
-      <View style={{ paddingTop: 18, }}>
+      <View style={{ paddingTop: 18, flex:1}}>
         {/* <Text style={{fontSize:22, color:'red'}} >{userProfile.name}</Text> */}
         <HeaderCustom
           title={userProfile?.name}

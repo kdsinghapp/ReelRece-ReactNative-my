@@ -81,8 +81,7 @@ export const getUserFeed = async (
         Authorization: `Token ${tokenValidation.sanitized}`,
       },
       params: createSafeParams(params),
-    });
-  // console.log("response.data", response.data, 'params', params);
+    }); 
     return response.data;
   } catch (error) {
     throw error;

@@ -7,7 +7,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import SearchBarCustom from '@components/common/searchBar/SearchBarCustom';
 import HeaderCustom from '@components/common/header/HeaderCustom';
-import { CustomStatusBar } from '..';
+import CustomStatusBar from '@components/common/statusBar/StatusBarCustom';
 import { t } from 'i18next';
 const helpMessage = () => {
   const route = useRoute();
