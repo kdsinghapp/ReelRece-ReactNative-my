@@ -799,7 +799,8 @@ const WatchWithFriend = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'height' : undefined}
+         behavior={Platform.OS === "ios" ? "padding" : undefined}
+
       style={{
         flex: 1,
         backgroundColor: "white"

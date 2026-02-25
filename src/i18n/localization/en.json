@@ -6,6 +6,8 @@
     "watchNow": "Watch Now",
     "watchonNetflix": "Watch on Netflix app",
     "firstMovie": "first movie!",
+    "unlockedRecScore1": "Awesome! You've unlocked",
+    "unlockedRecScore2": "your Rec Score!",
     "exitGroup": "Exit Group",
     "recsscoreprogress": "Recs Score Progress",
     "changeGroup": "Change Group Name",
@@ -158,9 +160,14 @@
     "moviedes": "This score predicts how much you'll enjoy this movie/show.",
     "recscoredes": "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm.",
     "groupScore": "Group Score",
-    "youve": "You’ve completed ranking for 5 movies! Your personalized Rec Score is now available."
+    "youve": "You’ve completed ranking for ",
+     "youve2": " movies! Your personalized Rec Score is now available.",
+    "rateFiveMore": "Rate 5 more movies/shows to get your personalized recommendations.",
+    "rateOneMore": "Rate 1 more movie/show to get your personalized recommendations.",
+    "swipeTooltipText": "Swipe up to explore the next title, or down to revisit the previous one."
   },
   "emptyState": {
+    "noGroupsYet": "No groups yet — create your first group!",
     "noMoviesFound": "No movies found",
     "nodescription": "No description available",
     "notificartionn_not": "No notifications yet",
@@ -187,10 +194,13 @@
     "morelike": "More like this",
     "subtitle": "Subtitle",
     "movietitle": "Movie Title",
-    "moviedescription": "Movie Description"
+    "moviedescription": "Movie Description",
+    "mute": "Mute",
+    "unmute": "Unmute"
   },
   "home": {
     "invite": "Invite Friends",
+    "CreateGroup": "Create Group",
     "deselectall": "Deselect All",
     "delete": "Delete",
     "cancel": "Cancel",
@@ -206,6 +216,7 @@
     "searchgroups": "Search groups...",
     "decline": "Decline",
     "yourFeed": "Your Feed",
+    "discoverPeople": "Discover people",
     "friend": "Friend",
     "rankings": "Rankings",
     "wantwatch": "Want to watch",

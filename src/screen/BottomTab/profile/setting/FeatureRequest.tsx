@@ -44,6 +44,7 @@ const FeatureRequest = () => {
   const [isCheckBox, setIsCheckBox] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState('');
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [feedBaCkText, setFeedBaCkText] = useState('');
   const [isAnimationSlide, setIsAnimationSlide] = useState(false)
   // Animation values
@@ -139,19 +140,36 @@ const FeatureRequest = () => {
       setShowForm(false);
     }
 
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setIsKeyboardVisible(true);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setIsKeyboardVisible(false);
-    });
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [feedBAck]);
+
+  // Dedicated keyboard listeners for height + scroll (user-friendly)
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        const h = e.endCoordinates?.height ?? 280;
+        setKeyboardHeight(h);
+        setIsKeyboardVisible(true);
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, Platform.OS === 'ios' ? 280 : 200);
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setKeyboardHeight(0);
+        setIsKeyboardVisible(false);
+      }
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
 
   const handleFormPress = async () => {
@@ -197,9 +215,6 @@ const FeatureRequest = () => {
 
   const handleTextInputFocus = () => {
     setIsKeyboardVisible(true);
-    setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: 200, animated: true });
-    }, 100);
   };
 
 
@@ -230,6 +245,7 @@ const FeatureRequest = () => {
         <TouchableWithoutFeedback onPress={() => textInputRef.current?.focus()}>
           <View style={[
             styles.inputContainer,
+            isKeyboardVisible && styles.inputContainerKeyboardOpen,
             inputValue && !isKeyboardVisible && {
               shadowColor: Color.primary,
               shadowOffset: { width: 2, height: 4 },
@@ -253,6 +269,7 @@ const FeatureRequest = () => {
               onBlur={() => setIsKeyboardVisible(false)}
               keyboardType="default"
               returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}
             />
           </View>
         </TouchableWithoutFeedback>
@@ -353,27 +370,30 @@ const FeatureRequest = () => {
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : "padding"}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View style={{ flex: 1 }}>
-          {/* (t("errorMessage.pleasedescribe") */}
-          <HeaderCustom
-            title={(t("home.streamingservices"))}
-            backIcon={imageIndex.backArrow}
-            rightIcon={false}
-            onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
-          />
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              paddingHorizontal: 18,
-              paddingBottom: 50,
-              flexGrow: 1
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <View style={{ marginTop: 10 }}>
+              <HeaderCustom
+                title={(t("home.streamingservices"))}
+                backIcon={imageIndex.backArrow}
+                rightIcon={false}
+                onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
+              />
+            </View>
+            <ScrollView
+              ref={scrollViewRef}
+              contentContainerStyle={{
+                paddingHorizontal: 18,
+                // paddingBottom: isKeyboardVisible ? keyboardHeight + 24 : 50,
+                flexGrow: 1,
+              }}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              showsVerticalScrollIndicator={false}
+            >
             <Text style={styles.suggestionsText}>
               {(t("home.havean"))}
             </Text>
@@ -432,9 +452,10 @@ const FeatureRequest = () => {
               {renderFormContent()}
 
             </Animated.View>
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView >
+            </ScrollView>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     );
   };
 
@@ -577,6 +598,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 14,
     zIndex: 2
+  },
+  inputContainerKeyboardOpen: {
+    minHeight: 100,
+    maxHeight: 140,
   },
   inputStyle: {
     width: "100%",

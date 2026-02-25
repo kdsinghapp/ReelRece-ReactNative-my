@@ -25,38 +25,14 @@ import imageIndex from "@assets/imageIndex";
   'History',
   'Sport',
   'Reality TV',
-];
-// export const sortByData = [
-//   { id: 1, label: "Rec Score" },
-//   { id: 2, label: "Release Date" },
-//   { id: 3, label: "Alphabetical" },
-// ];
-
+]; 
 export const sortByData = [
   { id: 1, label: "Rec Score", param: null }, // ❌ Don't send anything in API
   { id: 2, label: "Release Date", param: "release_date" },
   { id: 3, label: "Alphabetical", param: "alphabetical" },
 ];
 
-
-// export const sortByData = [
-//   { id: 1, label: "Rec Score" },
-//   { id: 2, label: "release_date" },
-//   { id: 3, label: "alphabetical" },
-// ];
-
-export const platformsData = [
-  { id: '1', name: 'Netflix', icon: imageIndex.google},
-  { id: '2', name: 'Disney Plus', icon: imageIndex.google},
-  { id: '3', name: 'Amazon Prime Video', icon: imageIndex.amazon},
-  { id: '4', name: 'Hulu', icon: imageIndex.google},
-  { id: '5', name: 'Paramount Plus', icon: imageIndex.amazon },
-  { id: '6', name: 'Fandango At Home', icon: imageIndex.amazon},
-  { id: '7', name: 'YouTube Premium', icon: imageIndex.amazon},
-  { id: '8', name: 'ABC', icon: imageIndex.amazon},
-
-
-];
+ 
 
 export const filters = [
   { id: '1', title: 'Recs for you',  },

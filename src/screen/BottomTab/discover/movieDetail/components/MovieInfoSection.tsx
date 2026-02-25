@@ -109,7 +109,7 @@ const MovieInfoSection = ({
         <TouchableOpacity style={[styles.scoreBoxGreen, {}]} disabled={true}>
           <View style={{}}>
             <RankingWithInfo
-              score={item?.friends_rec_score}
+              score={item?.friends_rec_score == null || Number(item?.friends_rec_score) < 0 ? '?' : Number(item.friends_rec_score)}
               title= {t("discover.friendscore")}
               description={t("discover.frienddes")}
             />
@@ -121,7 +121,7 @@ const MovieInfoSection = ({
             style={{ marginLeft: 6 }}
             font={font.PoppinsMedium}
           >
-          {item?.friends_rec_score}
+          {item?.friends_rec_score != null && Number(item?.friends_rec_score) >= 0 ? item?.friends_rec_score : '?'}
           </CustomText>
         </TouchableOpacity>
 

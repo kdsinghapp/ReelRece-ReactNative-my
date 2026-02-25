@@ -2,7 +2,7 @@
 import { StyleSheet } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
- 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.background, },
   header: { paddingTop: 5, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 19.8 },
@@ -18,9 +18,11 @@ const styles = StyleSheet.create({
   logo: { fontSize: 22, color: Color.whiteText, fontWeight: '600', marginLeft: 10 },
 
   card: { width: '48%', marginBottom: 15, borderRadius: 10, overflow: 'hidden', },
-  image: {   width: '100%',
-  aspectRatio: 2 / 3, // common poster ratio
-  borderRadius: 8, },
+  image: {
+    width: '100%',
+    aspectRatio: 2 / 3, // common poster ratio
+    borderRadius: 8,
+  },
   rating: {
     position: 'absolute',
     bottom: 0,
@@ -36,7 +38,7 @@ const styles = StyleSheet.create({
   },
 
   ratingText: { color: Color.whiteText, fontWeight: 'bold' },
-  list: { paddingBottom: 200,flexGrow:1 },
+  list: { paddingBottom: 200, flexGrow: 1 },
   sortbyImg: { height: 16, width: 16, resizeMode: 'contain' },
   // sortByText:{fontSize:12, color:Color.whiteText,marginLeft:7 ,fontFamily:font.PoppinsRegular},
 
@@ -62,7 +64,7 @@ const styles = StyleSheet.create({
     // paddingVertical: 4,
     height: 27,
     borderRadius: 20,
-    backgroundColor:Color.graybackGround,
+    backgroundColor: Color.graybackGround,
     width: '46%',
     flexWrap: 'wrap',
   },
@@ -71,7 +73,7 @@ const styles = StyleSheet.create({
     // height:'%',
     // paddingVertical: "auto",
     height: '99%',
-        backgroundColor:Color.graybackGround,
+    backgroundColor: Color.graybackGround,
 
     borderRadius: 20,
     justifyContent: 'center',
@@ -123,6 +125,6 @@ const styles = StyleSheet.create({
   sortByValueText: {
     alignSelf: 'center',
   },
-  noMoreMovie:{fontSize:16, color:Color.grey200, fontFamily:font.PoppinsMedium,marginTop:20,marginBottom:40,}
+  noMoreMovie: { fontSize: 16, color: Color.grey200, fontFamily: font.PoppinsMedium, marginTop: 20, marginBottom: 40, }
 });
 export default styles;

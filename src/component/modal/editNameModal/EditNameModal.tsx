@@ -9,7 +9,11 @@ import {
   Dimensions,
   Image,
   TextInput,
-  Alert
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
  import { Color } from '@theme/color';
@@ -110,53 +114,59 @@ const handleSave = async () => {
       animationType="slide"
       onRequestClose={() => setModalVisible(false)}
     >
-      <TouchableWithoutFeedback onPress={() => onClose()}>
+      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); onClose(); }}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.keyboardAvoid}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.header}>
+                  <Text style={styles.headerText}>{fieldLabel}</Text>
+                  <TouchableOpacity onPress={onClose}>
+                    <Image
+                      source={imageIndex.closeimg}
+                      style={{ height: 24, width: 24, resizeMode: 'contain' }}
+                    />
+                  </TouchableOpacity>
+                </View>
 
-
-            <View style={styles.modalContainer}>
-
-
-              <View style={styles.header}>
-                <Text style={styles.headerText}>{fieldLabel}</Text>
-                <TouchableOpacity onPress={onClose}>
-                  <Image
-                    source={imageIndex.closeimg}
-                    style={{ height: 24, width: 24, resizeMode: 'contain' }}
-
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.scrollContent}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      fieldKey === 'bio' && {
+                        height: 170,
+                        textAlignVertical: 'top',
+                      }
+                    ]}
+                    multiline={fieldKey === 'bio'}
+                    numberOfLines={fieldKey === 'bio' ? 6 : 1}
+                    placeholder={initialValue}
+                    placeholderTextColor='rgba(255, 255, 255, 0.7)'
+                    value={value}
+                    onChangeText={setValue}
+                    autoFocus={true}
+                    keyboardAppearance="light"
                   />
-                </TouchableOpacity>
+
+                  <ButtonCustom
+                    title="Save"
+                    onPress={handleSave}
+                    buttonStyle={styles.saveButton}
+                    textStyle={{
+                      color: Color.whiteText
+                    }}
+                  />
+                </ScrollView>
               </View>
-
-              <TextInput
-                style={[
-                  styles.input,
-                  fieldKey === 'bio' && {
-                    height: 170,
-                    textAlignVertical: 'top', // Makes multiline text start at the top
-                  }
-                ]}
-                multiline={fieldKey === 'bio'}
-                numberOfLines={fieldKey === 'bio' ? 6 : 1}
-                placeholder={initialValue}
-                placeholderTextColor='rgba(255, 255, 255, 0.7)'
-                value={value}
-                onChangeText={setValue}
-                autoFocus={true}
-              />
-
-              <ButtonCustom
-                title="Save"
-                onPress={handleSave}
-                buttonStyle={styles.saveButton}
-                textStyle={{
-                  color:Color.whiteText
-                }}
-              />
-            </View>
-
-
+            </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
         </View>
       </TouchableWithoutFeedback>
@@ -167,8 +177,11 @@ const handleSave = async () => {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.0)',
     justifyContent: 'flex-end',
+  },
+  keyboardAvoid: {
+    width: '100%',
   },
   modalContainer: {
     backgroundColor: Color.graybackGround,
@@ -176,6 +189,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     padding: 20,
     maxHeight: Dimensions.get('window').height * 0.7,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   header: {
     flexDirection: 'row',

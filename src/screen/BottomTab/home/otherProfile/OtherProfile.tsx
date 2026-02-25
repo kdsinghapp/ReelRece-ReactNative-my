@@ -7,8 +7,9 @@ import useHome from '../homeScreen/useHome';
 import { Color } from '@theme/color';
 import HorizontalMovieList from '@components/common/HorizontalMovieList/HorizontalMovieList';
 import { getOthereUsers, getOtherUserBookmarks } from '@redux/Api/ProfileApi';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
+import { fetchHomeFeed, fetchHomeRecentUsers } from '@redux/feature/homeSlice';
 import { getCommonBookmarkOtherUser, getOtherUserRatedMovies } from '@redux/Api/movieApi';
 import { followUser, unfollowUser } from '@redux/Api/followService';
 import useUserFeedWithName from '@components/card/feedCard/useUserFeedWithName';
@@ -30,8 +31,11 @@ type OtherProfileParams = { item?: User & { name?: string; username?: string } }
 type OtherUserProfile = User & {
   following_bool?: boolean;
   ranked?: number;
+  /** Prefer followers_count from API; followers for backward compatibility */
   followers?: number;
   following?: number;
+  followers_count?: number;
+  following_count?: number;
   bio?: string;
 };
 
@@ -39,6 +43,7 @@ type OtherUserProfile = User & {
 type BottomSheetOption = { name: string; action?: () => void };
 
 const OtherProfile = () => {
+  const dispatch = useDispatch();
   const token = useSelector((state: RootState) => state.auth?.token);
 
   const route = useRoute();
@@ -119,6 +124,8 @@ const OtherProfile = () => {
         await followUser(token, otherUserData.username);
       }
       setIsFollowing(!isFollowing);
+      dispatch(fetchHomeFeed({ silent: true }));
+      dispatch(fetchHomeRecentUsers({ silent: true }));
     } catch (error) {
     } finally {
       setFollowLoading(false);
@@ -456,38 +463,7 @@ const OtherProfile = () => {
   };
   const MemoFeedCardRender = useCallback((feedItem: FeedItemShape, index: number, avatarUri: string, posterUri: string) => {
     return (
-      // <MemoFeedCard
-      //   key={item.movie?.imdb_id} // <-- unique key per video
-
-      //   avatar={{ uri: avatarUri }}         //  string
-      //   poster={{ uri: posterUri }}        //  string
-      //   user={item.user?.name}
-      //   title={item.movie?.title}
-      //   comment={item.comment}
-      //   release_year={item?.movie?.release_year?.toString()}
-      //   videoUri={item.movie?.trailer_url}
-      //   imdb_id={item.movie?.imdb_id}
-      //   isMuted={isMuted}
-      //   token={token} rankPress={() => setIsVisible(true)}
-      //   ranked={item?.rec_score}
-      //   scoreType='Friend'
-      //   shouldAutoPlay={autoPlayEnabled}
-      //   isVisible={index === currentVisibleIndex}
-      //   videoIndex={index} // FIX HERE
-      //   username={otherUserData?.username}
-      //   // shouldPlay={index - 1 === playIndex}
-      //   shouldPlay={index - 1 === playIndex}
-      //   isPaused={index - 1 !== playIndex}
-      //   is_bookMark={item?.is_bookmarked}
-      //   //   videoIndex={index } // FIX HERE
-      //   // username={otherUserData?.username}
-      //   // // shouldPlay={index - 1 === playIndex}
-      //   // shouldPlay={index -1 === currentVisibleIndex}
-      //   // isPaused={index - 1 !== playIndex}
-      //   // is_bookMark={item?.is_bookmarked}
-
-      //   screenName='OtherProfile__Screen'
-      // />
+   
         <MemoFeedCardHome
           key={feedItem.movie?.imdb_id}
           activity={feedItem?.activity}
@@ -516,7 +492,6 @@ const OtherProfile = () => {
     );
   }, [currentVisibleIndex, playIndex, autoPlayEnabled, otherUserData?.username, token, isVisible, setIsVisible]);
 
-
   type ListItem = { type: string; id?: number; movie?: FeedItemShape['movie']; user?: FeedItemShape['user'] } & FeedItemShape;
   const renderItem = useCallback(({ item, index }: { item: ListItem; index: number }) => {
     if (item.type === 'profileCard') {
@@ -528,15 +503,16 @@ const OtherProfile = () => {
             onFollowPress={handleFollowUnfollow}
             imageLoading={imageLoading}
             setImageLoading={setImageLoading}
-            name={otherUserData?.name}
+            name={otherUserData?.name || otherUserData?.username}
+            username={otherUserData?.username}
             rank={`${otherUserData?.ranked ?? ''}`}
-            followers={`${otherUserData?.followers ?? ''}`}
-            following={`${otherUserData?.following ?? ''}`}
-            butt={otherUserData?.username !== userData?.username}
+            followers={`${otherUserData?.followers_count ?? otherUserData?.followers ?? 0}`}
+            following={`${otherUserData?.following_count ?? otherUserData?.following ?? 0}`}
+            butt={otherUserData?.username !== userData?.username || item?.username || otherUserData?.username}
             bio={otherUserData?.bio}
-            onFollow={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name })}
-            onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name })}
-            onSuggested={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: otherUserData?.name })}
+            onFollow={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
+            onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
+            onSuggested={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
             isFollowing={isFollowing}
           />
         </View>
@@ -549,47 +525,11 @@ const OtherProfile = () => {
     if (!item?.movie || !item?.user) return null;
     const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar ?? ''}`;
     const posterUri = item.movie?.horizontal_poster_url ?? '';
-    //     return (
-    //       <MemoFeedCard
-    //         key={item.movie?.imdb_id} // <-- unique key per video
-
-    //         avatar={{ uri: avatarUri }}         //  string
-    //         poster={{ uri: posterUri }}        //  string
-    //         user={item.user?.name}
-    //         title={item.movie?.title}
-    //         comment={item.comment}
-    //         release_year={item?.movie?.release_year?.toString()}
-    //         videoUri={item.movie?.trailer_url}
-    //         imdb_id={item.movie?.imdb_id}
-    //         isMuted={isMuted}
-    //         token={token} rankPress={() => setIsVisible(true)}
-    //         ranked={item?.rec_score}
-    //         scoreType='Friend'
-    //         shouldAutoPlay={autoPlayEnabled}
-    //         isVisible={index === currentVisibleIndex}
-    //         videoIndex={index } // FIX HERE
-    //         username={otherUserData?.username}
-    //         // shouldPlay={index - 1 === playIndex}
-    //         shouldPlay={index -1 === playIndex}
-    //         isPaused={index - 1 !== playIndex}
-    //         is_bookMark={item?.is_bookmarked}
-    //         //   videoIndex={index } // FIX HERE
-    //         // username={otherUserData?.username}
-    //         // // shouldPlay={index - 1 === playIndex}
-    //         // shouldPlay={index -1 === currentVisibleIndex}
-    //         // isPaused={index - 1 !== playIndex}
-    //         is_bookMark={item?.is_bookmarked}
-
-    //  screenName = 'OtherProfile__Screen'
-    //       />
-    //     );
-
-    return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
+      return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
   }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, navigation]);
 
   const renderFooter = useCallback(() => {
-    // 🟢 Normal loading
-    if (loadingFeed && combinedData.length <= 50) {
+     if (loadingFeed && combinedData.length <= 50) {
       return <FeedCardShimmer />;
     }
 
@@ -686,62 +626,8 @@ const OtherProfile = () => {
         // }]).current}
         viewabilityConfigCallbackPairs={useRef([{
           viewabilityConfig: viewabilityConfigRef.current,
-          onViewableItemsChanged, //  Directly pass this
+          onViewableItemsChanged,
         }]).current}
-
-      // 👇 Footer Loader + UI Heavy Condition
-      // ListFooterComponent={() => {
-      //  { 
-      //   // 🟢 Condition 1: Normal loading when fetching more data
-      //   if (loadingFeed && combinedData.length <= 50) {
-      //     return (
-      //       <FeedCardShimmer   />
-      //     );
-      //   }
-      //   // 🟡 Condition 2: When too much data already loaded (UI heavy)
-      //   else if (loadingFeed && combinedData.length > 50) {
-      //     return (
-      //       <View style={{ paddingVertical: 20, marginBottom: 90 }}>
-      //         <Text style={{ textAlign: "center", color: "gray" }}>
-      //           Loading more content... please wait
-      //         </Text>
-      //         <ActivityIndicator
-      //           size="small"
-      //           color={Color.primary}
-      //           style={{ marginTop: 8 }}
-      //         />
-      //       </View>
-      //     );
-      //   }
-
-      //   // 🔴 Condition 3: When no more data
-      //   else if (!hasMore && combinedData.length > 0) {
-      //     return (
-      //       <View style={{ paddingVertical: 20 }}>
-      //         <Text style={{ textAlign: "center", color: "gray" }}>
-      //           No more data available
-      //         </Text>
-      //       </View>
-      //     );
-      //   }
-
-      //   // Default case: nothing to show
-      //   else {
-      //     return (
-      //        <View>
-      //     <FeedCardShimmer />
-      //     </View>
-      //     )
-      //     ;
-      //   }}
-
-
-
-
-
-      // }
-      // }
-
 
       />
       <BottomSheet

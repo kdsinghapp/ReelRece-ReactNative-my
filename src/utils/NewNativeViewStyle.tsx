@@ -10,6 +10,11 @@ export const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: 'black',
   },
+  videoWrapper: {
+    width: '100%',
+    height: windowHeight / 3.9,
+    backgroundColor: 'black',
+  },
   video: {
     width: '100%',
     height: windowHeight / 3.9, // Default height, can be overridden by style prop

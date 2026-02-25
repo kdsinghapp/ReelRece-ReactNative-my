@@ -87,15 +87,14 @@ export const createGroup = async (
           Authorization: `Token ${token}`,
         },
       }
-    );
+    ); 
      return response;
-  } catch (error: unknown) {
+  } catch (error: unknown) { 
     const err = error as { response?: { data?: unknown }; message?: string };
      throw error;
   }
 };
-// need_Change
-/// 🔹 4. Get Group Members
+
 export const getGroupMembers = async (token: string, groupId: string): Promise<{ members: User[]; count: number }> => {
   try {
     // Validate group ID
@@ -118,7 +117,6 @@ export const getGroupMembers = async (token: string, groupId: string): Promise<{
      throw error;
   }
 };
-
 
 /// 🔹 5. List My Groups
 export const getAllGroups = async (token: string) => {

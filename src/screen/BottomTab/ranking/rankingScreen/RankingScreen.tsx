@@ -1,7 +1,8 @@
 
 
-import React, { useCallback, useEffect, useRef, useState, } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ScrollView, StatusBar, Image, ActivityIndicator, Platform, LayoutAnimation, UIManager, Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,12 +10,21 @@ import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import styles from './style';
 import ScreenNameEnum from '@routes/screenName.enum';
-import { RootState } from '@redux/store';
-import { getAllRatedMovies, getRankingSuggestionMovie, recordPairwiseDecision, recordPairwiseDecision1 } from '@redux/Api/movieApi';
+import { RootState, AppDispatch } from '@redux/store';
+import { recordPairwiseDecision1 } from '@redux/Api/movieApi';
+import {
+  fetchRankingRatedMovies,
+  fetchRankingSuggestionMovies,
+  resetSuggestionPagination,
+  reorderRatedMovies,
+  updateRatedMovieScores,
+  rollbackRatedMovieOrder,
+} from '@redux/feature/rankingSlice';
+import { fetchHomeRecommend } from '@redux/feature/homeSlice';
 import NormalMovieCard from '@components/common/NormalMovieCard/NormalMovieCard';
 import StepProgressBar from '@components/modal/stepProgressModal/StepProgressBar';
 import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
-import { useCompareComponent } from './useCompareComponent';
+import { useCompareComponent, STEPPER_VALUE } from './useCompareComponent';
 import CompareModals from './CompareModals';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import font from '@theme/font';
@@ -36,36 +46,226 @@ import { errorToast } from '@utils/customToast';
 
 const ITEM_HEIGHT = 180; // Adjust based on your movie card height
 
+const rankingItemStyles = StyleSheet.create({
+  row: { left: 0, right: 0 },
+  rowActive: { height: ITEM_HEIGHT, position: 'absolute' as const },
+  rowInactive: { height: ITEM_HEIGHT, position: 'relative' as const },
+  posterTouch: { marginTop: 2 },
+  iconUpDown: { height: 24, width: 24 },
+  iconDisabled: { opacity: 0.5 },
+  iconEnd: { alignSelf: 'flex-end' as const },
+});
+const rankingIconDisabledStyle = [rankingItemStyles.iconUpDown, rankingItemStyles.iconDisabled];
+
+// Frontend pagination (API returns all data; we window for performance)
+const RANKING_INITIAL_SIZE = 10;
+const RANKING_LOAD_MORE_SIZE = 10;
+const SUGGESTION_INITIAL_SIZE = 10;
+const SUGGESTION_LOAD_MORE_SIZE = 10;
+
+type RankingMovie = {
+  imdb_id: string;
+  title?: string;
+  release_year?: string | number;
+  cover_image_url?: string;
+  rec_score?: number;
+  [k: string]: unknown;
+};
+
+type RankingListItemProps = {
+  itemId: string;
+  index: number;
+  movie: RankingMovie;
+  isActive: boolean;
+  isSwapping: boolean;
+  totalCount: number;
+  token: string | null;
+  animatedPosition: Animated.Value;
+  scale: Animated.Value;
+  zIndexVal: Animated.Value;
+  zeroAnimatedValue: Animated.Value;
+  panHandlers: Record<string, unknown>;
+  onNavigate: (imdbId: string, t: string | null) => void;
+  onSwap: (id: string, direction: 'up' | 'down') => void;
+  onStartDrag: (id: string, y: number) => void;
+};
+
+const RankingListItem = React.memo(
+  function RankingListItem({
+    itemId,
+    index,
+    movie,
+    isActive,
+    isSwapping,
+    totalCount,
+    token,
+    animatedPosition,
+    scale,
+    zIndexVal,
+    zeroAnimatedValue,
+    panHandlers,
+    onNavigate,
+    onSwap,
+    onStartDrag,
+  }: RankingListItemProps) {
+    const translateY = isActive ? animatedPosition : zeroAnimatedValue;
+    const iconStyle = isSwapping || isActive ? rankingIconDisabledStyle : rankingItemStyles.iconUpDown;
+    return (
+      <Animated.View
+        style={[
+          rankingItemStyles.row,
+          isActive ? rankingItemStyles.rowActive : rankingItemStyles.rowInactive,
+          { transform: [{ translateY }, { scale }], zIndex: isActive ? 999 : index },
+        ]}
+      >
+        <TouchableOpacity
+          {...panHandlers}
+          style={[styles.movieCard]}
+          activeOpacity={0.7}
+          onLongPress={() => onStartDrag(itemId, 0)}
+        >
+          <TouchableOpacity
+            style={rankingItemStyles.posterTouch}
+            onPress={() => onNavigate(itemId, token)}
+            activeOpacity={0.8}
+            disabled={isSwapping || isActive}
+          >
+            {movie?.cover_image_url?.trim() ? (
+              <FastImage
+                source={{
+                  uri: movie.cover_image_url,
+                  priority: FastImage.priority.low,
+                  cache: FastImage.cacheControl.immutable,
+                }}
+                style={styles.poster}
+                resizeMode={FastImage.resizeMode.stretch}
+              />
+            ) : (
+              <View style={[styles.poster, { backgroundColor: '#000' }]} />
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => onNavigate(itemId, token)}
+            style={styles.info}
+            disabled={isSwapping || isActive}
+          >
+            <CustomText
+              size={16}
+              color={Color.whiteText}
+              style={[styles.title]}
+              font={font.PoppinsMedium}
+              numberOfLines={2}
+            >
+              {movie.title}
+            </CustomText>
+            <CustomText
+              size={14}
+              color={Color.placeHolder}
+              style={styles.year}
+              font={font.PoppinsRegular}
+            >
+              {movie.release_year}
+            </CustomText>
+            <View style={[styles.iconprimary, rankingItemStyles.iconEnd]}>
+              {Platform.OS === 'ios' ? (
+                <OutlineTextIOS text={index + 1} fontSize={60} />
+              ) : (
+                <LayeredShadowText text={index + 1} fontSize={60} marginRight={12} />
+              )}
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.icons}>
+            <View style={rankingItemStyles.iconEnd}>
+              <RankingWithInfo
+                score={movie?.rec_score}
+                title={t('discover.recscore')}
+                description={t('discover.recscoredes')}
+              />
+            </View>
+            <View style={styles.centerContainer}>
+              <View style={styles.iconprimary}>
+                {index > 0 && (
+                  <TouchableOpacity
+                    onPress={() => onSwap(itemId, 'up')}
+                    disabled={isSwapping || isActive}
+                  >
+                    <Image
+                      source={imageIndex.chevronUp}
+                      style={iconStyle}
+                      tintColor={Color.textGray}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                )}
+                {index < totalCount - 1 && (
+                  <TouchableOpacity
+                    onPress={() => onSwap(itemId, 'down')}
+                    disabled={isSwapping || isActive}
+                  >
+                    <Image
+                      source={imageIndex.downDown}
+                      resizeMode="contain"
+                      style={iconStyle}
+                      tintColor={Color.textGray}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  },
+  (prev, next) =>
+    prev.itemId === next.itemId &&
+    prev.index === next.index &&
+    prev.isActive === next.isActive &&
+    prev.isSwapping === next.isSwapping &&
+    prev.totalCount === next.totalCount &&
+    prev.token === next.token &&
+    prev.movie?.imdb_id === next.movie?.imdb_id &&
+    prev.movie?.rec_score === next.movie?.rec_score
+);
+
 const RankingScreen = () => {
   const token = useSelector((state: RootState) => state?.auth?.token);
-  const { currentStep, setCurrentStep } = useCompareComponent(token);
+  const compareHook = useCompareComponent(token);
+  const { currentStep, setCurrentStep, refreshStepCount } = compareHook;
   const route = useRoute()
   const navigation = useNavigation();
   const { openTooltipModal } = route?.params ?? {};
-  const [filteredMovies, setFilteredMovies] = useState([]);
-  const [ratedMovie, setRatedMovie] = useState([]);
+  const ratedMovie = useSelector((state: RootState) => state.ranking.ratedMovies);
+  const suggestionMoviesFromRedux = useSelector((state: RootState) => state.ranking.suggestionMovies);
+  const suggestionPage = useSelector((state: RootState) => state.ranking.suggestionPage);
+  const suggestionHasMore = useSelector((state: RootState) => state.ranking.suggestionHasMore);
+  const loadingRated = useSelector((state: RootState) => state.ranking.loadingRated);
+  const suggestionLoading = useSelector((state: RootState) => state.ranking.loadingSuggestion);
+  const [filteredMovies, setFilteredMovies] = useState(suggestionMoviesFromRedux);
 
   const [flatlistTop, setFlatlistTop] = useState(null);
+  const [firstRankIconPosition, setFirstRankIconPosition] = useState<{ x: number; y: number } | null>(null);
   const listRef = useRef(null);
-  const totalSteps = 5;
+  const totalSteps = STEPPER_VALUE;
   const [hasSeenTooltip, setHasSeenTooltip] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [TooltipModal, setTooltipModal] = useState<boolean>(openTooltipModal || false);
-  const [suggestionPage, setSuggestionPage] = useState(1);
-  const [suggestionHasMore, setSuggestionHasMore] = useState(true);
-  const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [displayMovies, setDisplayMovies] = useState([]);
-  const pageRef = useRef(1);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingIds, setLoadingIds] = useState<string[]>([]);
   const ratedMovieRef = useRef(ratedMovie);
   useEffect(() => { ratedMovieRef.current = ratedMovie; }, [ratedMovie]);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const isModalClosed = useSelector((state: RootState) => state?.modal?.isModalClosed);
 
-  const [loadingRated, setLoadingRated] = useState(true);
-  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+  useEffect(() => {
+    setFilteredMovies(suggestionMoviesFromRedux);
+    if (suggestionMoviesFromRedux.length === 0) {
+      setSuggestionVisibleCount(SUGGESTION_INITIAL_SIZE);
+    }
+  }, [suggestionMoviesFromRedux]);
 
   const [rankingRenderedCount, setRankingRenderedCount] = useState(0);
   const [isRankingFullyRendered, setIsRankingFullyRendered] = useState(false);
@@ -74,10 +274,13 @@ const RankingScreen = () => {
   const pageref = useRef(false);
 
   // Drag and Drop State
-  const [order, setOrder] = useState([]);
-  const animatedPositions = useRef({}).current;
-  const activeScale = useRef({}).current;
-  const activeZIndex = useRef({}).current;
+  const [order, setOrder] = useState<string[]>([]);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const orderRef = useRef<string[]>([]);
+  orderRef.current = order;
+  const animatedPositions = useRef<Record<string, Animated.Value>>({}).current;
+  const activeScale = useRef<Record<string, Animated.Value>>({}).current;
+  const activeZIndex = useRef<Record<string, Animated.Value>>({}).current;
 
   const dragState = useRef({
     id: null,
@@ -89,75 +292,62 @@ const RankingScreen = () => {
     isDragging: false,
     startY: 0,
   }).current;
-  const [visibleCount, setVisibleCount] = useState(180);
+  const [visibleCount, setVisibleCount] = useState(RANKING_INITIAL_SIZE);
 
-  const loadMoreItems = () => {
-    if (visibleCount < ratedMovie?.length) {
-      setVisibleCount(prev => prev + 20);
-    }
-  };
+  const loadMoreItems = useCallback(() => {
+    setVisibleCount(prev =>
+      ratedMovie?.length ? Math.min(prev + RANKING_LOAD_MORE_SIZE, ratedMovie.length) : prev
+    );
+  }, [ratedMovie?.length]);
+
+  // Frontend pagination for suggestion list (show window, grow on scroll)
+  const [suggestionVisibleCount, setSuggestionVisibleCount] = useState(SUGGESTION_INITIAL_SIZE);
   const flatListRef = useRef(null);
+  const panRespondersRef = useRef<Record<string, ReturnType<typeof PanResponder.create>>>({});
+  const zeroAnimatedValue = useRef(new Animated.Value(0)).current;
   // const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const prevOnlineRef = useRef(true);
+  const handleRefreshRef = useRef<(() => Promise<void>) | null>(null);
 
-  // Add this useEffect after your other effects
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
-
-      // Auto-reload when coming back online
-      if (prevOnlineRef.current === false && online === true) {
-        console.log('Network restored - auto-refreshing ranking data');
-        handleRefresh();
-      }
-
-      prevOnlineRef.current = online;
-    });
-
-    // Get initial network state
-    NetInfo.fetch().then(state => {
-      const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
-      prevOnlineRef.current = online;
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Add this function before your return statement
   const handleRefresh = useCallback(async () => {
     if (!isOnline) {
-      errorToast('No Internet! \n Please check your network connection')
-
+      errorToast('No Internet! \n Please check your network connection');
       return;
     }
-
     setRefreshing(true);
-
+    setSuggestionVisibleCount(SUGGESTION_INITIAL_SIZE);
     try {
-      // Reset all states
-      setFilteredMovies([]);
-      setRatedMovie([]);
-      setSuggestionPage(1);
-      setSuggestionHasMore(true);
-      pageRef.current = 1;
-
-      // Fetch all data in parallel
-      await Promise.allSettled([
-        fetchRatedMovies(),
-        fetchSuggestionMovies(),
+      dispatch(resetSuggestionPagination());
+      await Promise.all([
+        dispatch(fetchRankingRatedMovies()).unwrap(),
+        dispatch(fetchRankingSuggestionMovies(1)).unwrap(),
       ]);
-
-      console.log('Ranking screen refreshed successfully');
     } catch (error) {
       console.error('Refresh failed:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [isOnline, token]);
+  }, [isOnline, dispatch]);
 
+  handleRefreshRef.current = handleRefresh;
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      if (prevOnlineRef.current === false && online === true) {
+        handleRefreshRef.current?.();
+      }
+      prevOnlineRef.current = online;
+    });
+    NetInfo.fetch().then(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      prevOnlineRef.current = online;
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -165,6 +355,7 @@ const RankingScreen = () => {
     }
   }, []);
 
+  const ratedMovieLengthRef = useRef(0);
   // Initialize animated values when ratedMovie changes
   useEffect(() => {
     // ✅ Guard: Ensure ratedMovie is an array with items
@@ -172,6 +363,10 @@ const RankingScreen = () => {
       // Initialize order with imdb_ids
       const newOrder = ratedMovie.map(movie => movie?.imdb_id).filter(Boolean);
       setOrder(newOrder);
+      if (ratedMovie.length !== ratedMovieLengthRef.current) {
+        ratedMovieLengthRef.current = ratedMovie.length;
+        setVisibleCount(RANKING_INITIAL_SIZE);
+      }
 
       // Initialize animated values with safety checks
       ratedMovie.forEach((movie, index) => {
@@ -209,13 +404,12 @@ const RankingScreen = () => {
   useFocusEffect(
     useCallback(() => {
       if (token) {
-        setFilteredMovies([]);
-        setSuggestionPage(1);
-        setSuggestionHasMore(true);
-        fetchSuggestionMovies();
+        dispatch(resetSuggestionPagination());
+        dispatch(fetchRankingSuggestionMovies(1));
         checkSuggestScrollRef.current = true;
+        refreshStepCount();
       }
-    }, [token])
+    }, [token, refreshStepCount, dispatch])
   );
 
   const markTooltipSeen = async () => {
@@ -241,10 +435,10 @@ const RankingScreen = () => {
   useEffect(() => {
     const fetchStep = async () => {
       const step = await getCurrentStep();
-      setCurrentStep(step);
+      if (typeof step === 'number') setCurrentStep(step);
     };
     fetchStep();
-  }, [isModalClosed]);
+  }, [isModalClosed, setCurrentStep]);
 
   const goToSearchScreen = useCallback(() => {
     navigation.navigate(ScreenNameEnum.WoodsScreen, {
@@ -253,113 +447,66 @@ const RankingScreen = () => {
     });
   }, [navigation]);
 
-  const handleLayout = (event) => {
+  const handleLayout = useCallback((event: { nativeEvent: { layout: { y: number } } }) => {
     const { y } = event.nativeEvent.layout;
-    const statusbar = y + StatusBar.currentHeight;
-    setFlatlistTop(statusbar);
-  };
-
-  const fetchRatedMovies = async () => {
-    if (!token) return;
-
-    setLoading(true);
-    setRefreshing(true);
-    try {
-      const res_All_Rated = await getAllRatedMovies(token);
-      setRefreshing(false);
-      const safeRated = Array.isArray(res_All_Rated?.results)
-        ? res_All_Rated.results
-        : [];
-      setRatedMovie(safeRated);
-    } catch (error) {
-      setLoading(false);
-      setRefreshing(false);
-    } finally {
-      setLoading(false);
-      setLoadingRated(false);
-      setRefreshing(false);
-    }
-  };
-
-  const fetchSuggestionMovies = async () => {
-    if (!token || suggestionLoading || !suggestionHasMore) return;
-    setSuggestionLoading(true);
-    try {
-      const res = await getRankingSuggestionMovie(token, pageRef.current);
-      const safeResults = Array.isArray(res?.results) ? res.results : [];
-      if (pageRef.current === 1) {
-        setFilteredMovies(safeResults);
-      } else {
-        setFilteredMovies(prev => {
-          const existingIds = new Set(prev.map(m => m?.imdb_id));
-          const newResults = safeResults.filter(m => m && m.imdb_id && !existingIds.has(m.imdb_id));
-          return [...prev, ...newResults];
-        });
-      }
-
-      setTimeout(() => {
-        pageRef.current += 1;
-      }, 400);
-
-      const totalPages = Number(res?.total_pages ?? 0);
-      if (totalPages && pageRef.current > totalPages) {
-        setSuggestionHasMore(false);
-      }
-    } catch (error) {
-    } finally {
-      setSuggestionLoading(false);
-    }
-  };
+    setFlatlistTop(y + (StatusBar.currentHeight ?? 0));
+  }, []);
 
   useEffect(() => {
     if (!token) return;
-
     const init = async () => {
-      setLoadingRated(true)
-      await fetchRatedMovies();
-      setFilteredMovies([]);
-      setSuggestionPage(1);
-      setSuggestionHasMore(true);
-      await fetchSuggestionMovies();
+      dispatch(resetSuggestionPagination());
+      await dispatch(fetchRankingRatedMovies());
+      await dispatch(fetchRankingSuggestionMovies(1));
       checkSuggestScrollRef.current = true;
-    }
-    init()
-  }, [token]);
+    };
+    init();
+  }, [token, dispatch]);
 
   useEffect(() => {
     if (isModalClosed) {
-      fetchRatedMovies();
+      dispatch(fetchRankingRatedMovies({ silent: true }));
       dispatch(setModalClosed(false));
     }
   }, [isModalClosed, dispatch]);
 
-  const handleRemoveMovie = (imdb_id: string) => {
-    setDisplayMovies((prevMovies) => prevMovies.filter((movie) => movie?.imdb_id !== imdb_id));
-  };
+  const handleRemoveMovie = useCallback((imdb_id: string) => {
+    setDisplayMovies(prev => prev.filter(m => m?.imdb_id !== imdb_id));
+  }, []);
 
-  const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
-  };
+  const handleNavigation = useCallback(
+    (imdb_id: string, navToken: string | null) => {
+      navigation.navigate(ScreenNameEnum.MovieDetailScreen as never, { imdb_idData: imdb_id, token: navToken } as never);
+    },
+    [navigation]
+  );
 
-  const renderMovie = useCallback(({ item }: { item: object | string }) => {
-    if (!item || typeof item !== 'object' || !item.imdb_id) return null;
-    return (
-      <NormalMovieCard
-        token={token}
-        item={item}
-        onPressClose={() => handleRemoveMovie(item.imdb_id)}
-        onPressRanking={() => handleRankingPress(item)}
-        flatlistTop={flatlistTop}
-        imdb_id={item.imdb_id}
-      />
-    );
-  }, [flatlistTop, suggestionPage]);
+  const handleRankingPress = useCallback(
+    (movie: { imdb_id?: string }) => {
+      compareHook.openFeedbackModal(movie);
+    },
+    [compareHook]
+  );
 
-  const compareHook = useCompareComponent(token);
-
-  const handleRankingPress = (movie) => {
-    compareHook.openFeedbackModal(movie);
-  };
+  const renderMovie = useCallback(
+    ({ item, index }: { item: object | string; index: number }) => {
+      if (!item || typeof item !== 'object' || !(item as { imdb_id?: string }).imdb_id) return null;
+      const imdbId = (item as { imdb_id: string }).imdb_id;
+      return (
+        <NormalMovieCard
+          token={token}
+          item={item}
+          onPressClose={() => handleRemoveMovie(imdbId)}
+          onPressRanking={() => handleRankingPress(item as { imdb_id?: string })}
+          flatlistTop={flatlistTop}
+          imdb_id={imdbId}
+          isFirstItem={index === 1}
+          onFirstRankIconMeasure={index === 1 ? (x: number, y: number) => setFirstRankIconPosition({ x, y }) : undefined}
+        />
+      );
+    },
+    [token, flatlistTop, handleRemoveMovie, handleRankingPress]
+  );
 
   // Helper functions for loading states
   const addLoadingIds = (ids: (string | undefined)[]) =>
@@ -368,50 +515,57 @@ const RankingScreen = () => {
   const removeLoadingIds = (ids: (string | undefined)[]) =>
     setLoadingIds(prev => prev.filter(id => ids.includes(id) === false));
 
-  // Drag and Drop Functions
-  const indexOf = (id) => order.indexOf(id);
+  const indexOf = useCallback((id: string) => orderRef.current.indexOf(id), []);
 
-  const animateTo = (id, toTop, duration = 180) => {
-    if (animatedPositions[id]) {
-      Animated.timing(animatedPositions[id], {
-        toValue: toTop,
-        duration,
-        useNativeDriver: true,
-      }).start();
-    }
-  };
+  const moveItemToIndex = useCallback(
+    (id: string, newIndex: number) => {
+      const currentOrder = orderRef.current;
+      const from = currentOrder.indexOf(id);
+      if (from === -1 || newIndex === from) return;
 
-  const moveItemToIndex = (id, newIndex) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const from = order.indexOf(id);
-    if (from === -1 || newIndex === from) return;
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      const next = [...currentOrder];
+      next.splice(from, 1);
+      next.splice(newIndex, 0, id);
+      setOrder(next);
+      orderRef.current = next;
 
-    const next = [...order];
-    next.splice(from, 1);
-    next.splice(newIndex, 0, id);
-    setOrder(next);
+      next.forEach((itemId, idx) => {
+        if (itemId === dragState.id) return;
+        if (animatedPositions[itemId]) {
+          Animated.timing(animatedPositions[itemId], {
+            toValue: idx * ITEM_HEIGHT,
+            duration: 180,
+            useNativeDriver: true,
+          }).start();
+        }
+      });
 
-    // Animate all items except the dragged one
-    next.forEach((itemId, idx) => {
-      if (itemId === dragState.id) return;
-      if (animatedPositions[itemId]) {
-        animateTo(itemId, idx * ITEM_HEIGHT);
+      dispatch(reorderRatedMovies({ fromIndex: from, toIndex: newIndex }));
+      updatePairwiseDecisionRef.current?.(id, from, newIndex);
+    },
+    [dispatch, animatedPositions]
+  );
+
+  const swapItems = useCallback(
+    (id: string, direction: 'up' | 'down') => {
+      const currentOrder = orderRef.current;
+      const currentIndex = currentOrder.indexOf(id);
+      let newIndex: number;
+      if (direction === 'up' && currentIndex > 0) {
+        newIndex = currentIndex - 1;
+      } else if (direction === 'down' && currentIndex < currentOrder.length - 1) {
+        newIndex = currentIndex + 1;
+      } else {
+        return;
       }
-    });
+      moveItemToIndex(id, newIndex);
+    },
+    [moveItemToIndex]
+  );
 
-    // Update ratedMovie order
-    setRatedMovie(prev => {
-      const updated = [...prev];
-      const [movedItem] = updated.splice(from, 1);
-      updated.splice(newIndex, 0, movedItem);
-      return updated;
-    });
-
-    // Update API for the swap
-    updatePairwiseDecision(id, from, newIndex);
-  };
-
-  const updatePairwiseDecision = async (id, fromIndex, toIndex) => {
+  const updatePairwiseDecisionRef = useRef<(id: string, fromIndex: number, toIndex: number) => void>(() => {});
+  const updatePairwiseDecision = async (id: string, fromIndex: number, toIndex: number) => {
     const fromMovie = ratedMovie[fromIndex];
     const toMovie = ratedMovie[toIndex];
 
@@ -432,33 +586,19 @@ const RankingScreen = () => {
       };
 
       const res = await recordPairwiseDecision1(token, payload);
-      // const res = await recordPairwiseDecision(token, payload);
 
-      // Update scores
-      setTimeout(() => {
-        setRatedMovie(prev =>
-          prev.map(m => ({
-            ...m,
-            rec_score: res?.[m.imdb_id] ?? m.rec_score,
-          }))
-        );
-      }, 300);
-
+      if (res && typeof res === 'object') {
+        setTimeout(() => dispatch(updateRatedMovieScores(res as Record<string, number>)), 300);
+        dispatch(fetchHomeRecommend({ silent: true }));
+      }
     } catch (err) {
-
-      // Rollback
       setTimeout(() => {
-        const rollbackOrder = [...order];
+        const rollbackOrder = [...orderRef.current];
         const [movedItem] = rollbackOrder.splice(toIndex, 1);
         rollbackOrder.splice(fromIndex, 0, movedItem);
         setOrder(rollbackOrder);
-
-        setRatedMovie(prev => {
-          const updated = [...prev];
-          const [movedItem] = updated.splice(toIndex, 1);
-          updated.splice(fromIndex, 0, movedItem);
-          return updated;
-        });
+        orderRef.current = rollbackOrder;
+        dispatch(rollbackRatedMovieOrder({ fromIndex: toIndex, toIndex: fromIndex }));
       }, 100);
     } finally {
       setTimeout(() => {
@@ -466,54 +606,16 @@ const RankingScreen = () => {
       }, 400);
     }
   };
+  updatePairwiseDecisionRef.current = updatePairwiseDecision;
 
-  const swapItems = (id, direction) => {
-    const currentIndex = indexOf(id);
-    let newIndex;
-
-    if (direction === 'up' && currentIndex > 0) {
-      newIndex = currentIndex - 1;
-    } else if (direction === 'down' && currentIndex < order.length - 1) {
-      newIndex = currentIndex + 1;
-    } else {
-      return;
-    }
-
-    moveItemToIndex(id, newIndex);
-  };
-
-  const onStartDrag = (id, y) => {
-    const index = indexOf(id);
-    if (index === -1) return;
-
-    dragState.id = id;
-    dragState.startY = y;
-    dragState.startTop = index * ITEM_HEIGHT;
-    dragState.currentIndex = index;
-    dragState.isDragging = true;
-
-    // Highlight dragged item
-    Animated.timing(activeScale[id], {
-      toValue: 1.05,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(activeZIndex[id], {
-      toValue: 999,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const onMoveDrag = (id, dy) => {
+  const onMoveDrag = (id: string, dy: number) => {
     if (dragState.id !== id) return;
 
     const newTop = dragState.startTop + dy;
     const currentIndex = Math.round(newTop / ITEM_HEIGHT);
 
     // Clamp to valid range
-    const clampedIndex = Math.max(0, Math.min(order.length - 1, currentIndex));
+    const clampedIndex = Math.max(0, Math.min(orderRef.current.length - 1, currentIndex));
 
     if (clampedIndex !== dragState.currentIndex) {
       // moveItemToIndex(id, clampedIndex);
@@ -526,43 +628,13 @@ const RankingScreen = () => {
     }
   };
 
-  const onEndDrag = (id) => {
-    if (dragState.id !== id) return;
-
-    const finalIndex = dragState.currentIndex;
-    const finalTop = finalIndex * ITEM_HEIGHT;
-
-    // Snap to final position
-    if (animatedPositions[id]) {
-      animateTo(id, finalTop, 150);
-    }
-
-    // Reset scale and z-index
-    Animated.timing(activeScale[id], {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(activeZIndex[id], {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
-
-    // Reset drag state
-    dragState.id = null;
-    dragState.isDragging = false;
-    dragState.currentIndex = -1;
-  };
-
-  const handleScroll = (event) => {
+  const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     dragState.scrollOffset = offsetY;
 
     // Update positions for all items based on scroll
     if (!dragState.isDragging) {
-      order.forEach((id, idx) => {
+      orderRef.current.forEach((id, idx) => {
         if (animatedPositions[id]) {
           animatedPositions[id].setValue(idx * ITEM_HEIGHT - offsetY);
         }
@@ -572,164 +644,71 @@ const RankingScreen = () => {
   const [showList, setShowList] = useState(true);
 
 
-  // PanResponder for drag gesture
-  const panResponder = (id) => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: (_, gestureState) => {
-      return Math.abs(gestureState.dy) > 10;
-    },
-    onPanResponderGrant: (_, gestureState) => {
-      onStartDrag(id, gestureState.y0);
-    },
-    onPanResponderMove: (_, gestureState) => {
-      onMoveDrag(id, gestureState.dy);
-    },
-    onPanResponderRelease: () => {
-      onEndDrag(id);
-    },
-    onPanResponderTerminate: () => {
-      onEndDrag(id);
-    },
-  });
+  const onStartDragStable = useCallback((id: string, y: number) => {
+    const index = orderRef.current.indexOf(id);
+    if (index === -1) return;
+    dragState.id = id;
+    setActiveDragId(id);
+    dragState.startY = y;
+    dragState.startTop = index * ITEM_HEIGHT;
+    dragState.currentIndex = index;
+    dragState.isDragging = true;
+    if (activeScale[id]) {
+      Animated.timing(activeScale[id], {
+        toValue: 1.05,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+    if (activeZIndex[id]) {
+      Animated.timing(activeZIndex[id], {
+        toValue: 999,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, []);
 
-  const RankingMovieList = useCallback(({ item, index }: { item: object | string; index: number }) => {
-    if (!item || !item.imdb_id) return null;
-    const itemId = item.imdb_id;
-    const isSwapping = loadingIds.includes(itemId);
-    const isActive = dragState.id === itemId;
-    const animatedPosition =
-      animatedPositions[itemId] ||
-      (animatedPositions[itemId] = new Animated.Value(index * ITEM_HEIGHT));
-    const translateY = isActive ? animatedPosition : new Animated.Value(0);
-    const scale =
-      activeScale[itemId] || (activeScale[itemId] = new Animated.Value(1));
-    const zIndex =
-      activeZIndex[itemId] || (activeZIndex[itemId] = new Animated.Value(1));
-    return (
-      <Animated.View
-        style={[
-          localStyles.cardContainer,
-          {
-            height: ITEM_HEIGHT,
-            position: dragState.id === item.imdb_id ? 'absolute' : 'relative',
-            left: 0,
-            right: 0,
-            transform: [
-              { translateY: dragState.id === item.imdb_id ? animatedPositions[item.imdb_id] : 0 },
-              { scale: scale }
-            ],
-            zIndex: isActive ? 999 : index,
-          }
-        ]}
-      >
-        <TouchableOpacity
-          {...panResponder(itemId).panHandlers}
-          style={[styles.movieCard]}
-          activeOpacity={0.7}
-          onLongPress={() => onStartDrag(item.imdb_id, 0)}
-        >
-          <TouchableOpacity
-            style={[styles.rankingCardContainer, { marginTop: 2 }]}
-            onPress={() => handleNavigation(item.imdb_id, token)}
-            activeOpacity={0.8}
-            disabled={isSwapping || isActive}
-          >
-            <Image
-              source={
-                item?.cover_image_url && item.cover_image_url.trim().length > 0
-                  ? { uri: item.cover_image_url }
-                  : imageIndex.SingleMovie5
-              }
-              style={styles.poster}
-              resizeMode="stretch"
-            />
+  const onEndDragStable = useCallback((id: string) => {
+    if (dragState.id !== id) return;
+    const finalIndex = dragState.currentIndex;
+    const finalTop = finalIndex * ITEM_HEIGHT;
+    if (animatedPositions[id]) {
+      Animated.timing(animatedPositions[id], {
+        toValue: finalTop,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+    Animated.timing(activeScale[id], {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+    Animated.timing(activeZIndex[id], {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+    dragState.id = null;
+    setActiveDragId(null);
+    dragState.isDragging = false;
+    dragState.currentIndex = -1;
+  }, []);
 
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => handleNavigation(itemId, token)}
-            style={styles.info}
-            disabled={isSwapping || isActive}
-          >
-            <CustomText
-              size={16}
-              color={Color.whiteText}
-              style={[styles.title]}
-              font={font.PoppinsMedium}
-              numberOfLines={2}
-            >
-              {item.title}
-            </CustomText>
-            <CustomText
-              size={14}
-              color={Color.placeHolder}
-              style={styles.year}
-              font={font.PoppinsRegular}
-            >
-              {item.release_year}
-            </CustomText>
-
-            <View style={[styles.iconprimary, { alignSelf: 'flex-end' }]}>
-              {Platform.OS == 'ios' ?
-                <OutlineTextIOS text={(index + 1)} fontSize={60} /> :
-                <LayeredShadowText text={(index + 1)} fontSize={60} marginRight={12} />
-              }
-            </View>
-          </TouchableOpacity>
-
-          <View style={styles.icons}>
-            <View style={{ alignSelf: 'flex-end' }}>
-              <RankingWithInfo
-                score={item?.rec_score}
-                title={(t("discover.recscore"))}
-                description={(t("discover.recscoredes"))}
-              // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-              />
-            </View>
-
-            <View style={styles.centerContainer}>
-              <View style={styles.iconprimary}>
-                {index > 0 && (
-                  <TouchableOpacity
-                    onPress={() => swapItems(itemId, 'up')}
-                    disabled={isSwapping || isActive}
-                  >
-                    <Image
-                      source={imageIndex.chevronUp}
-                      style={{
-                        height: 24,
-                        width: 24,
-                        opacity: isSwapping || isActive ? 0.5 : 1
-                      }}
-                      tintColor={Color.textGray}
-                      resizeMode='contain'
-                    />
-                  </TouchableOpacity>
-                )}
-                {index < ratedMovie.length - 1 && (
-                  <TouchableOpacity
-                    onPress={() => swapItems(itemId, 'down')}
-                    disabled={isSwapping || isActive}
-                  >
-                    <Image
-                      source={imageIndex.downDown}
-                      resizeMode='contain'
-                      style={{
-                        height: 24,
-                        width: 24,
-                        opacity: isSwapping || isActive ? 0.5 : 1
-                      }}
-                      tintColor={Color.textGray}
-                    />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }, [token, ratedMovie, loadingIds, order, dragState.id]);
+  const getPanResponder = useCallback((id: string) => {
+    if (!panRespondersRef.current[id]) {
+      panRespondersRef.current[id] = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10,
+        onPanResponderGrant: (_, gestureState) => onStartDragStable(id, gestureState.y0),
+        onPanResponderMove: (_, gestureState) => onMoveDrag(id, gestureState.dy),
+        onPanResponderRelease: () => onEndDragStable(id),
+        onPanResponderTerminate: () => onEndDragStable(id),
+      });
+    }
+    return panRespondersRef.current[id].panHandlers as Record<string, unknown>;
+  }, [onStartDragStable, onEndDragStable]);
 
   useEffect(() => {
     if (ratedMovie.length > 0 && rankingRenderedCount >= ratedMovie.length) {
@@ -742,8 +721,107 @@ const RankingScreen = () => {
     setRankingRenderedCount(renderedCount);
   }).current;
   useEffect(() => {
-    setDisplayMovies(filteredMovies);
-  }, [filteredMovies, visibleCount]);
+    setDisplayMovies(filteredMovies.slice(0, suggestionVisibleCount));
+  }, [filteredMovies, suggestionVisibleCount]);
+
+  const getRankingItemLayout = useCallback(
+    (_: unknown, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    []
+  );
+
+  const rankingData = useMemo(
+    () => order.slice(0, visibleCount),
+    [order, visibleCount]
+  );
+
+  const rankingKeyExtractor = useCallback((id: string, index: number) => id || `ranking-${index}`, []);
+
+  const rankingExtraData = useMemo(
+    () => [activeDragId, loadingIds],
+    [activeDragId, loadingIds]
+  );
+
+  const renderRankingItem = useCallback(
+    ({ item: id, index }: { item: string; index: number }) => {
+      const movie = ratedMovieRef.current.find((m: { imdb_id?: string }) => m.imdb_id === id);
+      if (!movie) return null;
+      const itemId = movie.imdb_id as string;
+      if (!animatedPositions[itemId]) {
+        animatedPositions[itemId] = new Animated.Value(index * ITEM_HEIGHT);
+      }
+      if (!activeScale[itemId]) activeScale[itemId] = new Animated.Value(1);
+      if (!activeZIndex[itemId]) activeZIndex[itemId] = new Animated.Value(1);
+      return (
+        <RankingListItem
+          itemId={itemId}
+          index={index}
+          movie={movie as RankingMovie}
+          isActive={activeDragId === itemId}
+          isSwapping={loadingIds.includes(itemId)}
+          totalCount={ratedMovieRef.current.length}
+          token={token}
+          animatedPosition={animatedPositions[itemId]}
+          scale={activeScale[itemId]}
+          zIndexVal={activeZIndex[itemId]}
+          zeroAnimatedValue={zeroAnimatedValue}
+          panHandlers={getPanResponder(itemId)}
+          onNavigate={handleNavigation}
+          onSwap={swapItems}
+          onStartDrag={onStartDragStable}
+        />
+      );
+    },
+    [activeDragId, loadingIds, token, getPanResponder, handleNavigation, swapItems, onStartDragStable]
+  );
+
+  const handleSuggestionEndReached = useCallback(() => {
+    if (suggestionVisibleCount < filteredMovies.length) {
+      setSuggestionVisibleCount(prev => Math.min(prev + SUGGESTION_LOAD_MORE_SIZE, filteredMovies.length));
+    } else if (suggestionHasMore && !suggestionLoading) {
+      dispatch(fetchRankingSuggestionMovies(suggestionPage + 1));
+    }
+  }, [suggestionVisibleCount, filteredMovies.length, suggestionHasMore, suggestionLoading, suggestionPage, dispatch]);
+
+  const suggestionKeyExtractor = useCallback((item: { imdb_id?: string }, index: number) => {
+    return item?.imdb_id ?? `suggestion-${index}`;
+  }, []);
+
+  const suggestionListFooter = useCallback(
+    () => (suggestionLoading ? <ActivityIndicator size="large" color={Color.primary} /> : null),
+    [suggestionLoading]
+  );
+
+  const rankingListFooter = useCallback(
+    () => (
+      <ButtonCustom
+        title={t('discover.dis_cover')}
+        onPress={() =>
+          navigation.navigate(ScreenNameEnum.DiscoverTab as never, {
+            screen: ScreenNameEnum.DiscoverScreen,
+            params: { type: 'recs' },
+          } as never)
+        }
+        textStyle={{ color: Color.whiteText }}
+        buttonStyle={{ marginTop: 5 }}
+      />
+    ),
+    [navigation]
+  );
+
+  const handleCloseTooltip = useCallback(() => {
+    setTooltipModal(false);
+    markTooltipSeen();
+  }, []);
+
+  const extraDataSuggestion = useMemo(
+    () => [suggestionLoading, suggestionHasMore],
+    [suggestionLoading, suggestionHasMore]
+  );
+
   return (
     <SafeAreaView style={styles.maincontainer}>
       <CustomStatusBar />
@@ -773,9 +851,10 @@ const RankingScreen = () => {
           }
         //  contentContainerStyle={{ flexGrow: 1 }}
         >
-          {currentStep < 5 && (
+          {currentStep <= STEPPER_VALUE && (
             <StepProgressBar
               totalSteps={totalSteps}
+              showwithStepCount={true}
               disable={true}
               currentStepModal={currentStep}
             />
@@ -783,7 +862,7 @@ const RankingScreen = () => {
 
 
           {/* Rated Movies Section */}
-          {currentStep >= 5 && (
+          {currentStep > STEPPER_VALUE && (
             loadingRated ? (
               <View style={{ paddingHorizontal: 10, marginTop: 14 }}>
                 {Array.from({ length: 8 }).map((_, index) => (
@@ -825,61 +904,27 @@ const RankingScreen = () => {
 
               <Animated.FlatList
                 ref={flatListRef}
+                data={rankingData}
+                renderItem={renderRankingItem}
+                keyExtractor={rankingKeyExtractor}
+                getItemLayout={getRankingItemLayout}
+                extraData={rankingExtraData}
                 showsVerticalScrollIndicator={false}
-                data={order.slice(0, visibleCount)}
-                renderItem={({ item: id, index }) => {
-                  const movie = ratedMovie.find(m => m.imdb_id === id);
-                  if (!movie) return null;
-
-                  return RankingMovieList({ item: movie, index });
-                }}
-                keyExtractor={(id, index) => id ?? `ranking-${index}`}
-
                 initialNumToRender={10}
-                maxToRenderPerBatch={10}
+                maxToRenderPerBatch={8}
                 updateCellsBatchingPeriod={50}
-                windowSize={7}
+                windowSize={5}
                 removeClippedSubviews={true}
-
                 onEndReachedThreshold={0.2}
                 onEndReached={loadMoreItems}
-                ListHeaderComponent={() =>
-
-                  <>
-
-
-
-                  </>
-                }
-
-                ListFooterComponent={() =>
-                  <>
-
-
-                    <ButtonCustom
-                      title={(t("discover.dis_cover"))}
-                      onPress={() => navigation.navigate(ScreenNameEnum.DiscoverTab, {
-                        screen: ScreenNameEnum.DiscoverScreen,
-                        params: { type: 'recs' },
-                      })}
-                      textStyle={
-                        {
-                          color: Color.whiteText
-                        }
-                      }
-                      buttonStyle={{
-                        marginTop: 5
-                      }}
-                    />
-                  </>
-                }
+                ListFooterComponent={rankingListFooter}
               />
             )
           )}
 
 
 
-          {!showList ? null : (
+          {(!showList || loadingRated || (ratedMovie.length > 0 && visibleCount < ratedMovie.length)) ? null : (
             <>
               <>
                 {/* <ButtonCustom
@@ -913,7 +958,7 @@ const RankingScreen = () => {
               <FlatList
                 showsVerticalScrollIndicator={false}
                 data={displayMovies}
-                keyExtractor={(item, index) => index?.toString()}
+                keyExtractor={suggestionKeyExtractor}
                 ref={listRef}
                 onLayout={handleLayout}
                 renderItem={renderMovie}
@@ -921,18 +966,10 @@ const RankingScreen = () => {
                 maxToRenderPerBatch={10}
                 windowSize={8}
                 contentContainerStyle={{ paddingBottom: 20, marginTop: 10 }}
-                onEndReached={() => {
-                  if (suggestionHasMore && !suggestionLoading) {
-                    fetchSuggestionMovies(suggestionPage + 1);
-                  }
-                }}
+                onEndReached={handleSuggestionEndReached}
                 onEndReachedThreshold={0.2}
-                extraData={[filteredMovies, suggestionLoading, suggestionHasMore]}
-                ListFooterComponent={
-                  suggestionLoading ? (
-                    <ActivityIndicator size="large" color={Color.primary} />
-                  ) : null
-                }
+                extraData={extraDataSuggestion}
+                ListFooterComponent={suggestionListFooter}
               />
             </>
           )}
@@ -956,7 +993,7 @@ const RankingScreen = () => {
     contentContainerStyle={{ paddingBottom: 20, marginTop: 10 }}
     onEndReached={() => {
       if (suggestionHasMore && !suggestionLoading) {
-        fetchSuggestionMovies(suggestionPage + 1);
+        dispatch(fetchRankingSuggestionMovies(suggestionPage + 1));
       }
     }}
     onEndReachedThreshold={0.2}
@@ -975,12 +1012,10 @@ const RankingScreen = () => {
 
       <CompareModals token={token} useCompareHook={compareHook} />
       <SlideInTooltipModal
-        visible={TooltipModal}
-        onClose={() => {
-          setTooltipModal(false);
-          markTooltipSeen();
-        }}
+        visible={TooltipModal && firstRankIconPosition != null}
+        onClose={handleCloseTooltip}
         flatlistTop={flatlistTop}
+        firstRankIconPosition={firstRankIconPosition}
       />
 
     </SafeAreaView>

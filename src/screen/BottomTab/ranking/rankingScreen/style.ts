@@ -168,10 +168,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     // backgroundColor:'red'
   },
-  rankingCardContainer: {
-    flexDirection: 'row',
-    marginTop: 16,
-  },
   poster: {
     width: 98,
     height: 135,

@@ -1,5 +1,5 @@
 export default {
-  welcome: require('./images/welcome.png'),
+  // welcome: require('./images/welcome.png'),
   appLogo: require('./images/appLogo.png'),
   eyes: require('./images/eyes.png'),
   fb: require('./images/fb.png'),
@@ -17,8 +17,7 @@ export default {
   usersGroupActive: require('./images/usersGroupActive.png'),
   profileActive: require('./images/profileActive.png'),
   notification: require('./images/notification.png'),
-  search: require('./images/search.png'),
-  ratingLabel: require('./images/ratingLabel.png'),
+  search: require('./images/search.png'), 
   rightArrow: require('./images/rightArrow.png'),
   mdRankings: require('./images/mdRankings.png'),
   saveMark: require('./images/saveMark.png'),
@@ -29,44 +28,37 @@ export default {
   stopPlay: require('./images/stopPlay.png'),
   acrtivePlay: require('./images/acrtivePlay.png'),
   orCircle: require('./images/orCircle.png'),
-  bluePlay: require('./images/bluePlay.png'),
-  stepPogremBar: require('./images/stepPogremBar.png'),
-  stepCom: require('./images/stepCom.png'),
+  bluePlay: require('./images/bluePlay.png'), 
   chevronUp: require('./images/chevronUp.png'),
   downDown: require('./images/downDown.png'),
   backArrow: require('./images/backArrow.png'),
-  closeWhite: require('./images/closeWhite.png'),
-  mx: require('./images/mx.png'),
+  closeWhite: require('./images/closeWhite.png'), 
   menu: require('./images/menu.png'),
   profileImg: require('./images/profileImg.png'),
   save: require('./images/save.png'),
   WatchNowButton: require('./images/WatchNowButton.png'),
   checkBox: require('./images/checkBox.png'),
-  checKBoxActive: require('./images/checKBoxActive.png'),
-  amazon: require('./images/amazon.png'),
+  checKBoxActive: require('./images/checKBoxActive.png'), 
   closeimg: require('./images/closeimg.png'),
-  chevronDown: require('./images/chevronDown.png'),
+  // chevronDown: require('./images/chevronDown.png'),
   mess: require('./images/mess.png'),
   Addplus: require('./images/Addplus.png'),
   Info: require('./images/Info.png'),
   heart: require('./images/heart.png'),
   view: require('./images/view.png'),
-  pause: require('./images/pause.png'),
-  second: require('./images/second.png'),
-  ten10: require('./images/ten10.png'),
+  pause: require('./images/pause.png'), 
   polygon: require('./images/polygon.png'),
   send: require('./images/send.png'),
   settings: require('./images/settings.png'),
+  questionMark: require('./images/questionMark.png'),
   edit: require('./images/edit.png'),
   gallery: require('./images/gallery.png'),
-  camera: require('./images/camera.png'),
-  bgWatch: require('../assets/images/bgWatch.png'),
+  camera: require('./images/camera.png'), 
   reelRecs: require('../assets/images/reelRecs.png'),
   mutedIcon: require('../assets/images/mutedIcon.png'),
   puased: require('../assets/images/puased.png'),
   mute: require('../assets/images/mute.png'),
-  progressBarCenter: require('../assets/images/progressBarCenter.png'),
-  Welcomeupdate: require('../assets/images/Welcomeupdate.png'),
+  progressBarCenter: require('../assets/images/progressBarCenter.png'), 
   settingUser: require('../assets/images/settingUser.png'),
   settingPlay: require('../assets/images/settingPlay.png'),
   settingPrivacy: require('../assets/images/settingPrivacy.png'),
@@ -93,8 +85,7 @@ export default {
   playCircle: require('../assets/images/playCircle.png'),
   settingHelpImg: require('../assets/images/settingHelpImg.png'),
   commnet: require('../assets/images/commnet.png'),
-  sendComment: require('../assets/images/sendComment.png'),
-  questionMark: require('../assets/images/questionMark.png'),
+  sendComment: require('../assets/images/sendComment.png'), 
   volumeOff: require('../assets/images/volumeOff.png'),
   normalNotification: require('../assets/images/normalNotification.png'),
   rankingTab: require('../assets/images/rankingTab.png'),
@@ -117,25 +108,11 @@ export default {
   LargePortraitPoster2: require('../assets/images/LargePortraitPoster2.png'),
   SingleMovieSlide3: require('../assets/images/SingleMovieSlide3.png'),
   SingleMovie5: require('../assets/images/SingleMovie5.png'),
+  tooltipHand: require('./images/tooltipHand.png'),
+  tooltipHand2: require('./images/tooltipHand2.png'),
+  tooltipHand3: require('./images/tooltipHand3.png'),
+  tooltipHand4: require('./images/tooltipHand4.png'),
   // closeCircle: require('../assets/images/closeCircle.png'),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   welcomePost1: require('../assets/welcomePost/welcomePost1.png'),
   welcomePost2: require('../assets/welcomePost/welcomePost2.png'),
   welcomePost3: require('../assets/welcomePost/welcomePost3.png'),

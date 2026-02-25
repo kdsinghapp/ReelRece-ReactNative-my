@@ -8,7 +8,7 @@ import font from "@theme/font";
 import { t } from "i18next";
 
 interface RankingWithInfoProps {
-  score: number;
+  score?: number | string | null;
   title?: string;
   description?: string;
   loading?: boolean;
@@ -100,7 +100,7 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
         style={[styles.cardWrapper,{
          }]}
       >
-   <RankingCard ranked={score} loading={loading} />
+   <RankingCard ranked={score ?? '?'} loading={loading} />
  
 
       </TouchableOpacity>

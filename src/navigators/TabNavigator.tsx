@@ -83,15 +83,15 @@ const getTabBarStyle = useCallback(
     const hidden = isKeyboardVisible || isMultiSelect || shouldHide;
 
     return {
-     height: hidden
-  ? 0
-  : Platform.OS === "android"
-  ? 58   // ⬆️ was 64
-  : 88,  // ⬆️ was 78
-
-paddingTop: 3,               // ⬆️ was 8
-paddingBottom: Platform.OS === "android" ? 12 : 20, // ⬆️ more space
-
+      display: hidden ? "none" : "flex",
+      height: hidden
+        ? 0
+        : Platform.OS === "android"
+        ? 58
+        : 88,
+      overflow: "hidden",
+      paddingTop: 3,
+      paddingBottom: Platform.OS === "android" ? 12 : 20,
       backgroundColor: shouldTransparent ? "transparent" : Color.background,
       position:
         shouldTransparent || shouldAbsolute ? "absolute" : "relative",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import useWoodScreen from './useWoodScreen';
 import { Color } from '@theme/color';
@@ -23,6 +23,20 @@ import CompareModals from '../rankingScreen/CompareModals';
 import { t } from 'i18next';
 
 const SEARCH_DEBOUNCE_MS = 500;
+
+/** Returns page numbers and 'ellipsis' to show, e.g. [1, 2, 3, 4, 5, 'ellipsis', 22] */
+function getPaginationPages(current: number, total: number): (number | 'ellipsis')[] {
+  if (total <= 1) return [];
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | 'ellipsis')[] = [1];
+  const left = Math.max(2, current - 2);
+  const right = Math.min(total - 1, current + 2);
+  if (left > 2) pages.push('ellipsis');
+  for (let p = left; p <= right; p++) pages.push(p);
+  if (right < total - 1) pages.push('ellipsis');
+  pages.push(total);
+  return pages;
+}
 
 const WoodsScreen = () => {
   const route = useRoute();
@@ -48,7 +62,6 @@ const WoodsScreen = () => {
     currentPage,
     totalPages,
   } = useWoodScreen();
-
   // const {
   //   togglePlatform,
   //   isVisible, setIsVisible,
@@ -64,6 +77,7 @@ const WoodsScreen = () => {
 
   const token = useSelector((state: RootState) => state?.auth?.token); // ✅ outside  condition
   const compareHook = useCompareComponent(token);
+  const insets = useSafeAreaInsets();
 
 
   // const handleSearch = useCallback((query: string) => {
@@ -94,15 +108,14 @@ const WoodsScreen = () => {
   // }, [type, token, searchQuery]);
 
 
- 
   const handleSearch = useCallback(
-    (query: string, page: number = 1) => {
+    (query: string, page: number = 1, replace: boolean = false) => {
       if (!query.trim()) {
         setFilteredItems([]);
         return;
       }
       if (type === 'movie' && token) {
-        searchFromAPI(query.toLowerCase().trim(), token, page);
+        searchFromAPI(query.toLowerCase().trim(), token, page, replace);
       }
     },
     [type, token, searchFromAPI]
@@ -136,6 +149,8 @@ const WoodsScreen = () => {
   const handleSearchInputChange = useCallback(
     (text: string) => {
       setSearchQuery(text);
+      // In group mode, only update the input; local filter is done via useMemo below
+      if (type === 'group') return;
       if (!text.trim()) {
         if (debounceTimerRef.current) {
           clearTimeout(debounceTimerRef.current);
@@ -146,8 +161,19 @@ const WoodsScreen = () => {
       }
       runDebouncedSearch(text);
     },
-    [runDebouncedSearch, setFilteredItems]
+    [type, runDebouncedSearch, setFilteredItems]
   );
+
+  /** For group mode: filter groups locally by search query (groupName) */
+  const filteredGroupsForSearch = useMemo(() => {
+    if (type !== 'group' || !Array.isArray(groupsData)) return groupsData;
+    const q = (searchQuery || '').trim().toLowerCase();
+    if (!q) return groupsData;
+    return groupsData.filter(
+      (g: { groupName?: string }) =>
+        (g?.groupName ?? '').toLowerCase().includes(q)
+    );
+  }, [type, groupsData, searchQuery]);
 
   useEffect(() => {
     return () => {
@@ -186,7 +212,7 @@ const WoodsScreen = () => {
   }, [type]);
 
   return (
-    <SafeAreaView style={styles.maincontainer}>
+    <SafeAreaView style={styles.maincontainer} edges={['top', 'bottom']}>
       <CustomStatusBar />
 
       <View style={styles.searchHeaderContainer}>
@@ -220,29 +246,85 @@ const WoodsScreen = () => {
       )}
 
       {type === 'movie' && (
-        <SearchMovieCom
-          movieData={filteredItems}
-          setSearchData={setFilteredItems}     //  Add this
-          token={token}
-          navigation={navigation}
-          togglePlatform={togglePlatform}
-          isVisible={isVisible}
-          setIsVisible={setIsVisible}
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          lovedImge={lovedImge}
-          setlovedImge={setlovedImge}
-          selectedPlatforms={selectedPlatforms}
-          searchQuery={searchQuery}
-          loading={loading}  
-          loadingMore={loadingMore} // ✅ Pass loadingMore for footer spinner
-          onEndReached={loadMoreData} // ✅ Pass this to FlatList
-        />
+        <View style={[styles.movieSection, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <View style={styles.movieListWrapper}>
+            <SearchMovieCom
+              movieData={filteredItems}
+              setSearchData={setFilteredItems}
+              token={token}
+              navigation={navigation}
+              togglePlatform={togglePlatform}
+              isVisible={isVisible}
+              setIsVisible={setIsVisible}
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              lovedImge={lovedImge}
+              setlovedImge={setlovedImge}
+              selectedPlatforms={selectedPlatforms}
+              searchQuery={searchQuery}
+              loading={loading}
+              loadingMore={loadingMore}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onEndReached={loadMoreData}
+            />
+          </View>
+          {searchQuery.trim() && totalPages > 1 && (
+            <View style={styles.paginationBar}>
+              <TouchableOpacity
+                style={styles.paginationBtn}
+                onPress={() => handleSearch(searchQuery, 1, true)}
+                disabled={currentPage <= 1 || loading}
+              >
+                <Text style={[styles.paginationBtnText, (currentPage <= 1 || loading) && styles.paginationBtnDisabled]}>{'\u00AB'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.paginationBtn}
+                onPress={() => handleSearch(searchQuery, Math.max(1, currentPage - 1), true)}
+                disabled={currentPage <= 1 || loading}
+              >
+                <Text style={[styles.paginationBtnText, (currentPage <= 1 || loading) && styles.paginationBtnDisabled]}>&lt;</Text>
+              </TouchableOpacity>
+              <View style={styles.paginationNumbers}>
+                {getPaginationPages(currentPage, totalPages).map((item, idx) =>
+                  item === 'ellipsis' ? (
+                    <Text key={`ellipsis-${idx}`} style={styles.paginationEllipsis}>{'\u2026'}</Text>
+                  ) : (
+                    <TouchableOpacity
+                      key={item}
+                      style={[styles.paginationPageBtn, item === currentPage && styles.paginationPageBtnActive]}
+                      onPress={() => handleSearch(searchQuery, item, true)}
+                      disabled={loading}
+                    >
+                      <Text style={[styles.paginationPageText, item === currentPage && styles.paginationPageTextActive]}>{item}</Text>
+                    </TouchableOpacity>
+                  )
+                )}
+              </View>
+              <TouchableOpacity
+                style={styles.paginationBtn}
+                onPress={() => handleSearch(searchQuery, Math.min(totalPages, currentPage + 1), true)}
+                disabled={currentPage >= totalPages || loading}
+              >
+                <Text style={[styles.paginationBtnText, (currentPage >= totalPages || loading) && styles.paginationBtnDisabled]}>&gt;</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.paginationBtn}
+                onPress={() => handleSearch(searchQuery, totalPages, true)}
+                disabled={currentPage >= totalPages || loading}
+              >
+                <Text style={[styles.paginationBtnText, (currentPage >= totalPages || loading) && styles.paginationBtnDisabled]}>{'\u00BB'}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       )}
 
       {type === 'group' && (
-        <GroupSearch groupData={groupsData}
-          navigation={navigation} />
+        <GroupSearch
+          groupData={Array.isArray(filteredGroupsForSearch) ? filteredGroupsForSearch : []}
+          searchQuery={searchQuery ?? ''}
+        />
       )}
 
       <CompareModals token={token} useCompareHook={compareHook} />
@@ -255,7 +337,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.background,
   },
-
+  movieSection: {
+    flex: 1,
+  },
+  movieListWrapper: {
+    flex: 1,
+  },
   searchHeaderContainer: {
     marginTop: 15,
     flexDirection: 'row',
@@ -311,6 +398,66 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsBold,
     fontSize: 16,
     color: Color.primary,
+  },
+  paginationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+    gap: 6,
+  },
+  paginationBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Color.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paginationBtnText: {
+    fontSize: 16,
+    color: Color.primary,
+    fontFamily: font.PoppinsMedium,
+  },
+  paginationBtnDisabled: {
+    color: Color.placeHolder,
+    opacity: 0.6,
+  },
+  paginationNumbers: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  paginationPageBtn: {
+    minWidth: 36,
+    height: 36,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paginationPageBtnActive: {
+    backgroundColor: Color.primary,
+    borderColor: Color.primary,
+  },
+  paginationPageText: {
+    fontSize: 14,
+    color: Color.primary,
+    fontFamily: font.PoppinsMedium,
+  },
+  paginationPageTextActive: {
+    color: Color.whiteText,
+  },
+  paginationEllipsis: {
+    fontSize: 14,
+    color: Color.primary,
+    fontFamily: font.PoppinsRegular,
+    paddingHorizontal: 4,
+    lineHeight: 36,
   },
 });
 

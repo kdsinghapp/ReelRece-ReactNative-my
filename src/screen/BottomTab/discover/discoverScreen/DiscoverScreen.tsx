@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import { t } from 'i18next';
@@ -25,13 +25,9 @@ import imageIndex from '@assets/imageIndex';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { Trending_without_Filter } from '@redux/Api/movieApi';
 
-// ✅ update this import path if needed
-// import FilterBar from './FilterBar';
-// import SortByModal from './SortByModal';
-  
+ 
  import CustomText from '@components/common/CustomText/CustomText';
 
-// ✅ adjust RootState import to your project
 import { RootState } from '@redux/store';
 import SortbyModal from '@components/modal/SortbyModal/SortbyModal';
 import FilterBar from './FilterBar';
@@ -47,7 +43,7 @@ type MovieItem = {
   rec_score?: number;
 };
 
-const TabPaginationScreen = () => {
+const DiscoverScreen = () => {
   const flatListRef = useRef<FlatList<MovieItem>>(null);
 
   const {
@@ -88,6 +84,8 @@ const TabPaginationScreen = () => {
   const isFetchingRef = useRef(false);
   const shouldLoadMoreRef = useRef(true);
   const filterFingerprintRef = useRef('');
+  const routeParamsRef = useRef(route?.params);
+  routeParamsRef.current = route?.params;
 
   const goToSearchScreen = useCallback(() => {
     navigation.navigate(ScreenNameEnum.WoodsScreen, { type: 'movie' });
@@ -224,16 +222,32 @@ const TabPaginationScreen = () => {
     [token, buildUrl, setTrending]
   );
 
-  // Sync tab from route params as early as possible; also when params arrive after mount (e.g. tab)
-  useLayoutEffect(() => {
+   useLayoutEffect(() => {
     if (isSelectList != null && ['1', '2', '5'].includes(String(isSelectList))) {
       const next = String(isSelectList);
       setSelectedSimpleFilter(prev => (prev !== next ? next : prev));
     }
   }, [isSelectList]);
 
-  // Single source: fetch when filters (including selected tab) change; runs on mount and when user changes tab/filters
-  useEffect(() => {
+   useFocusEffect(
+    useCallback(() => {
+      const applyParams = () => {
+        const fromRef = routeParamsRef.current?.isSelectList;
+        const state = navigation.getState();
+        const routeFromState = state?.routes?.[state.index ?? 0];
+        const fromState = routeFromState?.params?.isSelectList;
+        const list = fromState ?? fromRef;
+        if (list != null && ['1', '2', '5'].includes(String(list))) {
+          setSelectedSimpleFilter(String(list));
+        }
+      };
+      applyParams();
+      const id = setTimeout(applyParams, 50);
+      return () => clearTimeout(id);
+    }, [navigation])
+  );
+
+   useEffect(() => {
     const currentFingerprint = `${selectedSimpleFilter}-${filterGenreString}-${platformFilterString}-${selectedSortId}-${contentSelect}`;
     if (filterFingerprintRef.current !== currentFingerprint) {
       filterFingerprintRef.current = currentFingerprint;
@@ -273,15 +287,7 @@ const TabPaginationScreen = () => {
   const renderItem = useCallback(
     ({ item }: { item: MovieItem }) => {
       if (!item) return null;
-
-      // const coverSource = item?.cover_image_url?.trim()
-      //   ? {
-      //       uri: item.cover_image_url,
-      //       priority: FastImage.priority.low,
-      //       cache: FastImage.cacheControl.immutable,
-      //     }
-      //   : imageIndex.SingleMovie5;
-      const coverSource = item?.cover_image_url?.trim()
+       const coverSource = item?.cover_image_url?.trim()
       ? {
           uri: item.cover_image_url,
           priority: FastImage.priority.low,
@@ -336,6 +342,11 @@ const TabPaginationScreen = () => {
 
     return null;
   }, [loadingMore, hasMore, trending?.length, currentPage, totalPages]);
+
+  const flatListExtraData = useMemo(
+    () => ({ loadingMore, hasMore }),
+    [loadingMore, hasMore]
+  );
 
   const renderEmpty = useCallback(() => {
     if (loading) {
@@ -495,7 +506,7 @@ const TabPaginationScreen = () => {
               maxToRenderPerBatch={10}
               windowSize={5}
               removeClippedSubviews
-              extraData={{ loadingMore, hasMore }}
+              extraData={flatListExtraData}
             />
           )}
         </View>
@@ -504,4 +515,4 @@ const TabPaginationScreen = () => {
   );
 };
 
-export default TabPaginationScreen;
+export default DiscoverScreen;

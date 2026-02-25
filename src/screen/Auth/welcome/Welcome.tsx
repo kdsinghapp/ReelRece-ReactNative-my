@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Image, Animated, Dimensions, StyleSheet } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import useWelcome from "./useWelcome";
-import { useSelector } from "react-redux";
-import { RootState } from "@redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@redux/store";
+import { fetchRankingRatedMovies, fetchRankingSuggestionMovies } from "@redux/feature/rankingSlice";
 import ScreenNameEnum from "@routes/screenName.enum";
 import { Button, CustomStatusBar } from "@components/index";
 import CustomText from "@components/common/CustomText/CustomText";
@@ -31,13 +32,22 @@ const moviePosters = [
 
 const Welcome = () => {
   const { navigation } = useWelcome();
+  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token);
   const userProfile = useSelector((state: RootState) => state.auth.userGetData);
   const [valid, setValid] = useState(true)
   const [loading, setLoading] = useState(true)
-useEffect(()=>{
-  bothBookMovie()
-},[])
+
+  useEffect(() => {
+    bothBookMovie();
+  }, []);
+
+  // Prefetch ranking APIs so Ranking tab loads smoothly when user taps Get started
+  useEffect(() => {
+    if (!token) return;
+    dispatch(fetchRankingRatedMovies());
+    dispatch(fetchRankingSuggestionMovies(1));
+  }, [token, dispatch]);
   // ✅ add this
   const { t } = useTranslation();
 

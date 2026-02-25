@@ -4,12 +4,14 @@ import {
   View,
   StyleSheet,
   Keyboard,
- } from 'react-native';
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
- import ScreenNameEnum from '@routes/screenName.enum';
+import ScreenNameEnum from '@routes/screenName.enum';
 import { useNavigation } from '@react-navigation/native';
- import CreateGroupName from '@components/modal/GroupMemberModal/CreateGroupName';
+import CreateGroupName from '@components/modal/GroupMemberModal/CreateGroupName';
 import SelectFriendCom from '@components/common/SelectFriendCom/SelectFriendCom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
@@ -54,81 +56,80 @@ const CreateGroupScreen = () => {
   }, []);
 
   const handleCreateGroup = async () => {
-     if (!selectedMembers || selectedMembers.length === 0) {
+    if (!selectedMembers || selectedMembers.length === 0) {
       showToast("Please select at least one friend.", false);
       return;
     }
     const getMemberName = (member) =>
-  (member?.name || member?.username || member?.id).trim();
+      (member?.name || member?.username || member?.id).trim();
 
-const finalGroupName = groupNameState?.trim()
-  ? groupNameState.trim()
-  : selectedMembers.length === 1
-    ? getMemberName(selectedMembers[0])
-    : selectedMembers.length === 2
-      ? `${getMemberName(selectedMembers[0])} & ${getMemberName(selectedMembers[1])}`
-      : selectedMembers.length > 2
-        ? `${selectedMembers
-            .slice(0, -1)
-            .map(getMemberName)
-            .join(', ')} & ${getMemberName(selectedMembers[selectedMembers.length - 1])}`
-        : '';
- 
+    const finalGroupName = groupNameState?.trim()
+      ? groupNameState.trim()
+      : selectedMembers.length === 1
+        ? getMemberName(selectedMembers[0])
+        : selectedMembers.length === 2
+          ? `${getMemberName(selectedMembers[0])} & ${getMemberName(selectedMembers[1])}`
+          : selectedMembers.length > 2
+            ? `${selectedMembers
+              .slice(0, -1)
+              .map(getMemberName)
+              .join(', ')} & ${getMemberName(selectedMembers[selectedMembers.length - 1])}`
+            : '';
 
-const createGroupName = (groupNameState: string, selectedMembers: string | object[]) => {
-  // If user manually entered a group name, use that
-  if (groupNameState?.trim()) {
-    return groupNameState.trim();
-  }
- 
-  const names = selectedMembers?.map(getMemberName).filter(Boolean);
- 
-  if (names.length === 0) return '';
- 
-  if (names.length === 1) {
-    return names[0];
-  }
- 
-  if (names.length === 2) {
-    return `${names[0]} & ${names[1]}`;
-  }
- 
-  // 3 or more members
-  return `${names.slice(0, -1).join(', ')} & ${names[names?.length - 1]}`;
-};
 
-setLoader(true)
-     try {
+    const createGroupName = (groupNameState: string, selectedMembers: string | object[]) => {
+      // If user manually entered a group name, use that
+      if (groupNameState?.trim()) {
+        return groupNameState.trim();
+      }
+
+      const names = selectedMembers?.map(getMemberName).filter(Boolean);
+
+      if (names.length === 0) return '';
+
+      if (names.length === 1) {
+        return names[0];
+      }
+
+      if (names.length === 2) {
+        return `${names[0]} & ${names[1]}`;
+      }
+
+      // 3 or more members
+      return `${names.slice(0, -1).join(', ')} & ${names[names?.length - 1]}`;
+    };
+
+    setLoader(true)
+    try {
       const finalGroupName = createGroupName(groupNameState, selectedMembers);
       // ✅ Safe array mapping with guards
-     const memberUsernames = Array.isArray(selectedMembers) 
-       ? selectedMembers.map(member => member?.username ||  member?.name ||member?.id).filter(Boolean)
-       : []; // ✅ FIXED
+      const memberUsernames = Array.isArray(selectedMembers)
+        ? selectedMembers.map(member => member?.username || member?.id || member?.name).filter(Boolean)
+        : []; // ✅ FIXED
       // const memberUsernames = selectedMembers.map(member => member.id);
-        const response = await createGroup(token, finalGroupName, memberUsernames);
+     const response = await createGroup(token, finalGroupName, memberUsernames);
       const data = response?.data as { message?: string; messaged?: string } | undefined;
       const createdGroupId = (data?.message ?? data?.messaged)?.split(' ')[0]?.trim();
       setGroup_Id(createdGroupId);
       setGroup_api_create(true);
-          setLoader(false)
+      setLoader(false)
       showToast("Group created successfully!", true);
-setTimeout(() => {
-  navigation.goBack();
-}, 300);  
-    } catch (error: string | object ) {
-                setLoader(false)
+      setTimeout(() => {
+        navigation.goBack();
+      }, 300);
+    } catch (error: string | object) {
+      setLoader(false)
 
- 
+
       if (error.response && error.response.status === 409) {
-                  setLoader(false)
-
-        const errorMsg  = error.response.data.error;
-        const existingGroupName   = error.response.data.existing_group_name;
-          showToast(`${errorMsg} Group name: ${existingGroupName}`, false);
+        setLoader(false)
+        const errorMsg = error.response.data.error;
+        const existingGroupName = error.response.data.existing_group_name;
+        showToast(`${errorMsg} Group name: ${existingGroupName}`, false);
       } else {
-                  setLoader(false)
+        setLoader(false)
 
-            showToast("Group creation failed. Please try again.", false);
+        showToast("Group creation failed. Please try again.", false);
       }
     }
   }
@@ -142,8 +143,8 @@ setTimeout(() => {
         setLoadingGroups(true);
 
         const groupName = groupNameState;
-         const groupId = group_Id;
-         // ✅ Fetch activities
+        const groupId = group_Id;
+        // ✅ Fetch activities
         let activities = {
           current_page: 1,
           results: [],
@@ -157,7 +158,7 @@ setTimeout(() => {
             total_pages: activityData?.total_pages,
           };
         } catch (err) {
-         }
+        }
 
         // ✅ Fetch members
         let members = [];
@@ -165,7 +166,7 @@ setTimeout(() => {
           const memberData = await getGroupMembers(token, groupId);
           members = memberData?.results || [];
         } catch (err) {
-         }
+        }
         const finalGroup = {
           groupId,
           groupName,
@@ -175,10 +176,10 @@ setTimeout(() => {
         };
 
         setGroupsData([finalGroup]);
- 
+
         //  Navigate after slight delay (optional)
         setTimeout(() => {
-           // navigation.navigate(ScreenNameEnum.WatchWithFriend, {
+          // navigation.navigate(ScreenNameEnum.WatchWithFriend, {
           navigation.navigate(ScreenNameEnum.WatchWithFriend as never, {
             // group: finalGroup,
             groupProps: finalGroup,
@@ -187,7 +188,7 @@ setTimeout(() => {
           });
         }, 1000);
       } catch (err) {
-       } finally {
+      } finally {
         setLoadingGroups(false);
       }
     };
@@ -203,7 +204,7 @@ setTimeout(() => {
   // ) }
   // useEffect(() => {
   //   if (group_api_create && groupsData.length > 0 && group_Id) {
-   //     navigation.navigate(ScreenNameEnum.WatchWithFriend, {
+  //     navigation.navigate(ScreenNameEnum.WatchWithFriend, {
   //       group: groupsData,
   //       groupId: group_Id,
   //       type: "createGroup", // Optional
@@ -221,7 +222,7 @@ setTimeout(() => {
   //     });
   //   }, 1000);
 
-   const renderContent = () => (
+  const renderContent = () => (
     <View style={{ justifyContent: 'space-between', flex: 1, }}>
 
       <SelectFriendCom
@@ -240,7 +241,7 @@ setTimeout(() => {
           toastMess={toastMess}
           selectedMembers={selectedMembers}
           setIsAutoGenerated={setIsAutoGenerated}
-         />
+        />
       )}
     </View>
   );
@@ -249,14 +250,20 @@ setTimeout(() => {
       <CustomStatusBar />
       <View style={{ paddingTop: 18, }} >
         <HeaderCustom
-        // 
+          // 
           title={(t("discover.addfriend"))}
           backIcon={imageIndex.backArrow}
           rightIcon={false}
           onRightPress={() => navigation.navigate(ScreenNameEnum.OtherWatchingProfile)}
         />
       </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 5 : 0}
+      >
       {renderContent()}
+      </KeyboardAvoidingView>
       {toastMess && (
         <SuccessMessageCustom
           textColor={Color.whiteText}
@@ -272,6 +279,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Color.background,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
 
 });

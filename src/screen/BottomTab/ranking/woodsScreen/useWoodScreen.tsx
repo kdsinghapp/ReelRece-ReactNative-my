@@ -1,5 +1,5 @@
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchMovies as fetchSearchMovies } from '@redux/Api/movieApi';
 import { useSelector } from 'react-redux';
@@ -8,6 +8,7 @@ import { getGroupActivities, getGroupMembers, getSearchGroup } from '@redux/Api/
 
 const useWoodScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const token = useSelector((state: RootState) => state.auth.token);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -20,7 +21,16 @@ const useWoodScreen = () => {
   const [loading, setLoading] = useState(false);
   const [filteredItems, setFilteredItems] = useState<string | object[]>([]);
   const [groupsData, setGroupsData] = useState<string | object[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true); 
+  const [loadingGroups, setLoadingGroups] = useState(true);
+
+  /** When opened with type 'group', use the group list passed from WatchScreen */
+  useEffect(() => {
+    const params = route?.params as { type?: string; groupsData?: unknown[] } | undefined;
+    if (params?.type === 'group' && Array.isArray(params?.groupsData)) {
+      setGroupsData(params.groupsData);
+      setLoadingGroups(false);
+    }
+  }, [route?.params]); 
   const [loadingMore, setLoadingMore] = useState(false); ;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -47,15 +57,15 @@ const useWoodScreen = () => {
   //     setLoading(false);
   //   }
   // };
-  const searchFromAPI = useCallback(async (query: string, authToken: string, page: number = 1) => {
+  const searchFromAPI = useCallback(async (query: string, authToken: string, page: number = 1, replace: boolean = false) => {
     if (!query?.trim()) return;
     const normalizedQuery = query.toLowerCase().trim();
     if (page === 1) latestSearchQueryRef.current = normalizedQuery;
 
     try {
-      if (page === 1) {
+      if (page === 1 || replace) {
         setLoading(true);
-        setCurrentPage(1);
+        if (page === 1) setCurrentPage(1);
       } else {
         setLoadingMore(true);
       }
@@ -66,12 +76,12 @@ const useWoodScreen = () => {
       if (latestSearchQueryRef.current !== normalizedQuery) return;
 
       setFilteredItems(prev =>
-        page === 1 ? newResults : [...(Array.isArray(prev) ? prev : []), ...newResults]
+        page === 1 || replace ? newResults : [...(Array.isArray(prev) ? prev : []), ...newResults]
       );
       setTotalPages(result?.data?.total_pages ?? 1);
       setCurrentPage(page);
     } catch (error) {
-      if (latestSearchQueryRef.current === normalizedQuery && page === 1) {
+      if (latestSearchQueryRef.current === normalizedQuery && (page === 1 || replace)) {
         setFilteredItems([]);
       }
     } finally {

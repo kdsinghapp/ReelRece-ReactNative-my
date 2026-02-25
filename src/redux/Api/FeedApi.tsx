@@ -4,23 +4,29 @@ import {
   validateString,
   validateUsername,
   validatePage,
+  validatePageSize,
   createSafeParams,
   throwValidationError,
 } from '@utils/apiInputValidator';
 
+/** Number of feed items per page */
+export const USER_FEED_PAGE_SIZE = 10;
+
 /**
  * Get user feed with input validation
- * 
+ *
  * @param token - Auth token (required)
  * @param type - Feed type: home, profile, or otherprofile
  * @param username - Username for otherprofile type
  * @param page - Page number (default: 1)
+ * @param pageSize - Items per page (default: 10)
  */
 export const getUserFeed = async (
   token: string,
   type: "home" | "profile" | "otherprofile",
   username?: string,
-  page: number = 1 
+  page: number = 1,
+  pageSize: number = USER_FEED_PAGE_SIZE
 ) => {
   // Validate token
   const tokenValidation = validateString(token, {
@@ -52,10 +58,20 @@ export const getUserFeed = async (
     page = pageValidation.value; // Use default
   }
 
+  const pageSizeValidation = validatePageSize(pageSize);
+  const validPageSize = pageSizeValidation.isValid ? pageSizeValidation.value : USER_FEED_PAGE_SIZE;
+
   try {
-    // Build params safely
-    const params: Record<string, string> = {};
+    // Build params safely (page, page_size for pagination; username for otherprofile)
+    const params: Record<string, string> = {
+      page: String(page),
+      page_size: String(validPageSize),
+    };
     if (type === "otherprofile" && username) {
+      params.username = username;
+    }
+
+    if (type === "profile" && username) {
       params.username = username;
     }
 
@@ -64,9 +80,9 @@ export const getUserFeed = async (
       headers: {
         Authorization: `Token ${tokenValidation.sanitized}`,
       },
-      params: Object.keys(params).length > 0 ? createSafeParams(params) : undefined,
+      params: createSafeParams(params),
     });
-
+  // console.log("response.data", response.data, 'params', params);
     return response.data;
   } catch (error) {
     throw error;

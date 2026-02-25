@@ -5,8 +5,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
  import { Color } from '@theme/color';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
+import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
 import FastImage from 'react-native-fast-image';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
@@ -25,6 +26,7 @@ interface WatchSaveUserProps {
 
 
 const WatchSaveUser = ({ disableBottomSheet = false }) => {
+  const dispatch = useDispatch();
   const route = useRoute();
   const { title, datamovie, username, token, imageUri ,my_profile=false} = route.params;
 
@@ -40,10 +42,8 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
    const [isFollowing, setIsFollowing] = useState(false);
   const avatar = useSelector((state: RootState) => state.auth.userGetData?.avatar);
   const userAvatarUrl = useMemo(() => `${BASE_IMAGE_URL}${avatar}}`, [avatar]);
-  //  const userAvatarUrl = useMemo(() => `${BASE_IMAGE_URL}${avatar}?t=${Date.now()}`, [avatar]);
-   //  const avatar = userGetData?.avatar;
-  const avatarUrl1 = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined;
- // ✅ pagination refs
+
+  const avatarUrl1 = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined; 
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
@@ -70,40 +70,14 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
   const handleToggleBookmark = async (imdb_id: string) => {
     try {
       const newStatus = await toggleBookmark(imdb_id);
-       if (!newStatus) {
+      if (!newStatus) {
         setMovies(prevMovies => prevMovies.filter(movie => movie.imdb_id !== imdb_id));
-        changeMovie = 2
+        changeMovie = 2;
       }
+      dispatch(fetchHomeBookmarks({ silent: true }));
     } catch (error) {
-     }
-  };
-
-  // const bothBookMovie = async () => {
-  //   let response = [];
-  //   if (loadingRef.current || !hasMoreRef.current) return;
-  //   loadingRef.current = true;
-
-  //   try {
-  //     if (my_profile) {
-  //      response = await getHistoryApi(token);
-
-  //     } else {
-  //      response = await getCommonBookmarkOtherUser(token, username);
-
-  //     }
-  //     setMovies(response?.results)
-   //   } catch (error) {
-   //   }
-
-  // }
-
-  // useEffect(() => {
-  //   bothBookMovie()
-  // }, [token, username])
-
-
-  
-  // ✅ Fetch API with pagination
+    }
+  }; 
   const fetchMovies = async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
     loadingRef.current = true;

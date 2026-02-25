@@ -25,10 +25,9 @@ import { TextInput } from 'react-native-gesture-handler';
 import { getCommentsByMovie, postComment } from '@redux/Api/commentService';
 import FastImage from 'react-native-fast-image';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
-import { BASE_IMAGE_URL } from '@config/api.config';
-import ShimmerReviewItem from '@components/common/ShimmerReviewItem/ShimmerReviewItem';
+import { BASE_IMAGE_URL } from '@config/api.config'; 
 import { t } from 'i18next';
-
+import ShimmerReviewItem from '@components/common/ShimmerReviewItem/ShimmerReviewItem';
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -74,6 +73,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     shallowEqual
   );
   const lastFetchedImdbRef = useRef<string | null>(null);
+  const commentInputRef = useRef<any>(null);
   // const userData = useSelector((state: RootState) => state.auth.userGetData);
   // const userprofile = useSelector((state: RootState) => state. auth.userGetData?.username);
   // useEffect(() => {
@@ -175,11 +175,18 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     }
   };
 
+  const handleCommentInputFocus = useCallback(() => {
+    if (!has_rated_movie_Ref.current) {
+      Keyboard.dismiss();
+      commentInputRef.current?.blur();
+      showCommenRankingCheck?.();
+    }
+  }, [showCommenRankingCheck]);
+
   const handlePostComment = async (text_Touch?: boolean) => {
     if (!has_rated_movie_Ref.current) {
-      showCommenRankingCheck()
-      // text_Touch_ref.current  = true
-      return
+      showCommenRankingCheck?.();
+      return;
     }
     const trimmedComment = commetText.trim();
     if (!trimmedComment) return;
@@ -298,8 +305,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
           >
             <TouchableOpacity
               onPress={() => {
-                console.log(item)
-                navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
+                 navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
                 // navigation.navigate(ScreenNameEnum.OtherProfile);
               }}
             >
@@ -399,7 +405,6 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                     <ShimmerReviewItem key={i} />
                   ))}
                 </View> :
-
                   !commmetLoad && comments.length === 0 ? (
                     <Text style={styles.emptyText}>{t("emptyState.noReviews")}</Text>
                   ) : (
@@ -424,22 +429,30 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                     />
                   )}
                 <View style={styles.inputContainer}>
-                  <TextInput
-                    allowFontScaling={false}
-                    placeholder={hasCommented ? t("common.editYour") : t("common.submitReview")}
-                    placeholderTextColor={Color.placeHolder}
-                    style={styles.input}
-                    value={commetText}
-                    onPress={() => { if (!has_rated_movie) handlePostComment() }}
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      ref={commentInputRef}
+                      allowFontScaling={false}
+                      placeholder={hasCommented ? t("common.editYour") : t("common.submitReview")}
+                      placeholderTextColor={Color.placeHolder}
+                      style={styles.input}
+                      value={commetText}
+                      editable={!!has_rated_movie}
+                      onFocus={handleCommentInputFocus}
+                      onChangeText={setCommentText}
+                    />
+                    {!has_rated_movie && (
+                      <TouchableOpacity
+                        style={StyleSheet.absoluteFill}
+                        onPress={() => showCommenRankingCheck?.()}
+                        activeOpacity={1}
+                      />
+                    )}
+                  </View>
 
-                    onChangeText={setCommentText}
-                  />
-
-                  <TouchableOpacity style={styles.postButton}
-
-                    // onPress={}
+                  <TouchableOpacity
+                    style={styles.postButton}
                     onPress={handlePostComment}
-
                   >
                     <Image
                       style={[
@@ -576,6 +589,10 @@ const styles = StyleSheet.create({
     // paddingVertical: 12,
     paddingHorizontal: 16,
     bottom: 0,
+  },
+  inputWrapper: {
+    flex: 1,
+    position: 'relative',
   },
   input: {
     color: Color.whiteText,

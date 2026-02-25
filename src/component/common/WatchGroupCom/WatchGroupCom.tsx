@@ -7,7 +7,7 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
 import GroupAllAvatars from '@components/common/GroupAllAvatars/GroupAllAvatars';
 import GroupInterestCycle from '@screens/BottomTab/watch/watchScreen/GroupInterestCycle';
-const GroupListItem = ({
+export const GroupListItem = ({
 
   group,
   isSettingsMode,

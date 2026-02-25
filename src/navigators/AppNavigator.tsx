@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 import toastConfig, { errorToast, successToast } from '@utils/customToast';
 import { persistor, store } from '@redux/store';
 import RegistrationRoutes from '@navigators/RegistrationRoutes';
+import { rootNavigationRef } from '@navigators/rootNavigationRef';
 import "../.././src/i18n";
 import NetworkStatusModal from '@components/NetworkStatusModal';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
@@ -56,6 +57,7 @@ const AppNavigator: React.FC = () => {
             offlineText="No Internet! Please check your connection."
           />  */}
             <NavigationContainer
+              ref={rootNavigationRef}
               theme={CustomTheme}
             >
               <RegistrationRoutes />

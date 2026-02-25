@@ -97,12 +97,12 @@ const WatchGroupMemberModal: React.FC<WatchGroupMemberModal1> = ({ visible,
 
         <View style={styles.overlay}>
           <KeyboardAvoidingView
-            style={{ flex: 1 }}
+            style={styles.keyboardAvoid}
             behavior={Platform.OS === "ios" ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 15}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 15}
           >
 
-            <View style={{ flex: 1 }} >
+            <View style={styles.modalWrapper} >
               <TouchableOpacity
                 style={styles.overlayTouchable}
                 activeOpacity={1}
@@ -134,6 +134,8 @@ const WatchGroupMemberModal: React.FC<WatchGroupMemberModal1> = ({ visible,
                     style={styles.searchInput}
                     value={searchText}
                     onChangeText={setSearchText}
+                    keyboardAppearance="dark"
+                    returnKeyType="search"
                   />
                   <TouchableOpacity onPress={() => setSearchText('')} >
                     {searchText.length > 0 && <Image source={imageIndex.closeimg} resizeMode='contain' style={{ height: 18, width: 18, }} />}
@@ -173,7 +175,9 @@ const WatchGroupMemberModal: React.FC<WatchGroupMemberModal1> = ({ visible,
                   {otherUsers?.length > 0 ? (
                     <FlatList
                       data={otherUsers}
-                      keyExtractor={(item) => item.username}
+                      keyExtractor={(item) => item.username ?? ''}
+                      keyboardShouldPersistTaps="handled"
+                      keyboardDismissMode="on-drag"
                       renderItem={({ item }) => (
                         <View style={styles.memberItem}>
                           <TouchableOpacity
@@ -251,16 +255,22 @@ const styles = StyleSheet.create({
   overlayTouchable: {
     flex: 1,
   },
+  keyboardAvoid: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalWrapper: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
   modalContent: {
     backgroundColor: 'rgba(37, 37, 37, 0.9)',
     borderTopRightRadius: 22,
     borderTopLeftRadius: 22,
     paddingHorizontal: 20,
     paddingTop: 30,
-    flex: 1.8,  // ✅ use flex instead of maxHeight
-    maxHeight: Dimensions.get('window').height * 0.7,
-    minHeight: Dimensions.get('window').height * 0.7,
-
+    maxHeight: Dimensions.get('window').height * 0.75,
+    minHeight: 340,
   },
   header: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, ScrollView, Pressable, Image, TouchableOpacity, Modal, StyleSheet, Dimensions, ActivityIndicator, FlatList } from 'react-native';
+import React, { useState, useCallback, useMemo } from 'react';
+import { View, Pressable, Image, TouchableOpacity, Modal, StyleSheet, Dimensions, ActivityIndicator, FlatList } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -10,26 +10,46 @@ import imageIndex from '@assets/imageIndex';
 import { SuccessMessageCustom } from '@components/index';
 import { t } from 'i18next';
 
-const PlatformModals = ({ visible,
-    onClose,
-    reset,
-    onApply,
-    platformsData,
-    selectedPlatforms,
-    setSelectedPlatforms }: boolean | string | object | number | null) => {
+type PlatformItem = { supported_platform: string; icon: string; isTelecom?: boolean };
+
+interface PlatformModalsProps {
+    visible: boolean;
+    onClose: (platforms: string[]) => void;
+    reset: () => void;
+    onApply: () => void;
+    platformsData: PlatformItem[];
+    selectedPlatforms: string[];
+    setSelectedPlatforms: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+const LIST_HEIGHT = Dimensions.get('window').height * 0.4;
+
+const PlatformRow = React.memo(({ item, isSelected, onToggle }: { item: PlatformItem; isSelected: boolean; onToggle: (id: string) => void }) => (
+    <Pressable onPress={() => onToggle(item.supported_platform)} style={styles.modalItem}>
+        <View style={styles.platformRow}>
+            <Image source={{ uri: item.icon }} style={styles.platformIcon} resizeMode="contain" />
+            <CustomText size={14} color={Color.whiteText} style={styles.modalItemTextWithMargin} font={font.PoppinsMedium} numberOfLines={1}>
+                {item.supported_platform}
+            </CustomText>
+        </View>
+        <Image source={isSelected ? imageIndex.checKBoxActive : imageIndex.checkBox} style={styles.checkboxIcon} />
+    </Pressable>
+));
+
+const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selectedPlatforms, setSelectedPlatforms }: PlatformModalsProps) => {
 
     const token = useSelector((state: RootState) => state.auth.token);
-    const [toastMess, setToastMess] = useState(false)
-    const [toastMessColorGreen, setToastMessGreen] = useState(false)
-    const [toastMessage, setToastMessage] = useState('')
+    const [toastMess, setToastMess] = useState(false);
+    const [toastMessColorGreen, setToastMessGreen] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
-    const togglePlatform = (platformId) => {
-        setSelectedPlatforms(prev =>
+    const togglePlatform = useCallback((platformId: string) => {
+        setSelectedPlatforms((prev: string[]) =>
             prev.includes(platformId)
-                ? prev.filter(id => id !== platformId)
+                ? prev.filter((id: string) => id !== platformId)
                 : [...prev, platformId]
         );
-    };
+    }, [setSelectedPlatforms]);
 
     // const restoreFormSetting = async () => {
     //     try {
@@ -65,95 +85,46 @@ const PlatformModals = ({ visible,
     //             : [...prev, index]     // add if not present
     //     );
     // };
-    const restoreFormSetting = async () => {
+    const restoreFormSetting = useCallback(async () => {
         try {
-            const response = await getUserSubscriptions(token);
-
-            // Extract subscriptions
-            const restoredPlatforms = response?.data.map(item => item.subscription) || [];
-
-            // Update state ONCE
+            const response = await getUserSubscriptions(token ?? '');
+            const restoredPlatforms = response?.data.map((item: { subscription: string }) => item.subscription) || [];
             setSelectedPlatforms(restoredPlatforms);
-
-            // Show toast
-            setToastMessage(t("saved platform restored"));
-            // ("Saved platforms restored!");
+            setToastMessage(t("saved platform restored") ?? '');
             setToastMessGreen(true);
             setToastMess(true);
-
         } catch (error) {
-            setToastMessage(t("errorMessage.failedrestoreplatforms"));
+            setToastMessage(t("errorMessage.failedrestoreplatforms") ?? '');
             setToastMessGreen(false);
             setToastMess(true);
         }
-    };
+    }, [token, setSelectedPlatforms]);
+ 
+    const selectAll = useCallback(() => {
+        setSelectedPlatforms(platformsData.map((platform: PlatformItem) => platform.supported_platform));
+    }, [platformsData, setSelectedPlatforms]);
+ 
+    const selectedServices = useMemo(() => {
+        return selectedPlatforms.filter((id: string) => {
+            const platform = platformsData.find((p: PlatformItem) => p.supported_platform === id);
+            return platform && !platform.isTelecom;
+        }).length;
+    }, [selectedPlatforms, platformsData]);
 
+    const handleClose = useCallback(() => onClose(selectedPlatforms), [onClose, selectedPlatforms]);
 
+    const renderItem = useCallback(({ item }: { item: PlatformItem }) => {
+        const isSelected = selectedPlatforms.includes(item.supported_platform);
+        return <PlatformRow item={item} isSelected={isSelected} onToggle={togglePlatform} />;
+    }, [selectedPlatforms, togglePlatform]);
 
-    // const restoreFormSetting = async () => {
-    //     try {
-    //         const response = await getUserSubscriptions(token);
-    //         let lengthItem = response?.data.length;
-
-    //         response?.data.map((ok) => {
-    //
-    //             togglePlatformForRestore(ok.subscription);
-    //         });
-
-
-    //         setToastMessage("Saved platforms restored!");
-    //         setToastMessGreen(true);
-    //         setToastMess(true);
-
-
-    //         setTimeout(() => {
-    //             setToastMess(false);
-    //         }, 2000);
-    //     } catch (error) {
-    //         setToastMessage("Failed to restore platforms!");
-    //         setToastMessGreen(false);
-    //         setToastMess(true);
-
-    //         setTimeout(() => {
-    //             setToastMess(false);
-    //         }, 2000);
-    //     }
-    // };
-
-
-    const selectAll = () => {
-        setSelectedPlatforms(platformsData.map(platform => platform.supported_platform));
-    };
-
-    // Reset selection
-    // const resetSelection = () => {
-    //     setSelectedPlatforms([]);
-    // };
-
-    // Apply selection
-    // const applySelection = () => {
-    //     onClose(selectedPlatforms);
-    // };
-
-    // Count services (assuming some platforms are marked as telecom)
-    const totalServices = platformsData.filter(p => !p?.isTelecom).length;
-    const selectedServices = selectedPlatforms.filter(id => {
-        const platform = platformsData.find(p => p.supported_platform === id);
-        return platform && !platform.isTelecom;
-    }).length;
+    const keyExtractor = useCallback((item: PlatformItem) => item.supported_platform, []);
 
     return (
         <Modal visible={visible} transparent animationType="slide">
-            {/* <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={() => onClose(selectedPlatforms)}  > */}
-            {/* <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={() => onClose(selectedPlatforms)}  > */}
-
             {/* Background overlay */}
-            <TouchableOpacity
-                style={styles.modalContainer}
-                activeOpacity={1}
-                onPress={() => onClose(selectedPlatforms)}
-            >
-                <View style={{ flex: 1 }} />
+            <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={handleClose}>
+                <View style={styles.modalOverlayFill} />
             </TouchableOpacity>
             <View style={styles.modalBox}>
                 {/* <Text style={styles.modalTitle}>Platform</Text> */}
@@ -175,7 +146,7 @@ const PlatformModals = ({ visible,
                         style={styles.counterText}
                         font={font.PoppinsRegular}
                     >
-                        {totalServices}                      {(t("discover.services"))}
+                         {(t("discover.services"))}
 
                     </CustomText>
 
@@ -205,107 +176,29 @@ const PlatformModals = ({ visible,
                     </CustomText>
                 </TouchableOpacity>
 
-                {/* Platforms list */}
-                <View style={{ height: Dimensions.get('window').height * 0.4 }} >
-                    <ScrollView contentContainerStyle={styles.modalContent}>
-
-                        {platformsData.length == 0 ? (
-
-                            <ActivityIndicator color={Color.primary}
-                                size={'small'}
-                            />
-                        ) : (
-                            <>
-
-                                <FlatList
-                                    data={platformsData}
-                                    keyExtractor={(item) => item.supported_platform}
-                                    renderItem={({ item }) => {
-                                        const isSelected = selectedPlatforms.includes(item.supported_platform);
-
-                                        return (
-                                            <Pressable
-                                                onPress={() => togglePlatform(item.supported_platform)}
-                                                style={[styles.modalItem]} // optional selected style
-                                            >
-                                                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                                                    <Image
-                                                        source={{ uri: item.icon }}
-                                                        style={styles.platformIcon}
-                                                        resizeMode="contain"
-                                                    />
-                                                    <CustomText
-                                                        size={14}
-                                                        color={Color.whiteText}
-                                                        style={[styles.modalItemText, { marginLeft: 10 }]}
-                                                        font={font.PoppinsMedium}
-                                                        numberOfLines={1}
-                                                    >
-                                                        {item.supported_platform}
-                                                    </CustomText>
-                                                </View>
-
-                                                {/* Just show the checkbox, no need for TouchableOpacity */}
-                                                <Image
-                                                    source={isSelected ? imageIndex.checKBoxActive : imageIndex.checkBox}
-                                                    style={styles.checkboxIcon}
-                                                />
-                                            </Pressable>
-                                        );
-                                    }}
-                                    extraData={selectedPlatforms} // ensures re-render when selection changes
-                                />
-
-
-                                {/* {platformsData?.map((platform) => (
-                            <Pressable
-                                key={platform.supported_platform}
-                                onPress={() => togglePlatform(platform.supported_platform)}
-                                style={[styles.modalItem]}
-                            >
-
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                    <Image source={{ uri: platform?.icon }} style={styles.platformIcon} resizeMode="contain" />
-                                    <CustomText
-                                        size={14}
-                                        color={Color.whiteText}
-                                        style={[styles.modalItemText]}
-                                        font={font.PoppinsMedium}
-                                        numberOfLines={1}
-                                    >
-                                        {platform?.supported_platform}
-                                    </CustomText>
-                                </View>
-
-                                <TouchableOpacity style={{ alignSelf: 'center', justifyContent: 'center' }} onPress={() => togglePlatform(platform?.supported_platform)}>
-                                    <Image
-                                        source={
-                                            selectedPlatforms.includes(platform?.supported_platform)
-                                                ? imageIndex.checKBoxActive
-                                                : imageIndex.checkBox
-                                        }
-                                        style={styles.checkboxIcon}
-                                    />
-                                </TouchableOpacity>
-                            </Pressable>
-                        ))} */}
-
-                            </>
-                        )}
-
-                    </ScrollView>
-
+                {/* Platforms list - FlatList only (no ScrollView) so virtualization works */}
+                <View style={styles.listContainer}>
+                    {platformsData.length === 0 ? (
+                        <ActivityIndicator color={Color.primary} size="small" />
+                    ) : (
+                        <FlatList
+                            data={platformsData}
+                            keyExtractor={keyExtractor}
+                            renderItem={renderItem}
+                            extraData={selectedPlatforms}
+                            contentContainerStyle={styles.modalContent}
+                            removeClippedSubviews={true}
+                            maxToRenderPerBatch={12}
+                            windowSize={5}
+                            initialNumToRender={10}
+                        />
+                    )}
                 </View>
-
-
-
-
                 {/* Footer buttons */}
                 <View style={styles.bottomButtonContainerBox}  >
                     <View style={styles.bottomButtonContainer}>
                         <TouchableOpacity onPress={reset} style={styles.selectButton}>
-                            {/* <Text style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]} >Reset</Text> */}
-
+                         
                             <CustomText
                                 size={14}
                                 color={Color.lightGrayText}
@@ -317,8 +210,7 @@ const PlatformModals = ({ visible,
                             </CustomText>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={onApply} style={styles.cancelButton}>
-                            {/* <Text style={styles.buttonTxt} >Apply</Text> */}
-                            <CustomText
+                             <CustomText
                                 size={14}
                                 color={Color.whiteText}
                                 style={[styles.buttonTxt, {
@@ -357,17 +249,24 @@ const PlatformModals = ({ visible,
                     />
                 )}
             </View>
-
-            {/* </TouchableOpacity> */}
+ 
         </Modal>
     );
 };
+
+export default React.memo(PlatformModals);
 
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'flex-end',
         backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalOverlayFill: {
+        flex: 1,
+    },
+    listContainer: {
+        height: LIST_HEIGHT,
     },
     modalBox: {
         backgroundColor: Color.modalBg,
@@ -416,22 +315,24 @@ const styles = StyleSheet.create({
     selectedModalItem: {
         backgroundColor: '#f0f8ff',
     },
+    platformRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
     platformIcon: {
         width: 40,
         height: 40,
         marginRight: 12,
-        borderRadius: 10
+        borderRadius: 10,
     },
     modalItemText: {
         width: '77%',
     },
-
-    // actionButtonsContainer: {
-    //     flexDirection: 'row',
-    //     justifyContent: 'space-between',
-    //     alignItems:'center',
-    //     // marginTop: 10,
-    // },
+    modalItemTextWithMargin: {
+        width: '77%',
+        marginLeft: 10,
+    }, 
     resetButton: {
         backgroundColor: '#e0e0e0',
         padding: 12,
@@ -505,5 +406,3 @@ const styles = StyleSheet.create({
 
 
 });
-
-export default PlatformModals;

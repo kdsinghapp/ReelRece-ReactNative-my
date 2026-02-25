@@ -82,7 +82,7 @@ const SuggestedFriendCard: React.FC<Props> = ({ item, onFollow, BASE_IMAGE_URL }
                 disabled={loading}
                 style={[
                     styles.followButton,
-                    isFollowing && styles.followingButton,
+                    // isFollowing && styles.followingButton,
                 ]}
             >
                 {loading ? (

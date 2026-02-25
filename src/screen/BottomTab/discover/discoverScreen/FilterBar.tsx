@@ -47,20 +47,24 @@ const FilterBar = ({ isSelectList,
     }
   }, [isSelectList]);
 
-  // Auto-scroll filter bar so the selected tab is in view (and centered)
+  // Auto-scroll filter bar so the selected tab is in view. First tab stays at start (no scroll) so "Recs for you" is not half-hidden.
   useEffect(() => {
     if (!selectedSimpleFilter || !['1', '2', '5'].includes(selectedSimpleFilter)) return;
     const index = filters.findIndex(f => f.id === selectedSimpleFilter);
     if (index < 0) return;
     const t = setTimeout(() => {
       try {
-        flatListRef.current?.scrollToIndex({
-          index,
-          animated: true,
-          viewPosition: 0.5,
-        });
+        if (index === 0) {
+          // Keep first tab (Recs for you) fully visible at start; don't center it
+          flatListRef.current?.scrollToOffset?.({ offset: 0, animated: true });
+        } else {
+          flatListRef.current?.scrollToIndex({
+            index,
+            animated: true,
+            viewPosition: 0.5,
+          });
+        }
       } catch (_) {
-        // fallback: scrollToOffset if scrollToIndex fails (e.g. item not measured yet)
         flatListRef.current?.scrollToOffset?.({ offset: index * 120, animated: true });
       }
     }, 100);

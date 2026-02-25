@@ -66,20 +66,29 @@ export const unfollowUser = async (token: string, username: string) => {
 //     }
 // };
 
-export const getFollowing = async (token: string, query: string = '') => {
+export const getFollowing = async (
+  token: string,
+  query: string = '',
+  page: number = 1,
+  pageSize: number = 15,
+  username?: string
+): Promise<PaginatedResponse<User>> => {
   try {
-    const url = query.trim()
-      ? `/following?query=${encodeURIComponent(query.trim())}`
-      : `/following`;
+    const params = new URLSearchParams();
+    if (username?.trim()) params.append('username', username.trim());
+    if (query.trim()) params.append('query', query.trim());
+    params.append('page', String(page));
+    params.append('page_size', String(pageSize));
+    const url = `/following?${params.toString()}`;
 
     const res = await axiosInstance.get(url, {
       headers: {
         Authorization: `Token ${token}`,
       },
     });
-     return res.data;
+    return res.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -88,41 +97,54 @@ export const getFollowing = async (token: string, query: string = '') => {
 
 
 
-export const getFollowers = async (token: string, query: string = '') => {
+export const getFollowers = async (
+  token: string,
+  query: string = '',
+  page: number = 1,
+  pageSize: number = 15,
+  username?: string
+): Promise<PaginatedResponse<User>> => {
   try {
-    const url = query.trim()
-      ? `/followers?query=${encodeURIComponent(query.trim())}`
-      : `/followers`;
+    const params = new URLSearchParams();
+    if (username?.trim()) params.append('username', username.trim());
+    if (query.trim()) params.append('query', query.trim());
+    params.append('page', String(page));
+    params.append('page_size', String(pageSize));
+    const url = `/followers?${params.toString()}`;
 
     const res = await axiosInstance.get(url, {
       headers: {
         Authorization: `Token ${token}`,
       },
     });
-     return res.data;
+    return res.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
 
 export const getSuggestedFriends = async (
   token: string,
-  query: string = ''
+  query: string = '',
+  page: number = 1,
+  pageSize: number = 15
 ): Promise<PaginatedResponse<User>> => {
   try {
-    const endpoint = query.trim()
-      ? `/suggest-friends?query=${encodeURIComponent(query.trim())}`
-      : `/suggest-friends`;
+    const params = new URLSearchParams();
+    if (query.trim()) params.append('query', query.trim());
+    params.append('page', String(page));
+    params.append('page_size', String(pageSize));
+    const endpoint = `/suggest-friends?${params.toString()}`;
 
     const response = await axiosInstance.get(endpoint, {
       headers: {
         Authorization: `Token ${token}`,
       },
     });
-     return response.data;
+    return response.data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
-     throw error;
+    throw error;
   }
 };

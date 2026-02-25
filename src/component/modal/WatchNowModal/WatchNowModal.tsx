@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   FlatList,
   Image,
+  Linking,
   Modal,
   Platform,
   StyleSheet,
@@ -20,8 +20,6 @@ import font from '@theme/font';
 import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
-import { ScrollView } from 'react-native-gesture-handler';
-
 const filterOptions = [
   { id: 1, option: 'All' },
   { id: 2, option: 'Subscription' },
@@ -30,65 +28,126 @@ const filterOptions = [
   { id: 5, option: 'Free' },
 ];
 
-    const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+export interface WatchPlatformItem {
+  supported_platform?: string;
+  watch_type?: string;
+  deeplink?: string;
+  deeplink_ios?: string;
+  web?: string;
+  image_url?: string | null;
+}
 
-const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad, setWatchModalLoad, country = 'US' }) => {
+const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+
+type WatchNowModalProps = {
+  visible: boolean;
+  token: string;
+  onClose?: () => void;
+  selectedImdbId: string;
+  watchModalLoad: boolean;
+  setWatchModalLoad: (v: boolean) => void;
+  country?: string;
+};
+
+const WatchNowModal = ({
+  visible,
+  token,
+  onClose,
+  selectedImdbId,
+  watchModalLoad,
+  setWatchModalLoad,
+  country = 'US',
+}: WatchNowModalProps) => {
   const [selectedSortOption, setSelectedSortOption] = useState('All');
-  const [platforms, setPlatforms] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState('')
-  const [selectFilterOp, setSelectFilterOp] = useState('')
-  // const filteredPlatforms =
-  //   selectedSortOption === 'All'
-  //     ? watchAvaibleData
-  //     : watchAvaibleData.filter((item) => item.type === selectedSortOption);
+  const [platforms, setPlatforms] = useState<WatchPlatformItem[]>([]);
+  const [selectFilterOp, setSelectFilterOp] = useState('');
 
-   const fetchData = async () => {
-    setWatchModalLoad(true)
+  const fetchData = async () => {
+    if (!selectedImdbId) return;
+    setWatchModalLoad(true);
     try {
-      const data = await getMoviePlatforms({
+      const response = await getMoviePlatforms({
         token,
         imdb_id: selectedImdbId,
         country,
-        watch_type: selectFilterOp, // static
-
+        watch_type: undefined,
       });
-       setPlatforms(data.data);
- 
-     } catch (error) {
-     } finally {
-      setWatchModalLoad(false)
+      const raw = (response as { data?: unknown })?.data ?? response;
+      const list = Array.isArray(raw)
+        ? raw
+        : (raw as { data?: unknown[]; platforms?: unknown[] })?.data ??
+          (raw as { platforms?: unknown[] })?.platforms ??
+          [];
+      
+      setPlatforms(Array.isArray(list) ? (list as WatchPlatformItem[]) : []);
+    } catch (error) {
+      setPlatforms([]);
+    } finally {
+      setWatchModalLoad(false);
     }
   };
+
   useEffect(() => {
-    if (selectedImdbId) {
+    if (visible && selectedImdbId) {
       fetchData();
     }
-  }, [selectedImdbId, selectFilterOp]);
+  }, [selectedImdbId, visible]);
 
-
-  useEffect(() => {
-    fetchData();
-  }, [selectedImdbId]);
-
-  const getWatchTypeLabel = (label) => {
+  const getWatchTypeLabel = (label: string) => {
     switch (label) {
       case 'Subscription':
-        // Alert.alert("flatrate")
         return 'flatrate';
       case 'Rent':
-        // Alert.alert("rent")
-
         return 'rent';
       case 'Buy':
-        // Alert.alert("buy")
-
         return 'buy';
       case 'Free':
-        // Alert.alert("Free")
-
         return 'free';
       default:
-        return ''; // 'All' default case
+        return '';
+    }
+  };
+
+  const normalizeWatchType = (watchType: string | undefined): string => {
+    if (!watchType) return '';
+    const t = String(watchType).trim().toLowerCase();
+    if (t === 'flatrate' || t === 'subscription') return 'Subscription';
+    if (t === 'rent') return 'Rent';
+    if (t === 'buy') return 'Buy';
+    if (t === 'free') return 'Free';
+    return String(watchType).trim();
+  };
+
+  const filteredByType =
+    selectedSortOption === 'All'
+      ? platforms
+      : platforms.filter((p) => {
+          const normalized = normalizeWatchType(p?.watch_type);
+          return normalized === selectedSortOption;
+        });
+
+  const filteredPlatforms = filteredByType.filter(
+    (item, index, self) =>
+      index ===
+      self.findIndex(
+        (p) =>
+          (p?.supported_platform ?? '').toLowerCase() ===
+          (item?.supported_platform ?? '').toLowerCase()
+      )
+  );
+
+  const openDeeplink = async (item: WatchPlatformItem) => {
+    const url =
+      Platform.OS === 'ios'
+        ? item?.deeplink_ios || item?.deeplink || item?.web
+        : item?.deeplink || item?.deeplink_ios || item?.web;
+    const toOpen = (url && String(url).trim()) || null;
+    if (!toOpen) return;
+    try {
+      await Linking.openURL(toOpen);
+      onClose?.();
+    } catch (e) {
+      // ignore (e.g. no app to handle scheme)
     }
   };
   const insets = useSafeAreaInsets();
@@ -113,68 +172,67 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
      
      return bottomPadding;
    };
-  const renderPlatform = ({ item }) => {
+  const renderPlatform = ({ item }: { item: WatchPlatformItem }) => {
+    const hasUrl =
+      (item?.deeplink && String(item.deeplink).trim()) ||
+      (item?.deeplink_ios && String(item.deeplink_ios).trim()) ||
+      (item?.web && String(item.web).trim());
 
     return (
-
       <View style={styles.platformRow}>
-        
-        
+        {item?.image_url ? (
           <FastImage
             source={{
-              uri: item?.image_url,
+              uri: item.image_url,
               priority: FastImage.priority.low,
-              cache: FastImage.cacheControl.immutable
+              cache: FastImage.cacheControl.immutable,
             }}
-            resizeMode={FastImage.resizeMode.stretch}
+            resizeMode={FastImage.resizeMode.contain}
             style={styles.platformLogo}
           />
-     
-          {/* <Image source={{ uri: item.image_url }} style={styles.platformLogo} resizeMode="contain" /> */}
-   
-            <Text style={styles.platformName}>{item?.supported_platform}</Text>
-            {/* <Text style={styles.action}>{item?.watch_type}</Text> */}
-         
-     
+        ) : (
+          <View style={[styles.platformLogo, styles.platformLogoPlaceholder]}>
+            <Text style={styles.platformLogoPlaceholderText} numberOfLines={1}>
+              {item?.supported_platform?.slice(0, 2) || '?'}
+            </Text>
+          </View>
+        )}
+        <Text style={styles.platformName} numberOfLines={1}>
+          {item?.supported_platform}
+        </Text>
         <TouchableOpacity
           style={[
             styles.watchBtn,
-            {
-              backgroundColor:
-                item?.watch_type === "flatrate"
-                  ? Color.primary
-
-
-                  : Color.graybackGround,
-            },
+            { backgroundColor: hasUrl ? Color.primary : Color.grey700 },
           ]}
+          onPress={() => hasUrl && openDeeplink(item)}
+          disabled={!hasUrl}
         >
-          <Text style={styles.watchBtnText}>▶{t("common.watchNow")}</Text>
+          <Text style={styles.watchBtnText}>▶ {t('common.watchNow')}</Text>
         </TouchableOpacity>
       </View>
     );
-  }
+  };
 
  
   
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-         <View style={styles.mainContainer}>
-                {/* This empty view represents the 40% video area */}
-                <View style={styles.videoAreaPlaceholder} />
-            
-        <View style={styles.overlay}>
-          <TouchableWithoutFeedback>
+      <View style={styles.mainContainer}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.backdropTouchable} />
+        </TouchableWithoutFeedback>
+
+        <View style={styles.overlay} pointerEvents="box-none">
             <View
-                        style={[
-                          styles.modalContent,
-                          {
-                            height: getModalHeight(),
-                            paddingBottom: getModalBottomPadding(),
-                          }
-                        ]}
-                      >
+              style={[
+                styles.modalContent,
+                {
+                  height: getModalHeight(),
+                  paddingBottom: getModalBottomPadding(),
+                },
+              ]}
+            >
               <View style={styles.headerContainer}>
                 <View style={{ width: 22 }} />
                 <Text style={styles.headingTitle}>{t("common.watchNow")}</Text>
@@ -219,37 +277,33 @@ const WatchNowModal = ({ visible, token, onClose, selectedImdbId, watchModalLoad
                 <View style={styles.loaderContainer}>
                   <ActivityIndicator color={Color.primary} size="large" />
                 </View>
-              ) : Array.isArray(platforms) && platforms.length === 0 ? (
+              ) : Array.isArray(filteredPlatforms) && filteredPlatforms.length === 0 ? (
                 <View style={styles.loaderContainer}>
                   <Text style={styles.NotAvaibleText}>{t("emptyState.noresults")}</Text>
                 </View>
               ) : (
-                <ScrollView showsVerticalScrollIndicator={false}>
-                <FlatList
-                  data={platforms}
-                  keyExtractor={(_, index) => index.toString()}
-                  renderItem={renderPlatform}
-                  contentContainerStyle={{ paddingVertical: 10 }}
-                  initialNumToRender={10}
-                  showsVerticalScrollIndicator={false}
-                  maxToRenderPerBatch={10}
-                  windowSize={7}
-                  removeClippedSubviews
-
-                />
-                </ScrollView>
+                <View style={styles.listWrapper}>
+                  <FlatList
+                    data={filteredPlatforms}
+                    keyExtractor={(item, index) =>
+                      `${item?.supported_platform ?? ''}-${item?.watch_type ?? ''}-${index}`
+                    }
+                    renderItem={renderPlatform}
+                    contentContainerStyle={{ paddingVertical: 10 }}
+                    initialNumToRender={10}
+                    showsVerticalScrollIndicator={true}
+                    maxToRenderPerBatch={10}
+                    windowSize={7}
+                    removeClippedSubviews={Platform.OS === 'android'}
+                  />
+                </View>
               )}
-
-             
             </View>
-          </TouchableWithoutFeedback>
         </View>
-          {Platform.OS === 'android' && insets.bottom > 0 && (
-                          <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
-                        )}
-        </View>
-       
-      </TouchableWithoutFeedback>
+        {Platform.OS === 'android' && insets.bottom > 0 && (
+          <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
+        )}
+      </View>
     </Modal>
   );
 };
@@ -258,9 +312,19 @@ export default WatchNowModal;
 
 
 const styles = StyleSheet.create({
+  backdropTouchable: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  listWrapper: {
+    flex: 1,
+    minHeight: 0,
+  },
   overlay: {
     flex: 1,
-    // backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
   container: {
@@ -332,8 +396,17 @@ const styles = StyleSheet.create({
     height: 35,
     width: 35,
     marginRight: 12,
-    borderRadius:6,
-    // backgroundColor: '#901d1dff'
+    borderRadius: 6,
+  },
+  platformLogoPlaceholder: {
+    backgroundColor: Color.grey700,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  platformLogoPlaceholderText: {
+    color: Color.whiteText,
+    fontSize: 10,
+    fontFamily: font.PoppinsMedium,
   },
   platformName: {
     color: Color.whiteText,

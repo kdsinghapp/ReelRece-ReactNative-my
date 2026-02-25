@@ -135,6 +135,7 @@ const filteredMembers = members?.filter(member =>
                     style={styles.searchInput}
                     value={searchText}
                     onChangeText={setSearchText}
+                    keyboardAppearance="light"
                   />
                   <TouchableOpacity onPress={() => setSearchText('')} >
                     {searchText.length > 0 && <Image source={imageIndex.closeimg} resizeMode='contain' style={{ height: 18, width: 18, }} />}

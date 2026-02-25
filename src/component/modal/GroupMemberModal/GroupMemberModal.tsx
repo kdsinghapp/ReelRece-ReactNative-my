@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar } from 'react-native';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar, ScrollView } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { followUser, unfollowUser } from '@redux/Api/followService';
 import FastImage from 'react-native-fast-image';
-import RNFS from 'react-native-fs';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 
@@ -90,16 +89,19 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       {/* <CustomStatusBar  backgroundColor={'black'}  translucent={true}/> */}
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
+      <TouchableWithoutFeedback
+
+
+        onPress={Keyboard.dismiss} >
 
         <View style={styles.overlay}>
           <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 15}
+            style={styles.keyboardAvoid}
+            behavior={Platform.OS === "ios" ? 'padding' : 'undefined'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 15}
           >
 
-            <View style={{ flex: 1 }} >
+            <View style={styles.modalWrapper} >
               <TouchableOpacity
                 style={styles.overlayTouchable}
                 activeOpacity={1}
@@ -126,11 +128,13 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                 <View style={styles.searchContaainer} >
                   <Image source={imageIndex.search} resizeMode='contain' style={{ height: 20, width: 20, marginRight: 6, }} />
                   <TextInput
-                    placeholder="Search members"
+                    placeholder={t("home.searchMembers")}
                     placeholderTextColor={Color.placeHolder}
                     style={styles.searchInput}
                     value={searchText}
                     onChangeText={setSearchText}
+                    keyboardAppearance="dark"
+                    returnKeyType="search"
                   />
                   <TouchableOpacity onPress={() => setSearchText('')} >
                     {searchText.length > 0 && <Image source={imageIndex.closeimg} resizeMode='contain' style={{ height: 18, width: 18, }} />}
@@ -138,113 +142,117 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.listContainer}>
+                <ScrollView showsVerticalScrollIndicator={false}>
 
-                  {currentUser && (
-                    <View style={styles.memberItem}>
-                      <View style={{ marginRight: 12 }}>
-                        <View style={styles.avatarContainer}>
-                      
-                          {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
-                         <TouchableOpacity
-                                onPress={() => {
-                                  onClose();
-                                  navigation.navigate(ScreenNameEnum.OtherProfile,{item:currentUser});
-                                }}
-                            >
-                          <FastImage
-                            style={styles.avatar}
-                            source={{
-                              uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
-                              priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-                              cache: FastImage.cacheControl.web // 👈 Cache permanently
-                            }}
-                            resizeMode={FastImage.resizeMode.cover}
-                          />
-                          </TouchableOpacity>
-                          {currentUser?.online && <View style={styles.onlineIndicator} />}
-                        </View>
-                      </View>
+                  <View style={styles.listContainer}>
 
-                      <Text style={styles.memberName}>{t("common.you")}</Text>
-                    </View>
-                  )}
+                    {currentUser && (
+                      <View style={styles.memberItem}>
+                        <View style={{ marginRight: 12 }}>
+                          <View style={styles.avatarContainer}>
 
-                  {otherUsers?.length > 0 ? (
-                    <FlatList
-                      data={otherUsers}
-                      keyExtractor={(item) => item.username}
-                      renderItem={({ item }) => {
-
-                        return (
-                          <View style={styles.memberItem}>
+                            {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
                             <TouchableOpacity
-                              style={{ marginRight: 12 }}
+
                               onPress={() => {
                                 onClose();
-                                navigation.navigate(ScreenNameEnum.OtherProfile,{item:item});
-                              }}
-                            >
-                              <View style={styles.avatarContainer}>
-
-                                {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
-
-                                <FastImage
-                                  style={styles.avatar}
-                                  source={{
-                                    uri: `${BASE_IMAGE_URL}${item?.avatar}`,
-                                    priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-                                    cache: FastImage.cacheControl.web // 👈 Cache permanently
-                                  }}
-                                  resizeMode={FastImage.resizeMode.stretch}
-                                />
-                                {item?.online && <View style={styles.onlineIndicator} />}
-                              </View>
+                                navigation.navigate(ScreenNameEnum.OtherProfile, { item: currentUser })
+                              }}  >
+                              <FastImage
+                                style={styles.avatar}
+                                source={{
+                                  uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
+                                  priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                                  cache: FastImage.cacheControl.web // 👈 Cache permanently
+                                }}
+                                resizeMode={FastImage.resizeMode.cover}
+                              />
                             </TouchableOpacity>
-
-                            <Text style={styles.memberName}>{item?.name ? item?.name : item?.username}</Text>
-
-
-
-
-
-
-                            <TouchableOpacity
-                              onPress={() => toggleFollow(item?.username)}
-                              disabled={loadingUsername !== null} // ✅ disable only during API
-                              style={[
-                                styles.followButton,
-                                item.following && styles.followingButton,
-                              ]}
-                            >
-                              {loadingUsername === item?.username ? (
-                                <ActivityIndicator color={Color.primary} size="small" />
-                              ) : (
-                                <Text style={styles.followText}>
-                                  {item?.following ? 'Following' : 'Follow'}
-                                </Text>
-                              )}
-                            </TouchableOpacity>
-
-
+                            {currentUser?.online && <View style={styles.onlineIndicator} />}
                           </View>
-                        )
-                      }}
-                      contentContainerStyle={styles.listContent}
-                      showsVerticalScrollIndicator={false}
-                      initialNumToRender={8}
-                      maxToRenderPerBatch={10}
-                      windowSize={8}
-                      removeClippedSubviews
+                        </View>
 
-                    />
-                  ) : (
-                    <View style={styles.noResultContainer}>
-                      <Text style={styles.noResultText}>{t("emptyState.nousers")}</Text>
-                    </View>
-                  )}
-                </View>
+                        <Text style={styles.memberName}>{t("common.you")}</Text>
+                      </View>
+                    )}
 
+                    {otherUsers?.length > 0 ? (
+                      <FlatList
+                        data={otherUsers}
+                        keyExtractor={(item) => item.username}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="on-drag"
+                        renderItem={({ item }) => {
+
+                          return (
+                            <View style={styles.memberItem}>
+                              <TouchableOpacity
+                                style={{ marginRight: 12 }}
+                                onPress={() => {
+                                  onClose();
+                                  navigation.navigate(ScreenNameEnum.OtherProfile, { item: item });
+                                }}
+                              >
+                                <View style={styles.avatarContainer}>
+
+                                  {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
+
+                                  <FastImage
+                                    style={styles.avatar}
+                                    source={{
+                                      uri: `${BASE_IMAGE_URL}${item?.avatar}`,
+                                      priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                                      cache: FastImage.cacheControl.web // 👈 Cache permanently
+                                    }}
+                                    resizeMode={FastImage.resizeMode.stretch}
+                                  />
+                                  {item?.online && <View style={styles.onlineIndicator} />}
+                                </View>
+                              </TouchableOpacity>
+
+                              <Text style={styles.memberName}>{item?.name ? item?.name : item?.username}</Text>
+
+
+
+
+
+
+                              <TouchableOpacity
+                                onPress={() => toggleFollow(item?.username)}
+                                disabled={loadingUsername !== null} // ✅ disable only during API
+                                style={[
+                                  styles.followButton,
+                                  item.following && styles.followingButton,
+                                ]}
+                              >
+                                {loadingUsername === item?.username ? (
+                                  <ActivityIndicator color={Color.primary} size="small" />
+                                ) : (
+                                  <Text style={styles.followText}>
+                                    {item?.following ? 'Following' : 'Follow'}
+                                  </Text>
+                                )}
+                              </TouchableOpacity>
+
+
+                            </View>
+                          )
+                        }}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                        initialNumToRender={8}
+                        maxToRenderPerBatch={10}
+                        windowSize={8}
+                        removeClippedSubviews
+
+                      />
+                    ) : (
+                      <View style={styles.noResultContainer}>
+                        <Text style={styles.noResultText}>{t("emptyState.nousers")}</Text>
+                      </View>
+                    )}
+                  </View>
+                </ScrollView>
 
               </View>
             </View>
@@ -264,16 +272,24 @@ const styles = StyleSheet.create({
   overlayTouchable: {
     flex: 1,
   },
+  keyboardAvoid: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.1 )',
+
+  },
+  modalWrapper: {
+    flex: 1,
+    justifyContent: 'flex-end',
+
+  },
   modalContent: {
     backgroundColor: 'rgba(37, 37, 37, 0.9)',
     borderTopRightRadius: 22,
     borderTopLeftRadius: 22,
     paddingHorizontal: 20,
     paddingTop: 30,
-    flex: 1.8,  // ✅ use flex instead of maxHeight
-    maxHeight: Dimensions.get('window').height * 0.7,
-    minHeight: Dimensions.get('window').height * 0.7,
-
+    flex: 1
   },
   header: {
     flexDirection: 'row',

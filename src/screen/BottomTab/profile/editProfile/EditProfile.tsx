@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  View, Text, Image, TouchableOpacity, 
-  FlatList, Alert
+  View, Text, Image, TouchableOpacity,
+  ScrollView
 } from 'react-native';
  import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
 import styles from './style';
@@ -9,7 +9,7 @@ import useEdit from './useEdit';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { getUserProfile, updateUserProfile } from '@redux/Api/authService';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
  import LoadingModal from '@utils/Loader';
  import { updateUserProfileField } from '@redux/feature/authSlice';
 import FastImage from 'react-native-fast-image';
@@ -23,7 +23,7 @@ import { t } from 'i18next';
 
 const EditProfile = () => {
   const token = useSelector((state: RootState) => state.auth.token);
-  const route = useRoute();
+  const route = useRoute<RouteProp<{ params?: { avatar?: string } }, 'params'>>();
   const { avatar } = route?.params || {};
 
   const {
@@ -85,92 +85,105 @@ const profileData = useMemo(() => [
     }
   }, [profileData]);
 
+  const fieldLabel = useMemo(
+    () => (editingKey ? editingKey.charAt(0).toUpperCase() + editingKey.slice(1) : ''),
+    [editingKey]
+  );
+
+  const handleCloseEditModal = useCallback(() => setModalVisible(false), []);
+
+  const handleSaveProfileField = useCallback(
+    async (key: string, newValue: string) => {
+      if (!token) return;
+      try {
+        setProfileFields((prev) => ({ ...prev, [key]: newValue }));
+        await updateUserProfile(token, { [key]: newValue });
+        dispatch(updateUserProfileField({ key: key as 'name' | 'username' | 'pronouns' | 'bio', value: newValue }));
+        await getUserProfile(token);
+      } catch (error) {
+        // handle error if needed
+      }
+    },
+    [token, dispatch]
+  );
+
+  const handleCloseImagePicker = useCallback(() => setIsModalVisible(false), []);
+
+  const imagePath = (imagePrfile as { path?: string } | null)?.path;
+
   useEffect(() => {
-    if (imagePrfile?.path) {
-      uploadProfileAvatar(imagePrfile, () => setImagePrfile(null));
+    if (imagePath) {
+      uploadProfileAvatar(imagePrfile as { path: string }, () => setImagePrfile(null));
     }
   }, [imagePrfile]);
 
-const avatarUri = imagePrfile?.path
-  ? imagePrfile.path
-  : `${BASE_IMAGE_URL}${userProfile?.avatar}` + `?nocache=${new Date().getTime()}`;
+  const avatarUri = imagePath
+    ? imagePath
+    : userProfile?.avatar
+      ? `${BASE_IMAGE_URL}${userProfile.avatar}?nocache=${Date.now()}`
+      : undefined;
 
-  const renderItem = useCallback(({ item }) => (
-    <View style={styles.fieldRow}>
-      <Text style={styles.label}>{item.label}</Text>
-      <View style={styles.fieldContainer}>
-        <Text style={styles.fieldText}>{item?.value}</Text>
-        <TouchableOpacity onPress={() => handleEdit(item.key)}>
-          <Image source={imageIndex.edit} style={styles.editIcon} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  ), [handleEdit]);
   return (
     <SafeAreaView style={styles.container}>
       <StatusBarCustom />
       <HeaderCustom title= {t("home.editprofile")}   backIcon={imageIndex.backArrow} />
-      <View style={[styles.container, { padding: 20,  }]}>
-       {/* <Image source={{ uri: avatarUri }} style={styles.avatar} /> */}
-
- <FastImage
+      <View style={[styles.container, { padding: 20 }]}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <FastImage
             style={styles.avatar}
-            source={{
-               uri: avatarUri,
-              priority: FastImage.priority.low,
-              cache: FastImage.cacheControl.immutable,
-            }}
+            source={
+              avatarUri
+                ? {
+                    uri: avatarUri,
+                    priority: FastImage.priority.low,
+                    cache: FastImage.cacheControl.immutable,
+                  }
+                : imageIndex.UserProfile
+            }
             resizeMode={FastImage.resizeMode.cover}
           />
 
-        <TouchableOpacity style={styles.button} onPress={() => setIsModalVisible(true)}>
-          <Text style={styles.buttonText}>{t("home.changepicture")}</Text>
-        </TouchableOpacity>
-        <FlatList
-          data={profileData}
-          keyExtractor={(item) => item.key}
-          renderItem={renderItem}
-             removeClippedSubviews
-  initialNumToRender={4}
-  windowSize={5}
-  maxToRenderPerBatch={4}
-        />
+          <TouchableOpacity style={styles.button} onPress={() => setIsModalVisible(true)}>
+            <Text style={styles.buttonText}>{t("home.changepicture")}</Text>
+          </TouchableOpacity>
+
+          {profileData.map((item) => (
+            <View key={item.key} style={styles.fieldRow}>
+              <Text style={styles.label}>{item.label}</Text>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.fieldText} numberOfLines={1}>
+                  {item?.value?.trim() ? item.value : `Add ${item.label.toLowerCase()}`}
+                </Text>
+                <TouchableOpacity onPress={() => handleEdit(item.key)}>
+                  <Image source={imageIndex.edit} style={styles.editIcon} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
         <ImagePickerModal
           modalVisible={isModalVisible}
           pickImageFromGallery={pickImageFromGallery}
           takePhotoFromCamera={takePhotoFromCamera}
-          setModalVisible={() => setIsModalVisible(false)}
-          onClose={() => setIsModalVisible(false)}
-          
+          setModalVisible={handleCloseImagePicker}
+          onClose={handleCloseImagePicker}
         />
         <EditNameModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
-          onClose={() => setModalVisible(false)}
-          fieldLabel={editingKey.charAt(0).toUpperCase() + editingKey.slice(1)}
-          fieldKey={editingKey}
-          initialValue={editingValue}
-          onSave={async (key, newValue) => {
-            try {
-              setProfileFields((prev) => ({ ...prev, [key]: newValue }));
-              console.log(profileFields.username)
-              console.log(key)
-              console.log(newValue)
-            // if(profileFields.username == newValue) {
-            //   setModalVisible(false)
-            //   return
-            // }
-              await updateUserProfile(token, { [key]: newValue });
-              dispatch(updateUserProfileField({ key: 'avatar', value: 'new-avatar.png' }));
-              await getUserProfile(token)
-            } catch (error) {
-             }
-          }}
-          
-
+          onClose={handleCloseEditModal}
+          fieldLabel={fieldLabel}
+          fieldKey={editingKey ?? ''}
+          initialValue={editingValue ?? ''}
+          onSave={handleSaveProfileField}
+          token={token ?? ''}
         />
       </View>
-      {uploading && <LoadingModal isVisible={uploading} />}
+      {uploading && <LoadingModal visible={uploading} />}
     </SafeAreaView>
   );
 };

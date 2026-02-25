@@ -8,6 +8,7 @@ import {
   Dimensions,
   StyleSheet,
   ImageBackground,
+  BackHandler,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
@@ -79,6 +80,19 @@ const OnboardingStepTwo = () => {
       }),
     ]).start();
   }, []);
+
+  const goBack = () => {
+    navigation.goBack();
+  };
+
+  useEffect(() => {
+    const onHardwareBack = () => {
+      goBack();
+      return true;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+    return () => sub.remove();
+  }, [navigation]);
 
   const goToInitialScreen = () => {
     navigation.reset({

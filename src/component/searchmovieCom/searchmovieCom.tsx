@@ -33,7 +33,9 @@ const SearchMovieCom = ({
   setSearchData,
   token,
   onEndReached,
-  loadingMore
+  loadingMore,
+  currentPage = 1,
+  totalPages = 1,
 }) => {
   
   
@@ -185,13 +187,28 @@ const SearchMovieCom = ({
     );
   }, [navigation, togglePlatform, setIsVisible, movieData, token, handleRankingPress, toggleSave]);
 
+  // List footer: only "no more" message (loading is shown by sticky footer so it's visible immediately)
+  const renderListFooter = useCallback(() => {
+    if (loadingMore) return null;
+    if (currentPage >= totalPages && movieData.length > 0) {
+      return (
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerNoMoreText}>
+            {t('discover.noMore') || 'No more movies available'}
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [loadingMore, currentPage, totalPages, movieData.length]);
+
   // ✅ Early return AFTER all hooks are called (Rules of Hooks)
   if (searchQuery.trim() === '') {
     return null;
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Color.background }}>
+    <View style={styles.wrapper}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           {loading ? (
@@ -208,31 +225,32 @@ const SearchMovieCom = ({
               data={movieData}
               keyExtractor={(item) => item?.imdb_id}
               renderItem={renderMovie}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={[
+                styles.listContent,
+                loadingMore && styles.listContentWithStickyFooter,
+              ]}
               keyboardShouldPersistTaps="handled"
-              initialNumToRender={12}
-              maxToRenderPerBatch={14}
+              initialNumToRender={20}
+              maxToRenderPerBatch={20}
               windowSize={10}
               removeClippedSubviews={true}
               onEndReached={handleEndReached}
               onEndReachedThreshold={0.3}
-              ListFooterComponent={
-                loadingMore
-                  ? () => (
-                      <ActivityIndicator
-                        size="small"
-                        color={Color.primary}
-                        style={styles.footerLoader}
-                      />
-                    )
-                  : null
-              }
+              ListFooterComponent={renderListFooter}
             />
           )}
         </View>
       </TouchableWithoutFeedback>
+      {/* Sticky loader: visible as soon as loadingMore is true (no need to scroll to see it) */}
+      {loadingMore && (
+        <View style={styles.stickyFooter} pointerEvents="none">
+          <ActivityIndicator size="large" color={Color.primary} />
+          <Text style={styles.footerLoadingText}>
+            {t('discover.loading')} {currentPage + 1}/{totalPages}
+          </Text>
+        </View>
+      )}
       <CompareModals token={token} useCompareHook={compareHook} />
-
     </View>
   );
 };
@@ -241,9 +259,12 @@ const SearchMovieCom = ({
 export default React.memo(SearchMovieCom)
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: Color.background,
+  },
   container: {
     flex: 1,
-    // paddingTop: 15,
   },
   movieCard: {
     flexDirection: 'row',
@@ -287,6 +308,32 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 20,
     paddingHorizontal: 15,
+  },
+  listContentWithStickyFooter: {
+    paddingBottom: 100,
+  },
+  stickyFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Color.background,
+  },
+  footerContainer: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  footerLoadingText: {
+    color: Color.textGray,
+    marginTop: 8,
+    fontSize: 14,
+  },
+  footerNoMoreText: {
+    color: Color.textGray,
+    fontSize: 14,
   },
   footerLoader: {
     margin: 10,

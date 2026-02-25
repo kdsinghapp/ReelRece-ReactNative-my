@@ -16,12 +16,7 @@ const PlaybackSetting = () => {
 
 
   const navigation = useNavigation();
-  const token = useSelector((state: RootState) => state.auth.token);
-  // const userProfile = useSelector((state: RootState) => state.auth.userGetData);
-
-  // const [isTrailer, setIsTrailer] = useState(true);
-  // const [isSound, setIsSound] = useState(true);
-
+ 
   const { flagValue: isTrailer, handleToggle: handleTrailerToggle } = useToggleFlag("autoplay_trailer");
   const { flagValue: isSound, handleToggle: handleSoundToggle } = useToggleFlag("videos_start_with_sound");
    return (
@@ -37,16 +32,7 @@ const PlaybackSetting = () => {
           <Text style={styles.headingText}>{t("setting.playback.autoplayTrailer")}</Text>
           <Text style={styles.detailText}>{t("setting.playback.trailerWillAutoPlay")}</Text>
         </View>
-        {/* <Switch
-          trackColor={{ false: '#767577', true: '#004565' }}
-          thumbColor={isTrailer ? '#008AC9' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          // onValueChange={handleTrailerToggle}
-          // value={isTrailer}
-          onValueChange={handleTrailerToggle}
-          value={isTrailer}
-        /> */}
-
+      
         <CustomSwitch
           value={isTrailer}
           onValueChange={handleTrailerToggle}
@@ -55,16 +41,7 @@ const PlaybackSetting = () => {
 
       <View style={styles.detailContainer}>
         <Text style={styles.headingText}>{t("setting.playback.videosStartWithSound")}</Text>
-        {/* <Switch
-          trackColor={{ false: '#767577', true: '#004565' }}
-          thumbColor={isSound ? '#008AC9' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          // onValueChange={handleSoundToggle}
-          // value={isSound}
-
-          onValueChange={handleSoundToggle}
-          value={isSound}
-        /> */}
+       
         <CustomSwitch
           value={isSound}
           onValueChange={handleSoundToggle}

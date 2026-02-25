@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
    Image,
@@ -21,6 +21,11 @@ import FastImage from 'react-native-fast-image';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { t } from 'i18next';
+
+const SHIMMER_COLORS = ['#181818ff', '#464545ff', '#181717ff'];
+const SHIMMER_STYLE = { borderRadius: 8 };
+
+type MovieItem = { imdb_id?: string; cover_image_url?: string; rec_score?: number };
 
 interface HorizontalMovieListProps {
   title: string;
@@ -74,16 +79,14 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
 
   const [showFirstModal, setShowFirstModal] = useState(false);
 
-  // const token = useSelector((state: RootState) => state.auth.token);
-  const handleNavigate = () => {
- 
+  const handleNavigate = useCallback(() => {
     if (isSelectList && type) {
       navigation.navigate(ScreenNameEnum.DiscoverTab as never, {
         screen: ScreenNameEnum.DiscoverScreen,
         params: { isSelectList, type },
       });
     } else if (navigateTo) {
-      navigation.navigate(navigateTo, {
+      navigation.navigate(navigateTo as never, {
         title,
         datamovie: data,
         username,
@@ -94,22 +97,39 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
         my_profile,
       });
     }
-  };
-  const goToDetail = useCallback(
-    (item) => {
-      const imdb_idData = item?.imdb_id;
+  }, [
+    navigation,
+    token,
+    isSelectList,
+    type,
+    navigateTo,
+    title,
+    data,
+    username,
+    imageUri,
+    userAvatarUrl,
+    disableBottomSheet,
+    my_profile,
+  ]);
 
-      navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+  const goToDetail = useCallback(
+    (item: { imdb_id?: string }) => {
+      const imdb_idData = item?.imdb_id;
+      if (!imdb_idData) return;
+      navigation.navigate(ScreenNameEnum.MovieDetailScreen as never, {
         imdb_idData,
         token,
       });
     },
-    [navigation]
+    [navigation, token]
   );
-   const renderItem = useCallback(
-    ({ item }: { item: object & { imdb_id?: string } }) => (
+
+  const renderItem = useCallback(
+    ({ item }: { item: unknown }) => {
+      const movie = item as MovieItem;
+      return (
       <TouchableOpacity
-        onPress={() => goToDetail(item)}
+        onPress={() => goToDetail(movie)}
         style={styles.movieCardContainer}
       >
         {/* <ImageBackground
@@ -120,7 +140,7 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
 
         <FastImage
           source={{
-            uri: item?.cover_image_url,
+            uri: movie?.cover_image_url,
             priority: FastImage.priority.low,
             cache: FastImage.cacheControl.immutable
 
@@ -133,10 +153,10 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
         <TouchableOpacity style={styles.rankingOverlay}
         //  onPress={() => setShowFirstModal(!showFirstModal)}  
         >
-          {/* {item?.rec_score && */}
+          {/* {movie?.rec_score && */}
         
             <RankingWithInfo
-              score={item?.rec_score ?? '?'}
+              score={movie?.rec_score ?? '?'}
               title={scoreType === "Rec" ? t("discover.recscore") :  t("discover.friendscore")  }
               description={scoreType === "Rec"? t("discover.recscoredes") : t("discover.frienddes")
               }
@@ -178,19 +198,36 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
           </TouchableOpacity>
         </ImageBackground> */}
       </TouchableOpacity>
+      );
+    },
+    [goToDetail, scoreType]
+  );
+
+  const renderShimmerItem = useCallback(
+    () => (
+      <View style={styles.movieCardContainer}>
+        <ShimmerPlaceHolder
+          LinearGradient={LinearGradient}
+          style={styles.movieCard}
+          shimmerStyle={SHIMMER_STYLE}
+          shimmerColors={SHIMMER_COLORS}
+        />
+      </View>
     ),
-    [navigation]
+    []
   );
-  const renderShimmerItem = () => (
-    <View style={styles.movieCardContainer}>
-      <ShimmerPlaceHolder
-        LinearGradient={LinearGradient}
-        style={styles.movieCard}
-        shimmerStyle={{ borderRadius: 8 }}
-        shimmerColors={['#181818ff', '#464545ff', '#181717ff']}
-      />
-    </View>
-  );
+
+  const keyExtractor = useCallback((item: unknown) => {
+    if (item != null && typeof item === 'object' && 'imdb_id' in item) return String((item as { imdb_id?: string }).imdb_id ?? '');
+    return '';
+  }, []);
+  const shimmerKeyExtractor = useCallback((_: unknown, index: number) => index.toString(), []);
+  const handleEndReached = useCallback(() => {
+    if (hasMore && !loading && onEndReached) onEndReached();
+  }, [hasMore, loading, onEndReached]);
+
+  const shimmerData = useMemo(() => [...Array(5)], []);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -209,11 +246,11 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
         </TouchableOpacity>
       </View>
 
-      {loading && data.length === 0 ? (
+      {loading && data?.length === 0 ? (
         <FlatList
-          data={[...Array(5)]}
+          data={shimmerData}
           horizontal
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={shimmerKeyExtractor}
           renderItem={renderShimmerItem}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
@@ -223,25 +260,18 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
           <FlatList
             data={data}
             horizontal
-            keyExtractor={(item) => item.imdb_id}
+            keyExtractor={keyExtractor}
             renderItem={renderItem}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
-            onEndReached={() => {
-              if (hasMore && !loading && onEndReached) {
-                onEndReached();
-              }
-            }}
+            onEndReached={handleEndReached}
             onEndReachedThreshold={0.5}
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             initialNumToRender={5}
             maxToRenderPerBatch={6}
-            // windowSize={5}
-            // removeClippedSubviews
-
             removeClippedSubviews={false}
-nestedScrollEnabled={true}
+            nestedScrollEnabled={true}
           />
            {loading && (
     // <ActivityIndicator

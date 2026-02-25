@@ -356,6 +356,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Color.whiteText,
         fontFamily: font.PoppinsBold,
+        lineHeight: 22,
     },
     userItem: {
         flexDirection: 'row',

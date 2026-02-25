@@ -80,13 +80,18 @@ groupId={groupId}
                             <Text  allowFontScaling={false}  style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={styles.addBtn}
+                            style={[styles.addBtn, {
+                                opacity: addmembers?.length === 0 ? 0.7 : 1
+                            }]}
+                              disabled={addmembers?.length === 0}
                             onPress={async () => {
                                 await handleAddMemberss(token, groupId, addmembers);
                                 onClose(addmembers);
                             }}
                         >
-                            <Text  allowFontScaling={false}  style={styles.buttonTxt}>{t("common.add")}
+                            <Text  allowFontScaling={false}  style={[styles.buttonTxt,{
+                                fontFamily: font.PoppinsMedium
+                            }]}>{t("common.add")}
                                 </Text>
                         </TouchableOpacity>
                     </View>
@@ -200,8 +205,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         width: "47%",
         // paddingHorizontal: "20%",
-        paddingVertical: 10,
-        height:42 ,
+         height:42 ,
 
     },
     addBtn: {
@@ -212,7 +216,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 24,
         width: "47%",
             height:42 ,
-
+ 
          borderWidth: 1,
         marginLeft: 15,
     },

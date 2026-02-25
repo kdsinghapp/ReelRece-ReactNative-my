@@ -4,25 +4,16 @@ import FeedCardHome from "./FeedCardHome";
 
 
   const MemoFeedCardHome = React.memo(FeedCardHome, (prev, next) => {
- 
     if (prev.imdb_id !== next.imdb_id) return false;
-   
     if (prev.videoUri !== next.videoUri) return false;
-
-
-  // objects comparison (poster, avatar)
     if (!isEqual(prev.poster, next.poster)) return false;
     if (!isEqual(prev.avatar, next.avatar)) return false;
-
-    // playback / visibility
     if (prev.shouldPlay !== next.shouldPlay) return false;
     if (prev.isVisible !== next.isVisible) return false;
-    // if (prev.isPaused !== next.isPaused) return false;
     if (prev.isMuted !== next.isMuted) return false;
     if (prev.shouldAutoPlay !== next.shouldAutoPlay) return false;
-  // if (prev.videoIndex !== next.videoIndex) return false; 
-  if (prev.videoIndex !== next.videoIndex) return false; 
-
+    if (prev.videoIndex !== next.videoIndex) return false;
+    if (prev.onBookmarkSuccess !== next.onBookmarkSuccess) return false;
     return true;
   });
 

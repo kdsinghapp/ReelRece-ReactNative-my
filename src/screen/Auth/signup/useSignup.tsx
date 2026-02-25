@@ -187,16 +187,14 @@ const useSignup = () => {
       //   return;
       // }
       const result = await signupWithUsername(email, password, trimmedUsername);
-            console.log("🚀 ~ file: useSignup.tsx:161 ~ handleFinalSignup ~ token:", result  )
-
+      
       if (!result?.success) {
          // Toast.show({ type: 'error', text1: result?.message || 'Signup failed' });
         Toast.show({ type: 'error', text1: 'Username already exists' });
         return;
       }
       const token = await loginUser_Api(email, password);
-      console.log("🚀 ~ file: useSignup.tsx:161 ~ handleFinalSignup ~ token:", token  )
-      const token1 = token?.data
+       const token1 = token?.data
       dispatch(loginSuccess({ token: token1 }));
       Toast.show({ type: 'success', text1: 'Account created 🎉' });
       navigation.navigate(ScreenNameEnum.StreamService, {

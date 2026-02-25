@@ -9,8 +9,6 @@ import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { useBookmarks } from '@hooks/useBookmark';
  import FastImage from 'react-native-fast-image';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import CustomText from '@components/common/CustomText/CustomText';
 const NormalMovieCard = ({
   item,
@@ -19,30 +17,28 @@ const NormalMovieCard = ({
   onPressRanking,
   flatlistTop,
   imdb_id,
+  isFirstItem,
+  onFirstRankIconMeasure,
 }: {
   item: object & { is_bookmarked?: boolean; cover_image_url?: string; title?: string; release_year?: string; imdb_id?: string; };
   onPressClose: () => void;
   onPressRanking: () => void;
-  onPressRankingTooltip: () => void;
-  flatlistTop: number;
-  imdb_id: string,
-  token: string,
+  onPressRankingTooltip?: () => void;
+  flatlistTop: number | null;
+  imdb_id: string;
+  token: string;
+  isFirstItem?: boolean;
+  onFirstRankIconMeasure?: (x: number, y: number) => void;
 }) => {
   const [save, setSave] = useState(false);
-  const navigation = useNavigation()
+  const navigation = useNavigation();
+  const rankIconRef = React.useRef<View>(null);
   const [isSaved, setIsSaved] = useState(item?.is_bookmarked ?? false);
   const { isBookmarked, toggleBookmark } = useBookmarks(token);
-     const [isFeedbackModal, setIsFeedbackModal] = useState(false);
- const compareHook = useCompareComponent(token);
+
   const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
-    // Alert.alert(imdb_id)
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token });
   };
-
-
-  const handleRankingPress = (movie) => {
-    compareHook.openFeedbackModal(movie);
-   };
 
   const handleToggleBookmark = async () => {
     try {
@@ -56,7 +52,17 @@ const NormalMovieCard = ({
 
     };
   };
-  
+
+  useEffect(() => {
+    if (!isFirstItem || !onFirstRankIconMeasure) return;
+    const t = setTimeout(() => {
+      rankIconRef.current?.measureInWindow?.((x, y) => {
+        onFirstRankIconMeasure(x, y);
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [isFirstItem, onFirstRankIconMeasure]);
+
   return (
     <View style={styles.movieCard}>
       <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)} >
@@ -127,18 +133,18 @@ const NormalMovieCard = ({
 
           </TouchableOpacity> */}
           <View style={styles.iconRow}>
-            
-            <TouchableOpacity style={styles.iconprimary}
-              // onPress={() => handleBookmarkToggle(token, item.imdb_id)}
-              onPress={handleRankingPress}
-            >
-              <Image
-                source={imageIndex.ranking}
-                style={styles.iconImage}
-                resizeMode="contain"
-                tintColor={Color.whiteText}
-              />
-            </TouchableOpacity>
+            <View ref={isFirstItem ? rankIconRef : undefined} collapsable={false}>
+              <TouchableOpacity style={styles.iconprimary}
+                onPress={onPressRanking}
+              >
+                <Image
+                  source={imageIndex.ranking}
+                  style={styles.iconImage}
+                  resizeMode="contain"
+                  tintColor={Color.whiteText}
+                />
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
               style={styles.iconprimary}
               // onPress={() => toggleBookmark(item.imdb_id)}
@@ -154,11 +160,6 @@ const NormalMovieCard = ({
 
           </View>
         </View>
-
-      { isFeedbackModal &&
-      <CompareModals token={token} useCompareHook={compareHook} />
-      
-      }
       </View>
    
     </View>

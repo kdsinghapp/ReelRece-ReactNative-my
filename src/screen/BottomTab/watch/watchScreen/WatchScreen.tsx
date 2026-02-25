@@ -7,7 +7,7 @@ import {
   BackHandler,
   Animated,
   ActivityIndicator,
-  ScrollView
+  FlatList
 } from 'react-native';
 import { Color } from '@theme/color';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -38,8 +38,7 @@ import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { errorToast } from '@utils/customToast';
 
-// 💤 Lazy load heavy components
-const WatchGroupCom = React.lazy(() => import('@components/common/WatchGroupCom/WatchGroupCom'));
+import WatchGroupCom, { GroupListItem } from '@components/common/WatchGroupCom/WatchGroupCom';
 // const Notifi cation = React.lazy(() => import('../../home/homeScreen/Notification/Notification'));
 // const LogoutModal = React.lazy(() => import('@components/modal/logoutModal/logoutModal'));
 
@@ -252,14 +251,36 @@ const WatchScreen = () => {
 
   }, [selectedGroupIds]);
 
-
+  const keyExtractor = useCallback((item) => item.groupId?.toString() ?? String(item), []);
+  const renderGroupItem = useCallback(
+    ({ item }) => (
+      <GroupListItem
+        group={item}
+        isSettingsMode={isSettingsMode}
+        onGroupSelect={handleGroupSelect}
+        navigationOff={false}
+        isMultiSelectMode={isMultiSelectMode}
+        selectedGroupIds={selectedGroupIds}
+        setSelectedGroup={setSelectedGroup}
+        setIsSettingsMode={setIsSettingsMode}
+      />
+    ),
+    [
+      isSettingsMode,
+      isMultiSelectMode,
+      selectedGroupIds,
+      handleGroupSelect,
+    ]
+  );
   // Store value in AsyncStorage
 
   const goToSearchScreen = useCallback(() => {
+    const groupList = Array.isArray(groupsData) ? groupsData : [];
     navigation.navigate(ScreenNameEnum.WoodsScreen, {
       type: 'group',
+      groupsData: groupList,
     });
-  }, []);
+  }, [groupsData, navigation]);
 
   // inside useEffect
   // useEffect(() => {
@@ -590,37 +611,8 @@ const WatchScreen = () => {
           <Image source={imageIndex.invitIcon} style={WatchStyle.invitBtnIcon} />
         </TouchableOpacity>
       </View>
-    )
-  })
-  const GroupList = memo(({ groupsData, isMultiSelectModel }) => {
-
-
-    return (
-      <View style={WatchStyle.groupsContainer}>
-        <Suspense fallback={
-          <View>
-            {[1, 2, 3].map((i) => (
-              <ShimmerGroupItem key={i} />
-            ))}
-          </View>
-
-        }>
-
-          <WatchGroupCom
-            groups={groupsData}
-            isSettingsMode={isSettingsMode}
-            onGroupSelect={handleGroupSelect}
-            isMultiSelectMode={isMultiSelectMode}
-            selectedGroupIds={selectedGroupIds}
-            setSelectedGroup={setSelectedGroup}
-            setIsSettingsMode={setIsSettingsMode}
-          />
-
-        </Suspense>
-
-      </View>
-    )
-  })
+    );
+  });
 
   return (
     <SafeAreaView style={WatchStyle.mincontainer}>
@@ -648,36 +640,57 @@ const WatchScreen = () => {
           goToSearchScreen={goToSearchScreen}
           setNotificationModal={setNotificationModal}
         />
-        <ScrollView
-          // refreshControl={
-          //   <RefreshControl
-          //     refreshing={refreshing}
-          //     onRefresh={onRefresh}
-          //     colors={[Color.primary]}
-          //     tintColor={Color.primary}
-          //   />
-          // }
-        >
-          <UserActions
-            isSettingsMode={isSettingsMode}
-            avatar={avatar}
-            navigation={navigation}
-            setIsSettingsMode={setIsSettingsMode}
+        <View style={WatchStyle.groupsContainer}>
+          <FlatList
+            data={groupsData}
+            keyExtractor={keyExtractor}
+            ListHeaderComponent={
+              <View style={{ marginBottom: 20 }}>
+                <UserActions
+                  groupsData={groupsData}
+                  isSettingsMode={isSettingsMode}
+                  isMultiSelectMode={isMultiSelectMode}
+                />
+              </View>
+            }
+            renderItem={renderGroupItem}
+          contentContainerStyle={{ paddingBottom: 70, paddingHorizontal: 10 }}
+          initialNumToRender={5}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
+          ListEmptyComponent={
+            loadingGroups ? (
+              // <View>
+              //   {[1, 2, 3].map((i) => (
+              //     <ShimmerGroupItem key={i} />
+              //   ))}
+              // </View>
+              <ActivityIndicator color={Color.primary} size={'large'} />
+            ) : (
+              <View style={{ paddingVertical: 40, paddingHorizontal: 24, alignItems: 'center' }}>
+                <CustomText
+                  size={16}
+                  color={Color.placeHolder}
+                  style={{ textAlign: 'center' }}
+                  font={font.PoppinsMedium}
+                >
+                  {t('emptyState.noGroupsYet')}
+                </CustomText>
+                <TouchableOpacity
+                  style={{ marginTop: 16, paddingVertical: 10, paddingHorizontal: 20, backgroundColor: Color.primary, borderRadius: 8 }}
+                  onPress={() => navigation.navigate(ScreenNameEnum.CreateGroupScreen)}
+                >
+                  <CustomText size={14} color={Color.whiteText} font={font.PoppinsMedium}>
+                    {t('home.CreateGroup')}
+                  </CustomText>
+                </TouchableOpacity>
+              </View>
+            )
+          }
           />
-
-          <GroupList
-            groupsData={groupsData}
-            isSettingsMode={isSettingsMode}
-            handleGroupSelect={handleGroupSelect}
-            isMultiSelectMode={isMultiSelectMode}
-            selectedGroupIds={selectedGroupIds}
-            setSelectedGroup={setSelectedGroup}
-            setIsSettingsMode={setIsSettingsMode}
-          />
-        </ScrollView>
-
+        </View>
       </View>
-
       {/* Group Settings Modal */}
       {selectedGroup && isSettingsMode && groupSettingModal && (
         <TouchableOpacity

@@ -22,6 +22,7 @@ import { useBookmarks } from '@hooks/useBookmark';
  import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
+import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
 import { invalid } from 'moment'
 import { styles } from './FeedCardstyle';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
@@ -35,7 +36,8 @@ import { t } from 'i18next';
 const FeedCardHome = ({
   screenName,activity,
   avatar, user, title, comment, poster, videoUri, isPaused, shouldAutoPlay, is_bookMark, videoIndex,
-  rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username
+  rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username,
+  onBookmarkSuccess,
 }) => {
   const navigation = useNavigation();
   const [posterOpacity] = useState(new Animated.Value(1));
@@ -97,6 +99,8 @@ const FeedCardHome = ({
 
     try {
       await toggleBookmark(imdb_id, token);
+      dispatch(fetchHomeBookmarks({ silent: true }));
+      onBookmarkSuccess?.();
     } catch (err) {
       setIsBookmarked(prev); // revert
     }

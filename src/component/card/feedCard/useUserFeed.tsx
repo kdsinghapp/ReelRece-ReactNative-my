@@ -1,147 +1,132 @@
-import { getUserFeed } from "@redux/Api/FeedApi";
-import { useState, useEffect } from "react";
- 
-const useUserFeed = (token: string,) => {
+import { getUserFeed, USER_FEED_PAGE_SIZE } from "@redux/Api/FeedApi";
+import { useState, useCallback, useRef, useEffect } from "react";
+
+type FeedType = "home" | "profile" | "otherprofile";
+
+interface FeedResponse {
+  results?: unknown[];
+  current_page?: number;
+  total_pages?: number;
+}
+
+/** Get stable key for deduplication (id or movie.imdb_id) */
+function getFeedItemKey(item: unknown): string | null {
+  if (item == null || typeof item !== "object") return null;
+  const o = item as Record<string, unknown>;
+  if (o.id != null) return String(o.id);
+  const movie = o.movie as Record<string, unknown> | undefined;
+  if (movie?.imdb_id != null) return String(movie.imdb_id);
+  return null;
+}
+
+const useUserFeed = (token: string) => {
   const [feedData, setFeedData] = useState<Array<unknown>>([]);
-  const [page, setPage] = useState(1);            // ✅ current page
-  const [hasMore, setHasMore] = useState(true);   // ✅ aur data bacha hai ya nahi
-  const [loadingFeed, setLoadingFeed] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0); // 0 = nothing loaded yet; first fetch will request page 1
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchFeed = async (
-    type: "home" | "profile" | "otherprofile",
-    username?: string,
-    reset: boolean = false   // ✅ reset true → fresh load
-  ) => {
-    if (!token || loadingFeed) return;
-    if (!hasMore && !reset) return;
+  const isFetchingRef = useRef(false);
+  const currentPageRef = useRef(0);
+  const hasMoreRef = useRef(true);
 
-    setLoadingFeed(true);
- 
-    try {
-      // ✅ page parameter bhejna important hai
-      const res = await getUserFeed(token, type, username, reset ? 1 : page);
-        setFeedData((prev) =>
-        reset ? res.results : [...prev, ...res.results] // ✅ overwrite ya append
-      );
-            setLoadingFeed(false);
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+    hasMoreRef.current = hasMore;
+  }, [currentPage, hasMore]);
 
- if (feedData && page ===1) {
-      setLoadingFeed(false);
+  const fetchFeed = useCallback(
+    async (
+      type: FeedType,
+      username?: string,
+      reset: boolean = false,
+      silent: boolean = false
+    ) => {
+      if (!token) return;
+      if (isFetchingRef.current) return;
+      if (!reset && !hasMoreRef.current) return;
 
-    setPage( page + 1);
-} else if (res.current_page >= res?.total_pages) {
-        setHasMore(false);
-      } else {
-                    setLoadingFeed(false);
+      // First load (currentPage 0) or reset: fetch page 1; otherwise fetch next page
+      const pageToFetch = reset || currentPageRef.current === 0 ? 1 : currentPageRef.current + 1;
+      const isInitialLoad = pageToFetch === 1 && currentPageRef.current === 0;
+      isFetchingRef.current = true;
 
-        setTimeout(() => {
-        setPage( page + 1); // ✅ next page set karo
-          
-        }, 600);
+      if (!silent) {
+        if (reset) {
+          setLoading(true);
+          setRefreshing(true);
+          setHasMore(true);
+          setFeedData([]);
+        } else if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
+      } else if (reset) {
+        setHasMore(true);
+        setFeedData([]);
       }
-    } catch (err) {
-               setHasMore(false);
 
-            setLoadingFeed(false);
+      try {
+        const res: FeedResponse = await getUserFeed(
+          token,
+          type,
+          username,
+          pageToFetch,
+          USER_FEED_PAGE_SIZE
+        );
+        const safeResults = Array.isArray(res?.results) ? res.results : [];
 
-     } finally {
-              setHasMore(false);
+        if (reset || isInitialLoad) {
+          setFeedData(safeResults);
+        } else if (safeResults.length > 0) {
+          setFeedData((prev) => {
+            const existingKeys = new Set(
+              prev.map(getFeedItemKey).filter(Boolean) as string[]
+            );
+            const newItems = safeResults.filter((item) => {
+              const key = getFeedItemKey(item);
+              return key != null && !existingKeys.has(key);
+            });
+            if (newItems.length === 0) return prev;
+            return [...prev, ...newItems];
+          });
+        }
 
-      setLoadingFeed(false);
-    }
-  };
+        const currentPageNum = Number(res?.current_page ?? pageToFetch);
+        const totalPagesNum = Number(res?.total_pages ?? 1);
+        const hasMoreData =
+          safeResults.length > 0 && currentPageNum < totalPagesNum;
 
-  // ✅ Initial Load
-  // useEffect(() => {
-  //   fetchFeed("home", undefined, true);
-//   // }, [token]);
-// useEffect(() => {
-//        // fetchFeed("home", otherUserData?.username);
-//       fetchFeed("otherprofile", );
-  
-//   }, []);
+        setCurrentPage(currentPageNum);
+        setTotalPages(totalPagesNum);
+        setHasMore(hasMoreData);
+      } catch {
+        setHasMore(false);
+      } finally {
+        if (!silent) {
+          setLoading(false);
+          setLoadingMore(false);
+          setRefreshing(false);
+        }
+        isFetchingRef.current = false;
+      }
+    },
+    [token]
+  );
+
   return {
     feedData,
     fetchFeed,
-    loadingFeed,
+    loadingFeed: loading,
+    loadingMore,
+    refreshing,
     hasMore,
+    currentPage,
+    totalPages,
   };
 };
 
 export default useUserFeed;
-
-
-// import { useState } from 'react';
-// import { getUserFeed } from '@redux/Api/FeedApi';
-
-// const useUserFeed = (token: string) => {
-//   const [feedData, setFeedData] = useState([]);
-//   const [hasMore, setHasMore] = useState(true);
-//   const [loadingFeed, setLoadingFeed] = useState(false);
-//  const [page, setPage] = useState(1);         
-
-
-
-
-// const fetchFeed = async (
-//   type: "home" | "profile" | "otherprofile",
-//   username?: string,
-//   reset: boolean = false   // agar true hua to feed reset karega
-// ) => {
-//   if (!token || loadingFeed) return;
-//   if (!hasMore && !reset) return;
-
-//   setLoadingFeed(true);
-
-//   try {
-//     const res = await getUserFeed(token, type, username, reset ? 1 : page); 
-//     // 👆 API call me page number bhejna hoga (API agar support karti ho)
-
-//     setFeedData(prev =>
-//       reset ? res.results : [...prev, ...res.results]   // ✅ overwrite ya append
-//     );
-
-//     if (res.current_page >= res.total_pages) {
-//       setHasMore(false);
-//     } else {
-//       setPage(prev => reset ? 2 : prev + 1);   // ✅ next page ke liye ready
-//     }
-//   } catch (err) {
- //   } finally {
-//     setLoadingFeed(false);
-//   }
-// };
-
-
-
-
-
-
-//   // const fetchFeed = async (
-//   //   type: "home" | "profile" | "otherprofile",
-//   //   username?: string
-//   // ) => {
-//   //   if (!token || !hasMore || loadingFeed) return;
-//   //   setLoadingFeed(true);
- //   //   try {
-//   //     // const res = await getUserFeed(token, type, username);
-//   //     const res = await getUserFeed(token,'home', username);
-//   //     setFeedData(res.results);
- 
-//   //     if (!res.next) setHasMore(false);
-//   //   } catch (err) {
- 
-//   //   } finally {
-//   //     setLoadingFeed(false);
-//   //   }
-//   // };
-
-//   return {
-//     feedData,
-//     fetchFeed,
-//     loadingFeed,
-//     hasMore,
-//   };
-// };
-
-// export default useUserFeed;

@@ -1,32 +1,36 @@
-import React  from 'react';
-import { View,   StyleSheet, Text } from 'react-native';
-  import font from '@theme/font';
+import React from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import font from '@theme/font';
 import WatchGroupCom from '@components/common/WatchGroupCom/WatchGroupCom';
 import { t } from 'i18next';
-const GroupSearch = ({ groupData }: object | string) => {
-    // const [searchText, setSearchText] = useState('');
 
-  // Filtered groups
-  // const filteredGroups = watchTogetherGroups.filter(group =>
-  //   group.groupName.toLowerCase().includes(searchText.toLowerCase())
-  // );
+export interface GroupSearchProps {
+  groupData?: unknown[];
+  searchQuery?: string;
+  navigation?: unknown;
+}
+
+const GroupSearch = ({ groupData, searchQuery }: GroupSearchProps) => {
+  const hasSearch = (searchQuery ?? '').trim().length > 0;
+  const isEmpty = !groupData || groupData.length === 0;
+
   return (
     <View style={styles.container}>
-
-      {groupData?.length > 0 ? (
+      {!isEmpty ? (
         <WatchGroupCom groups={groupData} />
       ) : (
-        <Text style={{ color: 'gray', textAlign: 'center', marginTop: 20  
-,
-fontFamily:font.PoppinsMedium ,
-fontSize:16
-
-        }}>
-          {(t("emptyState.nogroups"))}
-       
+        <Text
+          style={{
+            color: 'gray',
+            textAlign: 'center',
+            marginTop: 20,
+            fontFamily: font.PoppinsMedium,
+            fontSize: 16,
+          }}
+        >
+          {hasSearch ? t('emptyState.nomatch') || 'No groups match your search' : t('emptyState.nogroups')}
         </Text>
       )}
-
     </View>
   );
 };

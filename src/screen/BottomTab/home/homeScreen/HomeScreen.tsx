@@ -15,140 +15,141 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import useHome from './useHome';
 import { Color } from '@theme/color';
 import Notification from './Notification/Notification';
-import HorizontalMovieList from '@components/common/HorizontalMovieList/HorizontalMovieList';
-import { getRecentActiveUsers } from '@redux/Api/ProfileApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '@redux/store';
-  import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import isEqual from 'lodash.isequal';
- import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
-import { homeDiscoverApi } from '@redux/Api/movieApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '@redux/store';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
- import AvatarShimmer from '@components/ShimmerCom/AvatarShimmer';
- import MemoFeedCardHome from '@components/card/feedCard/MemoFeedCardHome';
-import useUserFeed from '@components/card/feedCard/useUserFeed';
+import AvatarShimmer from '@components/ShimmerCom/AvatarShimmer';
+import MemoFeedCardHome from '@components/card/feedCard/MemoFeedCardHome';
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 import NetInfo from '@react-native-community/netinfo';
 import { errorToast } from '@utils/customToast';
+import RecentUsersList from './components/RecentUsersList';
+import DiscoverPeopleSection from './components/DiscoverPeopleSection';
+import HomeHeader from './components/HomeHeader';
+import {
+  fetchHomeFeed,
+  fetchHomeRecentUsers,
+  fetchHomeSuggestedFriends,
+  fetchHomeTrending,
+  fetchHomeRecommend,
+  fetchHomeBookmarks,
+  resetHomeFeedPagination,
+} from '@redux/feature/homeSlice';
 
 
 
 const App = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token);
   const autoPlayEnabled = useSelector(
     (state: RootState) => state.auth.userGetData?.autoplay_trailer ?? true
   );
   const isMuted = false;
   const { navigation, setIsVisible } = useHome();
-  const { feedData, fetchFeed, loadingFeed, hasMore } = useUserFeed(token);
+
+  const {
+    feedData,
+    feedPage,
+    feedHasMore,
+    loadingFeed,
+    loadingMoreFeed,
+    recentUsers,
+    suggestedFriends,
+    trendingData,
+    recommendData,
+    bookmarkData,
+    loadingRecentUsers: userloading,
+    loadingTrending,
+    loadingRecs,
+    loadingBookmark,
+  } = useSelector((state: RootState) => state.home);
+
   const [notificationModal, setNotificationModal] = useState(false);
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [trendingData, setTrendingData] = useState([]);
-  const [recommendData, setRecommendData] = useState([]);
-  const [bookmarkData, setBookmarkData] = useState([]);
-  const [userloading, setUserLoading] = useState(true);
-  
+
   // scroll states
   const [hasScrolled, setHasScrolled] = useState(false);
   const [playIndex, setPlayIndex] = useState<number | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
-  
-  // API URLs
-  const trendingUrl = '/trending?country=US';
-  const recommendUrl = '/recommend-movies?sort_by=rec_score';
-  const bookmarksUrl = '/bookmarks?country=US';
-  
+
   const isFocused = useIsFocused();
-  const [loadingTrending, setLoadingTrending] = useState(true);
-  const [loadingRecs, setLoadingRecs] = useState(true);
-  const [loadingBookmark, setLoadingBookmark] = useState(true);
   const restoredRef = useRef(false);
   const lastPlayedIndexRef = useRef<number | null>(null);
-  
-  // API fetch flags to prevent multiple calls
-  const hasFetchedRecsRef = useRef(false);
-  const hasFetchedTrendingRef = useRef(false);
-  const hasFetchedBookmarksRef = useRef(false);
 
-   const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const prevOnlineRef = useRef(true);
   const flatListRef = useRef<FlatList>(null);
+  const onRefreshRef = useRef<(() => Promise<void>) | null>(null);
+  const initialFeedFetchedRef = useRef(false);
 
-  // Network listener
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
-      
-      // Auto-reload when coming back online
-      if (prevOnlineRef.current === false && online === true) {
-        onRefresh();
-      }
-      
-      prevOnlineRef.current = online;
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Refresh function
+  // Refresh function: all home APIs via Redux
   const onRefresh = useCallback(async () => {
-    if (!isOnline){
-       errorToast('No Internet! \n Please check your network connection')
-       return;
-    } 
-    
+    if (!isOnline) {
+      errorToast('No Internet! \n Please check your network connection');
+      return;
+    }
     setRefreshing(true);
-    
-    // Reset fetch flags
-    hasFetchedRecsRef.current = false;
-    hasFetchedTrendingRef.current = false;
-    hasFetchedBookmarksRef.current = false;
-    
     try {
-      await Promise.allSettled([
-        fetchTrendingData(),
-        fetchRecommendData(),
-        fetchBookmarkData(),
-        fetchRecentUsers(),
-        fetchFeed("home", true),
+      dispatch(resetHomeFeedPagination());
+      await Promise.all([
+        dispatch(fetchHomeFeed({ reset: true })).unwrap().catch(() => {}),
+        dispatch(fetchHomeTrending()).unwrap().catch(() => {}),
+        dispatch(fetchHomeRecommend()).unwrap().catch(() => {}),
+        dispatch(fetchHomeBookmarks()).unwrap().catch(() => {}),
+        dispatch(fetchHomeRecentUsers()).unwrap().catch(() => {}),
+        dispatch(fetchHomeSuggestedFriends()).unwrap().catch(() => {}),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [isOnline]);
+  }, [isOnline, dispatch]);
 
-  
+  onRefreshRef.current = onRefresh;
+ 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      if (prevOnlineRef.current === false && online === true) {
+        onRefreshRef.current?.();
+      }
+      prevOnlineRef.current = online;
+    });
+    return () => unsubscribe();
+  }, []);
+
   const combinedData = useMemo(() => {
-    return [
+     return [
       { type: 'profileStatus' },
       { type: 'header' },
-      ...feedData.map(item => ({ ...item, type: 'feed' })),
+      // ...discoverItem,
+      ...feedData.map((item: object) => ({ ...item, type: 'feed' })),
     ];
-  }, [feedData]);
+  }, [feedData, loadingFeed]);
 
   const compareHook = useCompareComponent(token);
-  
+
   // refs for scroll management
   const playIndexRef = useRef<number | null>(null);
   const currentVisibleIndexRef = useRef<number>(0);
   const isFocusedRef = useRef<boolean>(false);
-  
+
   // sync refs when states change
   useEffect(() => {
     playIndexRef.current = playIndex;
   }, [playIndex]);
-  
+
   useEffect(() => {
     currentVisibleIndexRef.current = currentVisibleIndex;
   }, [currentVisibleIndex]);
-  
+
   useEffect(() => {
     isFocusedRef.current = isFocused;
   }, [isFocused]);
@@ -187,7 +188,7 @@ const App = () => {
     const headerOrProfileVisible = viewableItems.some(
       v => v?.item?.type === 'header' || v?.item?.type === 'profileStatus'
     );
-    
+
     if (headerOrProfileVisible) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -207,7 +208,7 @@ const App = () => {
     const isFeedCardVisible = viewableItems.some(
       item => item?.item?.movie && item?.item?.user
     );
-    
+
     if (!isFeedCardVisible) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -239,109 +240,22 @@ const App = () => {
     }, 800);
   }).current;
 
-  const fetchRecentUsers = useCallback(async () => {
-          setUserLoading(true);
-
-    try {
-      const users = await getRecentActiveUsers(token);
-                setUserLoading(false);
-      setRecentUsers(users.data?.results || []);
-
-    } catch (err) {
-    
-     } finally {
-      setUserLoading(false);
-    }
-  }, [token]);
-
-  const fetchTrendingData = async () => {
-    if (hasFetchedTrendingRef.current) return;
-    
-    try {
-      hasFetchedTrendingRef.current = true;
-      const res = await homeDiscoverApi(token, trendingUrl);
-      
-      if (res?.results) {
-       setTrendingData(res?.results)
-      }
-    } catch (error) {
-       hasFetchedTrendingRef.current = false; 
-    } finally {
-      setLoadingTrending(false);
-    }
-  };
-
-  const fetchRecommendData = async () => {
-    if (hasFetchedRecsRef.current) return;
-    
-    try {
-      hasFetchedRecsRef.current = true;
-      setLoadingRecs(true);
-      const res = await homeDiscoverApi(token, recommendUrl);
-      
-      if (res?.results) {
-        setRecommendData(res.results);
-      } else {
-        // Handle empty response
-        setRecommendData([]);
-      }
-    } catch (error) {
-       hasFetchedRecsRef.current = false; // Reset on error
-      setRecommendData([]); // Set empty array on error
-    } finally {
-      setLoadingRecs(false);
-    }
-  };
-
-  const fetchBookmarkData = async () => {
-    if (hasFetchedBookmarksRef.current) return;
-    
-    try {
-      hasFetchedBookmarksRef.current = true;
-      const res = await homeDiscoverApi(token, bookmarksUrl);
-      if (res?.results) {
-        setBookmarkData(res.results);
-      }
-    } catch (error) {
-       hasFetchedBookmarksRef.current = false; // Reset on error
-    } finally {
-      setLoadingBookmark(false);
-    }
-  };
-
-  // Initialize all data fetches
+  // Initial load: all home APIs via Redux
   useEffect(() => {
-    const initDataFetches = async () => {
-      if (!token) return;
-      
-      try {
-        // Run all fetches in parallel
-        await Promise.allSettled([
-          fetchTrendingData(),
-          fetchRecommendData(),
-          fetchBookmarkData(),
-          fetchRecentUsers()
-        ]);
-      } catch (error) {
-       }
-    };
+    if (!token) return;
+    dispatch(fetchHomeTrending());
+    dispatch(fetchHomeRecommend());
+    dispatch(fetchHomeBookmarks());
+    dispatch(fetchHomeRecentUsers());
+    dispatch(fetchHomeSuggestedFriends());
+  }, [token, dispatch]);
 
-    initDataFetches();
-    
-    // Cleanup function
-    return () => {
-      hasFetchedRecsRef.current = false;
-      hasFetchedTrendingRef.current = false;
-      hasFetchedBookmarksRef.current = false;
-    };
-  }, [token]);
-
-  // Feed data fetch
+  // Feed: first page on mount when token exists
   useEffect(() => {
-    if (token && !loadingFeed) {
-      fetchFeed("home");
-    }
-  }, [token]);
+    if (!token || initialFeedFetchedRef.current) return;
+    initialFeedFetchedRef.current = true;
+    dispatch(fetchHomeFeed({ reset: true }));
+  }, [token, dispatch]);
 
   // Focus effect for restoring index
   useFocusEffect(
@@ -358,7 +272,7 @@ const App = () => {
             restoredRef.current = true;
           }
         } catch (err) {
-         }
+        }
       };
 
       restoreIndex();
@@ -369,6 +283,18 @@ const App = () => {
     }, [])
   );
 
+   useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      dispatch(fetchHomeFeed({ reset: true, silent: true }));
+      dispatch(fetchHomeBookmarks({ silent: true }));
+      dispatch(fetchHomeRecentUsers({ silent: true }));
+      dispatch(fetchHomeSuggestedFriends({ silent: true }));
+      dispatch(fetchHomeTrending({ silent: true }));
+      dispatch(fetchHomeRecommend({ silent: true }));
+    }, [token, dispatch])
+  );
+
   // Save index
   useEffect(() => {
     const saveIndex = async () => {
@@ -376,7 +302,7 @@ const App = () => {
       try {
         await AsyncStorage.setItem('homeIndex', indexForVideo.toString());
       } catch (err) {
-       }
+      }
     };
 
     if (currentVisibleIndex !== null) {
@@ -393,9 +319,9 @@ const App = () => {
 
     if (loadingFeed && combinedData.length > 50) {
       return (
-        <View style={{ paddingVertical: 20, marginBottom: 90 }}>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-             {t("emptyState.pleasewait")}
+            {t("emptyState.pleasewait")}
           </Text>
           <ActivityIndicator
             size="small"
@@ -406,129 +332,60 @@ const App = () => {
       );
     }
 
-    if (!hasMore && combinedData.length > 0) {
+    if (loadingMoreFeed) {
       return (
-        <View style={{ paddingVertical: 20 }}>
-          <Text style={{ textAlign: "center", color: "gray" }}>
-            {/* No more data available */}
-          </Text>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
+          <ActivityIndicator size="small" color={Color.primary} style={{ marginTop: 8 }} />
+        </View>
+      );
+    }
+
+    if (!feedHasMore && combinedData.length > 0) {
+      return (
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
+          <Text style={{ textAlign: "center", color: "gray" }} />
         </View>
       );
     }
 
     return <FeedCardShimmer />;
-  }, [loadingFeed, hasMore, combinedData.length]);
+  }, [loadingFeed, loadingMoreFeed, feedHasMore, combinedData.length]);
 
-  const RecentUsersList = React.memo(
-    ({ users, navigation }) => {
-    return (
-        <FlatList
-          data={users}
-          horizontal
-          keyExtractor={(item, index) => item?.username ?? item?.id?.toString() ?? `recent-${index}`}
-          contentContainerStyle={styles.avatarList}
-          showsHorizontalScrollIndicator={false}
-          initialNumToRender={7}
-          maxToRenderPerBatch={6}
-          renderItem={({ item }) => {
-            const avatarSource = item?.avatar
-              ? { uri: `${BASE_IMAGE_URL}${item.avatar}` }
-              : imageIndex.profileImg;
-            return (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate(ScreenNameEnum.OtherProfile, { item })
-                }
-                style={{ alignItems: 'center', marginRight: 12 }}
-              >
-                <Image
-                  source={avatarSource}
-                  style={{ height: 60, width: 60, borderRadius: 60 }}
-                />
-              </TouchableOpacity>
-            );
-          }}
-        />
-      );
+  const handleUserPress = useCallback(
+    (item: { username?: string; id?: string | number; avatar?: string }) => {
+      navigation.navigate(ScreenNameEnum.OtherProfile as never, { item } as never);
     },
-    (prev, next) => isEqual(prev.users, next.users)
+    [navigation]
   );
 
-  const HomeHeader = React.memo(({
-    trendingData,
-    recommendData,
-    bookmarkData,
-    loadingTrending,
-    loadingBookmark,
-    loadingRecs,
-    setFeedReached,
-  }: { loadingRecs: boolean; setFeedReached: (value: boolean) => void }) => {
-    return (
-      <View style={{ marginHorizontal: 14, marginLeft: 5 }}>
-        <View
-          style={{
-            borderWidth: 0.5,
-            borderColor: Color.textGray,
-            marginBottom: 8,
-            marginLeft: 5,
-          }}
-        />
+  const handleFollowSuggested = useCallback(
+    (username: string) => {
+      dispatch(fetchHomeFeed({ silent: true }));
+      dispatch(fetchHomeRecentUsers({ silent: true }));
+      dispatch(fetchHomeSuggestedFriends({ silent: true }));
+    },
+    [dispatch]
+  );
 
-        <View style={{ paddingLeft: 10, paddingRight: 4 }}>
-          <HorizontalMovieList
-            title={t("home.trending")}
-            data={trendingData}
-            navigateTo={ScreenNameEnum.DiscoverTab}
-            isSelectList="2"
-            type="Trending"
-            loading={loadingTrending}
-            emptyData={t("emptyState.noTrending")}
-            scoreType="Rec"
-          />
-          
-          <HorizontalMovieList
-            title={t("home.recsForYou")}
-            data={recommendData}
-            navigateTo={ScreenNameEnum.DiscoverTab}
-            isSelectList="1"
-            type="Recs"
-            loading={loadingRecs}
-            emptyData={t("emptyState.noRecsForYou")}
-            scoreType="Rec"
-          />
-          
-          <HorizontalMovieList
-            title={t("home.wantwatch")}
-            data={bookmarkData}
-            navigateTo={ScreenNameEnum.DiscoverTab}
-            isSelectList="5"
-            type="wantWatch"
-            loading={loadingBookmark}
-            emptyData={t("emptyState.nobookmarks")}
-            scoreType="Rec"
-          />
-        </View>
+  const handleFeedReached = useCallback(() => setFeedReached(true), []);
 
-        <Text
-          allowFontScaling={false}
-          style={styles.sectionTitle}
-          onLayout={() => setFeedReached(true)}
-        >
-             {t("home.yourFeed")}
-        </Text>
-      </View>
-    );
-  });
+  const handleRankPress = useCallback(() => setIsVisible(true), [setIsVisible]);
+
+  const handleCloseNotification = useCallback(() => setNotificationModal(false), []);
+
+  const handleSeeAllSuggested = useCallback(() => {
+    navigation.navigate(ScreenNameEnum.Followers as never, { tabToOpen: 2, type: 'Suggested' } as never);
+  }, [navigation]);
 
   const MemoFeedCardRender = useCallback((item, index, avatarUri, posterUri) => {
-      return (
+    return (
       <MemoFeedCardHome
         avatar={{ uri: avatarUri }}
         poster={{ uri: posterUri }}
         activity={item?.activity}
         key={item.movie?.imdb_id}
-        user={item.user?.name ||item.user?.username}
-        username = {item.user?.username}
+        user={item.user?.name || item.user?.username}
+        username={item.user?.username}
         title={item.movie?.title}
         comment={item.comment}
         release_year={item?.movie?.release_year?.toString()}
@@ -536,7 +393,7 @@ const App = () => {
         imdb_id={item.movie?.imdb_id}
         isMuted={isMuted}
         token={token}
-        rankPress={() => setIsVisible(true)}
+        rankPress={handleRankPress}
         ranked={item?.rec_score}
         created_date={item?.created_date}
         shouldAutoPlay={autoPlayEnabled}
@@ -549,36 +406,50 @@ const App = () => {
         screenName='Home__Screen'
       />
     );
-  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted]);
+  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress]);
 
   const renderItem = useCallback(({ item, index }) => {
     if (item?.type === 'profileStatus') {
       if (userloading) {
         return <AvatarShimmer count={7} />;
       } else {
-        return <RecentUsersList users={recentUsers} navigation={navigation} />;
+        return <RecentUsersList users={recentUsers} onUserPress={handleUserPress} />;
       }
     }
-    
+
     if (item?.type === 'header') {
+      const bookmarkKey = Array.isArray(bookmarkData)
+        ? `${bookmarkData.length}-${(bookmarkData[0] as { imdb_id?: string })?.imdb_id ?? ''}`
+        : '0';
       return (
         <HomeHeader
+          key={`header-${bookmarkKey}`}
           trendingData={trendingData}
           recommendData={recommendData}
           bookmarkData={bookmarkData}
-          setFeedReached={setFeedReached}
           loadingTrending={loadingTrending}
           loadingBookmark={loadingBookmark}
           loadingRecs={loadingRecs}
+          onFeedReached={handleFeedReached}
+        />
+      );
+    }
+
+    if (item?.type === 'discoverPeople') {
+      return (
+        <DiscoverPeopleSection
+          users={suggestedFriends}
+          onFollow={handleFollowSuggested}
+          onSeeAll={handleSeeAllSuggested}
         />
       );
     }
 
     if (!item.movie || !item.user) return null;
-    
+
     const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar}`;
     const posterUri = item.movie?.horizontal_poster_url;
-    
+
     return MemoFeedCardRender(item, index, avatarUri, posterUri);
   }, [
     userloading,
@@ -590,7 +461,12 @@ const App = () => {
     loadingTrending,
     loadingBookmark,
     loadingRecs,
-    MemoFeedCardRender
+    MemoFeedCardRender,
+    suggestedFriends,
+    handleUserPress,
+    handleFollowSuggested,
+    handleFeedReached,
+    handleSeeAllSuggested,
   ]);
   const goToSearchScreen = useCallback(() => {
     navigation.navigate(ScreenNameEnum.WoodsScreen, {
@@ -598,19 +474,28 @@ const App = () => {
     });
   }, [navigation]);
 
-  /**
-   * Process and merge feed data to remove duplicates and combine activities
-   * 
-   * This function:
-   * 1. Preserves non-feed items (header, profileStatus) in their original position
-   * 2. Merges duplicate feed items by imdb_id
-   * 3. Combines multiple activities for the same movie (e.g., "ranked, bookmarked")
-   * 4. Filters out invalid feed items (no imdb_id, no activity, or rec_score = -1)
-   * 5. Maintains bookmark status (once bookmarked, always bookmarked)
-   * 
-   * @param {Array} data - Combined data array with feed items and UI elements
-   * @returns {Array} Processed array with deduplicated feed items
-   */
+  const handleEndReached = useCallback(() => {
+    if (feedHasMore && !loadingFeed && !loadingMoreFeed) {
+      dispatch(fetchHomeFeed({ reset: false }));
+    }
+  }, [feedHasMore, loadingFeed, loadingMoreFeed, dispatch]);
+
+  const keyExtractor = useCallback((item: unknown, index: number) => {
+    if (item == null || typeof item !== 'object') return `index-${index}`;
+    const o = item as Record<string, unknown>;
+    if (o.id != null) return String(o.id);
+    const movie = o.movie as { imdb_id?: string } | undefined;
+    if (movie?.imdb_id) return movie.imdb_id;
+    if (o.type) return `${o.type}-${index}`;
+    return `index-${index}`;
+  }, []);
+
+  const listContentStyle = useMemo(() => ({ marginTop: 10, paddingBottom: 90 }), []);
+
+  const handleScrollBeginDrag = useCallback(() => {
+    if (!hasScrolled) setHasScrolled(true);
+  }, [hasScrolled]);
+ 
   const processedFeedData = useMemo(() => {
     const result: (object | string | null | number)[] = [];
     const feedMap = new Map();
@@ -642,7 +527,7 @@ const App = () => {
       const existing = feedMap.get(imdbId);
       existing._activities.add(item.activity);
 
-        if (item.is_bookmarked === true) {
+      if (item.is_bookmarked === true) {
         existing.is_bookmarked = true;
       }
     });
@@ -650,7 +535,7 @@ const App = () => {
     // Step 5: Finalize merged feed items
     feedMap.forEach(item => {
       const activityOrder = ["ranked", "bookmarked"];
-      
+
       // Combine activities in priority order
       item.activity = activityOrder
         .filter(a => item._activities.has(a))
@@ -665,18 +550,18 @@ const App = () => {
   }, [combinedData])
 
 
-   return (
+  return (
     <SafeAreaView style={styles.container}>
       <CustomStatusBar />
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image 
-            source={imageIndex.reelRecsHome}  
+          <Image
+            source={imageIndex.reelRecsHome}
             resizeMode='cover'
             style={{
               height: 43,
               width: 133
-            }} 
+            }}
           />
         </View>
 
@@ -690,20 +575,14 @@ const App = () => {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <FlatList
         data={processedFeedData}
         renderItem={renderItem}
-        keyExtractor={(item, index) => {
-          if (item?.id) return item.id.toString();
-          if (item?.movie?.imdb_id) return item.movie.imdb_id;
-          if (item?.type) return `${item.type}-${index}`;
-          return `index-${index}`;
-        }}
-        onEndReached={() => {
-          if (hasMore && !loadingFeed) fetchFeed("home");
-        }}
-        contentContainerStyle={{ marginTop: 10 }}
+        keyExtractor={keyExtractor}
+        extraData={`${bookmarkData?.length ?? 0}-${trendingData?.length ?? 0}-${recommendData?.length ?? 0}`}
+        onEndReached={handleEndReached}
+        contentContainerStyle={listContentStyle}
         onEndReachedThreshold={0.5}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -712,11 +591,9 @@ const App = () => {
         removeClippedSubviews={true}
         windowSize={8}
         decelerationRate={0.86}
-        onScrollBeginDrag={() => {
-          if (!hasScrolled) setHasScrolled(true);
-        }}
- ref={flatListRef}
-         refreshControl={
+        onScrollBeginDrag={handleScrollBeginDrag}
+        ref={flatListRef}
+        refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
@@ -734,7 +611,7 @@ const App = () => {
       <CompareModals token={token} useCompareHook={compareHook} />
       <Notification
         visible={notificationModal}
-        onClose={() => setNotificationModal(false)}
+        onClose={handleCloseNotification}
         bgColor={false}
       />
     </SafeAreaView>

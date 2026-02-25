@@ -15,7 +15,6 @@ const useLogin = () => {
   const dispatch = useDispatch();
   // const [email, setEmail] = useState<string>('');
   // const [password, setPassword] = useState<string>('');
-  // const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('sunny.2309@yahoo.in');
   const [password, setPassword] = useState<string>('test12345');
   const [emailError, setEmailError] = useState<string>('');

@@ -1,9 +1,16 @@
 import axios from 'axios';
 import TokenService from '@services/TokenService';
 import { getAxiosConfig } from '@config/api.config';
+import { store, persistor } from '@redux/store';
+import { logout } from '@redux/feature/authSlice';
+import { resetToLogin } from '@navigators/rootNavigationRef';
+import { errorToast } from '@utils/customToast';
 
 // ✅ Base configuration from centralized config
 const axiosInstance = axios.create(getAxiosConfig());
+
+// Guard: only run 401 logout + navigate once when multiple requests get 401
+let hasTriggered401Logout = false;
 
 // ✅ Public endpoints (no auth needed)
 const PUBLIC_ENDPOINTS = [
@@ -88,9 +95,23 @@ axiosInstance.interceptors.response.use(
 
     if (status === 401) {
       if (hadAuthHeader) {
-        await TokenService.clearToken();
         error.tokenInvalid = true;
         error.requiresReauth = true;
+        if (!hasTriggered401Logout) {
+          hasTriggered401Logout = true;
+          errorToast('Session expired. Please log in again.');
+          setTimeout(async () => {
+            await TokenService.clearToken();
+            store.dispatch(logout());
+            try {
+              await persistor.purge();
+            } catch (_) {
+              // ignore purge errors
+            }
+            resetToLogin();
+            hasTriggered401Logout = false; // allow 401 logout again after next login
+          }, 1000);
+        }
       } else {
         error.noToken = true;
       }

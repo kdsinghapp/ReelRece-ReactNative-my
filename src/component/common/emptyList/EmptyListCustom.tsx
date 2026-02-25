@@ -1,3 +1,5 @@
+import { Color } from '@theme/color';
+import font from '@theme/font';
 import { t } from 'i18next';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -23,9 +25,10 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 15,
-        color: 'black',
-        fontWeight:"500",
-        textAlign:"center"
+        color: Color.textGray,
+       
+        textAlign:"center" ,
+        fontFamily:font.PoppinsMedium
         
     },
 });

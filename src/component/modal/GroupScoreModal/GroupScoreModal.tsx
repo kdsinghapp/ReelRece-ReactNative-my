@@ -187,11 +187,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
                         <TouchableOpacity
                                                    style={{ marginRight: 12 }}
-                                                  //  onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser})}
-                                                   onPress={() => {
-                                onClose();
-                                navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser});
-                              }}
+                                                   onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser})}
                                                  >
                           <FastImage
                             style={styles.avatar}
@@ -235,10 +231,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                           <View style={styles.memberItem}>
                             <TouchableOpacity
                               style={{ marginRight: 12 }}
-                              onPress={() => {
-                                onClose();
-                                navigation.navigate(ScreenNameEnum.OtherProfile, {item:item});
-                              }}
+                              onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:item})}
                             >
                               <View style={styles.avatarContainer}>
 

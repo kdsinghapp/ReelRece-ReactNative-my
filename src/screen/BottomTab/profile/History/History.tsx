@@ -200,6 +200,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
           data={movies}
           keyExtractor={(item, index) => `${item?.imdb_id}-${index}`}
           renderItem={renderMovie}
+          
           ListHeaderComponent={() => (
             <>
               <View style={{
@@ -223,7 +224,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
           ListEmptyComponent={() => (
             isLoading ? (
               <View style={{ alignItems: 'center', marginTop: 50 }}>
-                <ActivityIndicator size="large" color={Color.primary} />
+                <ActivityIndicator size="small" color={Color.primary} />
                 <Text style={{ color: Color.whiteText, marginTop: 10 }}>{t("discover.loading")}</Text>
               </View>
             ) : (

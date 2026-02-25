@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Alert } from 'react-native';
-import { calculateMovieRating, getAllRated_with_preference, getRatedMovies, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'; 
+import { calculateMovieRating, getAllRatedMovies, getAllRated_with_preference, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
+import { setModalClosed, setRefetchProfileActivity } from '@redux/feature/modalSlice/modalSlice';
 import { getUserProfile } from '@redux/Api/authService';
 import { setUserProfile } from '@redux/feature/authSlice';
 import { errorToast } from '@utils/customToast';
+
+/** Number of movies to rank before step progress modal (show after 1st and 5th) */
+export const STEPPER_VALUE = 5;
 
 export const useCompareComponent = (token: string) => {
   // ---- Core state ----
@@ -40,8 +42,11 @@ export const useCompareComponent = (token: string) => {
   const lowRef = useRef(0);
   const highRef = useRef(0);
   const midRef = useRef(0);
-  const [userProfileDate, setUserProfileDate] = useState<Record<string, unknown>>({});
-  useEffect(() => {
+  /** Only show step modal when currentStep becomes 1 (first movie) or STEPPER_VALUE (fifth movie) */
+  const shouldShowStepModalRef = useRef(false);
+  /** Prefetched comparison lists by preference (love/like/dislike) for the current selectedMovieId - used to avoid API wait on preference select */
+  const prefetchedByPreferenceRef = useRef<Record<string, unknown[]>>({});
+   useEffect(() => {
     fetchUserProfile()
   }, [token])
   const fetchUserProfile = useCallback(async () => {
@@ -62,38 +67,27 @@ export const useCompareComponent = (token: string) => {
     }
   }, [token, dispatch]);
 
-  const fetchComparisonMovies = useCallback(async (pref?: 'love' | 'like' | 'dislike') => {
+  /** Single API call per preference; returns filtered list for the given movie id (excludes self, same preference). */
+  const fetchComparisonMovies = useCallback(async (pref?: 'love' | 'like' | 'dislike', excludeImdbId?: string | null) => {
     const preferenceToUse = pref || userPreference.preference;
-    if (!token || !selectedMovieId || !preferenceToUse) return [];
+    const movieId = excludeImdbId ?? selectedMovieId;
+    if (!token || !movieId || !preferenceToUse) return [];
 
     try {
-      let allResults: string | object = [];
-      let currentPage = 1;
-      let totalPages = 1;
-      while (currentPage <= totalPages) {
-        // const response = await getRatedMovies(token, currentPage);
-        const response = await getAllRated_with_preference(token, preferenceToUse)
-        const totalRated = response?.results?.length ?? 0;
-        setCurrentStep(totalRated);
-        await AsyncStorage.setItem('currentStep', String(totalRated));
-        totalPages = response?.total_pages ?? 1;
-        currentPage = response?.current_page ?? currentPage;
-        allResults = [...allResults, ...(response?.results ?? [])];
-        currentPage += 1;
-      }
+      const response = await getAllRated_with_preference(token, preferenceToUse);
+      const allResults = response?.results ?? [];
       const filtered = allResults
-        .filter(m => m.imdb_id !== selectedMovieId)
-        .filter(m => m.preference === preferenceToUse)
-      // .sort((a, b) => a.title.localeCompare(b.title));
-      setComparisonMovies(filtered);
+        .filter((m: { imdb_id?: string; preference?: string }) => m.imdb_id !== movieId && m.preference === preferenceToUse);
 
       // set binary search bounds
+      setComparisonMovies(filtered);
+
       const length = filtered.length;
       setLow(0);
       lowRef.current = 0;
       setHigh(length - 1);
       highRef.current = length - 1;
-      setMid(Math.floor((length - 1) / 2)); // first pivot = median
+      setMid(Math.floor((length - 1) / 2));
       midRef.current = Math.floor((length - 1) / 2);
 
       return filtered;
@@ -113,61 +107,120 @@ export const useCompareComponent = (token: string) => {
     setCurrentComparisonIndex(0);
   }, [isComparisonVisible, setComparisonVisible, setComparisonMovies, setCurrentComparisonIndex]);
 
-  //  const handleRatingRollbackError = useCallback((error: unknown) => {
-  //   handleCloseRating();  
-  //       handleCloseRating()
-  //     Alert.alert(
-  //       'Could not save rating',
-  //        'Your choices have been rolled back. Please try again from the beginning.',
-  //       [{ text: 'OK', onPress: () => { setComparisonVisible(false); setStepsModalVisible(false); } }]
-  //     );
+  // Show step modal only when currentStep is 1 (first movie ranked) or STEPPER_VALUE (fifth movie ranked)
+  useEffect(() => {
+    if ((currentStep === 1 || currentStep === STEPPER_VALUE) && shouldShowStepModalRef.current) {
+      shouldShowStepModalRef.current = false;
+      setStepsModalVisible(true);
+    }
+  }, [currentStep]);
+  const prefetchComparisonByPreference = useCallback((movieImdbId: string | null | undefined) => {
+    if (!token || !movieImdbId) return;
+    prefetchedByPreferenceRef.current = {};
+    const prefs: ('love' | 'like' | 'dislike')[] = ['love', 'like', 'dislike'];
+    Promise.all(
+      prefs.map(async (pref) => {
+        try {
+          const response = await getAllRated_with_preference(token, pref);
+          const results = response?.results ?? [];
+          const filtered = results.filter(
+            (m: { imdb_id?: string; preference?: string }) => m.imdb_id !== movieImdbId && m.preference === pref
+          );
+          prefetchedByPreferenceRef.current[pref] = filtered;
+        } catch {
+          prefetchedByPreferenceRef.current[pref] = [];
+        }
+      })
+    ).catch(() => {});
+  }, [token]);
 
-  // }, []);
-  // ---- Open feedback modal ----
-  const openFeedbackModal = useCallback((movie: string | object) => {
+  /** Apply a pre-fetched list to state and binary search bounds (no API call). */
+  const applyComparisonList = useCallback((filtered: unknown[]) => {
+    setComparisonMovies(filtered);
+    const length = filtered.length;
+    setLow(0);
+    lowRef.current = 0;
+    setHigh(length - 1);
+    highRef.current = length - 1;
+    const midVal = Math.floor((length - 1) / 2);
+    setMid(midVal);
+    midRef.current = midVal;
+  }, []);
+
     // setSelectedMovie(movie);
     // setSelectedMovieId(movie?.imdb_id ?? null);
     // setFeedbackVisible(true);
+  // ---- Open feedback modal ----
+  const openFeedbackModal = useCallback((movie: string | object) => {
     setSelectionHistory([]);
     setComparisonMovies([]);
     setCurrentComparisonIndex(0);
     setSelectedMovie(movie);
     setSelectedMovieId(movie?.imdb_id ?? null);
     setFeedbackVisible(true);
-    fetchComparisonMovies();
-    // }, [isFeedbackVisible, isComparisonVisible,]);
-  }, [isFeedbackVisible, isComparisonVisible, setFeedbackVisible, setComparisonVisible, setSelectedMovie, setSelectedMovieId, fetchComparisonMovies]);
+    prefetchComparisonByPreference(movie?.imdb_id ?? null);
+  }, [setFeedbackVisible, setSelectedMovie, setSelectedMovieId, prefetchComparisonByPreference]);
 
   const handleFeedbackSubmit = useCallback(
-    async (pref: 'love' | 'like' | 'dislike') => {
+      // Switch to comparison step immediately so animation can run right away
+    (pref: 'love' | 'like' | 'dislike') => {
       setUserPreference({ preference: pref });
-      setComparisonLoading(true);
 
-      try {
-        const list = await fetchComparisonMovies(pref);
-        setComparisonLoading(false);
-        if (list.length > 0) {
-          setComparisonVisible(true);
-          setFeedbackVisible(false);
-        } else {
-          setFeedbackVisible(false);
-          if (selectedMovie?.imdb_id) {
-            try {
-              await calculateMovieRating(token, {
-                imdb_id: selectedMovie?.imdb_id,
-                preference: pref,
-              });
-            } catch (error) {
-              handleCloseRating();
+      setComparisonVisible(true);
+      setFeedbackVisible(false);
+
+      (async () => {
+        try {
+          const prefetched = prefetchedByPreferenceRef.current[pref];
+          if (Array.isArray(prefetched) && prefetched.length >= 0) {
+            applyComparisonList(prefetched);
+            if (prefetched.length === 0) {
+              setComparisonVisible(false);
+              if (selectedMovie?.imdb_id) {
+                try {
+                  await calculateMovieRating(token, {
+                    imdb_id: selectedMovie?.imdb_id,
+                    preference: pref,
+                  });
+                  setCurrentStep((s) => {
+                    const next = s + 1;
+                    if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+                    AsyncStorage.setItem('currentStep', String(next));
+                    return next;
+                  });
+                } catch (error) {
+                  handleCloseRating();
+                }
+              }
+            }
+            return;
+          }
+          const list = await fetchComparisonMovies(pref);
+          if (list.length === 0) {
+            setComparisonVisible(false);
+            if (selectedMovie?.imdb_id) {
+              try {
+                await calculateMovieRating(token, {
+                  imdb_id: selectedMovie?.imdb_id,
+                  preference: pref,
+                });
+                setCurrentStep((s) => {
+                  const next = s + 1;
+                  if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+                  AsyncStorage.setItem('currentStep', String(next));
+                  return next;
+                });
+              } catch (error) {
+                handleCloseRating();
+              }
             }
           }
+        } catch (_) {
+          setFeedbackVisible(false);
         }
-      } catch (_) {
-        setComparisonLoading(false);
-        setFeedbackVisible(false);
-      }
+      })();
     },
-    [fetchComparisonMovies, selectedMovie, token]
+    [fetchComparisonMovies, applyComparisonList, selectedMovie, token]
   );
 
   const handleSkipSetFirst = async () => {
@@ -212,7 +265,12 @@ export const useCompareComponent = (token: string) => {
       // if (lowRef.current > highRef.current || !comparisonMovies[midRef.current]) {
       if (lowRef.current > highRef.current || !comparisonMovies[midRef.current]) {
         setComparisonVisible(false);
-        setStepsModalVisible(true);
+        setCurrentStep((s) => {
+          const next = s + 1;
+          if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+          AsyncStorage.setItem('currentStep', String(next));
+          return next;
+        });
 
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
@@ -238,183 +296,137 @@ export const useCompareComponent = (token: string) => {
 
 
 
-  const handleSelectFirst = useCallback(async () => {
+  const handleSelectFirst = useCallback(() => {
     if (!selectedMovie || !secondMovieData || !userPreference.preference) return;
-    try {
-      // Record user preference
-      setLastAction('first');
+    setLastAction('first');
 
-      // Record with retry: try once, on failure retry once, then show error and close
-      try {
-        await recordPairwiseDecision(token, {
-          preference: userPreference.preference,
-          imdb_id_1: selectedMovie.imdb_id,
-          imdb_id_2: secondMovieData.imdb_id,
-          winner: selectedMovie.imdb_id,
-        });
-      } catch (_) {
-        try {
-          await recordPairwiseDecision(token, {
-            preference: userPreference.preference,
-            imdb_id_1: selectedMovie.imdb_id,
-            imdb_id_2: secondMovieData.imdb_id,
-            winner: selectedMovie.imdb_id,
+    // Update UI state first so slide-in shows next card immediately (no wait for API)
+    const newHigh = midRef.current - 1;
+    const newMid = Math.floor((lowRef.current + newHigh) / 2);
+    setHigh(newHigh);
+    highRef.current = newHigh;
+    setMid(newMid);
+    midRef.current = newMid;
+
+    const remainingItems = highRef.current - lowRef.current + 1;
+
+    if (remainingItems <= 0) {
+      setComparisonVisible(false);
+      setCurrentStep((s) => {
+        const next = s + 1;
+        if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+        AsyncStorage.setItem('currentStep', String(next));
+        return next;
+      });
+      const imdbId = selectedMovie?.imdb_id;
+      const pref = userPreference.preference;
+      const pairwisePayload = {
+        preference: pref,
+        imdb_id_1: selectedMovie.imdb_id,
+        imdb_id_2: secondMovieData.imdb_id,
+        winner: selectedMovie.imdb_id,
+      };
+      recordPairwiseDecision(token, pairwisePayload)
+        .catch(() => recordPairwiseDecision(token, pairwisePayload))
+        .then(() => {
+          if (imdbId && pref) {
+            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then(() => {
+            dispatch(setModalClosed(true));
+            dispatch(setRefetchProfileActivity(true));
           });
-        } catch (_) {
+          }
+        })
+        .catch(() => {
           handleCloseRating();
           errorToast('movie ranking failed, please try again.');
-          return;
-        }
-      }
-
-
-      // Update high and mid using refs (binary search logic)
-      const newHigh = midRef.current - 1;
-      const newMid = Math.floor((lowRef.current + newHigh) / 2);
-      setHigh(newHigh);
-      highRef.current = newHigh;
-      setMid(newMid);
-      midRef.current = newMid;
-
-      // Calculate remaining items
-      const remainingItems = highRef.current - lowRef.current + 1;
-
-      if (remainingItems <= 0) {
-
-        setComparisonVisible(false);
-        setStepsModalVisible(true);
-
-        if (selectedMovie?.imdb_id && userPreference.preference) {
-          try {
-            await calculateMovieRating(token, {
-              imdb_id: selectedMovie.imdb_id,
-              preference: userPreference.preference,
-            });
-            dispatch(setModalClosed(true));
-          } catch (error) {
-            handleCloseRating();
-            errorToast("movie ranking failed, please try again.");
-
-            return;
-          }
-        }
-        return;
-      }
-      if (remainingItems === 2) {
-        setMid(lowRef.current);
-        midRef.current = lowRef.current;
-      }
-
-    } catch (err) {
+        });
+      return;
     }
+    if (remainingItems === 2) {
+      setMid(lowRef.current);
+      midRef.current = lowRef.current;
+    }
+
+    // Run API in background so slide-in is not blocked
+    const payload = {
+      preference: userPreference.preference,
+      imdb_id_1: selectedMovie.imdb_id,
+      imdb_id_2: secondMovieData.imdb_id,
+      winner: selectedMovie.imdb_id,
+    };
+    recordPairwiseDecision(token, payload).catch(() =>
+      recordPairwiseDecision(token, payload)
+    ).catch(() => {
+      handleCloseRating();
+      errorToast('movie ranking failed, please try again.');
+    });
   }, [selectedMovie, secondMovieData, token, userPreference.preference]);
 
 
-  const handleSelectSecond = useCallback(async () => {
+  const handleSelectSecond = useCallback(() => {
     if (!selectedMovie || !secondMovieData || !userPreference.preference) return;
-    try {
-      setLastAction('second');
+    setLastAction('second');
 
-      // Record with retry: try once, on failure retry once, then show error and close
-      try {
-        await recordPairwiseDecision(token, {
-          preference: userPreference.preference,
-          imdb_id_1: selectedMovie.imdb_id,
-          imdb_id_2: secondMovieData.imdb_id,
-          winner: secondMovieData.imdb_id,
-        });
-      } catch (_) {
-        try {
-          await recordPairwiseDecision(token, {
-            preference: userPreference.preference,
-            imdb_id_1: selectedMovie.imdb_id,
-            imdb_id_2: secondMovieData.imdb_id,
-            winner: secondMovieData.imdb_id,
-          });
-        } catch (_) {
-          handleCloseRating();
-          errorToast('movie ranking failed, please try again.');
-          return;
-        }
-      }
+    // Update UI state first so slide-in shows next card immediately (no wait for API)
+    const newLow = midRef.current + 1;
+    const newMid = Math.floor((newLow + highRef.current) / 2);
+    setLow(newLow);
+    lowRef.current = newLow;
+    setMid(newMid);
+    midRef.current = newMid;
 
-      // Update low and mid using refs
-      const newLow = midRef.current + 1;
-      const newMid = Math.floor((newLow + highRef.current) / 2);
-      setLow(newLow);
-      lowRef.current = newLow;
-      setMid(newMid);
-      midRef.current = newMid;
+    const remainingItems = highRef.current - lowRef.current + 1;
 
-      // Check if out of bounds
-      // if (midRef.current >= highRef.current) {
-
-      //   setComparisonVisible(false);
-      //   setStepsModalVisible(true);
-      // const remainingItems = highRef.current - lowRef.current + 1;
-
-      // if (remainingItems === 2) {
-      //   // force final comparison
-      //   setMid(lowRef.current); // first of the two
-      //   midRef.current = lowRef.current;
-      //   // don't close modal yet, wait for user choice
-      // } else if (midRef.current >= highRef.current) {
-      //   setComparisonVisible(false);
-      //   setStepsModalVisible(true);
-      //   if (selectedMovie?.imdb_id && userPreference.preference) {
-      //     await calculateMovieRating(token, {
-      //       imdb_id: selectedMovie.imdb_id,
-      //       preference: userPreference.preference,
-      //     });
-      //   }
-      //   return;
-      // }
-
-
-      const remainingItems = highRef.current - lowRef.current + 1;
-
-      if (remainingItems <= 0) {
-        setComparisonVisible(false);
-        setStepsModalVisible(true);
-
-        if (selectedMovie?.imdb_id && userPreference.preference) {
-          try {
-            const result_calculate_movie = await calculateMovieRating(token, {
-              imdb_id: selectedMovie.imdb_id,
-              preference: userPreference.preference,
+    if (remainingItems <= 0) {
+      setComparisonVisible(false);
+      setCurrentStep((s) => {
+        const next = s + 1;
+        if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+        AsyncStorage.setItem('currentStep', String(next));
+        return next;
+      });
+      const imdbId = selectedMovie?.imdb_id;
+      const pref = userPreference.preference;
+      const pairwisePayload = {
+        preference: pref,
+        imdb_id_1: selectedMovie.imdb_id,
+        imdb_id_2: secondMovieData.imdb_id,
+        winner: secondMovieData.imdb_id,
+      };
+      recordPairwiseDecision(token, pairwisePayload)
+        .catch(() => recordPairwiseDecision(token, pairwisePayload))
+        .then(() => {
+          if (imdbId && pref) {
+            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then((res) => {
+              if (res) {
+                dispatch(setModalClosed(true));
+                dispatch(setRefetchProfileActivity(true));
+              }
             });
-            if (result_calculate_movie) dispatch(setModalClosed(true));
           }
-          catch (error) {
-
-            handleCloseRating();
-            errorToast(
-              "Unable to save your rating. Your previous choices were rolled back. Please try again from the beginning."
-            );
-
-            return;
-          }
-        }
-        return;
-      }
-    } catch (err) {
-
-      try {
-        const result_calculate_movie = await calculateMovieRating(token, {
-          imdb_id: selectedMovie.imdb_id,
-          preference: userPreference.preference,
+        })
+        .catch(() => {
+          handleCloseRating();
+          errorToast(
+            "Unable to save your rating. Your previous choices were rolled back. Please try again from the beginning."
+          );
         });
-        if (result_calculate_movie) dispatch(setModalClosed(true));
-      }
-      catch (error) {
-        handleCloseRating();
-        errorToast("movie ranking failed, please try again.");
-
-        return;
-      }
-
-
+      return;
     }
+
+    // Run API in background so slide-in is not blocked
+    const payload = {
+      preference: userPreference.preference,
+      imdb_id_1: selectedMovie.imdb_id,
+      imdb_id_2: secondMovieData.imdb_id,
+      winner: secondMovieData.imdb_id,
+    };
+    recordPairwiseDecision(token, { ...payload, winner: secondMovieData.imdb_id })
+      .catch(() => recordPairwiseDecision(token, { ...payload, winner: secondMovieData.imdb_id }))
+      .catch(() => {
+        handleCloseRating();
+        errorToast('movie ranking failed, please try again.');
+      });
   }, [selectedMovie, secondMovieData, token, userPreference.preference]);
 
 
@@ -428,7 +440,12 @@ export const useCompareComponent = (token: string) => {
         selectionHistory[selectionHistory.length - 1] === "first"
       ) {
         setComparisonVisible(false);
-        setStepsModalVisible(true);
+        setCurrentStep((s) => {
+          const next = s + 1;
+          if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+          AsyncStorage.setItem('currentStep', String(next));
+          return next;
+        });
         setSelectionHistory([]);
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
@@ -457,9 +474,12 @@ export const useCompareComponent = (token: string) => {
       // if user skipped at the end
       if (skip) {
         setComparisonVisible(false);
-        // handleSkipSetFirst();
-
-        if (comparisonMovies.length < 6) setStepsModalVisible(true);
+        setCurrentStep((s) => {
+          const next = s + 1;
+          if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+          AsyncStorage.setItem('currentStep', String(next));
+          return next;
+        });
         return;
       }
       if (next < comparisonMovies.length) {
@@ -467,7 +487,12 @@ export const useCompareComponent = (token: string) => {
         setCurrentStep(s => s + 1); // functional update
       } else {
         setComparisonVisible(false);
-        setStepsModalVisible(true);
+        setCurrentStep((s) => {
+          const next = s + 1;
+          if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+          AsyncStorage.setItem('currentStep', String(next));
+          return next;
+        });
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
             await calculateMovieRating(token, {
@@ -511,8 +536,8 @@ export const useCompareComponent = (token: string) => {
         const storedCount = await AsyncStorage.getItem('currentStep');
         const countNum = storedCount ? Number(storedCount) : 0;
 
-        // ✅ skip API if already have 5 or more
-        if (countNum >= 5) {
+        // ✅ skip API if already have STEPPER_VALUE or more
+        if (countNum >= STEPPER_VALUE) {
           if (mounted) {
             setCurrentStep(countNum);
             setLoading(false);
@@ -520,10 +545,10 @@ export const useCompareComponent = (token: string) => {
           return;
         }
 
-        const resp = await getRatedMovies(token);
+        const resp = await getAllRatedMovies(token);
         if (!mounted) return;
 
-        const totalRated = resp?.results?.length ?? 0;
+        const totalRated = Array.isArray(resp?.results) ? resp.results.length : 0;
         setCurrentStep(totalRated);
 
         await AsyncStorage.setItem('currentStep', String(totalRated));
@@ -540,11 +565,23 @@ export const useCompareComponent = (token: string) => {
     };
   }, [token]);
 
-
+  // Refresh step count from API (e.g. when screen is focused after ranking)
+  const refreshStepCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      const resp = await getAllRatedMovies(token);
+      const totalRated = Array.isArray(resp?.results) ? resp.results.length : 0;
+      setCurrentStep(totalRated);
+      await AsyncStorage.setItem('currentStep', String(totalRated));
+    } catch (e) {
+      // ignore
+    }
+  }, [token]);
 
   return {
     // State
     selectedMovie,
+    setSelectedMovie,
     selectedMovieId,
     secondMovieData,               // derived
     currentComparisonIndex,
@@ -572,6 +609,7 @@ export const useCompareComponent = (token: string) => {
     setStepsModalVisible,
     currentStep,
     setCurrentStep,
+    refreshStepCount,
     handleCloseRating,   // close modal by cross
   };
 };

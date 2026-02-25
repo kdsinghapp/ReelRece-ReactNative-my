@@ -1,4 +1,4 @@
-import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenNameEnum from '@routes/screenName.enum'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -328,14 +328,6 @@ const StreamService = () => {
         onPress={() => removeSelectedItem(item?.supported_platform.toString())}
         style={styles.selectedItem}
       >
-        {/* <Image
-          // source={item.logo}
-          source={{ uri: item?.image_url }}
-          style={styles.selectedImage}
-          resizeMode="contain"
-        /> */}
-
-
         <FastImage
           style={styles.selectedImage}
           source={{
@@ -361,173 +353,161 @@ const StreamService = () => {
   return (
     <SafeAreaView style={styles.container}>
       <CustomStatusBar backgroundColor={Color.grey} />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.streamHeader} >
+              <HeaderCustom
+                title={(t("home.streamingservices"))}
+                backIcon={fromSignUp ? null : imageIndex.backArrow}
+                rightIcon={false}
+                onRightPress={() => navigation.navigate(ScreenNameEnum.OtherWatchingProfile)}
+              />
+              <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
+              <View style={styles.serviceCountComntainer}>
+                <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
+                  {selectedPlatforms?.length} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
+                </Text>
+              </View>
 
-      <View style={{ flex: 1 }}>
-        <View style={styles.streamHeader} >
-          <HeaderCustom
-            title={(t("home.streamingservices"))}
-            backIcon={fromSignUp ? null : imageIndex.backArrow}
-            rightIcon={false}
-            onRightPress={() => navigation.navigate(ScreenNameEnum.OtherWatchingProfile)}
-          />
-          <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
-          <View style={styles.serviceCountComntainer}>
-            {/* <Text style={styles.serviceCountText}>{platformData.length} Services.</Text> */}
-            <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
-              {selectedPlatforms?.length} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
-            </Text>
-          </View>
+              {selectedPlatforms.length > 0 ? (
+                <View style={styles.selectedItemsContainer}>
+                  <FlatList
+                    horizontal
+                    data={getSelectedItems()}
+                    renderItem={renderSelectedItem}
+                    keyExtractor={(item) => item?.supported_platform.toString()}
+                    contentContainerStyle={styles.selectedItemsList}
+                    showsHorizontalScrollIndicator={false}
+                    initialNumToRender={20}
+                    maxToRenderPerBatch={28}
+                    windowSize={18}
+                    removeClippedSubviews
+                    keyboardShouldPersistTaps="handled"
+                  />
+                </View>
+              ) :
+                <View style={{ paddingHorizontal: 14 }} >
+                  <Text style={styles.streamAllText} >
+                    {(t("discover.simplily"))}
+                  </Text>
+                </View>
+              }
+            </View>
+            <View style={styles.searchContainer} >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                <Image source={imageIndex.search} style={styles.searchImg} resizeMode='contain' />
+                <TextInput
+                  placeholder={(t("discover.searchStreaming"))}
+                  placeholderTextColor={Color.whiteText}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  style={styles.inputStyle}
+                  returnKeyType="search"
+                  onSubmitEditing={Keyboard.dismiss}
+                />
+              </View>
+              <TouchableOpacity onPress={() => setSearchQuery('')} >
+                <Image source={imageIndex.closeWhite} style={styles.crossImg} resizeMode='contain' />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.dataSelectContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.mostPopularContainer,
+                  filterMode === 'popular' && { backgroundColor: Color.primary }
+                ]}
+                onPress={() => setFilterMode('popular')}
+              >
+                <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'popular' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.mostPopular")}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.mostPopularContainer,
+                  filterMode === 'more' && { backgroundColor: Color.primary }
+                ]}
+                onPress={() => setFilterMode('more')}
+              >
+                <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'more' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.allPlatforms")}</Text>
 
-          {/* Selected Items Header */}
-          {selectedPlatforms.length > 0 ? (
-            <View style={styles.selectedItemsContainer}>
-              {/* <Text style={styles.selectedItemsTitle}>Selected Services:</Text> */}
+              </TouchableOpacity>
+            </View>
+            <View style={{ alignSelf: 'center', flex: 1 }}>
               <FlatList
-                horizontal
-                data={getSelectedItems()}
-                renderItem={renderSelectedItem}
+                data={getFilteredData()}
                 keyExtractor={(item) => item?.supported_platform.toString()}
-                contentContainerStyle={styles.selectedItemsList}
+                numColumns={numColumns}
+                contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 8, }}
+                renderItem={renderItem}
                 showsHorizontalScrollIndicator={false}
-                initialNumToRender={20}
-                maxToRenderPerBatch={28}
-                windowSize={18}
+                showsVerticalScrollIndicator={false}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={7}
                 removeClippedSubviews
-
-              />
-            </View>
-          ) :
-            <View style={{ paddingHorizontal: 14 }} >
-              <Text style={styles.streamAllText} >
-
-                {(t("discover.simplily"))}
-              </Text>
-            </View>
-          }
-        </View>
-        {/* search bar */}
-        <View style={styles.searchContainer} >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-            <Image source={imageIndex.search} style={styles.searchImg} resizeMode='contain' />
-            <TextInput
-              placeholder={(t("discover.searchStreaming"))}
-              placeholderTextColor={Color.whiteText}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              style={styles.inputStyle}
-            />
-          </View>
-          <TouchableOpacity onPress={() => setSearchQuery('')} >
-            <Image source={imageIndex.closeWhite} style={styles.crossImg} resizeMode='contain' />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.dataSelectContainer}>
-          <TouchableOpacity
-            style={[
-              styles.mostPopularContainer,
-              filterMode === 'popular' && { backgroundColor: Color.primary } // active state
-            ]}
-            onPress={() => setFilterMode('popular')}
-          >
-            <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'popular' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.mostPopular")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.mostPopularContainer,
-              filterMode === 'more' && { backgroundColor: Color.primary } // active stat
-            ]}
-            onPress={() => setFilterMode('more')}
-          >
-            <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'more' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.allPlatforms")}</Text>
-
-          </TouchableOpacity>
-        </View>
-        {/* <View style={styles.dataSelectContainer} >
-  <TouchableOpacity style={styles.mostPopularContainer}  >
-    <Text style={styles.mostPopularText} >Most Popular</Text>
-  </TouchableOpacity>
-
-   <TouchableOpacity style={styles.mostPopularContainer}  >
-    <Text style={styles.mostPopularText} >More</Text>
-  </TouchableOpacity>
-</View> */}
-        {/* Stream data */}
-        <View style={{ alignSelf: 'center', flex: 1 }}>
-
-          <FlatList
-            data={getFilteredData()}
-            keyExtractor={(item) => item?.supported_platform.toString()}
-            numColumns={numColumns}
-            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 8, }}
-            renderItem={renderItem}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}
-            windowSize={7}
-            removeClippedSubviews
-            // ListEmptyComponent={
-            //   <Text style={styles.noResultsText}>No services found</Text>
-            // }
-
-            refreshControl={
-              <RefreshControl
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={() => fetchPlatformsPage({
+                      pageToLoad: 1,
+                      query: searchQuery,
+                      replace: true
+                    })}
+                    colors={[Color.primary]}
+                    tintColor={Color.primary}
+                  />
+                }
+                ListEmptyComponent={() => {
+                  if (isLoading || isRefreshing) {
+                    return <ActivityIndicator style={{ margin: 12 }} />;
+                  }
+                  if (!isLoading && platformData.length === 0 && debouncedSearch?.length > 0) {
+                    return <Text style={styles.noResultsText}>{t("setting.streaming.noServicesFound")}</Text>;
+                  }
+                  return null;
+                }}
+                onEndReachedThreshold={0.4}
+                onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum.current = false; }}
+                onEndReached={() => {
+                  if (onEndReachedCalledDuringMomentum.current) return;
+                  if (!isLoadingMore && page < totalPages) {
+                    fetchPlatformsPage({ pageToLoad: page + 1, query: debouncedSearch, replace: false });
+                  }
+                  onEndReachedCalledDuringMomentum.current = true;
+                }}
+                ListFooterComponent={() => (isLoadingMore ? <ActivityIndicator style={{ margin: 12 }} /> : null)}
                 refreshing={isRefreshing}
-                onRefresh={() => fetchPlatformsPage({
-                  pageToLoad: 1,
-                  query: searchQuery,
-                  replace: true
-                })}
-                colors={[Color.primary]}
-                tintColor={Color.primary}
+                onRefresh={() => fetchPlatformsPage({ pageToLoad: 1, query: searchQuery, replace: true })}
               />
-            }
-            ListEmptyComponent={() => {
-              if (isLoading || isRefreshing) {
-                return <ActivityIndicator style={{ margin: 12 }} />;
-              }
-              if (!isLoading && platformData.length === 0 && debouncedSearch?.length > 0) {
-                return <Text style={styles.noResultsText}>{t("setting.streaming.noServicesFound")}</Text>;
-              }
-              return null;
-            }}
-            onEndReachedThreshold={0.4}
-            onMomentumScrollBegin={() => { onEndReachedCalledDuringMomentum.current = false; }}
+            </View>
 
-            onEndReached={() => {
-              if (onEndReachedCalledDuringMomentum.current) return;
-              if (!isLoadingMore && page < totalPages) {
-                fetchPlatformsPage({ pageToLoad: page + 1, query: debouncedSearch, replace: false });
-              }
-              onEndReachedCalledDuringMomentum.current = true;
-            }}
-            ListFooterComponent={() => (isLoadingMore ? <ActivityIndicator style={{ margin: 12 }} /> : null)}
-            refreshing={isRefreshing}
-            onRefresh={() => fetchPlatformsPage({ pageToLoad: 1, query: searchQuery, replace: true })}
-          />
-        </View>
-
-
-
-        {fromSignUp ? (
-          !isKeyboardVisible && (
-            <ButtonCustom
-              title={(t("login.next"))}
-              buttonStyle={styles.buttonStyle}
-              onPress={goToRankingScreen}
-            />
-          )
-        ) : (
-          searchQuery.length > 0 && !isKeyboardVisible && (
-            <TouchableOpacity
-              style={styles.btnContainer}
-              onPress={() => setSearchQuery('')}
-            >
-              <Text style={styles.btnText}>{(t("home.back"))}</Text>
-            </TouchableOpacity>
-          )
-        )}
-      </View>
+            {fromSignUp ? (
+              !isKeyboardVisible && (
+                <ButtonCustom
+                  title={(t("login.next"))}
+                  buttonStyle={styles.buttonStyle}
+                  onPress={goToRankingScreen}
+                />
+              )
+            ) : (
+              searchQuery.length > 0 && !isKeyboardVisible && (
+                <TouchableOpacity
+                  style={styles.btnContainer}
+                  onPress={() => setSearchQuery('')}
+                >
+                  <Text style={styles.btnText}>{(t("home.back"))}</Text>
+                </TouchableOpacity>
+              )
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 };

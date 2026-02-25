@@ -30,18 +30,15 @@ import font from '@theme/font';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
-import { homeDiscoverApi, Trending_without_Filter } from '@redux/Api/movieApi';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import CacheManagerUI from '@utils/NewCache/CacheManagerUI';
+import { homeDiscoverApi, Trending_without_Filter } from '@redux/Api/movieApi'; 
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { ComparisonModal, CustomStatusBar } from '@components/index';
 import { t } from 'i18next';
 
 const FixedHomeScreen = () => {
-  const token = useSelector((state: RootState) => state.auth.token);
-  const userData = useSelector((state: RootState) => state.auth?.userGetData);
+  const token = useSelector((state: RootState) => state.auth.token); 
   const autoPlayEnabled = useSelector(
     (state: RootState) => state.auth.userGetData?.autoplay_trailer ?? true
   );
@@ -58,6 +55,7 @@ const FixedHomeScreen = () => {
     feedData,
     fetchFeed,
     loadingFeed,
+    loadingMore,
     hasMore,
   } = useUserFeed(token);
 
@@ -67,13 +65,10 @@ const FixedHomeScreen = () => {
   const [trendingData, setTrendingData] = useState([]);
   const [recommendData, setRecommendData] = useState([]);
   const [bookmarkData, setBookmarkData] = useState([]);
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [loadingMovieLists, setLoadingMovieLists] = useState(true);
-  const [playIndex, setPlayIndex] = useState<number | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasScrolled, setHasScrolled] = useState(false); 
+  const [playIndex, setPlayIndex] = useState<number | null>(null); 
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [feedReached, setFeedReached] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); 
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(true);
   const [loadingBookmark, setLoadingBookmark] = useState(true);
@@ -115,14 +110,7 @@ const FixedHomeScreen = () => {
       };
 
  
-      // Show debug alert with API response info
-      Alert.alert('API Debug',
-        `Trending: ${debugInfo.trendingCount} items\n` +
-        `Recommend: ${debugInfo.recommendCount} items\n` +
-        `Bookmarks: ${debugInfo.bookmarksCount} items\n` +
-        `Keys: ${trending ? Object.keys(trending).join(', ') : 'null'}`
-      );
-
+ 
       // Log first item to see structure
       if (trending?.results?.[0]) {
        } else if (trending?.movies?.[0]) {
@@ -282,6 +270,9 @@ const FixedHomeScreen = () => {
     );
   }, [autoPlayEnabled, playIndex, isFocused, loading, currentVisibleIndex, token, isMuted]);
 
+  const feedKeyExtractor = useCallback((item: { id?: number }, index: number) => item?.id?.toString() ?? `feed-${index}`, []);
+  const listContentStyle = useMemo(() => ({ paddingBottom: 90 }), []);
+
   const renderFooter = useCallback(() => {
     if (loadingFeed && feedData.length <= 50) {
       return <FeedCardShimmer />;
@@ -289,7 +280,7 @@ const FixedHomeScreen = () => {
 
     if (loadingFeed && feedData.length > 50) {
       return (
-        <View style={{ paddingVertical: 20, marginBottom: 90 }}>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
             Loading more content... please wait
           </Text>
@@ -302,11 +293,18 @@ const FixedHomeScreen = () => {
       );
     }
 
+    if (loadingMore) {
+      return (
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
+          <ActivityIndicator size="small" color={Color.primary} style={{ marginTop: 8 }} />
+        </View>
+      );
+    }
+
     if (!hasMore && feedData.length > 0) {
       return (
-        <View style={{ paddingVertical: 20 }}>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-          
                  {t("emptyState.nodata",)}
           </Text>
         </View>
@@ -314,7 +312,7 @@ const FixedHomeScreen = () => {
     }
 
     return <FeedCardShimmer />;
-  }, [loadingFeed, hasMore, feedData.length]);
+  }, [loadingFeed, loadingMore, hasMore, feedData.length]);
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -352,11 +350,12 @@ const FixedHomeScreen = () => {
         ref={flatListRef}
         data={feedData}
         renderItem={renderFeedItem}
-        keyExtractor={(item, index) => item?.id?.toString() || `feed-${index}`}
+        keyExtractor={feedKeyExtractor}
+        contentContainerStyle={listContentStyle}
         ListHeaderComponent={HeaderSection}
         ListFooterComponent={renderFooter}
         onEndReached={() => {
-          if (hasMore && !loadingFeed) fetchFeed("home");
+          if (hasMore && !loadingFeed && !loadingMore) fetchFeed("home");
         }}
         onEndReachedThreshold={0.5}
         refreshControl={

@@ -99,6 +99,7 @@ const GenreModal = ({
               maxToRenderPerBatch={10}
               windowSize={7}
               removeClippedSubviews
+              showsVerticalScrollIndicator={false}
 
             />
 
@@ -121,7 +122,11 @@ const GenreModal = ({
 
               <TouchableOpacity
                 onPress={onApply}
-                style={styles.cancelButton}
+                style={[styles.cancelButton, {
+                  opacity: selectedGenres.length === 0 ? 0.7 : 0.9
+
+                }]}
+                disabled={selectedGenres.length === 0}
               >
 
                 <CustomText
@@ -189,10 +194,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     backgroundColor: Color.grey,
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 14,
     justifyContent: 'center',
     marginVertical: 6,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   genreText: {
     alignSelf: 'center',

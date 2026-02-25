@@ -1,4 +1,4 @@
-import React, { useEffect, } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Modal, View, Text, StyleSheet, TouchableWithoutFeedback,
 } from 'react-native';
@@ -6,6 +6,7 @@ import StepProgressBar from './StepProgressBar'; // import component
 import { Color } from '@theme/color';
 import { fileLogger } from '@utils/FileLogger';
 import { t } from 'i18next';
+
 
 // interface ProgressModalProps {
 //   visible: boolean;
@@ -106,8 +107,6 @@ const StepProgressModal: React.FC<ProgressModalProps> = ({
   setStepsModal,
   totalSteps, // <-- receive from props
 }) => {
-
-
   useEffect(() => {
     if (visible) {
       fileLogger.info('StepProgressModal opened', {
@@ -122,22 +121,25 @@ const StepProgressModal: React.FC<ProgressModalProps> = ({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
-          <Text style={styles.heading}>
-            {t("common.qawesome")}
-            {'\n'} {t("common.firstMovie")}
-          </Text>
+          <View>
+            <Text style={styles.heading}>
+              {currentStep > 2
+                ? `${t("common.unlockedRecScore1")}\n${t("common.unlockedRecScore2")}`
+                : `${t("common.qawesome")}\n${t("common.firstMovie")}`}
+            </Text>
 
-          <View style={{ width: '90%' }}>
-            <StepProgressBar
-              navigationProps={navigationProps}
-              currentStepModal={currentStep ?? 0}
-              // setMoviereommNav={setMoviereommNav}
-              totalSteps={totalSteps} // <-- dynamic
-              disable={true}
-              // onStepPress={handleStepPress}
-              onClose={() => setStepsModal(false)}
+            <View style={{ width: '90%' }}>
+              <StepProgressBar
+                navigationProps={navigationProps}
+                currentStepModal={currentStep ?? 0}
+                // setMoviereommNav={setMoviereommNav}
+                totalSteps={totalSteps} // <-- dynamic
+                disable={true}
+                // onStepPress={handleStepPress}
+                onClose={() => setStepsModal(false)}
             // selectedMovieId={selectedMovieId}
-            />
+              />
+            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>

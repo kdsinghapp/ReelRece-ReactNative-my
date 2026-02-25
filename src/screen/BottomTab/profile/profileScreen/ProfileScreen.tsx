@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Image, ScrollView, FlatList, TouchableOpacity, ActivityIndicator, VirtualizedList, Dimensions } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ViewToken } from 'react-native';
 import styles from './style';
 import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -10,7 +10,8 @@ import useProfile from './useProfile';
 import LoadingModal from '@utils/Loader';
 import { getHistoryApi, getUserBookmarks } from '@redux/Api/ProfileApi';
 import { RootState } from '@redux/store';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { setRefetchProfileActivity } from '@redux/feature/modalSlice/modalSlice';
 import { getRatedMovies } from '@redux/Api/movieApi';
 import useUserFeed from '@components/card/feedCard/useUserFeed';
 import { getSuggestedFriends } from '@redux/Api/followService';
@@ -28,18 +29,23 @@ import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { errorToast } from '@utils/customToast';
 
+type ViewableListItem = { type?: string; movie?: object; user?: object };
+
 const ProfileScreen = () => {
-
-  const { token, userGetData } = useSelector((state: RootState) => state.auth);
-  const avatar = userGetData?.avatar;
-  const autoPlayEnabled = userGetData?.autoplay_trailer ?? true;
-  const isMuted = userGetData?.videos_start_with_sound;
+  const dispatch = useDispatch();
+  const { token, userGetData, avatar, autoPlayEnabled, isMuted, email_da_data } = useSelector(
+    (state: RootState) => ({
+      token: state.auth.token,
+      userGetData: state.auth.userGetData,
+      avatar: state.auth.userGetData?.avatar,
+      autoPlayEnabled: state.auth.userGetData?.autoplay_trailer ?? true,
+      isMuted: state.auth.userGetData?.videos_start_with_sound,
+      email_da_data: state.auth.userGetData,
+    }),
+    shallowEqual
+  );
+  const refetchProfileActivity = useSelector((state: RootState) => state.modal?.refetchProfileActivity ?? false);
   const restoredRef = useRef(false);
-
-  // const token = useSelector((state: RootState) => state.auth.token); // ✅ outside  condition
-  // const userprofile = useSelector((state: RootState) => state.auth.userGetData.avatar); // ✅ outside  condition
-  const email_da_data = useSelector((state: RootState) => state?.auth?.userGetData);
-  const userprofile = useSelector((state: RootState) => state.auth.userGetData?.avatar);
   const {
     loading,
     userProfile,
@@ -54,8 +60,8 @@ const ProfileScreen = () => {
     feedData,
     fetchFeed,
     loadingFeed,
+    loadingMore,
     hasMore,
-    getUserFeed,
   } = useUserFeed(token);
   const { navigation,
     isVisible, setIsVisible,
@@ -63,7 +69,7 @@ const ProfileScreen = () => {
   } = useHome()
   const [suggestedFriend, setSuggestedFriend] = useState([]);
   const listRef = useRef<FlatList>(null);
-  const ITEM_HEIGHT = Math.round(Dimensions.get('window').height * 0.65);
+  const ITEM_HEIGHT = useMemo(() => Math.round(Dimensions.get('window').height * 0.65), []);
   const [savedMovies, setSavedMovies] = useState([]);
   const [historyMovies, setHistoryMovies] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
@@ -83,71 +89,65 @@ const ProfileScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const prevOnlineRef = useRef(true);
+  const handleRefreshRef = useRef<(() => Promise<void>) | null>(null);
+  const focusFetchRef = useRef<{
+    fetchBookmarks: () => Promise<void>;
+    fetchHistory1: () => Promise<void>;
+  } | null>(null);
+  const refreshFnsRef = useRef<{
+    refetchUserProfile: () => Promise<void>;
+    fetchBookmarks: () => Promise<void>;
+    fetchRatedMovies: () => Promise<void>;
+    fetchHistory1: () => Promise<void>;
+    fetchFeed: (source: string, username?: string, force?: boolean) => Promise<void>;
+    fetchSuggestedFriends: () => Promise<void>;
+  } | null>(null);
+  const onViewableItemsChangedRef = useRef<(info: { viewableItems: ViewToken<ViewableListItem>[] }) => void>(() => {});
+  const playIndexRef = useRef<number | null>(null);
 
-  // Add this useEffect after your other effects
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
-
-      // Auto-reload when coming back online
-      if (prevOnlineRef.current === false && online === true) {
-        // console.log('Network restored - auto-refreshing profile data');
-        handleRefresh();
-      }
-
-      prevOnlineRef.current = online;
-    });
-
-    // Get initial network state
-    NetInfo.fetch().then(state => {
-      const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
-      prevOnlineRef.current = online;
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Add this function before your return statement
   const handleRefresh = useCallback(async () => {
     if (!isOnline) {
-      errorToast('No Internet! \n Please check your network connection')
-
+      errorToast('No Internet! \n Please check your network connection');
       return;
     }
-
     setRefreshing(true);
-
+    const ref = refreshFnsRef.current;
     try {
-      // Refresh all data in parallel
-      await Promise.allSettled([
-        // User profile
-        refetchUserProfile(),
-
-        // Bookmarks
-        fetchBookmarks(),
-
-        // Rated movies
-        fetchRatedMovies(),
-
-        // History
-        fetchHistory1(),
-
-        // Feed data
-        fetchFeed("profile", email_da_data?.username, true), // true = force refresh
-
-        // Suggested friends
-        fetchSuggestedFriends(),
-      ]);
-
-      console.log('Profile screen refreshed successfully');
+      if (ref) {
+        await Promise.allSettled([
+          ref.refetchUserProfile(),
+          ref.fetchBookmarks(),
+          ref.fetchRatedMovies(),
+          ref.fetchHistory1(),
+          ref.fetchFeed('profile', email_da_data?.username, true),
+          ref.fetchSuggestedFriends(),
+        ]);
+      }
     } catch (error) {
       console.error('Refresh failed:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [isOnline, token, email_da_data?.username]);
+  }, [isOnline, email_da_data?.username]);
+
+  handleRefreshRef.current = handleRefresh;
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      if (prevOnlineRef.current === false && online === true) {
+        handleRefreshRef.current?.();
+      }
+      prevOnlineRef.current = online;
+    });
+    NetInfo.fetch().then(state => {
+      const online = state.isConnected && state.isInternetReachable;
+      setIsOnline(online);
+      prevOnlineRef.current = online;
+    });
+    return () => unsubscribe();
+  }, []);
   //   const combinedData = useMemo(() => {
   //   return [{ type: 'header' }, ...feedData.map(item => ({ ...item, type: 'feed' }))];
   // }, [feedData]);
@@ -161,13 +161,7 @@ const ProfileScreen = () => {
   }, [feedData]);
 
 
-  // const combinedData = useMemo(() => feedData.map(item => ({ ...item, type: 'feed' })), [feedData]);
-
-
-
-
-  // ✅ Refetch profile when screen is focused AND token exists but no profile
-  useFocusEffect(
+   useFocusEffect(
     useCallback(() => {
       if (token && !userProfile) {
         refetchUserProfile();
@@ -194,7 +188,6 @@ const ProfileScreen = () => {
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
-
       const restoreIndex = async () => {
         try {
           const savedIndex = await AsyncStorage.getItem('profileIndex');
@@ -239,48 +232,16 @@ const ProfileScreen = () => {
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 90,
     minimumViewTime: 250
-  });
-  // scroll
-  // const onViewableItemsChanged = useCallback(({ viewableItems }) => {
-  //   if (!isFocused) return;
-  //   if (viewableItems.length > 0) {
-  //     const firstVisible = viewableItems[0];
-  //     const index = firstVisible?.index ?? 0;
+  }); 
 
-  //     if (firstVisible?.item?.type === 'header') {
-  //       setPlayIndex(null);
-  //       return;
-  //     }
+  useEffect(() => {
+    playIndexRef.current = playIndex;
+  }, [playIndex]);
 
-  //     const isFeedCardVisible = viewableItems.some(
-  //       item => item?.item?.movie && item?.item?.user
-  //     );
-
-  //     if (!isFeedCardVisible) {
-  //       setPlayIndex(null);
-  //       return;
-  //     }
-
-  //     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-  //     timeoutRef.current = setTimeout(() => {
-  //       if (playIndex !== index - 1) { // only update if changed
-  //         setCurrentVisibleIndex(index);
-  //         setPlayIndex(index - 1);
-  //         lastPlayedIndexRef.current = index - 1;
-  //       }
-  //     }, 800);
-  //   } else {
-  //     setPlayIndex(null);
-  //   }
-  // }, [isFocused]);
-
-
-  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken<ViewableListItem>[] }) => {
     if (!isFocused) return;
 
     const headerVisible = viewableItems.some(item => item?.item?.type === 'header');
-
     if (headerVisible) {
       setPlayIndex(null);
       lastPlayedIndexRef.current = null;
@@ -289,7 +250,6 @@ const ProfileScreen = () => {
     if (viewableItems.length > 0) {
       const firstVisible = viewableItems[0];
       const index = firstVisible?.index ?? 0;
-      // If header or profileStatus is visible, stop video
       const nonFeedVisible = viewableItems.some(item =>
         item?.item?.type === 'header' || item?.item?.type === 'profileStatus'
       );
@@ -297,21 +257,17 @@ const ProfileScreen = () => {
         setPlayIndex(null);
         return;
       }
-
       const isFeedCardVisible = viewableItems.some(
         item => item?.item?.movie && item?.item?.user
       );
-
       if (!isFeedCardVisible) {
         setPlayIndex(null);
         lastPlayedIndexRef.current = 0;
         return;
       }
-
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
       timeoutRef.current = setTimeout(() => {
-        if (playIndex !== index - 1) {
+        if (playIndexRef.current !== index - 1) {
           setCurrentVisibleIndex(index);
           setPlayIndex(index - 1);
           lastPlayedIndexRef.current = index - 1;
@@ -319,15 +275,14 @@ const ProfileScreen = () => {
       }, 800);
     } else {
       setPlayIndex(null);
-
     }
-  }, [isFocused, playIndex, isVisible]);
+  }, [isFocused]);
 
 
 
 
 
-  const fetchBookmarks = async () => {
+  const fetchBookmarks = useCallback(async () => {
     try {
       setLoadingBookmark(true);
       const bookmarks = await getUserBookmarks(token);
@@ -336,37 +291,32 @@ const ProfileScreen = () => {
     } finally {
       setLoadingBookmark(false);
     }
-  };
+  }, [token]);
   useEffect(() => {
     if (!token) return;
-
     fetchBookmarks();
-  }, [token]);
+  }, [token, fetchBookmarks]);
 
 
   // -------------------------
   // RATED MOVIES FETCH
   // -------------------------
-  const fetchRatedMovies = async () => {
-    let videoNUllVideo = 0;
-
+  const fetchRatedMovies = useCallback(async () => {
     try {
       setLoadingTrending(true);
       const rated = await getRatedMovies(token);
-      await AsyncStorage.setItem('profileIndex', videoNUllVideo.toString());
-
+      await AsyncStorage.setItem('profileIndex', '0');
       setRankingMovie(rated?.results || []);
     } catch (err) {
     } finally {
       setLoadingTrending(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
-
     fetchRatedMovies();
-  }, [token]);
+  }, [token, fetchRatedMovies]);
 
 
   // -------------------------
@@ -418,7 +368,7 @@ const ProfileScreen = () => {
     };
   }, [token]);
 
-  const fetchHistory1 = async () => {
+  const fetchHistory1 = useCallback(async () => {
     try {
       setLoadingRecs(true);
       const history = await getHistoryApi(token);
@@ -427,29 +377,32 @@ const ProfileScreen = () => {
     } finally {
       setLoadingRecs(false);
     }
-  };
+  }, [token]);
 
+  focusFetchRef.current = { fetchBookmarks, fetchHistory1 };
 
+  // On focus: refetch bookmarks, history, and Recent Activity so profile reflects latest actions (e.g. after rank/bookmark on another tab).
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
-
+      const ref = focusFetchRef.current;
+      if (!ref) return () => { isActive = false; };
       const fetchData = async () => {
+        if (!isActive) return;
         try {
-          await fetchBookmarks();
-          await fetchHistory1();
+          await ref.fetchBookmarks();
+          await ref.fetchHistory1();
+          if (token && email_da_data?.username) {
+            fetchFeed('profile', email_da_data.username, true);
+          }
         } catch (error) {
         }
       };
-      if (isActive) {
-        fetchData();
-      }
-
-      // Cleanup when screen loses focus
+      fetchData();
       return () => {
         isActive = false;
       };
-    }, [])
+    }, [token, email_da_data?.username, fetchFeed])
   );
 
 
@@ -480,18 +433,46 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     fetchSuggestedFriends();
-  }, [token]);
+  }, [token, fetchSuggestedFriends]);
 
-  // Handle follow/unfollow callback - refresh profile data
+  useEffect(() => {
+    refreshFnsRef.current = {
+      refetchUserProfile,
+      fetchBookmarks,
+      fetchRatedMovies,
+      fetchHistory1,
+      fetchFeed,
+      fetchSuggestedFriends,
+    };
+  }, [refetchUserProfile, fetchBookmarks, fetchRatedMovies, fetchHistory1, fetchFeed, fetchSuggestedFriends]);
+
+  // When user taps Follow/Unfollow: update suggested list only (no recent activity refetch)
   const handleFollowCallback = useCallback((username: string, isFollowing: boolean) => {
-    // Refresh profile to update following count
-    refetchUserProfile();
-
-    // Optionally remove from suggested list after following
     if (isFollowing) {
-      setSuggestedFriend(prev => prev.filter(friend => friend.username !== username));
+      setSuggestedFriend(prev =>
+        prev.map(friend => {
+          const f = friend as { username?: string; is_following?: boolean };
+          return f.username === username ? { ...f, is_following: true } : f;
+        })
+      );
+    } else {
+      setSuggestedFriend(prev =>
+        prev.map(friend => {
+          const f = friend as { username?: string; is_following?: boolean };
+          return f.username === username ? { ...f, is_following: false } : f;
+        })
+      );
     }
-  }, [refetchUserProfile]);
+  }, []);
+
+  // When user rates or bookmarks elsewhere: refetch Recent Activity + Ranked + Want to Watch so profile reflects latest actions
+  useEffect(() => {
+    if (!refetchProfileActivity || !token || !email_da_data?.username) return;
+    fetchFeed('profile', email_da_data.username, true);
+    fetchBookmarks();
+    fetchRatedMovies();
+    dispatch(setRefetchProfileActivity(false));
+  }, [refetchProfileActivity, token, email_da_data?.username, fetchFeed, fetchBookmarks, dispatch]);
 
 
   useEffect(() => {
@@ -511,16 +492,65 @@ const ProfileScreen = () => {
 
 
 
+  onViewableItemsChangedRef.current = onViewableItemsChanged;
   const viewabilityConfigCallbackPairs = useRef([
     {
       viewabilityConfig: viewabilityConfigRef.current,
-      onViewableItemsChanged: onViewableItemsChanged,
+      onViewableItemsChanged: (info: { viewableItems: ViewToken<ViewableListItem>[] }) => {
+        onViewableItemsChangedRef.current?.(info);
+      },
     },
   ]);
-  // const avatarUrl = useMemo(() => `${BASE_IMAGE_URL}${avatar}?t=${Date.now()}`, [avatar]);
   const avatarUrl = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined;
 
+  const userNameFollow = userProfile?.name;
+  const user_name = userProfile?.username;
 
+  const handleSeeAllSuggested = useCallback(() => {
+    navigation.navigate(ScreenNameEnum.Followers as never, {
+      tabToOpen: 2,
+      type: 'Suggested',
+      userName: userNameFollow,
+      user_name: user_name,
+      followersCount: userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers as number | undefined,
+      followingCount: userProfile?.following_count ?? (userProfile as unknown as Record<string, unknown>)?.following as number | undefined,
+    } as never);
+  }, [navigation, userNameFollow, user_name, userProfile?.followers_count, userProfile?.following_count, userProfile]);
+
+  const suggestedKeyExtractor = useCallback(
+    (item: { username?: string; id?: string }, index: number) =>
+      item?.username ?? item?.id?.toString() ?? `suggested-${index}`,
+    []
+  );
+
+  const suggestedListEmpty = useCallback(
+    () => (
+      <Text
+        style={{
+          color: Color.whiteText,
+          marginLeft: 11,
+          fontSize: 14,
+          fontFamily: font.PoppinsMedium,
+          textAlign: 'center',
+        }}
+      >
+        {t('emptyState.noSuggestedMembers')}
+      </Text>
+    ),
+    []
+  );
+
+  const renderSuggestedItem = useCallback(
+    ({ item }: { item: { username?: string; avatar?: string; name?: string | null } }) =>
+      item ? (
+        <SuggestedFriendCard
+          item={item}
+          BASE_IMAGE_URL={BASE_IMAGE_URL}
+          onFollow={handleFollowCallback}
+        />
+      ) : null,
+    [handleFollowCallback]
+  );
 
   const renderHeader = () => {
     return (
@@ -576,48 +606,24 @@ const ProfileScreen = () => {
           />
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8, paddingHorizontal: 1, alignContent: 'center' }}>
             <Text style={styles.sectionTitle}>{t("profile.suggestedMembers")}</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 2 , type: 'Suggested', userName: userNameFollow })}
-            >
+            <TouchableOpacity onPress={handleSeeAllSuggested}>
               <Image source={imageIndex.rightArrow} style={styles.listArrow} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 5, paddingVertical: 10 }} >
+        <View style={{ paddingHorizontal: 5, paddingVertical: 10 }}>
           <FlatList
             horizontal
             data={suggestedFriend}
-            keyExtractor={(item, index) =>
-              item?.username ?? item?.id?.toString() ?? `suggested-${index}`
-            }
+            keyExtractor={suggestedKeyExtractor}
             showsHorizontalScrollIndicator={false}
             initialNumToRender={5}
             maxToRenderPerBatch={5}
-            ListEmptyComponent={() => (
-              <Text
-                style={{
-                  color: Color.whiteText,
-                  marginLeft: 11,
-                  fontSize: 14,
-                  fontFamily: font.PoppinsMedium,
-                  textAlign: 'center',
-                }}
-              >
-                {t("emptyState.noSuggestedMembers")}
-              </Text>
-            )}
+            ListEmptyComponent={suggestedListEmpty}
             removeClippedSubviews
             updateCellsBatchingPeriod={50}
-            renderItem={({ item }) =>
-              item ? (
-                <SuggestedFriendCard
-                  item={item}
-                  BASE_IMAGE_URL={BASE_IMAGE_URL}
-                  onFollow={(username) => { }}
-                />
-              ) : null
-            }
+            renderItem={renderSuggestedItem}
           />
         </View>
 
@@ -634,10 +640,44 @@ const ProfileScreen = () => {
     )
   }
 
+  const memoizedHeader = useMemo(() => renderHeader(), [
+    rankingMovie,
+    savedMovies,
+    historyMovies,
+    suggestedFriend,
+    userProfile?.name,
+    avatarUrl,
+    loadingTrending,
+    loadingRecs,
+    loadingBookmark,
+    token,
+    handleSeeAllSuggested,
+    suggestedKeyExtractor,
+    suggestedListEmpty,
+    renderSuggestedItem,
+  ]);
 
+  const keyExtractor = useCallback(
+    (item: { id?: string; type?: string; movie?: { imdb_id?: string } }, index: number) =>
+      item?.type === 'feed' && item?.movie?.imdb_id
+        ? String(item.movie.imdb_id)
+        : item?.id?.toString?.() ?? `header-${index}`,
+    []
+  );
 
-  const userNameFollow = userProfile?.name;
-  const renderItem = ({ item, index }) => {
+  const listContentStyle = useMemo(() => ({ paddingBottom: 90 }), []);
+
+  const handleEndReached = useCallback(() => {
+    if (hasMore && !loadingFeed && !loadingMore) fetchFeed('profile', email_da_data?.username);
+  }, [hasMore, loadingFeed, loadingMore, email_da_data?.username, fetchFeed]);
+
+  const handleScrollBeginDrag = useCallback(() => {
+    if (!hasScrolled) setHasScrolled(true);
+  }, [hasScrolled]);
+
+  const handleRankPress = useCallback(() => setIsVisible(true), [setIsVisible]);
+
+  const renderItem = useCallback(({ item, index }: { item: { type?: string; movie?: object; user?: object; [k: string]: unknown }; index: number }) => {
     if (!item) return null;
     if (item.type === 'profileCard') {
       return (
@@ -648,17 +688,16 @@ const ProfileScreen = () => {
           name={userProfile?.name}
           rank={`${userProfile?.ranked}`}
           rankscreenData={rankingMovie}
-          followers={`${userProfile?.followers}`}
-          following={`${userProfile?.following}`}
+          followers={`${userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers ?? 0}`}
+          following={`${userProfile?.following_count ?? (userProfile as unknown as Record<string, unknown>)?.following ?? 0}`}
           butt={false}
           bio={userProfile?.bio}
-          onFollow={() => navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: userNameFollow })}
+          onFollow={() => navigation.navigate(ScreenNameEnum.Followers as never, { tabToOpen: 0, type: 'Followers', userName: userNameFollow, user_name: user_name, followersCount: userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers as number | undefined, followingCount: userProfile?.following_count ?? (userProfile as unknown as Record<string, unknown>)?.following as number | undefined } as never)}
           onFollowing={() =>
-            // navigation.navigate('Followers', { tabToOpen: 1, type: 'Following', userName:userProfile?.name })
-            navigation.navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: userNameFollow })
+            navigation.navigate(ScreenNameEnum.Followers as never, { tabToOpen: 1, type: 'Following', userName: userNameFollow, user_name: user_name, followersCount: userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers as number | undefined, followingCount: userProfile?.following_count ?? (userProfile as unknown as Record<string, unknown>)?.following as number | undefined } as never)
           }
           onSuggested={() =>
-            navigation.navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: userNameFollow })
+            navigation.navigate(ScreenNameEnum.Followers as never, { id: 2, type: 'Suggested', userName: userNameFollow, user_name: user_name, followersCount: userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers as number | undefined, followingCount: userProfile?.following_count ?? (userProfile as unknown as Record<string, unknown>)?.following as number | undefined } as never)
           }
           onFollowPress={() =>
             navigation.navigate(ScreenNameEnum.EditProfile, {
@@ -669,7 +708,7 @@ const ProfileScreen = () => {
       );
     }
     if (item.type === 'header') {
-      return renderHeader();
+      return memoizedHeader;
     }
     if (item.type === 'feed') {
       if (!item.movie || !item.user) return null;
@@ -677,7 +716,7 @@ const ProfileScreen = () => {
       const avatarUri = item.user.avatar ? `${BASE_IMAGE_URL}${item.user.avatar}` : null;
       const avatarSource = avatarUri ? { uri: avatarUri } : imageIndex.profileImg;
       const posterUri = item.movie.horizontal_poster_url;
-      const posterSource = posterUri ? { uri: posterUri } : imageIndex.SingleMovie5;
+      const posterSource = posterUri ? { uri: posterUri } : null;
 
       return (
         <MemoFeedCardHome
@@ -694,7 +733,7 @@ const ProfileScreen = () => {
           imdb_id={item.movie?.imdb_id}
           isMuted={isMuted}
           token={token}
-          rankPress={() => setIsVisible(true)}
+          rankPress={handleRankPress}
           ranked={item?.rec_score}
           shouldAutoPlay={autoPlayEnabled}
           isVisible={index === currentVisibleIndex}
@@ -703,11 +742,25 @@ const ProfileScreen = () => {
           shouldPlay={index === currentVisibleIndex}
           isPaused={index - 1 !== playIndex}
           is_bookMark={item?.is_bookmarked}
+          onBookmarkSuccess={fetchBookmarks}
         />
       );
     }
     return null;
-  };
+  }, [
+    avatarUrl,
+    imageLoading,
+    userProfile,
+    rankingMovie,
+    userNameFollow,
+    token,
+    autoPlayEnabled,
+    isMuted,
+    currentVisibleIndex,
+    playIndex,
+    memoizedHeader,
+    handleRankPress,
+  ]);
 
   const renderFooter = useCallback(() => {
     // 🟢 Normal loading
@@ -718,7 +771,7 @@ const ProfileScreen = () => {
     // 🟡 Heavy UI load
     if (loadingFeed && combinedData.length > 50) {
       return (
-        <View style={{ paddingVertical: 20, marginBottom: 90 }}>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
             Loading more content... please wait
           </Text>
@@ -731,12 +784,20 @@ const ProfileScreen = () => {
       );
     }
 
+    // Load more (next page)
+    if (loadingMore) {
+      return (
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
+          <ActivityIndicator size="small" color={Color.primary} style={{ marginTop: 8 }} />
+        </View>
+      );
+    }
+
     // 🔴 No more data
     if (!hasMore && combinedData.length > 0) {
       return (
-        <View style={{ paddingVertical: 20 }}>
+        <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-
             {t("emptyState.nomore")}
           </Text>
         </View>
@@ -749,83 +810,49 @@ const ProfileScreen = () => {
         <FeedCardShimmer />
       </View>
     );
-  }, [loadingFeed, hasMore, combinedData.length]);
+  }, [loadingFeed, loadingMore, hasMore, combinedData.length]);
 
+
+  const fiter = useMemo(() => {
+    const data = combinedData ?? [];
+    const result: typeof data = [];
+    const feedMap = new Map<string, { _activities: Set<string>; [k: string]: unknown }>();
+
+    data.forEach((item: { type?: string; movie?: { imdb_id?: string }; activity?: string; rec_score?: number; is_bookmarked?: boolean }) => {
+      if (item?.type !== 'feed') {
+        result.push(item as never);
+        return;
+      }
+      const imdbId = item?.movie?.imdb_id;
+      if (!imdbId || !item.activity || item.rec_score === -1) return;
+      if (!feedMap.has(imdbId)) {
+        feedMap.set(imdbId, { ...item, _activities: new Set([item.activity]) } as never);
+        return;
+      }
+      const existing = feedMap.get(imdbId)!;
+      existing._activities.add(item.activity);
+      if (item.is_bookmarked === true) (existing as { is_bookmarked?: boolean }).is_bookmarked = true;
+    });
+
+    feedMap.forEach((item) => {
+      const activityOrder = ['ranked', 'bookmarked'];
+      (item as { activity?: string }).activity = activityOrder
+        .filter((a) => item._activities.has(a))
+        .join(', ');
+      delete item._activities;
+      result.push(item as never);
+    });
+    return result;
+  }, [combinedData]);
 
   if (loading) {
-    return (<View style={{ flex: 1, backgroundColor: Color.background, alignItems: 'center', justifyContent: 'center' }} >
-      <ActivityIndicator size="large" color={Color.primary} />
-    </View>)
-  }
-
-
-  {
-    loading && (
-      <View style={{ flex: 1, backgroundColor: Color.background, alignItems: 'center', justifyContent: 'center' }} >
+    return (
+      <View style={{ flex: 1, backgroundColor: Color.background, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" color={Color.primary} />
-      </View>)
-  };
-
-
-  function mergeFeedByImdbId(data = []) {
-    const result = [];
-    const feedMap = new Map();
-
-    data.forEach(item => {
-      // 1️⃣ Non-feed items
-      if (item?.type !== "feed") {
-        result.push(item);
-        return;
-      }
-
-      const imdbId = item?.movie?.imdb_id;
-
-      // 2️⃣ Invalid feed → skip
-      if (!imdbId || !item.activity || item.rec_score === -1) {
-        return;
-      }
-
-      // 3️⃣ First occurrence
-      if (!feedMap.has(imdbId)) {
-        feedMap.set(imdbId, {
-          ...item,
-          _activities: new Set([item.activity]),
-        });
-        return;
-      }
-
-      // 4️⃣ Merge
-      const existing = feedMap.get(imdbId);
-
-      existing._activities.add(item.activity);
-
-      // // ranked has priority
-      // if (item.activity === "ranked") {
-      //   existing.rec_score = item.rec_score;
-      //   existing.comment = item.comment;
-      // }
-
-      // bookmarked once → always bookmarked
-      if (item.is_bookmarked === true) {
-        existing.is_bookmarked = true;
-      }
-    });
-
-    // 5️⃣ Finalize
-    feedMap.forEach(item => {
-      const activityOrder = ["ranked", "bookmarked"];
-
-      item.activity = activityOrder
-        .filter(a => item._activities.has(a))
-        .join(", ");
-
-      delete item._activities;
-      result.push(item);
-    });
-
-    return result;
+      </View>
+    );
   }
-  const fiter = mergeFeedByImdbId(combinedData)
+
   return (
     <SafeAreaView style={styles.container}>
       <CustomStatusBar />
@@ -839,42 +866,31 @@ const ProfileScreen = () => {
         />
         <FlatList
           data={fiter}
-          // data={combinedData}
           renderItem={renderItem}
-          //  keyExtractor={(item, index) => item?.id?.toString() || `index-${index}`}
-          keyExtractor={(item, index) => item?.id?.toString?.() || `header-${index}`}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={listContentStyle}
+          ListFooterComponent={renderFooter}
+          removeClippedSubviews
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
               colors={[Color.primary]}
               tintColor={Color.primary}
-              title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
+              title={isOnline ? 'Pull to refresh' : 'Offline - Pull when connected'}
               titleColor={Color.grey700}
-            // enabled={isOnline} // Disable when offline
             />
           }
-          onEndReached={() => {
-            if (hasMore && !loadingFeed) fetchFeed("profile", email_da_data?.username);
-            ;
-          }}
+          onEndReached={handleEndReached}
           onEndReachedThreshold={0.2}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           initialNumToRender={2}
           maxToRenderPerBatch={6}
-          // removeClippedSubviews={true} 
           windowSize={10}
-          // removeClippedSubviews
           decelerationRate={0.86}
-          // removeClippedSubviews={true} 
-
-          //  windowSize={14}             
           updateCellsBatchingPeriod={50}
-          //  ListFooterComponent={renderFooter}
-          onScrollBeginDrag={() => {
-            if (!hasScrolled) setHasScrolled(true);
-          }}
+          onScrollBeginDrag={handleScrollBeginDrag}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
         //  viewabilityConfigCallbackPairs={useRef([{
         //    viewabilityConfig: viewabilityConfigRef.current,

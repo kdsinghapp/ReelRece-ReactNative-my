@@ -200,14 +200,7 @@ marginBottom:18,
     bottom: 10,
     padding: 6,
     borderRadius: 20,
-    // zIndex: 111111,
-
   },
-
-
-
-
-
 
   video: {
     width: '100%',
@@ -230,6 +223,24 @@ marginBottom:18,
   },
   slider: {
     flex: 1,
+  },
+  muteButtonOverlay: {
+    position: 'absolute',
+    zIndex: 1000,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  muteButtonIcon: {
+    height: 20,
+    width: 20,
+    tintColor: Color.whiteText,
+  },
+  muteButtonLabel: {
+    marginLeft: 6,
   },
 });
 

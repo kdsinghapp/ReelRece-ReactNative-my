@@ -17,8 +17,7 @@ const columnWidth = 120;
 const posterHeight = 180;
 const posterGap = 12;
 const horizontalGap = 14;
-
-// Dummy Posters
+ 
 const moviePosters = [
   [imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23],
   [imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23, imageIndex.welcomePost23],

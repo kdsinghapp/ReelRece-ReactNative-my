@@ -66,6 +66,7 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             returnKeyType={props.returnKeyType}
             onSubmitEditing={props.onSubmitEditing}
             allowFontScaling={false}
+            keyboardAppearance="light"
           />
 
           {/* Eye Icon Toggle */}

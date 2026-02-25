@@ -109,21 +109,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           width: progressAnim,
         }}
       />
-      
-      {/* Knob */}
-      {/* <Animated.View
-        style={{
-          position: 'absolute',
-          left: Animated.subtract(progressAnim, 8),
-          top: -5,
-          width: 16,
-          height: 16,
-          borderRadius: 8,
-          backgroundColor: Color.primary,
-          borderWidth: 2,
-          borderColor: Color.whiteText,
-        }}
-      /> */}
+       
     </View>
   );
 };

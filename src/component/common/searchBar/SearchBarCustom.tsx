@@ -66,7 +66,7 @@ const SearchBarCustom: React.FC<SearchBarProps> = ({
           onChangeText={onSearchChange}
           onSubmitEditing={onSubmitSearch} //  Add this line
           value={value}
-
+          keyboardAppearance="light"
         />
         {closeIm && (
           <Image

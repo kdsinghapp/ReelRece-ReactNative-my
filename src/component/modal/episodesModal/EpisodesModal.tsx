@@ -250,7 +250,7 @@ const EpisodesModal: React.FC<Props> = ({
 
             {EpisodesLoder ? (
               <View style={styles.loaderContainer}>
-                <ActivityIndicator color={Color.primary} size="large" />
+                <ActivityIndicator color={Color.primary} size="small" />
               </View>
             ) : (
               <>

@@ -17,6 +17,8 @@ import useHome from '../homeScreen/useHome';
 import { t } from 'i18next';
 import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import EmptyListCustom from '@components/common/emptyList/EmptyListCustom';
+import font from '@theme/font';
 
 
 const OtherWantProfile = () => {
@@ -181,6 +183,19 @@ const OtherWantProfile = () => {
         <FlatList
           showsVerticalScrollIndicator={false}
           data={movies}
+          ListEmptyComponent={() => (
+            <Text
+              style={{
+                textAlign: "center",
+                marginTop: 40,
+                fontSize: 14,
+                fontFamily: font.PoppinsMedium,
+                color: Color.textGray,
+              }}
+            >
+              {t("emptyState.noMoviesFound")}
+            </Text>
+          )}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -209,7 +224,7 @@ const OtherWantProfile = () => {
           onEndReachedThreshold={0.2}
           ListFooterComponent={
             loadingRef.current ? (
-              <ActivityIndicator size="large" color={Color.primary} style={{ marginVertical: 20 }} />
+              <ActivityIndicator size="small" color={Color.primary} style={{ marginVertical: 20 }} />
             ) : null
           }
         />

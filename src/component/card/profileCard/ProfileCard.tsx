@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
- import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import ButtonCustom from '@components/common/button/ButtonCustom';
@@ -14,6 +14,7 @@ import { t } from 'i18next';
 const ProfileCard = ({
     imageUri,
     name,
+    username,
     rank,
     followers,
     following,
@@ -28,9 +29,11 @@ const ProfileCard = ({
     setImageLoading,
     loaderFollow,
     onSuggested,
+
 }: {
     imageUri?: string;
     name?: string;
+    username?: string;
     rank?: string;
     followers?: string;
     following?: string;
@@ -47,7 +50,7 @@ const ProfileCard = ({
     onSuggested?: () => void;
 }) => {
     const navigation = useNavigation();
- 
+
     return (
         <View style={styles.profileContainer}>
             {/* <Image source={{ uri: imageUri }} style={styles.profileImage} resizeMode='contain' /> */}
@@ -60,19 +63,19 @@ const ProfileCard = ({
                 shimmerColors={['#181818ff', '#464545ff', '#181717ff']}
 
             >
-                
+
                 <FastImage
-  source={{
-    uri: imageUri,
-    priority: FastImage.priority.low,
-    cache: FastImage.cacheControl.web,
-  }}
-  style={styles.profileImage}
-  resizeMode={FastImage.resizeMode.cover}
-  onLoadStart={() => setImageLoading(true)}
-  onLoadEnd={() => setImageLoading(false)}
-  onError={() => setImageLoading(false)}
-/>
+                    source={{
+                        uri: imageUri,
+                        priority: FastImage.priority.low,
+                        cache: FastImage.cacheControl.web,
+                    }}
+                    style={styles.profileImage}
+                    resizeMode={FastImage.resizeMode.cover}
+                    onLoadStart={() => setImageLoading(true)}
+                    onLoadEnd={() => setImageLoading(false)}
+                    onError={() => setImageLoading(false)}
+                />
 
             </ShimmerPlaceholder>
 
@@ -99,6 +102,7 @@ const ProfileCard = ({
                             {
                                 datamovie: rankscreenData,
                                 username: name,
+                                user_name: username,
                                 imageUri: imageUri,
                             })
                     }}>
@@ -123,7 +127,7 @@ const ProfileCard = ({
                     onPress={onFollowPress}
                     loaderFollow={loaderFollow}
 
-                    title={isFollowing ?   t("common.following"): t("common.follow")}
+                    title={isFollowing ? t("common.following") : t("common.follow")}
                     buttonStyle={[
                         {
                             height: 42,

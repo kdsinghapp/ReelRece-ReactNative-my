@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   Animated,
+  Keyboard,
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
@@ -66,24 +67,15 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
  
 
 
+  useLayoutEffect(() => {
+    setCurrentSecondMovie(secondMovie);
+  }, [secondMovie]);
+
   useEffect(() => {
-     if (comparisonMovies.length > 0 && currentIndex < comparisonMovies.length) {
-      const current = comparisonMovies[currentIndex];
-
-      const posterUrl = current?.poster?.uri || current?.poster || current?.cover_image_url;
-      // const fixedPoster = posterUrl
-      //   ? { uri: posterUrl }
-      //   : require('../../../assets/images/profile1.png');
-
-
-      setCurrentSecondMovie(secondMovie)
-
-      // setCurrentSecondMovie({
-      //   ...current,
-      //   poster: fixedPoster,
-      // });
+    if (comparisonMovies.length > 0 && currentIndex < comparisonMovies.length) {
+      setCurrentSecondMovie(secondMovie);
     }
-  }, [currentIndex, comparisonMovies, onSelectFirst, secondMovie, onSelectSecond]);
+  }, [currentIndex, comparisonMovies, secondMovie]);
 
   // const slideAndResetImages = (callback: () => void) => {
   //   Animated.parallel([
@@ -121,38 +113,49 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
   //   });
   // };
 
-  const slideAndResetImages = (onBeforeSlide: () => void, onAfterSlide?: () => void) => {
-    onBeforeSlide?.();
-
+  const slideAndResetImages = (
+    onAfterSlideOut: () => void | Promise<void>,
+    onAfterSlideIn?: () => void
+  ) => {
+    // 1. Slide current images out (user sees old images leave)
     Animated.parallel([
       Animated.timing(leftAnim, {
         toValue: screenWidth,
-        duration: 500,
+        duration: 180,
         useNativeDriver: true,
       }),
       Animated.timing(rightAnim, {
         toValue: -screenWidth,
-        duration: 500,
+        duration: 180,
         useNativeDriver: true,
       }),
-    ]).start(() => {
+    ]).start(async () => {
       setSelected(null);
       leftAnim.setValue(screenWidth);
       rightAnim.setValue(-screenWidth);
 
-      Animated.parallel([
-        Animated.timing(leftAnim, {
-          toValue: 0,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-        Animated.timing(rightAnim, {
-          toValue: 0,
-          duration: 180,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        onAfterSlide?.();
+      // 2. Update parent (API + state) so next pair is ready; wait for it
+      const result = onAfterSlideOut?.();
+      await Promise.resolve(result);
+
+      // 3. Let React commit new props (new firstMovie/secondMovie) before sliding back
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          Animated.parallel([
+            Animated.timing(leftAnim, {
+              toValue: 0,
+              duration: 120,
+              useNativeDriver: true,
+            }),
+            Animated.timing(rightAnim, {
+              toValue: 0,
+              duration: 120,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            onAfterSlideIn?.();
+          });
+        });
       });
     });
   };
@@ -168,6 +171,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
 
   useEffect(() => {
     if (visible) {
+      Keyboard.dismiss();
       setSelected(null);
       setCurrentIndex(0);
       leftAnim.setValue(screenWidth / 2);
@@ -192,7 +196,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
 <TouchableOpacity onPress={() => handleSelection(currentSecondMovie, false)} /> */}
     return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.overlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity style={{ alignSelf: 'flex-end', right: 22, position: 'absolute', top: - screenHeight * 0.14, zIndex: 777 }}
@@ -223,10 +227,8 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
                   onPress={() => {
                     setSelected('first');
                     setTimeout(() => {
-                      slideAndResetImages(() => {
-                        onSelectFirst();
-                      });
-                    }, 700);
+                      slideAndResetImages(() => onSelectFirst());
+                    }, 200);
                     // slideAndResetImages(() => {
                     //   onSelectFirst();
                     // });
@@ -275,38 +277,26 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Second Movie (Animated) */}
-              <Animated.View style={[styles.movieCard, { transform: [{ translateX: leftAnim }] }]}>
-
+              {/* Second Movie (Animated) - key + secondMovie so content never sticks during animation */}
+              <Animated.View
+                key={secondMovie?.imdb_id ?? 'second'}
+                style={[styles.movieCard, styles.movieCardAnimated, { transform: [{ translateX: leftAnim }] }]}
+              >
                 <TouchableOpacity
                   disabled={!!selected}
                   onPress={() => {
                     setSelected('second');
-                    // onSelectSecond(secondMovie);
                     setTimeout(() => {
-                      slideAndResetImages(() => {
-                        onSelectSecond(secondMovie);
-                      });
-                    }, 700);
-                    // slideAndResetImages(() => {
-                    //       // onSelectSecond();
-                    //       onSelectSecond(secondMovie);
-
-                    // });
+                      slideAndResetImages(() => onSelectSecond(secondMovie));
+                    }, 200);
                   }}
                 >
-                  <View>
+                  <View style={styles.movieCardInner} collapsable={false}>
                     <View style={styles.posterWrapper}>
                       <Grayscale
                         amount={selected === 'first' ? 1 : 0}
                         style={{ width: '100%', height: '100%' }}
                       >
-                        {/* <Image
-                          resizeMode="cover"
-                          source={currentSecondMovie.poster}
-                          style={[styles.poster, { borderWidth: selected === 'second' ? 1 : 0 }]}
-                        /> */}
-
                         <FastImage
                           style={[
                             styles.poster,
@@ -316,63 +306,46 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
                             },
                           ]}
                           source={{
-                            ...currentSecondMovie?.poster,
+                            ...(secondMovie?.poster ?? currentSecondMovie?.poster),
                             priority: FastImage.priority.low,
                             cache: FastImage.cacheControl.web
                           }}
                           resizeMode={FastImage.resizeMode.contain}
                         />
 
-                        {currentSecondMovie.rating && (
+                        {(secondMovie?.rating ?? currentSecondMovie?.rating) && (
                           <View style={styles.ratingBadge}>
-                            {/* <RankingCard ranked={currentSecondMovie.rating} /> */}
                             <RankingWithInfo
-                              score={currentSecondMovie?.rating}
+                              score={secondMovie?.rating ?? currentSecondMovie?.rating}
                               title={"Rec Score"}
-                              description={
-                t("discover.recscoredes") 
-
-                                // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                                //  "This score shows the rating from your friend for this title."
-                              }
+                              description={t("discover.recscoredes")}
                             />
                           </View>
                         )}
                       </Grayscale>
                     </View>
-                    {/* <Text style={styles.title}>{currentSecondMovie.title}</Text> */}
                     <CustomText
                       size={16}
                       color={Color.whiteText}
                       style={styles.title}
                       font={font.PoppinsMedium}
+                      numberOfLines={2}
                     >
-                      {currentSecondMovie.title}
+                      {secondMovie?.title ?? currentSecondMovie?.title ?? ''}
                     </CustomText>
-
                     <CustomText
                       size={14}
                       color={Color.placeHolder}
                       style={styles.year}
                       font={font.PoppinsRegular}
+                      numberOfLines={1}
                     >
-                      {currentSecondMovie.year}
+                      {secondMovie?.year ?? currentSecondMovie?.year ?? ''}
                     </CustomText>
-                    {/* {currentSecondMovie.rating && (
-                      <View style={styles.ratingBadge}>
-                        <RankingCard ranked={currentSecondMovie.rating} />
-                      </View>
-                    )} */}
                   </View>
                 </TouchableOpacity>
               </Animated.View>
             </View>
-
-
-
-
-
-
 
 
             {/* <TouchableOpacity style={styles.editContainer} onPress={() => setCommentModal(true)}>
@@ -383,7 +356,6 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({
               />
             </TouchableOpacity> */}
             <TouchableOpacity style={styles.skipButton}
-
               onPress={() => {
                  onSkipSelect()
               }}
@@ -448,7 +420,13 @@ const styles = StyleSheet.create({
   movieCard: {
     width: '48%',
     alignItems: 'center',
-    // marginTop:22,
+  },
+  movieCardAnimated: {
+    overflow: 'hidden',
+  },
+  movieCardInner: {
+    width: '100%',
+    overflow: 'hidden',
   },
   posterWrapper: {
     width: '100%',

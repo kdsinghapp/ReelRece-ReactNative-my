@@ -133,6 +133,7 @@ interface StepProgressBarProps {
   onClose?: () => void;
   currentStepModal?: number;
   setMoviereommNav?: (val: boolean) => void;
+  showwithStepCount?: boolean;
   // navigationProps?: () => void;
 }
 const StepProgressBar: React.FC<StepProgressBarProps> = ({
@@ -141,7 +142,8 @@ const StepProgressBar: React.FC<StepProgressBarProps> = ({
   // navigationProps,
   disable,
   onClose,
-  setMoviereommNav
+  setMoviereommNav,
+  showwithStepCount = false
 }) => {
   // const [currentStep, setCurrentStep] = useState(currentStepModal);
 
@@ -179,7 +181,8 @@ const StepProgressBar: React.FC<StepProgressBarProps> = ({
       }
     }
   }, [currentStepModal, totalSteps]);
-  const progressPercentage = (currentStepModal / totalSteps) * 100;
+  const step = typeof currentStepModal === 'number' ? currentStepModal : 0;
+  const progressPercentage = totalSteps > 0 ? (step / totalSteps) * 100 : 0;
   return (
     <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
       <View style={styles.scoreHeader}>
@@ -206,19 +209,25 @@ const StepProgressBar: React.FC<StepProgressBarProps> = ({
                 source={imageIndex.progressBarCenter}
                 style={[
                   styles.icon,
-                  // { tintColor: index < currentStepModal ? '#bde8ff' : '#aaa' },
-                  { tintColor: 'rgba(255, 255, 255, 0.5)' },
+                  { tintColor: index < step ? '#bde8ff' : 'rgba(255, 255, 255, 0.5)' },
                 ]}
               />
             </TouchableOpacity>
           ))}
         </View>
       </View>
-      <Text allowFontScaling={false} style={styles.subText}>
-       {/* Rate a few more movies/shows to get your personalized recommendations. */}
-           {t("discover.youve")}
-       
+      {
+        showwithStepCount ?
+      <Text allowFontScaling={false} style={[styles.subText, { marginTop: 6 }]}>
+        {t("discover.youve")}{step} {t("discover.youve2")}
       </Text>
+      :
+      <Text allowFontScaling={false} style={styles.subText}>
+        {step < 2
+          ? t("discover.rateFiveMore")
+          : t("discover.rateOneMore")}
+      </Text>
+}
     </TouchableOpacity>
   );
 };

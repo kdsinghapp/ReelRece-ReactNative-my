@@ -67,10 +67,10 @@ import { Platform, StyleSheet } from "react-native";
     width: 20,
   },
   groupsContainer: {
-    // marginBottom: 150,
+    flex: 1,
     marginBottom: 50,
-    marginTop: 20, 
-    },
+    marginTop: 20,
+  },
   modalOverlay: {
     position: 'absolute',
     top: 0,

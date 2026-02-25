@@ -1,21 +1,33 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ComparisonModal, FeedbackModal, StepProgressModal } from '@components/index';
+import { FeedbackModal, StepProgressModal } from '@components/index';
+import type { MovieForComparison } from '@components/modal/feedbackModal/FeedbackModal';
 import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STEPPER_VALUE } from './useCompareComponent';
 
+type RankMovie = {
+  imdb_id?: string;
+  title?: string;
+  release_year?: string | number;
+  cover_image_url?: string;
+  rating?: string | number;
+};
 
 const CompareModals = ({
   token,
   useCompareHook,
   onModalClose,
+  onReviewAdded,
 }: {
   token: string;
   useCompareHook: ReturnType<typeof import('./useCompareComponent').useCompareComponent>;
   onModalClose?: () => void;
+  onReviewAdded?: (imdb_id: string) => void;
 }) => {
   const {
     selectedMovie,
+    setSelectedMovie,
     secondMovieData,
     isFeedbackVisible,
     isComparisonVisible,
@@ -32,8 +44,7 @@ const CompareModals = ({
     userPreference,
     currentComparisonIndex,
     handleNextComparison,
-    // step progressbar
-    isStepsModalVisible,      //  step modal visibility
+     isStepsModalVisible,      //  step modal visibility
     currentStep,              //  current step count
     setCurrentStep,           //  set step count
     setStepsModalVisible,     //  set step modal visibility
@@ -49,10 +60,8 @@ const CompareModals = ({
     }
   }, [isStepsModalVisible, dispatch]);
 
-  // Track if any modal was ever open
-  const wasAnyModalOpen = useRef(false);
+   const wasAnyModalOpen = useRef(false);
 
-  // Call onModalClose when all modals are closed (only if they were previously open)
   useEffect(() => {
     const anyModalOpen = isFeedbackVisible || isComparisonVisible || isStepsModalVisible;
 
@@ -78,96 +87,109 @@ const CompareModals = ({
     }
   };
 
-  useEffect(() => {
+   useEffect(() => {
+    if (isStepsModalVisible) return;
     const fetchStep = async () => {
       const step = await getCurrentStep();
-      setfetchStep(step);
+      setfetchStep(step as unknown as string | object);
+      if (typeof step !== 'number') return;
+      const atStepPopup = currentStep === 1 || currentStep === STEPPER_VALUE;
+      if (atStepPopup && step !== currentStep) return;
+      setCurrentStep(step);
     };
-
     fetchStep();
-  }, [isFeedbackVisible, isComparisonVisible, isStepsModalVisible]);
-  useEffect(() => {
-    if (fetchStep1 == 5) {
-      setStepsModalVisible(false);
-    }
-  }, [fetchStep1]);
+  }, [isFeedbackVisible, isComparisonVisible, currentStep, setCurrentStep]);
+
+  const isAnyModalVisible = isFeedbackVisible || isComparisonVisible;
+  const movie = selectedMovie as RankMovie | undefined;
+  const secondMovie = secondMovieData as RankMovie | undefined;
+  const isComparisonStep = isComparisonVisible && !!movie && !!secondMovie;
+  const step = isComparisonVisible ? 'comparison' : isFeedbackVisible ? 'feedback' : 'comparison';
+
   return (
     <>
-      {isFeedbackVisible && (
+      {isAnyModalVisible && (
         <FeedbackModal
-          visible={isFeedbackVisible}
+          visible={isAnyModalVisible}
+          step={step}
           onClose={() => {
-            setFeedbackVisible(false);
-            resetComparisonData();
-            onModalClose?.();
+            if (isComparisonStep) {
+              handleCloseRating();
+              if (currentStep === 1 || currentStep === STEPPER_VALUE) {
+                setStepsModalVisible(true);
+              }
+              resetComparisonData();
+              setSelectedMovie(undefined as never);
+            } else {
+              setFeedbackVisible(false);
+              resetComparisonData();
+              onModalClose?.();
+            }
           }}
           setFeedbackVisible={setFeedbackVisible}
           token={token}
-          selectedMovie={selectedMovie}
-          imdb_id={selectedMovie?.imdb_id}
-          movieTitle={selectedMovie?.title}
-          movieYear={selectedMovie?.release_year?.toString()}
-          poster={{ uri: selectedMovie?.cover_image_url }}
+          selectedMovie={movie}
+          imdb_id={movie?.imdb_id ?? ''}
+          movieTitle={movie?.title ?? ''}
+          movieYear={movie?.release_year?.toString() ?? ''}
+          poster={{ uri: movie?.cover_image_url }}
           isLoading={isComparisonLoading}
-          onOpenSecondModal={() => {
-            setFeedbackVisible(false);
-            setComparisonVisible(true);
-          }}
           onSubmit={(preference) => {
             setUserPreference({ preference });
             handleFeedbackSubmit(preference);
           }}
-        />
-      )}
-      {isComparisonVisible && selectedMovie && secondMovieData && (
-        <ComparisonModal
-          visible={isComparisonVisible}
-          onClose={() => {
-            setComparisonVisible(false);
-            setStepsModalVisible(true);
-            resetComparisonData();
-            setSelectedMovie(null);
-            // SecondMovieData(null);
-          }}
-          setComparisonVisible={setComparisonVisible}
-          onSkip={() => setComparisonVisible(false)}
-          firstMovie={{
-            title: selectedMovie?.title,
-            year: selectedMovie?.release_year,
-            poster: { uri: selectedMovie?.cover_image_url },
-            rating: selectedMovie.rating?.toString(),
-            imdb_id: selectedMovie.imdb_id,
-          }}
-          secondMovie={{
-            title: secondMovieData?.title,
-            year: secondMovieData?.release_year,
-            poster: { uri: secondMovieData?.cover_image_url },
-            rating: secondMovieData?.rating?.toString(),
-            imdb_id: secondMovieData?.imdb_id,
-          }}
+          firstMovie={
+            isComparisonStep && movie
+              ? {
+                  title: movie?.title ?? '',
+                  year: String(movie?.release_year ?? ''),
+                  poster: { uri: movie?.cover_image_url ?? '' },
+                  rating: movie?.rating?.toString(),
+                  imdb_id: movie?.imdb_id,
+                }
+              : undefined
+          }
+          secondMovie={
+            isComparisonStep && secondMovie
+              ? {
+                  title: secondMovie?.title ?? '',
+                  year: String(secondMovie?.release_year ?? ''),
+                  poster: { uri: secondMovie?.cover_image_url ?? '' },
+                  rating: secondMovie?.rating?.toString(),
+                  imdb_id: secondMovie?.imdb_id,
+                }
+              : undefined
+          }
+          onReviewAdded={onReviewAdded}
           onSelectFirst={handleSelectFirst}
           onSelectSecond={handleSelectSecond}
-          comparisonMovies={comparisonMovies}
           onSkipSelect={handleSkipSetFirst}
-          handleCloseRating={handleCloseRating}  // close modal by close
-        // currentComparisonIndex={currentComparisonIndex}
+          handleCloseRating={() => {
+            handleCloseRating();
+            if (currentStep === 1 || currentStep === STEPPER_VALUE) {
+              setStepsModalVisible(true);
+            }
+            resetComparisonData();
+            setSelectedMovie(undefined as never);
+          }}
+          comparisonMovies={Array.isArray(comparisonMovies) ? (comparisonMovies as MovieForComparison[]) : []}
         />
       )}
-      {fetchStep1 < 6 && (
+      {(currentStep === 1 || currentStep === STEPPER_VALUE) && (
         <StepProgressModal
           visible={isStepsModalVisible}
           onClose={() => {
             setStepsModalVisible(false);
             onModalClose?.();
           }}
-          progress={currentStep / comparisonMovies.length}
+          progress={currentStep / STEPPER_VALUE}
           navigationProps={() => { }}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
           setStepsModal={setStepsModalVisible}
-          selectedMovieId={selectedMovie?.imdb_id}
+          selectedMovieId={movie?.imdb_id}
           setMoviereommNav={() => { }}
-          totalSteps={5}
+          totalSteps={STEPPER_VALUE}
         />
       )}
 

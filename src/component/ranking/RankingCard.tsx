@@ -12,9 +12,9 @@ type Props = {
 };
 
 const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
-  // Handle undefined or null values properly
   const safeRanked = ranked ?? "";
   const rankNum = parseFloat(String(safeRanked));
+  const hasValidScore = !isNaN(rankNum) && String(safeRanked).trim() !== "";
 
   const windowHeight = Dimensions.get('window').height * 0.05;
   const windowWidth = Dimensions.get('window').width * 0.088;
@@ -22,8 +22,8 @@ const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
   let backgroundColor = "#CA462A";
   let showBackArrow = false;
 
-  if (!isNaN(rankNum)) {
-    if (rankNum === -1.0 || rankNum === 0.0 || rankNum == -1) {
+  if (hasValidScore) {
+    if (rankNum === -1.0 || rankNum === 0.0 || rankNum === -1) {
       backgroundColor = Color.primary;
       showBackArrow = true;
     } else if (rankNum < 3.34) {
@@ -33,14 +33,16 @@ const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
     } else if (rankNum > 6.7) {
       backgroundColor = "#6ED989";
     }
+  } else {
+    backgroundColor = Color.primary;
+    showBackArrow = true;
   }
 
-  // Ensure displayText is always a valid string, never undefined
-  const displayText = !isNaN(rankNum)
+  const displayText = hasValidScore
     ? rankNum === 10
       ? "10"
       : rankNum.toFixed(1)
-    : String(safeRanked || "");
+    : "?";
 
   // ========================
   // Shimmer logic

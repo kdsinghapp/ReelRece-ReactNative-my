@@ -11,8 +11,7 @@ import {
 } from '@utils/apiInputValidator';
 import { validateResponse, unwrapValidation } from '@utils/apiResponseValidator';
 import { z } from 'zod';
-import toastConfig, { errorToast, normalToast, successToast } from '@utils/customToast';
-import { ErrorToast } from 'react-native-toast-message';
+import  { errorToast } from '@utils/customToast';
 
 const loginResponseSchema = z.object({
   token: z.string(),
