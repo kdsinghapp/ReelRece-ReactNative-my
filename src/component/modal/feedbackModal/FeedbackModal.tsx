@@ -486,7 +486,7 @@ setModalMarginTop(-133);
                   <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
                     {poster?.uri ? (
                       <FastImage
-                        source={{ uri: poster.uri, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                        source={{ uri: poster.uri, priority: FastImage.priority.low, cache: FastImage.cacheControl.immutable }}
                         style={styles.comparisonPoster}
                         resizeMode={FastImage.resizeMode.contain}
                       />

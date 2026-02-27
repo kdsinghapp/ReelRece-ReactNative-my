@@ -685,7 +685,7 @@ const WatchWithFriend = () => {
               alignItems: 'center',
               width: width * 0.4,
               borderRadius: 10,
-              marginTop: Platform.OS === 'ios' ? 0 : 5,
+              marginTop: Platform.OS === 'ios' ? -5 : 5,
               bottom: Platform.OS === 'ios' ? 0 : 5,
               opacity: pressed ? 0.8 : 1,
             },
@@ -764,7 +764,9 @@ const WatchWithFriend = () => {
                 cache: FastImage.cacheControl.immutable,
               }}
               style={[styles.poster, {
-                bottom: 22.5
+                bottom: 22.5 ,
+                marginTop:Platform.OS == "ios" ? 13: 0
+        
               }]}
               resizeMode={FastImage.resizeMode.cover}
             />

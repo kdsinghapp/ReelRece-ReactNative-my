@@ -132,16 +132,6 @@ const OtherProfile = () => {
       setLoadingFollow(false);
     }
   };
-
-  const handleEditProfile = useCallback(() => {
-    const avatar = userData?.avatar ?? '';
-    (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.EditProfile, {
-      avatar: `${BASE_IMAGE_URL}${avatar}`,
-    });
-  }, [navigation, userData?.avatar]);
-
-  const isOwnProfile = otherUserData?.username === userData?.username;
-
   const BottomData: BottomSheetOption[] = useMemo(() => [
     {
       name: isFollowing ? t("common.unfollow") : t("common.follow"),
@@ -473,6 +463,38 @@ const OtherProfile = () => {
   };
   const MemoFeedCardRender = useCallback((feedItem: FeedItemShape, index: number, avatarUri: string, posterUri: string) => {
     return (
+      // <MemoFeedCard
+      //   key={item.movie?.imdb_id} // <-- unique key per video
+
+      //   avatar={{ uri: avatarUri }}         //  string
+      //   poster={{ uri: posterUri }}        //  string
+      //   user={item.user?.name}
+      //   title={item.movie?.title}
+      //   comment={item.comment}
+      //   release_year={item?.movie?.release_year?.toString()}
+      //   videoUri={item.movie?.trailer_url}
+      //   imdb_id={item.movie?.imdb_id}
+      //   isMuted={isMuted}
+      //   token={token} rankPress={() => setIsVisible(true)}
+      //   ranked={item?.rec_score}
+      //   scoreType='Friend'
+      //   shouldAutoPlay={autoPlayEnabled}
+      //   isVisible={index === currentVisibleIndex}
+      //   videoIndex={index} // FIX HERE
+      //   username={otherUserData?.username}
+      //   // shouldPlay={index - 1 === playIndex}
+      //   shouldPlay={index - 1 === playIndex}
+      //   isPaused={index - 1 !== playIndex}
+      //   is_bookMark={item?.is_bookmarked}
+      //   //   videoIndex={index } // FIX HERE
+      //   // username={otherUserData?.username}
+      //   // // shouldPlay={index - 1 === playIndex}
+      //   // shouldPlay={index -1 === currentVisibleIndex}
+      //   // isPaused={index - 1 !== playIndex}
+      //   // is_bookMark={item?.is_bookmarked}
+
+      //   screenName='OtherProfile__Screen'
+      // />
         <MemoFeedCardHome
           key={feedItem.movie?.imdb_id}
           activity={feedItem?.activity}
@@ -509,7 +531,7 @@ const OtherProfile = () => {
           <ProfileCard
             imageUri={avatarUrl}
             loaderFollow={loadingFollow}
-            onFollowPress={isOwnProfile ? handleEditProfile : handleFollowUnfollow}
+            onFollowPress={handleFollowUnfollow}
             imageLoading={imageLoading}
             setImageLoading={setImageLoading}
             name={otherUserData?.name || otherUserData?.username}
@@ -517,7 +539,7 @@ const OtherProfile = () => {
             rank={`${otherUserData?.ranked ?? ''}`}
             followers={`${otherUserData?.followers_count ?? otherUserData?.followers ?? 0}`}
             following={`${otherUserData?.following_count ?? otherUserData?.following ?? 0}`}
-            butt={!isOwnProfile}
+            butt={otherUserData?.username !== userData?.username || item?.username ||otherUserData?.username}
             bio={otherUserData?.bio}
             onFollow={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 0, type: 'Followers', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
             onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
@@ -534,11 +556,47 @@ const OtherProfile = () => {
     if (!item?.movie || !item?.user) return null;
     const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar ?? ''}`;
     const posterUri = item.movie?.horizontal_poster_url ?? '';
-      return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
-  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, handleEditProfile, isOwnProfile, navigation]);
+    //     return (
+    //       <MemoFeedCard
+    //         key={item.movie?.imdb_id} // <-- unique key per video
+
+    //         avatar={{ uri: avatarUri }}         //  string
+    //         poster={{ uri: posterUri }}        //  string
+    //         user={item.user?.name}
+    //         title={item.movie?.title}
+    //         comment={item.comment}
+    //         release_year={item?.movie?.release_year?.toString()}
+    //         videoUri={item.movie?.trailer_url}
+    //         imdb_id={item.movie?.imdb_id}
+    //         isMuted={isMuted}
+    //         token={token} rankPress={() => setIsVisible(true)}
+    //         ranked={item?.rec_score}
+    //         scoreType='Friend'
+    //         shouldAutoPlay={autoPlayEnabled}
+    //         isVisible={index === currentVisibleIndex}
+    //         videoIndex={index } // FIX HERE
+    //         username={otherUserData?.username}
+    //         // shouldPlay={index - 1 === playIndex}
+    //         shouldPlay={index -1 === playIndex}
+    //         isPaused={index - 1 !== playIndex}
+    //         is_bookMark={item?.is_bookmarked}
+    //         //   videoIndex={index } // FIX HERE
+    //         // username={otherUserData?.username}
+    //         // // shouldPlay={index - 1 === playIndex}
+    //         // shouldPlay={index -1 === currentVisibleIndex}
+    //         // isPaused={index - 1 !== playIndex}
+    //         is_bookMark={item?.is_bookmarked}
+
+    //  screenName = 'OtherProfile__Screen'
+    //       />
+    //     );
+
+    return MemoFeedCardRender(item as FeedItemShape, index, avatarUri, posterUri);
+  }, [renderHeader, playIndex, currentVisibleIndex, autoPlayEnabled, otherUserData, userData, avatarUrl, imageLoading, loadingFollow, isFollowing, handleFollowUnfollow, navigation]);
 
   const renderFooter = useCallback(() => {
-     if (loadingFeed && combinedData.length <= 50) {
+    // 🟢 Normal loading
+    if (loadingFeed && combinedData.length <= 50) {
       return <FeedCardShimmer />;
     }
 
@@ -635,8 +693,62 @@ const OtherProfile = () => {
         // }]).current}
         viewabilityConfigCallbackPairs={useRef([{
           viewabilityConfig: viewabilityConfigRef.current,
-          onViewableItemsChanged,
+          onViewableItemsChanged, //  Directly pass this
         }]).current}
+
+      // 👇 Footer Loader + UI Heavy Condition
+      // ListFooterComponent={() => {
+      //  { 
+      //   // 🟢 Condition 1: Normal loading when fetching more data
+      //   if (loadingFeed && combinedData.length <= 50) {
+      //     return (
+      //       <FeedCardShimmer   />
+      //     );
+      //   }
+      //   // 🟡 Condition 2: When too much data already loaded (UI heavy)
+      //   else if (loadingFeed && combinedData.length > 50) {
+      //     return (
+      //       <View style={{ paddingVertical: 20, marginBottom: 90 }}>
+      //         <Text style={{ textAlign: "center", color: "gray" }}>
+      //           Loading more content... please wait
+      //         </Text>
+      //         <ActivityIndicator
+      //           size="small"
+      //           color={Color.primary}
+      //           style={{ marginTop: 8 }}
+      //         />
+      //       </View>
+      //     );
+      //   }
+
+      //   // 🔴 Condition 3: When no more data
+      //   else if (!hasMore && combinedData.length > 0) {
+      //     return (
+      //       <View style={{ paddingVertical: 20 }}>
+      //         <Text style={{ textAlign: "center", color: "gray" }}>
+      //           No more data available
+      //         </Text>
+      //       </View>
+      //     );
+      //   }
+
+      //   // Default case: nothing to show
+      //   else {
+      //     return (
+      //        <View>
+      //     <FeedCardShimmer />
+      //     </View>
+      //     )
+      //     ;
+      //   }}
+
+
+
+
+
+      // }
+      // }
+
 
       />
       <BottomSheet

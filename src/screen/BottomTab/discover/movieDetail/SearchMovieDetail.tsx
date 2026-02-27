@@ -35,7 +35,6 @@ import { RootState } from '@redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
-import { setRefetchProfileActivity } from '@redux/feature/modalSlice/modalSlice';
 import VideoPlayer from '@utils/NewNativeView';
 import CustomVideoPlayer from '@components/common/CustomVideoPlayerios';
 import { CustomStatusBar, EpisodesModal, HeaderCustom, MoreSheetModal, MovieInfoModal } from '@components/index';
@@ -193,7 +192,6 @@ const MovieDetailScreen = () => {
           return newMap;
         });
         dispatch(fetchHomeBookmarks({ silent: true }));
-        dispatch(setRefetchProfileActivity(true));
       }
     } catch (err) {
       setBookmarkMap(prev => {

@@ -8,6 +8,16 @@ const PosterImage = ({ poster, style }) => {
 
   return (
     <View style={{ position: 'relative' }}>
+      {/* Placeholder (static image) */}
+      {/* {(loading || error) && ( */}
+      {/* <Image
+                    source={imageIndex.welcomePost14} // 👈 yahan apni static image lagana
+                    style={style}
+                    resizeMode="cover"
+                /> */}
+      {/* )} */}
+
+      {/* Actual image */}
       <FastImage
         source={
           typeof poster === 'string'
@@ -30,7 +40,7 @@ const PosterImage = ({ poster, style }) => {
           setLoading(true);
           setError(false);
         }}
-
+        
         onLoadEnd={() => setLoading(false)}
         onError={(e) => {
           setLoading(false);

@@ -26,6 +26,7 @@ const FeedTab: FunctionComponent = () => {
     { name: ScreenNameEnum.OtherWantProfile, Component: OtherWantProfile },   // PROFILE2
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
+
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
 
 

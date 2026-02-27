@@ -4,7 +4,6 @@ import CustomStatusBar from './common/statusBar/StatusBarCustom';
 import InputFieldCustom from './common/inputField/InputFieldCustom';
 import SearchBarCustom from './common/searchBar/SearchBarCustom';
 import SuccessMessageCustom from './common/successMessage/SuccessMessageCustom';
-import FieldErrorCustom from './common/successMessage/FieldErrorCustom';
 import HeaderCustom from './common/header/HeaderCustom';
 import BottomSheet from './common/bottomSheet/BottomSheet';
 
@@ -39,7 +38,6 @@ export {
   Button,
   InputFieldCustom,
   SuccessMessageCustom,
-  FieldErrorCustom,
   SearchBarCustom,
   HeaderCustom,
   BottomSheet,

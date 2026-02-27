@@ -19,6 +19,7 @@ const SuccessMessageCustom = ({ message, title, first = true, color, textColor }
         //  <Text style={[styles.title, {color: textColor ? textColor : Color.whiteText}]}>{title}</Text>}
 
         <CustomText
+
           size={16}
           color={Color.whiteText}
           style={[styles.title, { color: textColor ? textColor : Color.whiteText }]}

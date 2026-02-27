@@ -134,7 +134,7 @@ const RankingListItem = React.memo(
               <FastImage
                 source={{
                   uri: movie.cover_image_url,
-                  priority: FastImage.priority.high,
+                  priority: FastImage.priority.low,
                   cache: FastImage.cacheControl.immutable,
                 }}
                 style={styles.poster}

@@ -99,11 +99,54 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
             setToastMess(true);
         }
     }, [token, setSelectedPlatforms]);
- 
+
+
+
+    // const restoreFormSetting = async () => {
+    //     try {
+    //         const response = await getUserSubscriptions(token);
+    //         let lengthItem = response?.data.length;
+
+    //         response?.data.map((ok) => {
+    //
+    //             togglePlatformForRestore(ok.subscription);
+    //         });
+
+
+    //         setToastMessage("Saved platforms restored!");
+    //         setToastMessGreen(true);
+    //         setToastMess(true);
+
+
+    //         setTimeout(() => {
+    //             setToastMess(false);
+    //         }, 2000);
+    //     } catch (error) {
+    //         setToastMessage("Failed to restore platforms!");
+    //         setToastMessGreen(false);
+    //         setToastMess(true);
+
+    //         setTimeout(() => {
+    //             setToastMess(false);
+    //         }, 2000);
+    //     }
+    // };
+
+
     const selectAll = useCallback(() => {
         setSelectedPlatforms(platformsData.map((platform: PlatformItem) => platform.supported_platform));
     }, [platformsData, setSelectedPlatforms]);
- 
+
+    // Reset selection
+    // const resetSelection = () => {
+    //     setSelectedPlatforms([]);
+    // };
+
+    // Apply selection
+    // const applySelection = () => {
+    //     onClose(selectedPlatforms);
+    // };
+
     const selectedServices = useMemo(() => {
         return selectedPlatforms.filter((id: string) => {
             const platform = platformsData.find((p: PlatformItem) => p.supported_platform === id);
@@ -122,6 +165,9 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
 
     return (
         <Modal visible={visible} transparent animationType="slide">
+            {/* <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={() => onClose(selectedPlatforms)}  > */}
+            {/* <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={() => onClose(selectedPlatforms)}  > */}
+
             {/* Background overlay */}
             <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={handleClose}>
                 <View style={styles.modalOverlayFill} />
@@ -198,7 +244,8 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                 <View style={styles.bottomButtonContainerBox}  >
                     <View style={styles.bottomButtonContainer}>
                         <TouchableOpacity onPress={reset} style={styles.selectButton}>
-                         
+                            {/* <Text style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]} >Reset</Text> */}
+
                             <CustomText
                                 size={14}
                                 color={Color.lightGrayText}
@@ -210,7 +257,8 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                             </CustomText>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={onApply} style={styles.cancelButton}>
-                             <CustomText
+                            {/* <Text style={styles.buttonTxt} >Apply</Text> */}
+                            <CustomText
                                 size={14}
                                 color={Color.whiteText}
                                 style={[styles.buttonTxt, {
@@ -249,7 +297,8 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                     />
                 )}
             </View>
- 
+
+            {/* </TouchableOpacity> */}
         </Modal>
     );
 };
@@ -332,7 +381,14 @@ const styles = StyleSheet.create({
     modalItemTextWithMargin: {
         width: '77%',
         marginLeft: 10,
-    }, 
+    },
+
+    // actionButtonsContainer: {
+    //     flexDirection: 'row',
+    //     justifyContent: 'space-between',
+    //     alignItems:'center',
+    //     // marginTop: 10,
+    // },
     resetButton: {
         backgroundColor: '#e0e0e0',
         padding: 12,

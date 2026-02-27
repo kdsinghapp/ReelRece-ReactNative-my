@@ -112,7 +112,8 @@ const App = () => {
   }, [isOnline, dispatch]);
 
   onRefreshRef.current = onRefresh;
- 
+
+  // Network listener: use ref so "back online" always runs latest refresh
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const online = state.isConnected && state.isInternetReachable;
@@ -126,7 +127,8 @@ const App = () => {
   }, []);
 
   const combinedData = useMemo(() => {
-     return [
+    const discoverItem = feedData.length === 0 && !loadingFeed ? [{ type: 'discoverPeople' as const }] : [];
+    return [
       { type: 'profileStatus' },
       { type: 'header' },
       // ...discoverItem,
@@ -283,7 +285,8 @@ const App = () => {
     }, [])
   );
 
-   useFocusEffect(
+  // Refetch when screen gains focus so "Your Feed" / "Want to watch" etc. show new data (tab switch or navigate back)
+  useFocusEffect(
     useCallback(() => {
       if (!token) return;
       dispatch(fetchHomeFeed({ reset: true, silent: true }));
@@ -495,7 +498,20 @@ const App = () => {
   const handleScrollBeginDrag = useCallback(() => {
     if (!hasScrolled) setHasScrolled(true);
   }, [hasScrolled]);
- 
+
+  /**
+   * Process and merge feed data to remove duplicates and combine activities
+   * 
+   * This function:
+   * 1. Preserves non-feed items (header, profileStatus) in their original position
+   * 2. Merges duplicate feed items by imdb_id
+   * 3. Combines multiple activities for the same movie (e.g., "ranked, bookmarked")
+   * 4. Filters out invalid feed items (no imdb_id, no activity, or rec_score = -1)
+   * 5. Maintains bookmark status (once bookmarked, always bookmarked)
+   * 
+   * @param {Array} data - Combined data array with feed items and UI elements
+   * @returns {Array} Processed array with deduplicated feed items
+   */
   const processedFeedData = useMemo(() => {
     const result: (object | string | null | number)[] = [];
     const feedMap = new Map();

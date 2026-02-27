@@ -305,12 +305,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
           >
             <TouchableOpacity
               onPress={() => {
-                const tappedUsername = item?.user?.username;
-                if (tappedUsername && tappedUsername === userprofile) {
-                  navigation.navigate(ScreenNameEnum.ProfileTab as never, { screen: ScreenNameEnum.ProfileScreen } as never);
-                } else {
-                  navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
-                }
+                 navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
+                // navigation.navigate(ScreenNameEnum.OtherProfile);
               }}
             >
               {/* <Image
@@ -332,12 +328,9 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
             <View style={styles.info}>
               <TouchableOpacity
                 onPress={() => {
-                  const tappedUsername = item?.user?.username;
-                  if (tappedUsername && tappedUsername === userprofile) {
-                    navigation.navigate(ScreenNameEnum.ProfileTab as never, { screen: ScreenNameEnum.ProfileScreen } as never);
-                  } else {
-                    navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
-                  }
+ navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
+               
+                  // navigation.navigate(ScreenNameEnum.OtherProfile);
                 }}
               >
                 <Text style={styles.name}>{item.user?.name}

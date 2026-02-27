@@ -72,10 +72,12 @@ const ChangePassSetting = () => {
         toastMessFunc({ green: true, message: t("errorMessage.passwordChangeSuccess") });
 
         navigation.goBack();
-      } else { 
+      } else {
+        // Alert.alert("Error", "Password change failed");
       }
 
-    } catch (error) { 
+    } catch (error) {
+      // Alert.alert("Error", "कुछ गड़बड़ है, कृपया दोबारा कोशिश करें");
     }
   };
 

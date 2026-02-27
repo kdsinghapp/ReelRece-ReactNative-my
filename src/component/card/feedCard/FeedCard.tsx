@@ -1,5 +1,5 @@
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Image,
@@ -22,6 +22,7 @@ import { useBookmarks } from '@hooks/useBookmark';
  import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
+import { invalid } from 'moment'
 import { styles } from './FeedCardstyle';
 import CustomText from '@components/common/CustomText/CustomText';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
@@ -50,6 +51,9 @@ const FeedCard = ({
   const dispatch = useDispatch()
   const progressAnim = useRef(new Animated.Value(0)).current;
 
+  useEffect(() => {
+
+   }, [videoUriRef.current])
 
   const isPlaying = shouldAutoPlay && isVisible && shouldPlay && !paused;
   const isScreenFocused = useIsFocused();
@@ -68,7 +72,8 @@ const FeedCard = ({
   const stableVideoUri = useRef(videoUri);
 
 
-  const handleVideoLoad = useCallback((data?: { duration?: number }) => {
+  const handleVideoLoad = (data?: { duration?: number }) => {
+
     if (data?.duration) setVideoDuration(data.duration);
     setTimeout(() => {
       Animated.timing(posterOpacity, {
@@ -76,46 +81,47 @@ const FeedCard = ({
         duration: 1000,
         useNativeDriver: true,
       }).start(() => setPosterVisible(false));
-    }, 1200);
-  }, [posterOpacity]);
 
+
+    }, 1200);
+  };
   useEffect(() => {
     setIsBookmarked(!!is_bookMark);
   }, [is_bookMark]);
 
-  const handleToggleBookmark = useCallback(async () => {
+  const handleToggleBookmark = async () => {
     const prev = isBookmarked;
-    setIsBookmarked(!prev);
+    setIsBookmarked(!prev); // Optimistic update
+
     try {
-      await toggleBookmark(imdb_id);
+      await toggleBookmark(imdb_id, token);
     } catch (err) {
-      setIsBookmarked(prev);
+      setIsBookmarked(prev); // revert
     }
-  }, [isBookmarked, imdb_id, toggleBookmark]);
+  };
 
   useEffect(() => {
-    const shouldTrigger = paused && !hasInteractedRef.current && imdb_id;
+  const shouldTrigger = paused && !hasInteractedRef.current && imdb_id;
     if (shouldTrigger) {
       hasInteractedRef.current = true;
-      trailerTracker.triggerInteractionIfAny();
+       trailerTracker.triggerInteractionIfAny();
       trailerTracker.resetTracker();
     }
-  }, [paused, imdb_id]);
+  }, [paused, invalid]);
 
   const compareHook = useCompareComponent(token);
-  const handleRankingPress = useCallback((movie: object) => {
+  const handleRankingPress = (movie: object) => {
     compareHook.openFeedbackModal(movie);
-  }, [compareHook]);
-
+   };
   useEffect(() => {
     if (isVisible) {
       hasInteractedRef.current = false;
       trailerTracker.resetTracker();
     }
   }, [isVisible]);
-  const handleNavigation = useCallback((id: string, tok: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: id, token: tok });
-  }, [navigation]);
+  const handleNavigation = (imdb_id: string, token: string) => {
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
+  };
 
   // Clear video buffer when component unmounts
   useEffect(() => {
@@ -138,25 +144,28 @@ const FeedCard = ({
     previousImdbRef.current = imdb_id;
   }, [imdb_id]);
 
-  const handleTogglePause = useCallback(() => {
-    if (!shouldAutoPlay) setPaused(prev => !prev);
-  }, [shouldAutoPlay]);
-
-  const lastProgressRef = useRef(0);
-  const onVideoProgress = useCallback((data: { currentTime: number; seekableDuration: number }) => {
-    if (paused) return;
-    const seekable = data.seekableDuration || 1;
-    const progressPercent = Math.min(1, data.currentTime / seekable);
-    if (Math.abs(progressPercent - lastProgressRef.current) >= 0.01) {
-      lastProgressRef.current = progressPercent;
-      Animated.timing(progressAnim, {
-        toValue: progressPercent,
-        duration: 250,
-        useNativeDriver: false,
-      }).start();
+  const handleTogglePause = () => {
+    if (!shouldAutoPlay) {
+      setPaused(prev => !prev);
     }
-    trailerTracker.onProgress({ currentTime: data.currentTime, imdb_id, trailer_url: videoUri });
-  }, [paused, imdb_id, videoUri, progressAnim, trailerTracker]);
+  };
+
+  // ---- VIDEO PROGRESS HANDLER ----
+  const onVideoProgress = useCallback(async (data) => {
+    if (paused) return;
+
+    const progressPercent = data.currentTime / data.seekableDuration; // 👈 compute fraction between 0–1s
+     Animated.timing(progressAnim, {
+      toValue: progressPercent,
+      duration: 250,
+      useNativeDriver: false, 
+    }).start();
+    trailerTracker.onProgress({
+      currentTime: data.currentTime,
+      imdb_id,
+      trailer_url: videoUri,
+    });
+  }, [paused, imdb_id, videoUri]);
 
   useEffect(() => {
     if (!isScreenFocused || !isVisible) {
@@ -177,33 +186,15 @@ const FeedCard = ({
   }, [videoUri, videoIndex]);
 
 
-  const navigateOnPoster = useCallback(() => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token });
-  }, [navigation, imdb_id, token]);
-
-  const item = useMemo(() => ({ username }), [username]);
-  const onHeaderTitlePress = useCallback(() => handleNavigation(imdb_id, token), [handleNavigation, imdb_id, token]);
-  const onProfilePress = useCallback(() => navigation.navigate(ScreenNameEnum.OtherProfile, { item }), [navigation, item]);
-  const setShowFirstModalToggle = useCallback(() => setShowFirstModal(prev => !prev), []);
-  const closeScoreModal = useCallback(() => setShowFirstModal(false), []);
-  const movieForRank = useMemo(() => ({
-    imdb_id,
-    title,
-    release_year,
-    cover_image_url: poster?.uri ?? '',
-  }), [imdb_id, title, release_year, poster?.uri]);
-  const onRankingPress = useCallback(() => handleRankingPress(movieForRank), [handleRankingPress, movieForRank]);
-
-  const avatarSource = useMemo(() => ({
-    ...avatar,
-    priority: FastImage.priority.low,
-    cache: FastImage.cacheControl.immutable,
-  }), [avatar]);
-  const posterSource = useMemo(() => ({
-    ...poster,
-    priority: FastImage.priority.low,
-    cache: FastImage.cacheControl.immutable,
-  }), [poster]);
+  const navigateOnPoster = (imdb_id: string, token: string) => {
+     navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: imdb_id,
+      token,
+    });
+  }
+  const item = {
+    username: username
+  };
 
 
 
@@ -218,11 +209,29 @@ const FeedCard = ({
   return (
     <View style={styles.feedCard}>
       <View style={styles.feedHeader}>
-        <TouchableOpacity onPress={onProfilePress}>
-          <FastImage source={avatarSource} style={styles.feedAvatar} />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate(ScreenNameEnum.OtherProfile, { item: item })
+          }
+        >
+          <FastImage
+            source={{
+              ...avatar,
+              priority: FastImage.priority.low,
+              cache: FastImage.cacheControl.immutable
+            }}
+            style={styles.feedAvatar}
+          
+          />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.feedHeaderRow} onPress={onHeaderTitlePress}>
-          <View style={styles.feedHeaderTitleWrap}>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "row", alignItems: "center", }}
+          onPress={() => {
+            handleNavigation(imdb_id, token);
+            
+          }}
+        >
+          <View style={{ flex: 1, paddingRight: 10 }}>
             <CustomText
               size={15}
               color={Color.whiteText}
@@ -255,7 +264,7 @@ const FeedCard = ({
               font={font.PoppinsRegular}
             >{created_date}</CustomText>
           </View>
-          <TouchableOpacity style={styles.rankingTouch} onPress={setShowFirstModalToggle}>
+          <TouchableOpacity style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
 
             <RankingWithInfo
               score={ranked}
@@ -283,7 +292,9 @@ const FeedCard = ({
           <CustomText
             size={14}
             color={Color.whiteText}
-            style={styles.commentMargin}
+            style={{
+              marginLeft: 6,
+            }}
             font={font.PoppinsRegular}
           >{comment}</CustomText>
         </CustomText>
@@ -292,17 +303,22 @@ const FeedCard = ({
       {/* Video / Poster */}
       <TouchableOpacity onPress={handleTogglePause}>
         <View style={styles.videoWrapper}>
-          <TouchableOpacity activeOpacity={1} onPress={navigateOnPoster} style={styles.posterOverlay}>
+          <TouchableOpacity activeOpacity={1} onPress={() => { navigateOnPoster(imdb_id, token) }} style={styles.posterOverlay}>
+            {/* {!isPlaying && poster && posterVisible && ( */}
             {!isPlaying && (
               <FastImage
-                source={posterSource}
+                source={{
+                  ...poster,
+                  priority: FastImage.priority.low,
+                  cache: FastImage.cacheControl.immutable
+                }}
                 style={styles.posterOverlay}
                 resizeMode={FastImage.resizeMode.stretch}
               />
-            )}
+           )}
           </TouchableOpacity>
           {isLowMemoryDevice && !isVisible ? (
-            <Image source={{ uri: typeof poster === 'string' ? poster : poster?.uri }} resizeMode="stretch" style={styles.video} />
+            <Image source={{ uri: poster }}   resizeMode='stretch' style={styles.video} />
           ) : (
             <Video
               source={{ uri: stableVideoUri.current }}
@@ -359,8 +375,16 @@ const FeedCard = ({
 
 
           {!paused && (
-            <TouchableOpacity style={styles.tButton} onPress={() => dispatch(toggleMute())}>
-              <Image source={isMuted ? imageIndex.volumeOff : imageIndex.mute} style={styles.muteIcon} resizeMode="contain" />
+            <TouchableOpacity
+              style={styles.tButton}
+              // onPress={() => setMuted(!muted)}
+              onPress={() => dispatch(toggleMute())}
+            >
+              <Image
+                source={isMuted ? imageIndex.volumeOff : imageIndex.mute}
+                style={{ height: 18, width: 18, tintColor: Color.whiteText }}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -368,14 +392,26 @@ const FeedCard = ({
 
       {/* Footer Actions */}
       <View style={styles.footerActions}>
-        <TouchableOpacity onPress={onRankingPress}>
+        <TouchableOpacity
+          onPress={() =>
+            handleRankingPress({
+              imdb_id,
+              title,
+              release_year,
+              cover_image_url: poster?.uri || '', 
+            })
+          }
+        >
           <Image
             source={imageIndex.mdRankings}
             style={styles.footerIcon}
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bookmarkTouch} onPress={handleToggleBookmark}>
+        <TouchableOpacity
+          style={{ height: 35, width: 30 }}
+          onPress={handleToggleBookmark}
+        >
           <Image
             source={isBookmarked ? imageIndex.save : imageIndex.saveMark}
             style={styles.footerSaveIcon}
@@ -387,7 +423,7 @@ const FeedCard = ({
       <View style={styles.footerDivider} />
       <ScoreIntroModal
         visible={showFirstModal}
-        onClose={closeScoreModal}
+        onClose={() => setShowFirstModal(false)}
         variant="second"
       />
       <CompareModals token={token} useCompareHook={compareHook} />

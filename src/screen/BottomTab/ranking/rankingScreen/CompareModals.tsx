@@ -44,7 +44,8 @@ const CompareModals = ({
     userPreference,
     currentComparisonIndex,
     handleNextComparison,
-     isStepsModalVisible,     
+    // step progressbar
+    isStepsModalVisible,      //  step modal visibility
     currentStep,              //  current step count
     setCurrentStep,           //  set step count
     setStepsModalVisible,     //  set step modal visibility
@@ -60,8 +61,10 @@ const CompareModals = ({
     }
   }, [isStepsModalVisible, dispatch]);
 
-   const wasAnyModalOpen = useRef(false);
+  // Track if any modal was ever open
+  const wasAnyModalOpen = useRef(false);
 
+  // Call onModalClose when all modals are closed (only if they were previously open)
   useEffect(() => {
     const anyModalOpen = isFeedbackVisible || isComparisonVisible || isStepsModalVisible;
 

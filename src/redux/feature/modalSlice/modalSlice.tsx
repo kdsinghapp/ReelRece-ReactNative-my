@@ -3,13 +3,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ModalState {
   isModalClosed: boolean;
-  /** When true, Profile refetches Recent Activity (after rank or bookmark). */
-  refetchProfileActivity: boolean;
 }
 
 const initialState: ModalState = {
   isModalClosed: false,
-  refetchProfileActivity: false,
 };
 
 const modalSlice = createSlice({
@@ -22,13 +19,10 @@ const modalSlice = createSlice({
     toggleModalClosed(state) {
       state.isModalClosed = !state.isModalClosed;
     },
-    setRefetchProfileActivity(state, action: PayloadAction<boolean>) {
-      state.refetchProfileActivity = action.payload;
-    },
   },
 });
 
-export const { setModalClosed, toggleModalClosed, setRefetchProfileActivity } = modalSlice.actions;
+export const { setModalClosed, toggleModalClosed } = modalSlice.actions;
 export default modalSlice.reducer;
 
 

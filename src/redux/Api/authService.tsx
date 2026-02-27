@@ -45,7 +45,13 @@ const ensureEmail = (value: unknown): string => {
   return result.sanitized;
 };
 
- 
+/**
+ * Login user with email and password
+ * 
+ * @param email - User email address
+ * @param password - User password
+ * @returns ApiResponse with auth token on success
+ */
 export const loginUser_Api = (email: string, password: string): Promise<ApiResponse<string>> =>
   safeApiCall(
     async () => {
@@ -366,7 +372,8 @@ export const changePassword = async (
       headers: {
         Authorization: `Token ${token}`,
       },
-    }); 
+    });
+
     return {
       success: response.status === 200 && response.data?.password_reset === "success",
     };

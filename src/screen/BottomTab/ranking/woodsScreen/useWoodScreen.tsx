@@ -38,13 +38,12 @@ const useWoodScreen = () => {
   /** Ignore responses for older queries so only the latest search updates the list (fixes jumping data). */
   const latestSearchQueryRef = useRef('');
 
-  const togglePlatform = useCallback((item: string | object) => {
-    const id = (item as { id?: string })?.id;
-    if (id == null) return;
+  const togglePlatform = (item: string | object) => {
+    const id = item.id;
     setSelectedPlatforms(prev =>
-      (prev as string[]).includes(id) ? (prev as string[]).filter(pid => pid !== id) : [...(prev as string[]), id]
+      prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
     );
-  }, []);
+  };
 
   // 🔍 Search for Movies
   // const searchFromAPI = async (query: string, page: number = 1) => {
