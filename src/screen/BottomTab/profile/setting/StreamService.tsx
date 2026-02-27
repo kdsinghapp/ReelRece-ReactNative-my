@@ -1,7 +1,7 @@
 import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenNameEnum from '@routes/screenName.enum'
-import { useNavigation, useRoute } from '@react-navigation/native'
+import { useNavigation, useRoute, CommonActions } from '@react-navigation/native'
 import { Color } from '@theme/color'
 import font from '@theme/font'
 import { useSelector } from 'react-redux'
@@ -258,44 +258,13 @@ const StreamService = () => {
   }, [searchQuery]);
 
   const goToRankingScreen = () => {
-    // navigation.reset(ScreenNameEnum.OnboardingScreen);
-    navigation.reset({
-      index: 0,
-      routes: [
-        { name: ScreenNameEnum.OnboardingScreen }
-      ],
-    });
-
-
-
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [
-    //     {
-    //       name: ScreenNameEnum.TabNavigator,
-    //       state: {
-    //         index: 0,
-    //         routes: [
-    //           {
-    //             name: ScreenNameEnum.RankingTab,
-    //             state: {
-    //               index: 0,
-    //               routes: [
-    //                 {
-    //                   name: ScreenNameEnum.RankingScreen,
-    //                   params: { openTooltipModal: true },
-    //                 },
-    //               ],
-    //             },
-    //           },
-    //         ],
-    //       },
-    //     },
-    //   ],
-    // });
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: ScreenNameEnum.OnboardingScreen }],
+      })
+    );
   };
-
-
 
   const renderItem = ({ item }) => {
     const isSelected = selectedPlatforms.includes(item?.supported_platform.toString());
@@ -488,7 +457,7 @@ const StreamService = () => {
             </View>
 
             {fromSignUp ? (
-              !isKeyboardVisible && (
+              (
                 <ButtonCustom
                   title={(t("login.next"))}
                   buttonStyle={styles.buttonStyle}

@@ -179,7 +179,6 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // maxHeight: 60, // 👈 REQUIRED for scrolling
   },
   defaultText: {
     color: Color.whiteText,
