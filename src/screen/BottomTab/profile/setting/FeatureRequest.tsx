@@ -1,6 +1,5 @@
 import {
   Image,
-
   StyleSheet,
   Text,
   KeyboardAvoidingView,
@@ -18,7 +17,7 @@ import {
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { Color } from '@theme/color';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
@@ -28,7 +27,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import imageIndex from '@assets/imageIndex';
-import { Button, CustomStatusBar, HeaderCustom, SuccessMessageCustom } from '@components/index';
+import { Button, CustomStatusBar , HeaderCustom, SuccessMessageCustom } from '@components/index';
 import { t } from 'i18next';
 const FeatureRequest = () => {
   const token = useSelector((state: RootState) => state.auth.token);
@@ -64,6 +63,8 @@ const FeatureRequest = () => {
   const [toastMess, setToastMess] = useState(false);
   const [toastMessColorGreen, setToastMessGreen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+  const [feedbackTypeError, setFeedbackTypeError] = useState('');
 
   useEffect(() => {
     setFirstRightAni(true)
@@ -173,8 +174,10 @@ const FeatureRequest = () => {
 
 
   const handleFormPress = async () => {
+    setDescriptionError('');
+    setFeedbackTypeError('');
 
-
+  
     if (inputValue.trim() === '') {
       setToastMess(true);
       setToastMessGreen(false);
@@ -186,25 +189,24 @@ const FeatureRequest = () => {
       setToastMessage(t("errorMessage.feedbacktype"));
       return;
     }
-    try {
-      const response = await userFeedback(token, feedBaCkText, isCheckBox, inputValue);
 
-      setFeedBAckSucc(true)
-      // navigation.navigate(ScreenNameEnum.MainSetting);
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: ScreenNameEnum.MainSetting,
-            params: { toastTrue: true }, // 👈 param भेज दिया
-          },
-        ],
-      });
+    if (!token) return;
+    try {
+      await userFeedback(token, feedBaCkText, isCheckBox, inputValue);
+      if (typeof setFeedBAckSucc === 'function') setFeedBAckSucc(true);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: ScreenNameEnum.MainSetting, params: { toastTrue: true } }],
+        })
+      );
     } catch (error) {
     } finally {
       setToastMess(false);
       setToastMessGreen(false);
       setToastMessage('');
+      setDescriptionError('');
+      setFeedbackTypeError('');
     }
   };
 
@@ -227,6 +229,7 @@ const FeatureRequest = () => {
 
   const handleFeedbackSelection = (text: string) => {
     setFeedBaCkText(text);
+    if (feedbackTypeError) setFeedbackTypeError('');
     // Reset vertical position to bottom
     formVerticalAnim.setValue(Dimensions.get('window').height);
     // Animate up
@@ -259,7 +262,10 @@ const FeatureRequest = () => {
             <TextInput
               ref={textInputRef}
               value={inputValue}
-              onChangeText={setInputValue}
+              onChangeText={(v) => {
+                setInputValue(v);
+                if (descriptionError) setDescriptionError('');
+              }}
               style={styles.inputStyle}
               placeholderTextColor={Color.lightGrayText}
               placeholder={(t("errorMessage.pleasedescribe"))
@@ -272,7 +278,7 @@ const FeatureRequest = () => {
               onSubmitEditing={Keyboard.dismiss}
             />
           </View>
-        </TouchableWithoutFeedback>
+         </TouchableWithoutFeedback>
 
         <View style={styles.CheckContainer}>
           <TouchableOpacity
@@ -377,10 +383,17 @@ const FeatureRequest = () => {
           <View style={{ flex: 1 }}>
             <View style={{ marginTop: 10 }}>
               <HeaderCustom
-                title={(t("home.streamingservices"))}
+                title={t("setting.feedback.featureRequest")}
                 backIcon={imageIndex.backArrow}
-                rightIcon={false}
-                onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
+                rightIcon={null}
+                onBackPressW={() => {
+                  Keyboard.dismiss();
+                  navigation.navigate(ScreenNameEnum.MainSetting as never);
+                }}
+                onRightPress={() => {
+                  Keyboard.dismiss();
+                  navigation.navigate(ScreenNameEnum.MainSetting as never);
+                }}
               />
             </View>
             <ScrollView
@@ -445,7 +458,7 @@ const FeatureRequest = () => {
                   style={styles.arrowStyle}
                 />
               </TouchableOpacity>
-
+         
               {feedBAck && renderFeedbackOptions()}
 
 

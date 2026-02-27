@@ -196,7 +196,8 @@
     "movietitle": "Movie Title",
     "moviedescription": "Movie Description",
     "mute": "Mute",
-    "unmute": "Unmute"
+    "unmute": "Unmute",
+    "whereToWatch": "Where to Watch"
   },
   "home": {
     "invite": "Invite Friends",

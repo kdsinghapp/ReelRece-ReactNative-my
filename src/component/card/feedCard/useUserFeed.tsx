@@ -21,7 +21,7 @@ function getFeedItemKey(item: unknown): string | null {
 
 const useUserFeed = (token: string) => {
   const [feedData, setFeedData] = useState<Array<unknown>>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0); // 0 = nothing loaded yet; first fetch will request page 1
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ const useUserFeed = (token: string) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const isFetchingRef = useRef(false);
-  const currentPageRef = useRef(1);
+  const currentPageRef = useRef(0);
   const hasMoreRef = useRef(true);
 
   useEffect(() => {
@@ -41,22 +41,32 @@ const useUserFeed = (token: string) => {
     async (
       type: FeedType,
       username?: string,
-      reset: boolean = false
+      reset: boolean = false,
+      silent: boolean = false
     ) => {
       if (!token) return;
       if (isFetchingRef.current) return;
       if (!reset && !hasMoreRef.current) return;
 
-      const pageToFetch = reset ? 1 : currentPageRef.current + 1;
+      // First load (currentPage 0) or reset: fetch page 1; otherwise fetch next page
+      const pageToFetch = reset || currentPageRef.current === 0 ? 1 : currentPageRef.current + 1;
+      const isInitialLoad = pageToFetch === 1 && currentPageRef.current === 0;
       isFetchingRef.current = true;
 
-      if (reset) {
-        setLoading(true);
-        setRefreshing(true);
+      if (!silent) {
+        if (reset) {
+          setLoading(true);
+          setRefreshing(true);
+          setHasMore(true);
+          setFeedData([]);
+        } else if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
+      } else if (reset) {
         setHasMore(true);
         setFeedData([]);
-      } else {
-        setLoadingMore(true);
       }
 
       try {
@@ -69,7 +79,7 @@ const useUserFeed = (token: string) => {
         );
         const safeResults = Array.isArray(res?.results) ? res.results : [];
 
-        if (reset) {
+        if (reset || isInitialLoad) {
           setFeedData(safeResults);
         } else if (safeResults.length > 0) {
           setFeedData((prev) => {
@@ -96,9 +106,11 @@ const useUserFeed = (token: string) => {
       } catch {
         setHasMore(false);
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        setRefreshing(false);
+        if (!silent) {
+          setLoading(false);
+          setLoadingMore(false);
+          setRefreshing(false);
+        }
         isFetchingRef.current = false;
       }
     },

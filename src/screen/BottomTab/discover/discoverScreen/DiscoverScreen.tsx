@@ -25,13 +25,9 @@ import imageIndex from '@assets/imageIndex';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { Trending_without_Filter } from '@redux/Api/movieApi';
 
-// ✅ update this import path if needed
-// import FilterBar from './FilterBar';
-// import SortByModal from './SortByModal';
-  
+ 
  import CustomText from '@components/common/CustomText/CustomText';
 
-// ✅ adjust RootState import to your project
 import { RootState } from '@redux/store';
 import SortbyModal from '@components/modal/SortbyModal/SortbyModal';
 import FilterBar from './FilterBar';
@@ -226,17 +222,14 @@ const DiscoverScreen = () => {
     [token, buildUrl, setTrending]
   );
 
-  // Sync tab from route params as early as possible; also when params arrive after mount (e.g. tab)
-  useLayoutEffect(() => {
+   useLayoutEffect(() => {
     if (isSelectList != null && ['1', '2', '5'].includes(String(isSelectList))) {
       const next = String(isSelectList);
       setSelectedSimpleFilter(prev => (prev !== next ? next : prev));
     }
   }, [isSelectList]);
 
-  // When navigating from Home with "Want to watch", params can arrive after focus when switching tabs.
-  // Read from both ref (latest from render) and navigation state so we never miss params.
-  useFocusEffect(
+   useFocusEffect(
     useCallback(() => {
       const applyParams = () => {
         const fromRef = routeParamsRef.current?.isSelectList;
@@ -254,8 +247,7 @@ const DiscoverScreen = () => {
     }, [navigation])
   );
 
-  // Single source: fetch when filters (including selected tab) change; runs on mount and when user changes tab/filters
-  useEffect(() => {
+   useEffect(() => {
     const currentFingerprint = `${selectedSimpleFilter}-${filterGenreString}-${platformFilterString}-${selectedSortId}-${contentSelect}`;
     if (filterFingerprintRef.current !== currentFingerprint) {
       filterFingerprintRef.current = currentFingerprint;
@@ -295,19 +287,12 @@ const DiscoverScreen = () => {
   const renderItem = useCallback(
     ({ item }: { item: MovieItem }) => {
       if (!item) return null;
-
-      // const coverSource = item?.cover_image_url?.trim()
-      //   ? {
-      //       uri: item.cover_image_url,
-      //       priority: FastImage.priority.low,
-      //       cache: FastImage.cacheControl.immutable,
-      //     }
-      //   : imageIndex.SingleMovie5;
-      const coverSource = item?.cover_image_url?.trim()
+       const coverSource = item?.cover_image_url?.trim()
       ? {
           uri: item.cover_image_url,
-          priority: FastImage.priority.low,
+          priority: FastImage.priority.high,
           cache: FastImage.cacheControl.immutable,
+          
         }
       : null;
       return (
@@ -320,6 +305,7 @@ const DiscoverScreen = () => {
             style={styles.image}
             source={coverSource}
             resizeMode={FastImage.resizeMode.stretch}
+
           />
           <View style={styles.rating}>
             <RankingWithInfo

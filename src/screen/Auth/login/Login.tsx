@@ -16,11 +16,13 @@ import CustomText from '@components/common/CustomText/CustomText';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import styles from '@screens/Auth/signup/style';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import LoadingModal from '@utils/Loader';
 import useLogin from './useLogin';
 import { t } from 'i18next';
 import { CustomStatusBar, InputFieldCustom, SuccessMessageCustom } from '@components/index';
 export default function Login() {
+  const isOnline = useNetworkStatus();
   const {
     navigation,
     LoginFunction,
@@ -40,7 +42,7 @@ export default function Login() {
     }
   }, [validSuccess]);
    return (
-    <SafeAreaView style={style.mainViewLogin}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={style.mainViewLogin}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
       {loading ? <LoadingModal /> : null}

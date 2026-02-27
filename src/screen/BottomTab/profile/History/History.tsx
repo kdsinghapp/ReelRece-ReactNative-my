@@ -4,6 +4,7 @@ import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from
 import imageIndex from '@assets/imageIndex';
 import { BottomSheet,   CustomStatusBar,   HeaderCustom, ProfileOther,  } from '@components';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
  import { Color } from '@theme/color';
@@ -18,6 +19,7 @@ import { t } from 'i18next';
 
 
 const OtherWatchingProfile = () => {
+  const isOnline = useNetworkStatus();
   const [bottomModal, setBottomModal] = useState(false)
   const [lovedImageMap, setLovedImageMap] = useState<{ [key: string]: boolean }>({});
 
@@ -182,7 +184,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
   }, [token, handleToggleLovedImage, lovedImageMap, isSaved, movies]);
 
   return (
-    <SafeAreaView style={{
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
       flex:1
     }}>
       <CustomStatusBar />

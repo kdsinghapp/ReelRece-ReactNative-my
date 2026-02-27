@@ -1,10 +1,11 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, BackHandler } from 'react-native';
- import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
- import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
@@ -12,7 +13,7 @@ import FastImage from 'react-native-fast-image';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { useBookmarks } from '@hooks/useBookmark';
-    import { getCommonBookmarkOtherUser, getCommonBookmarks, getOtherUserRatedMovies } from '@redux/Api/movieApi';
+import { getCommonBookmarkOtherUser, getCommonBookmarks, getOtherUserRatedMovies } from '@redux/Api/movieApi';
 import { getHistoryApi } from '@redux/Api/ProfileApi';
 import imageIndex from '@assets/imageIndex';
 import { BottomSheet, CustomStatusBar, HeaderCustom, ProfileOther } from '@components/index';
@@ -26,30 +27,31 @@ interface WatchSaveUserProps {
 
 
 const WatchSaveUser = ({ disableBottomSheet = false }) => {
+  const isOnline = useNetworkStatus();
   const dispatch = useDispatch();
   const route = useRoute();
-  const { title, datamovie, username, token, imageUri ,my_profile=false} = route.params;
+  const { title, datamovie, username, token, imageUri, my_profile = false } = route.params;
 
 
 
-   const navigation = useNavigation();
+  const navigation = useNavigation();
   const [movies, setMovies] = useState([]);
   // const [modalVisible, setModalVisible] = useState(false);
   const [bottomModal, setBottomModal] = useState(false)
   const loginUserName = useSelector((state: RootState) => state.auth.userGetData?.username);
   const { isBookmarked, toggleBookmark } = useBookmarks(token);
   const [isSaved, setIsSaved] = useState(true);
-   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const avatar = useSelector((state: RootState) => state.auth.userGetData?.avatar);
   const userAvatarUrl = useMemo(() => `${BASE_IMAGE_URL}${avatar}}`, [avatar]);
 
-  const avatarUrl1 = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined; 
+  const avatarUrl1 = avatar ? `${BASE_IMAGE_URL}${avatar}` : undefined;
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
 
-   let changeMovie = 1;
+  let changeMovie = 1;
   const BottomData = isFollowing
     ? [
       { name: t("common.unfollow"), action: () => { setIsFollowing(false); setBottomModal(false); } },
@@ -65,7 +67,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
   const compareHook = useCompareComponent(token);
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
-   };
+  };
 
   const handleToggleBookmark = async (imdb_id: string) => {
     try {
@@ -77,7 +79,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
       dispatch(fetchHomeBookmarks({ silent: true }));
     } catch (error) {
     }
-  }; 
+  };
   const fetchMovies = async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
     loadingRef.current = true;
@@ -104,12 +106,12 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
         pageRef.current += 1;
       }
     } catch (error) {
-     } finally {
+    } finally {
       loadingRef.current = false;
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     // reset when user changes
     pageRef.current = 1;
     hasMoreRef.current = true;
@@ -119,7 +121,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
 
   const renderMovie = useCallback(({ item }) => {
     // setIsSaved(item?.is_bookmarked ?? false)
-     return (
+    return (
       <>
         <View style={styles.movieCard}>
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }} >
@@ -180,8 +182,8 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
   }, [navigation, isBookmarked, toggleBookmark, changeMovie]);
 
   // const { backnavigateTab, backnavigate } = route.params || {};
-   return (
-    <SafeAreaView style={styles.maincontainer}>
+  return (
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.maincontainer}>
       <CustomStatusBar />
       <View style={styles.container}>
         <HeaderCustom
@@ -200,7 +202,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
           data={movies}
           keyExtractor={item => item.id}
           renderItem={renderMovie}
- onEndReached={fetchMovies}
+          onEndReached={fetchMovies}
           onEndReachedThreshold={0.6}
           ListHeaderComponent={() => (
             <View style={{ marginTop: 65 }}>

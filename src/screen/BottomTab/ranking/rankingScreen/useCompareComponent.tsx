@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Alert } from 'react-native';
-import { calculateMovieRating, getAllRatedMovies, getAllRated_with_preference, getRatedMovies, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'; 
+import { calculateMovieRating, getAllRatedMovies, getAllRated_with_preference, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
+import { setModalClosed, setRefetchProfileActivity } from '@redux/feature/modalSlice/modalSlice';
 import { getUserProfile } from '@redux/Api/authService';
 import { setUserProfile } from '@redux/feature/authSlice';
 import { errorToast } from '@utils/customToast';
@@ -47,8 +46,7 @@ export const useCompareComponent = (token: string) => {
   const shouldShowStepModalRef = useRef(false);
   /** Prefetched comparison lists by preference (love/like/dislike) for the current selectedMovieId - used to avoid API wait on preference select */
   const prefetchedByPreferenceRef = useRef<Record<string, unknown[]>>({});
-  const [userProfileDate, setUserProfileDate] = useState<Record<string, unknown>>({});
-  useEffect(() => {
+   useEffect(() => {
     fetchUserProfile()
   }, [token])
   const fetchUserProfile = useCallback(async () => {
@@ -116,18 +114,6 @@ export const useCompareComponent = (token: string) => {
       setStepsModalVisible(true);
     }
   }, [currentStep]);
-
-  //  const handleRatingRollbackError = useCallback((error: unknown) => {
-  //   handleCloseRating();  
-  //       handleCloseRating()
-  //     Alert.alert(
-  //       'Could not save rating',
-  //        'Your choices have been rolled back. Please try again from the beginning.',
-  //       [{ text: 'OK', onPress: () => { setComparisonVisible(false); setStepsModalVisible(false); } }]
-  //     );
-
-  // }, []);
-  /** Prefetch comparison lists for all preferences when feedback modal opens so selection feels instant. */
   const prefetchComparisonByPreference = useCallback((movieImdbId: string | null | undefined) => {
     if (!token || !movieImdbId) return;
     prefetchedByPreferenceRef.current = {};
@@ -344,7 +330,10 @@ export const useCompareComponent = (token: string) => {
         .catch(() => recordPairwiseDecision(token, pairwisePayload))
         .then(() => {
           if (imdbId && pref) {
-            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then(() => dispatch(setModalClosed(true)));
+            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then(() => {
+            dispatch(setModalClosed(true));
+            dispatch(setRefetchProfileActivity(true));
+          });
           }
         })
         .catch(() => {
@@ -409,7 +398,10 @@ export const useCompareComponent = (token: string) => {
         .then(() => {
           if (imdbId && pref) {
             return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then((res) => {
-              if (res) dispatch(setModalClosed(true));
+              if (res) {
+                dispatch(setModalClosed(true));
+                dispatch(setRefetchProfileActivity(true));
+              }
             });
           }
         })

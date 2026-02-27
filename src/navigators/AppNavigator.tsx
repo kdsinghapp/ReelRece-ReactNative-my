@@ -9,8 +9,8 @@ import toastConfig, { errorToast, successToast } from '@utils/customToast';
 import { persistor, store } from '@redux/store';
 import RegistrationRoutes from '@navigators/RegistrationRoutes';
 import { rootNavigationRef } from '@navigators/rootNavigationRef';
+import OfflineBanner from '@components/common/OfflineBanner/OfflineBanner';
 import "../.././src/i18n";
-import NetworkStatusModal from '@components/NetworkStatusModal';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 
 // Custom theme define karein
@@ -51,11 +51,11 @@ const AppNavigator: React.FC = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <GestureHandlerRootView style={{ flex: 1, }}>
-          <SafeAreaView style={{ flex: 1, backgroundColor: '#000000' }} edges={['bottom']}>
-            {/* <NetworkStatusModal
-            modalVisible={!isConnected}
-            offlineText="No Internet! Please check your connection."
-          />  */}
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: '#000000' }}
+            edges={isConnected ? ['bottom'] : ['top', 'bottom']}
+          >
+              {!isConnected && <OfflineBanner />}
             <NavigationContainer
               ref={rootNavigationRef}
               theme={CustomTheme}

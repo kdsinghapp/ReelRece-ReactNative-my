@@ -14,12 +14,14 @@ import font from '@theme/font';
 import CustomText from '@components/common/CustomText/CustomText';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { CustomStatusBar, HeaderCustom, InputFieldCustom, SuccessMessageCustom } from '@components/index';
 import LoadingModal from '@utils/Loader';
 import imageIndex from '@assets/imageIndex';
 import { t } from 'i18next';
 
 export default function PasswordReset() {
+  const isOnline = useNetworkStatus();
   const {
     email,
     handleIdentityText,
@@ -34,7 +36,7 @@ export default function PasswordReset() {
     showToast,
   } = useToastMessage();
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
       {loading && <LoadingModal />}

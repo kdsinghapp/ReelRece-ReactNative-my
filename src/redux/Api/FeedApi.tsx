@@ -71,14 +71,17 @@ export const getUserFeed = async (
       params.username = username;
     }
 
+    if (type === "profile" && username) {
+      params.username = username;
+    }
+
     // Use relative path - axiosInstance already has baseURL configured
     const response = await axiosInstance.get(API_ENDPOINTS.USER.FEED, {
       headers: {
         Authorization: `Token ${tokenValidation.sanitized}`,
       },
       params: createSafeParams(params),
-    });
-   
+    }); 
     return response.data;
   } catch (error) {
     throw error;

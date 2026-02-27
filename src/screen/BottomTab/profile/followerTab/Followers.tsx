@@ -16,7 +16,6 @@ import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-import { errorToast } from '@utils/customToast';
 import ScreenNameEnum from '@routes/screenName.enum';
 
 const PAGE_SIZE = 15;
@@ -284,7 +283,7 @@ const Followers = () => {
     return () => unsubscribe();
   }, [isConnected, activeUsers.length]);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Color.background }}>
+    <SafeAreaView edges={!isConnected ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: Color.background }}>
       <StatusBarCustom />
       <View style={{ marginBottom: 10 }} />
       <HeaderCustom title={userName} backIcon={imageIndex.backArrow} />

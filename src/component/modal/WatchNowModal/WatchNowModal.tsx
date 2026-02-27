@@ -291,7 +291,7 @@ const WatchNowModal = ({
                     renderItem={renderPlatform}
                     contentContainerStyle={{ paddingVertical: 10 }}
                     initialNumToRender={10}
-                    showsVerticalScrollIndicator={true}
+                    showsVerticalScrollIndicator={false}
                     maxToRenderPerBatch={10}
                     windowSize={7}
                     removeClippedSubviews={Platform.OS === 'android'}

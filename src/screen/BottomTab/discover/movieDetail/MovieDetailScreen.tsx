@@ -9,6 +9,7 @@ import {
   Platform,
   useWindowDimensions,
   AppState,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -19,6 +20,7 @@ import { Color } from '@theme/color';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
@@ -42,12 +44,14 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import imageIndex from '@assets/imageIndex';
 import MovieDetailsShimmer from '@components/MovieDetailsShimmer/MovieDetailsShimmer';
 import { t } from 'i18next';
+import type { Platform as StreamingPlatform } from '../../../../types/api.types';
 const CommentModal = React.lazy(() =>
   import('@components/modal/comment/CommentModal')
 );
 
 
 const MovieDetailScreen = () => {
+  const isOnline = useNetworkStatus();
   const navigation = useNavigation();
   const {
     watchModal, setWatchModal,
@@ -207,13 +211,14 @@ const MovieDetailScreen = () => {
       scrollEnabled: outerScrollEnableds.current
     });
   }, [outerScrollEnableds.current]);
-  // Screen focus: resume video state when screen is focused
+  // Screen focus: unmount video when user navigates away (tab switch, back) to stop audio
   useFocusEffect(
     useCallback(() => {
       setIsScreenFocused(true);
       setIsVideoPaused(false);
 
       return () => {
+        setIsScreenFocused(false);
         setIsVideoPaused(true);
         trailerTracker.triggerInteractionIfAny();
         trailerTracker.resetTracker();
@@ -363,6 +368,7 @@ const MovieDetailScreen = () => {
           setCurrentIndex(1);
           isResettingRef.current = false;
           setIsVideoTransitioning(false);
+          setPaused(false);
           preloadNextMovie();
         }, 250);
         return;
@@ -384,6 +390,7 @@ const MovieDetailScreen = () => {
             setCurrentIndex(1);
             isResettingRef.current = false;
             setIsVideoTransitioning(false);
+            setPaused(false);
             preloadNextMovie();
           }, 250);
         } else {
@@ -640,15 +647,6 @@ const MovieDetailScreen = () => {
   const [paused, setPaused] = useState(false); // Start playing by default
   const prevModalState = useRef(false);
 
-  // Stop video when user switches tab (screen loses focus)
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        setPaused(true);
-      };
-    }, [])
-  );
-
   // Stop and unmount video when app goes to background so it doesn't keep playing
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextAppState) => {
@@ -725,7 +723,7 @@ const MovieDetailScreen = () => {
 
             {Platform.OS == "ios" ? <>
 
-              {index === currentIndex && !isVideoTransitioning && appInForeground ? (
+              {index === currentIndex && !isVideoTransitioning && appInForeground && isScreenFocused ? (
                 <CustomVideoPlayer
                   key={`video-ios-${item?.imdb_id}-${videoMountKey}`}
                   videoUrl={item.trailer_url}
@@ -744,7 +742,7 @@ const MovieDetailScreen = () => {
               )}
 
             </> : <>
-              {index === currentIndex && !isVideoTransitioning && appInForeground && !!item?.trailer_url ? (
+              {index === currentIndex && !isVideoTransitioning && appInForeground && isScreenFocused && !!item?.trailer_url ? (
                 <VideoPlayer
                   key={`video-android-${item?.imdb_id}-${videoMountKey}`}
                   source={{ uri: item.trailer_url }}
@@ -996,6 +994,68 @@ const MovieDetailScreen = () => {
                   </View>
                 ) :
                 <Text style={styles.description} >{t("emptyState.nodescription")}</Text>}
+
+              {/* Where to Watch - platforms from movie metadata */}
+              {item?.platforms && Array.isArray(item.platforms) && item.platforms.length > 0 && (
+                <View style={styles.whereToWatchSection}>
+                  <CustomText
+                    size={14}
+                    color={Color.whiteText}
+                    style={styles.whereToWatchTitle}
+                    font={font.PoppinsBold}
+                  >
+                    {t("movieDetail.whereToWatch")}
+                  </CustomText>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.whereToWatchScroll}
+                  >
+                    {item.platforms.map((platform: StreamingPlatform, idx: number) => {
+                      const hasLink = platform?.watch_link && String(platform.watch_link).trim();
+                      return (
+                        <TouchableOpacity
+                          key={`${platform.platform_name}-${idx}`}
+                          style={[styles.whereToWatchCard, !hasLink && styles.whereToWatchCardDisabled]}
+                          onPress={() => hasLink && Linking.openURL(platform.watch_link!)}
+                          disabled={!hasLink}
+                          activeOpacity={hasLink ? 0.7 : 1}
+                        >
+                          {platform.logo_url ? (
+                            <Image
+                              source={{ uri: platform.logo_url }}
+                              style={styles.whereToWatchLogo}
+                              resizeMode="contain"
+                            />
+                          ) : (
+                            <View style={styles.whereToWatchLogoPlaceholder}>
+                              <Text style={styles.whereToWatchLogoPlaceholderText} numberOfLines={1}>
+                                {(platform.platform_name || '?').slice(0, 2)}
+                              </Text>
+                            </View>
+                          )}
+                          <CustomText
+                            size={12}
+                            color={Color.whiteText}
+                            numberOfLines={1}
+                            style={styles.whereToWatchName}
+                            font={font.PoppinsMedium}
+                          >
+                            {platform.platform_name || 'Unknown'}
+                          </CustomText>
+                          {platform.watch_type && (
+                            <View style={styles.whereToWatchBadge}>
+                              <Text style={styles.whereToWatchBadgeText} numberOfLines={1}>
+                                {platform.watch_type}
+                              </Text>
+                            </View>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
             </View>
             <View style={{
               justifyContent: 'space-between',
@@ -1157,7 +1217,7 @@ const MovieDetailScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={movieData}
@@ -1227,14 +1287,13 @@ const MovieDetailScreen = () => {
       />
 
       <WatchNowModal
-
-        visible={watchNow} onClose={closeWatchNowModal}
+        visible={watchNow}
+        onClose={closeWatchNowModal}
         token={token}
         watchNow={watchNow}
-        selectedImdbId={imdb_idData}
+        selectedImdbId={movieData[currentIndex]?.imdb_id ?? imdb_idData}
         watchModalLoad={watchModalLoad}
         setWatchModalLoad={setWatchModalLoad}
-
       />
 
       <MovieInfoModal

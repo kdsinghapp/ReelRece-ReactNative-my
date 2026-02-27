@@ -134,7 +134,7 @@ const RankingListItem = React.memo(
               <FastImage
                 source={{
                   uri: movie.cover_image_url,
-                  priority: FastImage.priority.low,
+                  priority: FastImage.priority.high,
                   cache: FastImage.cacheControl.immutable,
                 }}
                 style={styles.poster}
@@ -312,7 +312,7 @@ const RankingScreen = () => {
 
   const handleRefresh = useCallback(async () => {
     if (!isOnline) {
-      errorToast('No Internet! \n Please check your network connection');
+      // errorToast('No Internet! \n Please check your network connection');
       return;
     }
     setRefreshing(true);
@@ -823,7 +823,7 @@ const RankingScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.maincontainer}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.maincontainer}>
       <CustomStatusBar />
 
       <View style={styles.container}>

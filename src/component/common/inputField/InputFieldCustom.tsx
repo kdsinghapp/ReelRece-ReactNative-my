@@ -49,7 +49,7 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
               fontFamily: font.PoppinsRegular,
               fontSize: 16,
               color: Color.whiteText,
-              textAlignVertical: 'center', // Android
+               textAlignVertical: 'center', // Android
               paddingVertical: 0,          // important
               includeFontPadding: false,   // Android fix
 

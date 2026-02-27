@@ -23,15 +23,14 @@ import {
   Pressable,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import debounce from 'lodash.debounce';
 import FastImage from 'react-native-fast-image';
-
 import { Color } from '@theme/color';
 import font from '@theme/font';
-
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
 import { DescriptionWithReadMore } from '@components/common/DescriptionWithReadMore/DescriptionWithReadMore';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -123,6 +122,7 @@ const BackgroundImage = memo(({ imageUri }) => {
 
 // Main Component
 const WatchWithFriend = () => {
+  const isOnline = useNetworkStatus();
   const route = useRoute()
   const token = useSelector((state: RootState) => state.auth.token);
   const navigation = useNavigation();
@@ -644,9 +644,8 @@ const WatchWithFriend = () => {
         <View
           pointerEvents="box-none"
           style={{
-            bottom: 18.5
-
-          }}
+            bottom: 18.5,
+           }}
         >
 
           <DescriptionWithReadMore
@@ -685,7 +684,7 @@ const WatchWithFriend = () => {
               alignItems: 'center',
               width: width * 0.4,
               borderRadius: 10,
-              marginTop: Platform.OS === 'ios' ? -5 : 5,
+              marginTop: Platform.OS === 'ios' ? -7 : 5,
               bottom: Platform.OS === 'ios' ? 0 : 5,
               opacity: pressed ? 0.8 : 1,
             },
@@ -765,8 +764,7 @@ const WatchWithFriend = () => {
               }}
               style={[styles.poster, {
                 bottom: 22.5 ,
-                marginTop:Platform.OS == "ios" ? 13: 0
-        
+                marginTop: Platform.OS =="ios" ? 10.6:0
               }]}
               resizeMode={FastImage.resizeMode.cover}
             />
@@ -817,7 +815,7 @@ const WatchWithFriend = () => {
         reducedTransparencyFallbackColor="white"
         // overlayColor='transparent'
       /> */}
-      <SafeAreaView style={[styles.mincontainer, { flex: 1 }]}>
+      <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={[styles.mincontainer, { flex: 1 }]}>
         <CustomStatusBar translucent={true} />
 
         {/* Header */}

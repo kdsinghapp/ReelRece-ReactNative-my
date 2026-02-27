@@ -453,7 +453,7 @@ if(activity =="bookmarked"){
       <View style={styles.footerActions}>
         <TouchableOpacity 
                 activeOpacity={1}
-
+   
           onPress={() =>
             handleRankingPress({
               imdb_id,
@@ -462,6 +462,14 @@ if(activity =="bookmarked"){
               cover_image_url: poster?.uri || '', 
             })
           }
+          // onPress={() =>
+          //   handleRankingPress({
+          //     imdb_id,
+          //     title,
+          //     release_year,
+          //     cover_image_url: poster?.uri || '', 
+          //   })
+          // }
         >
           <Image
             source={imageIndex.mdRankings}

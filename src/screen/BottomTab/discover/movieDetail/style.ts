@@ -242,6 +242,66 @@ marginBottom:18,
   muteButtonLabel: {
     marginLeft: 6,
   },
+  // Where to Watch section (streaming platforms)
+  whereToWatchSection: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  whereToWatchTitle: {
+    marginBottom: 10,
+  },
+  whereToWatchScroll: {
+    paddingRight: 14,
+    alignItems: 'center',
+  },
+  whereToWatchCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 88,
+    marginRight: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    backgroundColor: Color.grey700,
+    borderRadius: 10,
+  },
+  whereToWatchCardDisabled: {
+    opacity: 0.7,
+  },
+  whereToWatchLogo: {
+    width: 40,
+    height: 40,
+    marginBottom: 6,
+    borderRadius: 6,
+  },
+  whereToWatchLogoPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    backgroundColor: Color.darkGrey,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  whereToWatchLogoPlaceholderText: {
+    fontSize: 12,
+    fontFamily: font.PoppinsMedium,
+    color: Color.lightGrayText,
+  },
+  whereToWatchName: {
+    textAlign: 'center',
+  },
+  whereToWatchBadge: {
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: Color.primary,
+    borderRadius: 4,
+  },
+  whereToWatchBadgeText: {
+    fontSize: 10,
+    fontFamily: font.PoppinsMedium,
+    color: Color.whiteText,
+  },
 });
 
 export default styles;

@@ -1,7 +1,7 @@
 import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenNameEnum from '@routes/screenName.enum'
-import { useNavigation, useRoute, CommonActions } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { Color } from '@theme/color'
 import font from '@theme/font'
 import { useSelector } from 'react-redux'
@@ -24,7 +24,7 @@ const imageSize = screenWidth / numColumns - 25;
 const StreamService = () => {
   const token = useSelector((state: RootState) => state.auth.token);
   const route = useRoute();
-  const { fromSignUp } = route.params || {};
+  const { fromSignUp } = route?.params || {};
   const navigation = useNavigation() 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMode, setFilterMode] = useState<| 'popular' | 'more'>('popular');
@@ -40,8 +40,7 @@ const StreamService = () => {
   const [platformData, setPlatformData] = useState<object | string | null | number[]>([]); // current loaded items
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1)
-  const [filteredPlatforms, setFilteredPlatforms] = useState(allPlatforms);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
 
   /** ---- Fetch User Subscriptions ---- */
@@ -258,13 +257,44 @@ const StreamService = () => {
   }, [searchQuery]);
 
   const goToRankingScreen = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: ScreenNameEnum.OnboardingScreen }],
-      })
-    );
+    // navigation.reset(ScreenNameEnum.OnboardingScreen);
+    navigation.reset({
+      index: 0,
+      routes: [
+        { name: ScreenNameEnum.OnboardingScreen }
+      ],
+    });
+
+
+
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [
+    //     {
+    //       name: ScreenNameEnum.TabNavigator,
+    //       state: {
+    //         index: 0,
+    //         routes: [
+    //           {
+    //             name: ScreenNameEnum.RankingTab,
+    //             state: {
+    //               index: 0,
+    //               routes: [
+    //                 {
+    //                   name: ScreenNameEnum.RankingScreen,
+    //                   params: { openTooltipModal: true },
+    //                 },
+    //               ],
+    //             },
+    //           },
+    //         ],
+    //       },
+    //     },
+    //   ],
+    // });
   };
+
+
 
   const renderItem = ({ item }) => {
     const isSelected = selectedPlatforms.includes(item?.supported_platform.toString());
@@ -457,7 +487,7 @@ const StreamService = () => {
             </View>
 
             {fromSignUp ? (
-              (
+              !isKeyboardVisible && (
                 <ButtonCustom
                   title={(t("login.next"))}
                   buttonStyle={styles.buttonStyle}

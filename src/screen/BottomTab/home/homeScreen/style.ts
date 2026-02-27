@@ -6,20 +6,8 @@ import font from '@theme/font';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.background },
-  // header: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-between',
-  //   alignItems: 'center',
-  //   paddingHorizontal: 13,
-  //   height:50,
-  //   backgroundColor:'rgba(221, 6, 6, 0.24)',
-  //   zIndex:99,
-
-  // },
-
   header: {
-    // position: 'absolute', // Makes it float
-    top: 0,               // Stick to top
+     top: 0,               // Stick to top
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

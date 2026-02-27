@@ -121,13 +121,20 @@ interface Props {
   onViewMore: () => void;
   descriptionStyle?: TextStyle;
   titleLines?: number;
+  /** Font size in pixels. Default 14. */
+  fontSize?: number;
+  /** Line height in pixels. Defaults to fontSize * 1.43 if omitted. */
+  lineHeight?: number;
 }
 
 export const DescriptionWithReadMore: React.FC<Props> = ({
   description,
   descriptionStyle,
   titleLines = 1,
+  fontSize = 14,
+  lineHeight: lineHeightProp,
 }) => {
+  const lineHeight = lineHeightProp ?? Math.round(fontSize * 1.43);
   const [wordLimit, setWordLimit] = useState(titleLines === 1 ? 145 : 90);
 
   useEffect(() => {
@@ -148,9 +155,15 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
     return cleaned.slice(0, wordLimit).trim();
   }, [description, wordLimit]);
 
+  const textStyle: TextStyle[] = [
+    styles.baseText,
+    { fontSize, lineHeight },
+    ...(descriptionStyle ? [descriptionStyle] : []),
+  ];
+
   if (!description?.trim()) {
     return (
-      <Text style={[styles.defaultText, descriptionStyle]}>
+      <Text style={textStyle}>
         {t("emptyState.nodata")}
       </Text>
     );
@@ -158,19 +171,17 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      {/* Vertical scroll inside horizontal scroll */}
       <ScrollView
         nestedScrollEnabled
         showsVerticalScrollIndicator={true}
-        // contentContainerStyle={{height:100}}
       >
         <CustomText
-          size={14}
+          size={fontSize}
           color={Color.lightGrayText}
-          style={[styles.defaultText, descriptionStyle]}
+          style={textStyle}
           font={font.PoppinsRegular}
         >
-          {description}  
+          {description}
         </CustomText>
       </ScrollView>
     </View>
@@ -178,12 +189,9 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-  },
-  defaultText: {
+  container: {},
+  baseText: {
     color: Color.whiteText,
     fontFamily: font.PoppinsRegular,
-    fontSize: 13,
-    lineHeight: 20,
   },
 });

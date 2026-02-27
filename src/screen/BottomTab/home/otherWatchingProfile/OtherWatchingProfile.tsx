@@ -39,8 +39,7 @@ const OtherWatchingProfile = () => {
   const [isSaved, setIsSaved] = useState(false);
   const [movies, setMovies] = useState([])
 
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
 

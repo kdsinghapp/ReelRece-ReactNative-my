@@ -19,12 +19,14 @@ import font from '@theme/font';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import { sendOTPToEmail_GET } from '@redux/Api/authService';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import imageIndex from '@assets/imageIndex';
 import { CustomStatusBar } from '@components/index';
 import useSignup from '@screens/Auth/signup/useSignup';
 import { t } from 'i18next';
 
 const EmailVerify = () => {
+  const isOnline = useNetworkStatus();
   const route = useRoute();
   const { email, password, purpose = 'signup' } = route?.params || {};
 
@@ -96,7 +98,7 @@ const response  = await sendOTPToEmail_GET(email)
     }
   }, [code]);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: 'black' }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* <AuthBack /> */}

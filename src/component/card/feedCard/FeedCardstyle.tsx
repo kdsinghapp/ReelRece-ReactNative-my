@@ -121,5 +121,28 @@ export const styles = StyleSheet.create({
     borderColor: Color.grey,
     marginTop: 15,
   },
- 
+  feedHeaderRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  feedHeaderTitleWrap: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  commentMargin: {
+    marginLeft: 6,
+  },
+  muteIcon: {
+    height: 18,
+    width: 18,
+    tintColor: Color.whiteText,
+  },
+  rankingTouch: {
+    alignSelf: 'flex-start',
+  },
+  bookmarkTouch: {
+    height: 35,
+    width: 30,
+  },
 });

@@ -14,6 +14,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
  import { updateUserProfileField } from '@redux/feature/authSlice';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { EditNameModal, HeaderCustom, ImagePickerModal } from '@components/index';
 import imageIndex from '@assets/imageIndex';
 import useProfile from '../profileScreen/useProfile';
@@ -22,6 +23,7 @@ import { t } from 'i18next';
 
 
 const EditProfile = () => {
+  const isOnline = useNetworkStatus();
   const token = useSelector((state: RootState) => state.auth.token);
   const route = useRoute<RouteProp<{ params?: { avatar?: string } }, 'params'>>();
   const { avatar } = route?.params || {};
@@ -124,7 +126,7 @@ const profileData = useMemo(() => [
       : undefined;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.container}>
       <StatusBarCustom />
       <HeaderCustom title= {t("home.editprofile")}   backIcon={imageIndex.backArrow} />
       <View style={[styles.container, { padding: 20 }]}>

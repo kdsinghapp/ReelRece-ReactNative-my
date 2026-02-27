@@ -17,6 +17,7 @@ import font from '@theme/font';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import LoadingModal from '@utils/Loader';
 import { CustomStatusBar, InputFieldCustom, SuccessMessageCustom } from '@components/index';
 import { t } from 'i18next';
@@ -41,6 +42,7 @@ const {
   loading,
 } = usePasswordReset({ showToast }); //  Now this is safe
 
+  const isOnline = useNetworkStatus();
   const passwordRef = useRef(null);
   const confirmPasswordRef = useRef(null);
 const navigation = useNavigation();
@@ -52,7 +54,7 @@ navigation.navigate(ScreenNameEnum.LoginScreen);
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Color.background }}>
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: Color.background }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
       {loading && <LoadingModal />}
  <View style={{ marginTop: 60, marginLeft:16,}} >

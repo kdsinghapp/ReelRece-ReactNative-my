@@ -12,6 +12,7 @@ import styles from './style';
 import useSignup from './useSignup';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { Color } from '@theme/color';
 import { Button, CustomStatusBar, InputFieldCustom } from '@components/index';
 import LoadingModal from '@utils/Loader';
@@ -34,9 +35,10 @@ export default function Signup() {
     passwordError,
     email, password } = useSignup()
   const navigating = useNavigation()
+  const isOnline = useNetworkStatus()
 
   return (
-    <SafeAreaView style={{
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
       flex: 1,
       backgroundColor: "black"
     }}>

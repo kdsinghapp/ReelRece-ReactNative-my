@@ -28,7 +28,7 @@ import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { BASE_IMAGE_URL } from '@config/api.config'; 
 import { t } from 'i18next';
 import ShimmerReviewItem from '@components/common/ShimmerReviewItem/ShimmerReviewItem';
-interface Props {
+ interface Props {
   visible: boolean;
   onClose: () => void;
   reviews: string[];
@@ -305,8 +305,12 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
           >
             <TouchableOpacity
               onPress={() => {
-                 navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
-                // navigation.navigate(ScreenNameEnum.OtherProfile);
+                const tappedUsername = item?.user?.username;
+                if (tappedUsername && tappedUsername === userprofile) {
+                  navigation.navigate(ScreenNameEnum.ProfileTab as never, { screen: ScreenNameEnum.ProfileScreen } as never);
+                } else {
+                  navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
+                }
               }}
             >
               {/* <Image
@@ -328,9 +332,12 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
             <View style={styles.info}>
               <TouchableOpacity
                 onPress={() => {
- navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
-               
-                  // navigation.navigate(ScreenNameEnum.OtherProfile);
+                  const tappedUsername = item?.user?.username;
+                  if (tappedUsername && tappedUsername === userprofile) {
+                    navigation.navigate(ScreenNameEnum.ProfileTab as never, { screen: ScreenNameEnum.ProfileScreen } as never);
+                  } else {
+                    navigation.navigate(ScreenNameEnum.OtherProfile, { item: item?.user });
+                  }
                 }}
               >
                 <Text style={styles.name}>{item.user?.name}

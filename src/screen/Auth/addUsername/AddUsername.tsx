@@ -16,6 +16,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import ButtonCustom from '@components/common/button/ButtonCustom';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import LoadingModal from '@utils/Loader';
 import { CustomStatusBar, InputFieldCustom } from '@components/index';
 import { t } from 'i18next';
@@ -31,9 +32,10 @@ export default function AddUsername() {
   const route = useRoute();
   const { email, password } = route?.params || {};
   const navigating = useNavigation()
+  const isOnline = useNetworkStatus()
 
   return (
-    <SafeAreaView style={{
+    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
       flex: 1,
       backgroundColor: "black"
     }}>

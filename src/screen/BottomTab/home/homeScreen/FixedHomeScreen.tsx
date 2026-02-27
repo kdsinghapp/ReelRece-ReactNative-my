@@ -30,18 +30,15 @@ import font from '@theme/font';
 import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
-import { homeDiscoverApi, Trending_without_Filter } from '@redux/Api/movieApi';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import CacheManagerUI from '@utils/NewCache/CacheManagerUI';
+import { homeDiscoverApi, Trending_without_Filter } from '@redux/Api/movieApi'; 
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { ComparisonModal, CustomStatusBar } from '@components/index';
 import { t } from 'i18next';
 
 const FixedHomeScreen = () => {
-  const token = useSelector((state: RootState) => state.auth.token);
-  const userData = useSelector((state: RootState) => state.auth?.userGetData);
+  const token = useSelector((state: RootState) => state.auth.token); 
   const autoPlayEnabled = useSelector(
     (state: RootState) => state.auth.userGetData?.autoplay_trailer ?? true
   );
@@ -68,13 +65,10 @@ const FixedHomeScreen = () => {
   const [trendingData, setTrendingData] = useState([]);
   const [recommendData, setRecommendData] = useState([]);
   const [bookmarkData, setBookmarkData] = useState([]);
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [loadingMovieLists, setLoadingMovieLists] = useState(true);
-  const [playIndex, setPlayIndex] = useState<number | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [hasScrolled, setHasScrolled] = useState(false); 
+  const [playIndex, setPlayIndex] = useState<number | null>(null); 
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [feedReached, setFeedReached] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); 
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(true);
   const [loadingBookmark, setLoadingBookmark] = useState(true);
@@ -116,14 +110,7 @@ const FixedHomeScreen = () => {
       };
 
  
-      // Show debug alert with API response info
-      Alert.alert('API Debug',
-        `Trending: ${debugInfo.trendingCount} items\n` +
-        `Recommend: ${debugInfo.recommendCount} items\n` +
-        `Bookmarks: ${debugInfo.bookmarksCount} items\n` +
-        `Keys: ${trending ? Object.keys(trending).join(', ') : 'null'}`
-      );
-
+ 
       // Log first item to see structure
       if (trending?.results?.[0]) {
        } else if (trending?.movies?.[0]) {

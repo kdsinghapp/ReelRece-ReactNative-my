@@ -20,11 +20,8 @@ import font from '@theme/font';
 import LogoutModal from '@components/modal/logoutModal/logoutModal';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  getAllGroups,
-  leaveGroup,
-  toggleGroupNotification
-} from '@redux/Api/GroupApi';
+import { leaveGroup, toggleGroupNotification } from '@redux/Api/GroupApi';
+import { fetchWatchGroups, updateGroupsAfterLeave } from '@redux/feature/watchSlice';
 import { WatchStyle } from './WatchStyle';
 import { getUserProfile } from '@redux/Api/authService';
 import { setUserProfile } from '@redux/feature/authSlice';
@@ -67,8 +64,8 @@ const WatchScreen = () => {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [selectedGroupIds, setSelectedGroupIds] = useState([]);
   const [groupSettingModal, setGroupSettingModal] = useState(false);
-  const [groupsData, setGroupsData] = useState([]);
-  const [loadingGroups, setLoadingGroups] = useState(true); // optional
+  const groupsData = useSelector((state: RootState) => (state.watch?.groupsData ?? []) as { groupId: string; groupName: string; isMuted: boolean; members: unknown[]; activities: unknown[]; max_activities_cnt: number }[]);
+  const loadingGroups = useSelector((state: RootState) => state.watch.loadingGroups);
   const bottomBarAnim = useRef(new Animated.Value(0)).current;
   const modalButtonsAnim = useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
@@ -76,10 +73,14 @@ const WatchScreen = () => {
   const disableMultiSelect = () => dispatch(setMultiSelectMode(false));
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = useCallback(() => {
+  const fetchGroups = useCallback(() => {
+    dispatch(fetchWatchGroups());
+  }, [dispatch]);
 
-    fetchGroups().finally(() => setRefreshing(false));
-  }, []);
+  const onRefresh = useCallback(() => {
+    fetchGroups();
+    setRefreshing(false);
+  }, [fetchGroups]);
 
   const [isConnected, setIsConnected] = useState(true);
 
@@ -88,19 +89,18 @@ const WatchScreen = () => {
       setIsConnected(state.isConnected);
       if (state.isConnected) {
         setRefreshing(true);
-        // Auto-refresh when coming back online
         fetchGroups();
       } else {
-        errorToast('No Internet! \n Please check your network connection')
+        // errorToast('No Internet! \n Please check your network connection');
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [fetchGroups]);
 
   const fetchGroupsWithRetry = async (retryCount = 0) => {
     try {
-      await fetchGroups();
-    } catch (error) {
+      await dispatch(fetchWatchGroups()).unwrap();
+    } catch {
       if (retryCount < 3) {
         setTimeout(() => fetchGroupsWithRetry(retryCount + 1), 2000);
       }
@@ -238,18 +238,15 @@ const WatchScreen = () => {
       await hanldeleaveGroup(token, id);
     });
 
-    // UI state update
-    setGroupsData(prev => prev.filter(group => !groupIdsToDelete.includes(group.groupId)));
+    dispatch(updateGroupsAfterLeave(groupIdsToDelete));
     setSelectedGroupIds([]);
     setSelectedGroup(null);
-    // setIsMultiSelectMode(false);
-    disableMultiSelect()
+    disableMultiSelect();
 
     navigation.navigate(ScreenNameEnum.WatchScreen, {
-      getAllGroupReference: Date.now()
+      getAllGroupReference: Date.now(),
     });
-
-  }, [selectedGroupIds]);
+  }, [selectedGroupIds, dispatch]);
 
   const keyExtractor = useCallback((item) => item.groupId?.toString() ?? String(item), []);
   const renderGroupItem = useCallback(
@@ -282,103 +279,31 @@ const WatchScreen = () => {
     });
   }, [groupsData, navigation]);
 
-  // inside useEffect
-  // useEffect(() => {
-  const fetchGroups = async () => {
-    try {
-      setLoadingGroups(true);
-      const groupsRes = await getAllGroups(token); // groupsRes.results = array of groups
-
-      // ✅ Guard: Check if response and results exist
-      if (!groupsRes || !Array.isArray(groupsRes.results)) {
-        setGroupsData([]);
-        return;
-      }
-
-      const enrichedGroups = await Promise.all(
-        groupsRes.results.map(async (group) => {
-
-
-          let activities = [];
-          let members = [];
-          const groupId = group?.group_id || group?.username;
-          const max_activities_cnt = group?.max_activities_cnt || 0;
-          const groupName = group?.name || group?.username || 'Unnamed Group';
-          const isMuted = group?.notification ?? false;
-          members = group?.members || [];
-          // activities
-          activities = group?.activities || [];
-          // try {
-          //   activities = await getGroupActivities(token, groupId);
-          // } catch (err) {
-          // }
-
-          // try {
-          //   const m = await getGroupMembers(token, groupId);
-          //   members = m.results;
-          // } catch (err) {
-          // }
-          return {
-            groupId,
-            groupName,
-            isMuted,
-            members,
-            activities,
-            max_activities_cnt
-          };
-        })
-      );
-      const filteredGroups = enrichedGroups.filter(Boolean);
-
-      setGroupsData(filteredGroups);
-
-    } catch (error) {
-      setGroupsData([]); // ✅ Set empty array on error
-    } finally {
-      setLoadingGroups(false);
-    }
-  };
-
-
-
   const handleNotification = async (token, groupId, currentStatus) => {
     if (!groupId) return;
     const newStatus = currentStatus ? 'off' : 'on';
 
     try {
-      const response = await toggleGroupNotification(token, groupId, newStatus);
-      const updatedGroups = groupsData.map(group =>
-        group.groupId === groupId
-          ? { ...group, isMuted: !currentStatus }
-          : group
+      await toggleGroupNotification(token, groupId, newStatus);
+      setSelectedGroup((prev: { groupId?: string } | null) =>
+        prev?.groupId === groupId ? { ...prev, isMuted: !currentStatus } : prev
       );
-      setGroupsData(updatedGroups);
-
-      //  2. selectedGroup
-      setSelectedGroup(prev =>
-        prev?.groupId === groupId
-          ? { ...prev, isMuted: !currentStatus }
-          : prev
-      );
-      fetchGroups()
-    } catch (error) {
+      fetchGroups();
+    } catch {
+      // silent fail
     }
   };
 
-  //  when getAllGroupReference changes
   useEffect(() => {
     if (getAllGroupReference === true) {
       fetchGroups();
     }
-  }, [getAllGroupReference]);
-
+  }, [getAllGroupReference, fetchGroups]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchGroups();
-      return () => {
-      };
-    }, []) // ❗ NO dependencies
+      if (isConnected) fetchGroups();
+    }, [fetchGroups, isConnected])
   );
 
 
@@ -615,7 +540,7 @@ const WatchScreen = () => {
   });
 
   return (
-    <SafeAreaView style={WatchStyle.mincontainer}>
+    <SafeAreaView edges={!isConnected ? ['bottom'] : ['top', 'bottom']} style={WatchStyle.mincontainer}>
 
 
 

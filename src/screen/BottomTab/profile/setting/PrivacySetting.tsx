@@ -1,5 +1,5 @@
-import {  StyleSheet, Switch, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import {  StyleSheet,  Text, View } from 'react-native';
+import React from 'react';
 import { Color } from '@theme/color';
 import { useNavigation } from '@react-navigation/native';
 import useToggleFlag from './useToggleFlag';

@@ -51,15 +51,14 @@ const AccountSetting = () => {
       {/* <View style={styles.divider} /> */}
 
       {/* Change Password Row */}
-      <View  style={styles.row}  
-         
-       >
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => (navigation as any).navigate(ScreenNameEnum.ChangePassSetting)}
+        activeOpacity={0.8}
+      >
         <Text style={styles.label}>{t("login.changepassword")}</Text>
-        <TouchableOpacity  onPress={() => navigation.navigate(ScreenNameEnum.ChangePassSetting)} >
-        <Image source={imageIndex.rightArrow}  style={styles.rightIcon} />
-
-        </TouchableOpacity>
-      </View>
+        <Image source={imageIndex.rightArrow} style={styles.rightIcon} />
+      </TouchableOpacity>
 
       </SafeAreaView>
 

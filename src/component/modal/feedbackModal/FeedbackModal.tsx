@@ -396,7 +396,7 @@ setModalMarginTop(-133);
                             <FastImage
                               style={[styles.comparisonPoster, { borderWidth: comparisonSelected === 'first' ? 2 : 0 }]}
                               source={leftPosterSource}
-                              resizeMode={FastImage.resizeMode.contain}
+                        resizeMode={FastImage.resizeMode.stretch}
                             />
                           )}
                         </Grayscale>
@@ -430,6 +430,7 @@ setModalMarginTop(-133);
                               ]}
                               source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
                               resizeMode={FastImage.resizeMode.contain}
+                              
                               onLoad={() => {
                                 if (!rightCardSlideInDoneRef.current) {
                                   rightCardSlideInDoneRef.current = true;
@@ -486,9 +487,9 @@ setModalMarginTop(-133);
                   <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
                     {poster?.uri ? (
                       <FastImage
-                        source={{ uri: poster.uri, priority: FastImage.priority.low, cache: FastImage.cacheControl.immutable }}
+                        source={{ uri: poster.uri, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
                         style={styles.comparisonPoster}
-                        resizeMode={FastImage.resizeMode.contain}
+                        resizeMode={FastImage.resizeMode.stretch}
                       />
                     ) : null}
                   </View>

@@ -66,8 +66,7 @@ const HelpSetting = () => {
     ],
     []
   );
-
-  // ✅ Sections + questions (i18n)
+ 
   const sections = useMemo(
     () => [
       {
@@ -133,7 +132,7 @@ const HelpSetting = () => {
       <View style={styles.searchWrap}>
         <SearchBarCustom
           value={search}
-          onChangeText={setSearch}
+          onSearchChange={setSearch}
           placeholder={t("helpsetting.searchPlaceholder")}
         />
       </View>

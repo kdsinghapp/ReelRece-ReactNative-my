@@ -1,10 +1,15 @@
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 import TokenService from '@services/TokenService';
 import { getAxiosConfig } from '@config/api.config';
-import { store, persistor } from '@redux/store';
+import { store, persistor, purgeStore } from '@redux/store';
 import { logout } from '@redux/feature/authSlice';
 import { resetToLogin } from '@navigators/rootNavigationRef';
 import { errorToast } from '@utils/customToast';
+import {
+  getRetryBehavior,
+  queueForReconnect,
+  sleep,
+} from '@redux/Api/retryQueue';
 
 // ✅ Base configuration from centralized config
 const axiosInstance = axios.create(getAxiosConfig());
@@ -90,8 +95,9 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   response => response,
   async error => {
+    const config = error.config as InternalAxiosRequestConfig & { __retryCount?: number };
     const status = error.response?.status;
-    const hadAuthHeader = !!error.config?.headers?.Authorization;
+    const hadAuthHeader = !!config?.headers?.Authorization;
 
     if (status === 401) {
       if (hadAuthHeader) {
@@ -108,6 +114,7 @@ axiosInstance.interceptors.response.use(
             } catch (_) {
               // ignore purge errors
             }
+            store.dispatch(purgeStore());
             resetToLogin();
             hasTriggered401Logout = false; // allow 401 logout again after next login
           }, 1000);
@@ -117,9 +124,22 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Network error handling
+    // Network error flag (for retry logic)
     if (error.message === 'Network Error' || error.code === 'ECONNABORTED') {
       error.isNetworkError = true;
+    }
+
+    // Smart retry: exponential backoff + offline queue
+    if (config && !error.tokenInvalid && !error.noToken && status !== 403) {
+      const behavior = getRetryBehavior(error, config);
+      if (behavior.shouldRetry && behavior.delayMs != null) {
+        config.__retryCount = (config.__retryCount ?? 0) + 1;
+        await sleep(behavior.delayMs);
+        return axiosInstance.request(config);
+      }
+      if (behavior.shouldQueue) {
+        queueForReconnect(config);
+      }
     }
 
     return Promise.reject(error);

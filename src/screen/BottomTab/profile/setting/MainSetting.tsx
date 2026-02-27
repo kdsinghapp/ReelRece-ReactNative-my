@@ -132,12 +132,12 @@ const route = useRoute<MainSettingRouteProp>();
   };
 
   const onPressItem = (item: MenuItem) => {
-    if (item.screenName === "SettingLogOut") {  
+    if (item?.screenName === "SettingLogOut") {  
       setLogoutModalVisible(true);
       return;
     }
 
-    if (item.screenName === "FeatureRequest") {
+    if (item?.screenName === "FeatureRequest") {
       navigation.navigate(ScreenNameEnum[item.screenName], {});
       return;
     }
@@ -147,9 +147,9 @@ const route = useRoute<MainSettingRouteProp>();
 
   const renderItem = ({ item }: { item: MenuItem }) => (
     <TouchableOpacity onPress={() => onPressItem(item)} style={styles.menuItem} activeOpacity={0.8}>
-      <Image source={item.icon} style={styles.icon} tintColor={Color.primary} />
+      <Image source={item?.icon} style={styles.icon} tintColor={Color.primary} />
       <Text allowFontScaling={false} style={styles.label}>
-        {item.label}
+        {item?.label}
       </Text>
     </TouchableOpacity>
   );
