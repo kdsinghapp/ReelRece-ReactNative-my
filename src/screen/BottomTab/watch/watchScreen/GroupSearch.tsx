@@ -12,7 +12,7 @@ export interface GroupSearchProps {
 
 const GroupSearch = ({ groupData, searchQuery }: GroupSearchProps) => {
   const hasSearch = (searchQuery ?? '').trim().length > 0;
-  const isEmpty = !groupData || groupData.length === 0;
+  const isEmpty = !groupData || groupData?.length === 0;
 
   return (
     <View style={styles.container}>

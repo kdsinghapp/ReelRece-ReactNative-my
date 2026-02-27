@@ -93,7 +93,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
 
       if (filteredResults) {
         setMembers(filteredResults)
-       }
+      }
     } catch (error) {
       throw error
     }
@@ -185,23 +185,26 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
-                        <TouchableOpacity
-                                                   style={{ marginRight: 12 }}
-                                                   onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:currentUser})}
-                                                 >
-                          <FastImage
-                            style={styles.avatar}
-                            source={{
-                              uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
-                              priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-                              cache: FastImage.cacheControl.web // 👈 Cache permanently
+                          <TouchableOpacity
+                            style={{ marginRight: 12 }}
+                            onPress={() => {
+                              onClose()
+                              navigation.navigate(ScreenNameEnum.OtherProfile, { item: currentUser })
                             }}
-                            resizeMode={FastImage.resizeMode.cover}
-                          />
+                          >
+                            <FastImage
+                              style={styles.avatar}
+                              source={{
+                                uri: `${BASE_IMAGE_URL}${currentUser?.avatar}`,
+                                priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                                cache: FastImage.cacheControl.web // 👈 Cache permanently
+                              }}
+                              resizeMode={FastImage.resizeMode.cover}
+                            />
                           </TouchableOpacity>
                           {currentUser?.preference &&
-                            <View style={[styles.onlineIndicator, { backgroundColor: currentUser?.preference == 'dislike' ? '#CA462A' : '#35C75A' }]}>
-                              <Image source={currentUser?.preference == 'dislike' ? imageIndex.disLike : imageIndex.like} style={{ height: 16, width: 16 }} />
+                            <View style={[styles.onlineIndicator,]}>
+                              <Image source={currentUser?.preference == 'dislike' ? imageIndex.propertyDislike : imageIndex.propertyLike} style={{ height: 16, width: 16 }} />
                             </View>
                           }
                         </View>
@@ -231,7 +234,12 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                           <View style={styles.memberItem}>
                             <TouchableOpacity
                               style={{ marginRight: 12 }}
-                              onPress={() => navigation.navigate(ScreenNameEnum.OtherProfile, {item:item})}
+                              onPress={() => {
+
+
+                                onClose()
+                                navigation.navigate(ScreenNameEnum.OtherProfile, { item: item })
+                              }}
                             >
                               <View style={styles.avatarContainer}>
 
@@ -247,8 +255,9 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                                   resizeMode={FastImage.resizeMode.stretch}
                                 />
                                 {item?.preference &&
-                                  <View style={[styles.onlineIndicator, { backgroundColor: item?.preference == 'dislike' ? '#CA462A' : '#35C75A' }]}>
-                                    <Image source={item?.preference == 'dislike' ? imageIndex.disLike : imageIndex.like} style={{ height: 16, width: 16 }} />
+                                  <View style={[styles.onlineIndicator,]}>
+                                    <Image source={item?.preference == 'dislike' ? imageIndex.propertyDislike : imageIndex.propertyLike} style={{ height: 33, width: 33 }}
+                                    />
                                   </View>
                                 }
                                 {/* {item?.preference && <View style={styles.onlineIndicator} />} */}
@@ -259,8 +268,6 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                               {item?.is_admin && <Text style={[styles.memberName, { color: 'grey' }]}>{"(Group Owner)"}</Text>
                               }
                             </View>
-
-
 
 
 
@@ -285,7 +292,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                     />
                   ) : (
                     <View style={styles.noResultContainer}>
-                      <Text style={styles.noResultText}>{t("common.cancel")}</Text>
+                      <Text style={styles.noResultText}>{t("emptyState.nogroupscore")}</Text>
                     </View>
                   )}
                 </View>
@@ -394,13 +401,9 @@ const styles = StyleSheet.create({
   },
   onlineIndicator: {
     position: 'absolute',
-    right: -8,
-    top: -5,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#35C75A',
-    alignItems: 'center',
+    right: 11,
+    top: -1,
+       alignItems: 'center',
     justifyContent: 'center'
     // borderWidth: 2.5,
     // borderColor: Color.background,
@@ -413,7 +416,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noResultText: {
-    fontSize: 16,
+    fontSize: 14,
     color: Color.lightGrayText,
     fontFamily: font.PoppinsRegular,
   },

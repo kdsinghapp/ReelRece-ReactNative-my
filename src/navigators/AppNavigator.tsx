@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import toastConfig, { errorToast, successToast } from '@utils/customToast';
+import toastConfig, { successToast } from '@utils/customToast';
 import { persistor, store } from '@redux/store';
 import RegistrationRoutes from '@navigators/RegistrationRoutes';
 import { rootNavigationRef } from '@navigators/rootNavigationRef';
@@ -35,11 +35,14 @@ const AppNavigator: React.FC = () => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       const connected = state.isConnected ?? true;
       setIsConnected(connected);
+
       if (!connected) {
+        // Just show inline OfflineBanner; no toast for offline state
         setWasDisconnected(true);
-        errorToast('You’re offline. Please check your internet connection.');
+        return;
       }
-       if (connected && wasDisconnected) {
+
+      if (connected && wasDisconnected) {
         successToast('You are back online');
         setWasDisconnected(false);
       }

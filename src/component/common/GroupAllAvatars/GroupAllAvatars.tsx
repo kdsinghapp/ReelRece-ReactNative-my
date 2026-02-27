@@ -1,12 +1,12 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { Color } from '@theme/color';
- import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 import { BASE_IMAGE_URL } from '@config/api.config';
 
 const GroupAllAvatars = ({ group }: { group: { members: Array<{ avatar: string }> } }) => {
 
-     const getGridImageStyleByIndex = (index) => {
+    const getGridImageStyleByIndex = (index: number) => {
         switch (index) {
             case 0:
                 return styles.gridImageTopLeft;
@@ -21,12 +21,12 @@ const GroupAllAvatars = ({ group }: { group: { members: Array<{ avatar: string }
         }
     };
     const renderUserImages = () => {
-       const users = group?.members
-  ? group?.members?.map((item) => item?.avatar)
-  : group?.map((item) => item?.avatar) || []; // fallback if group is an array
+        const users = group?.members
+            ? group?.members?.map((item) => item?.avatar)
+            : group?.map((item) => item?.avatar) || []; // fallback if group is an array
 
-// Total number of users
-const totalUsers = users.length;
+        // Total number of users
+        const totalUsers = users.length;
         // const renderImage = (user, style, key = null) => (
         //     <Image
         //         key={key || user?.userId}
@@ -38,16 +38,16 @@ const totalUsers = users.length;
         // );
 
         const renderImage = (avatarPath, style, key = null) => (
-            <FastImage 
-            
-            
-            source={{
-                uri: `${BASE_IMAGE_URL}${avatarPath}`,
-                cache :FastImage.cacheControl.immutable,
-                priority: FastImage.priority.low
-            }}
-            style={style}
-            resizeMode={FastImage.resizeMode.cover}
+            <FastImage
+
+
+                source={{
+                    uri: `${BASE_IMAGE_URL}${avatarPath}`,
+                    cache: FastImage.cacheControl.immutable,
+                    priority: FastImage.priority.low
+                }}
+                style={style}
+                resizeMode={FastImage.resizeMode.cover}
             />
             // <Image
             //     key={key}
@@ -120,7 +120,7 @@ const totalUsers = users.length;
 
                         {/* 4th spot with +N count */}
                         <View style={[getGridImageStyleByIndex(3), styles.moreUsersCircle]}>
-                            <Text  allowFontScaling={false}  style={styles.moreUsersText}>{totalUsers}</Text>
+                            <Text allowFontScaling={false} style={styles.moreUsersText}>{totalUsers}</Text>
                         </View>
                     </View>
                 );

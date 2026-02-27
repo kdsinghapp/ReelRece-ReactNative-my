@@ -5,7 +5,6 @@ export default {
     PoppinsRegular: 'Poppins-Regular',
     PoppinsMedium: 'Poppins-Medium',
     PoppinsExtraBold: 'Poppins-ExtraBold',
-
     PoppinsSemiBold: 'Poppins-SemiBold',
     // PoppinsSemiBoldItalic: 'Poppins-SemiBoldItalic',
     PoppinsThin: 'Poppins-Thin',
@@ -17,4 +16,4 @@ export default {
     PoppinsExtraLightItalic: 'Poppins-ExtraLightItalic',
   };
 
-//    allowFontScaling={false} 
+ 

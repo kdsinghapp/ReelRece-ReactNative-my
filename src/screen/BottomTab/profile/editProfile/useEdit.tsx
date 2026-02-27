@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
 import ImagePicker from "react-native-image-crop-picker";
 
 const useEdit = () => {
@@ -31,22 +31,45 @@ const useEdit = () => {
       });
   };
 
+  const requestCameraPermission = async (): Promise<boolean> => {
+    if (Platform.OS !== 'android') {
+      return true;
+    }
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Camera Permission',
+          message: 'We need access to your camera to take your profile photo.',
+          buttonPositive: 'OK',
+          buttonNegative: 'Cancel',
+          buttonNeutral: 'Ask Me Later',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const takePhotoFromCamera = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert('Permission required', 'Camera permission is needed to take a photo.');
+      return;
+    }
     try {
       const image: object = await ImagePicker.openCamera({
         width: 300,
         height: 400,
         cropping: false,
-
         compressImageQuality: 0.4,
         mediaType: 'photo',
-
-
       });
-      setImagePrfile(image)
+      setImagePrfile(image);
       setIsModalVisible(false);
-    } catch (error: string | object) {
-      // Alert.alert('Error', error.message);
+    } catch (error: any) {
+      // user cancelled or error; optionally handle
     }
   };
   return {

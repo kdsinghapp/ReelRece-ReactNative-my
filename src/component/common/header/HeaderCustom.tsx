@@ -1,11 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, Pressable, Platform, } from 'react-native';
+import React from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet,   Platform, } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import { t } from 'i18next';
-
-
 
 interface HeaderCustomProps {
   title?: string;

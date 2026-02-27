@@ -96,7 +96,7 @@ export const GroupListItem = ({
           marginHorizontal: 5
 
         }}>
- <GroupAllAvatars group={group} />
+          <GroupAllAvatars group={group} />
           <GroupInterestCycle
             group={group}
             onGroupSelect={onGroupSelect}

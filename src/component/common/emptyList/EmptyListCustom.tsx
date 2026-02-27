@@ -26,7 +26,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 15,
         color: Color.textGray,
-       
         textAlign:"center" ,
         fontFamily:font.PoppinsMedium
         

@@ -56,7 +56,7 @@ const Welcome = () => {
       navigation.replace(ScreenNameEnum.TabNavigator, {
         screen: ScreenNameEnum.RankingTab,
       });
-            // navigation.navigate(ScreenNameEnum.OnboardingScreen);
+            //  navigation.navigate(ScreenNameEnum.OnboardingScreen);
 
     } else {
       navigation.navigate(ScreenNameEnum.LoginScreen);

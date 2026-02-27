@@ -49,8 +49,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
   const [toastMess, setToastMess] = useState(false)
   const [toastMessColorGreen, setToastMessGreen] = useState(true)
-  const [toastMessage, setToastMessage] = useState('');
-
+ 
 
   const toggleNotification = () => {
     setNotificationEnabled(prev => !prev);
@@ -249,7 +248,9 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
       /> */}
         <GroupMembersModal visible={groupMember}
           groupMembers={group1?.results || group?.members}
-          onClose={() => setGroupMember(false)}
+          onClose={() => {
+            // onClose()
+          setGroupMember(false) }}
           token={token}
           heading= {t("home.groupMembers")}   />
         <AddFriendModal

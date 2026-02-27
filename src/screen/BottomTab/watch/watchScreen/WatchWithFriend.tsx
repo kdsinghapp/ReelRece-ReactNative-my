@@ -52,12 +52,10 @@ import { CustomStatusBar, FriendthinkModal, MovieInfoModal } from '@components/i
 import useMovie from '@screens/BottomTab/discover/movieDetail/useMovie';
 import { t } from 'i18next';
 import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notification';
-import { BlurView } from '@react-native-community/blur';
-import RankingWithInfo from '@components/ranking/RankingWithInfo';
+ import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import GroupScoreModal from '@components/modal/GroupScoreModal/GroupScoreModal';
 import { BASE_IMAGE_URL } from '@config/api.config';
-import { Alert } from 'react-native';
-import ScreenNameEnum from '@routes/screenName.enum';
+ import ScreenNameEnum from '@routes/screenName.enum';
 const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.4;
 const SPACING = 7.9;
@@ -764,7 +762,7 @@ const WatchWithFriend = () => {
               }}
               style={[styles.poster, {
                 bottom: 22.5 ,
-                marginTop: Platform.OS =="ios" ? 10.6:0
+                marginTop: Platform.OS =="ios" ? 12.6:0
               }]}
               resizeMode={FastImage.resizeMode.cover}
             />

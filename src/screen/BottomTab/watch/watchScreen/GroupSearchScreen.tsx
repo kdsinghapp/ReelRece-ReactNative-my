@@ -8,7 +8,7 @@ const GroupSearchScreen = () => {
 
   // Filtered groups
   const filteredGroups = watchTogetherGroups.filter(group =>
-    group?.groupName.toLowerCase().includes(searchText.toLowerCase())
+    group?.groupName?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
