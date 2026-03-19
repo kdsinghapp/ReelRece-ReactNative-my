@@ -515,8 +515,7 @@ const RankingScreen = () => {
   const removeLoadingIds = (ids: (string | undefined)[]) =>
     setLoadingIds(prev => prev.filter(id => ids.includes(id) === false));
 
-  const indexOf = useCallback((id: string) => orderRef.current.indexOf(id), []);
-
+ 
   const moveItemToIndex = useCallback(
     (id: string, newIndex: number) => {
       const currentOrder = orderRef.current;
@@ -564,7 +563,7 @@ const RankingScreen = () => {
     [moveItemToIndex]
   );
 
-  const updatePairwiseDecisionRef = useRef<(id: string, fromIndex: number, toIndex: number) => void>(() => {});
+  const updatePairwiseDecisionRef = useRef<(id: string, fromIndex: number, toIndex: number) => void>(() => { });
   const updatePairwiseDecision = async (id: string, fromIndex: number, toIndex: number) => {
     const fromMovie = ratedMovie[fromIndex];
     const toMovie = ratedMovie[toIndex];
@@ -617,30 +616,14 @@ const RankingScreen = () => {
     // Clamp to valid range
     const clampedIndex = Math.max(0, Math.min(orderRef.current.length - 1, currentIndex));
 
-    if (clampedIndex !== dragState.currentIndex) {
-      // moveItemToIndex(id, clampedIndex);
-      // dragState.currentIndex = clampedIndex;
+    if (clampedIndex !== dragState.currentIndex) { 
     }
-
-    // Update position of dragged item
+ 
     if (animatedPositions[id]) {
       animatedPositions[id].setValue(newTop);
     }
   };
 
-  const handleScroll = (event: { nativeEvent: { contentOffset: { y: number } } }) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    dragState.scrollOffset = offsetY;
-
-    // Update positions for all items based on scroll
-    if (!dragState.isDragging) {
-      orderRef.current.forEach((id, idx) => {
-        if (animatedPositions[id]) {
-          animatedPositions[id].setValue(idx * ITEM_HEIGHT - offsetY);
-        }
-      });
-    }
-  };
   const [showList, setShowList] = useState(true);
 
 
@@ -716,10 +699,7 @@ const RankingScreen = () => {
     }
   }, [rankingRenderedCount, ratedMovie.length]);
 
-  const onViewableItemsChanged = useRef(({ viewableItems, changed }: string | object) => {
-    const renderedCount = viewableItems.length;
-    setRankingRenderedCount(renderedCount);
-  }).current;
+  
   useEffect(() => {
     setDisplayMovies(filteredMovies.slice(0, suggestionVisibleCount));
   }, [filteredMovies, suggestionVisibleCount]);
@@ -823,7 +803,7 @@ const RankingScreen = () => {
   );
 
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.maincontainer}>
+    <SafeAreaView  edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />
 
       <View style={styles.container}>
@@ -1022,12 +1002,6 @@ const RankingScreen = () => {
   );
 };
 
-const localStyles = StyleSheet.create({
-  cardContainer: {
-    // position: 'absolute',
-    left: 0,
-    right: 0,
-  },
-});
+
 
 export default React.memo(RankingScreen);

@@ -6,36 +6,34 @@ import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 
-export default function InputFieldCustom({ validSuccess, ...props }) {
+export default function InputFieldCustom({ validSuccess = undefined, ...props }) {
   const [showPassword, setShowPassword] = useState(props.hide);
   const [isFocused, setIsFocused] = useState(false);
-  const [text, setText] = useState(props.text || ""); //  local state for text
+  const [text, setText] = useState(props.text || "");
   const inputRef = useRef(null);
 
   const onChangeText = (value: string) => {
-    setText(value); // local update
+    setText(value);
     if (props.onChangeText) {
-      props.onChangeText(value); // parent callback bhi trigger
+      props.onChangeText(value);
     }
   };
-
-  // 🔑 Border show hone ki condition
   const showBorder = isFocused || text.length > 0;
 
   return (
-    <View style={{ marginVertical: 12 }}>
+    <View style={{ marginVertical: 8 }}>
       <View style={{ position: 'relative' }}>
         <View
           style={[
             {
               flexDirection: 'row',
-              backgroundColor: Color.grey,
-              height: 50,
+              backgroundColor: Color.gray,
+              height: 48,
               borderRadius: 10,
-              paddingHorizontal: 10,
+              paddingHorizontal: 12,
               alignItems: 'center',
-              borderWidth: 0.8,
-              borderColor: showBorder ? Color.whiteText : 'transparent', // ✅ use condition here
+              // borderWidth: 0.8,
+              // borderColor: showBorder ? Color.whiteText : 'transparent',
             },
             props.style,
           ]}
@@ -47,11 +45,11 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
             style={{
               flex: 1,
               fontFamily: font.PoppinsRegular,
-              fontSize: 16,
+              fontSize: 14,
               color: Color.whiteText,
-               textAlignVertical: 'center', // Android
-              paddingVertical: 0,          // important
-              includeFontPadding: false,   // Android fix
+              textAlignVertical: 'center',
+              paddingVertical: 0,
+              includeFontPadding: false,
 
             }}
             onChangeText={onChangeText}
@@ -75,7 +73,7 @@ export default function InputFieldCustom({ validSuccess, ...props }) {
               <Image
                 source={showPassword ? imageIndex.eyes : imageIndex.view}
                 style={{ width: 24, height: 24 }}
-                tintColor={'rgba(205, 205, 205, 1)'}
+                tintColor={'white'}
               />
             </TouchableOpacity>
           )}

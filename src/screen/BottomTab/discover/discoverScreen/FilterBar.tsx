@@ -7,13 +7,13 @@ import {
   Modal,
   StyleSheet,
   Image,
- 
+
   Alert,
 } from 'react-native';
- import { filters } from './DisCoverData';
+import { filters } from './DisCoverData';
 import { Color } from '@theme/color';
 import PlatformModals from './PlatformModals';
-   import { getUniqueGenres } from '@redux/Api/movieApi';
+import { getUniqueGenres } from '@redux/Api/movieApi';
 import { getUniquePlatforms } from '@redux/Api/SettingApi';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
@@ -27,7 +27,7 @@ const FilterBar = ({ isSelectList,
   setPlatformFilterString,
   selectedSimpleFilter, setSelectedSimpleFilter,
   platformFilterString,
-  token, }:boolean| string | object| number|null) => {
+  token, }: boolean | string | object | number | null) => {
   const [selectedGenres, setSelectedGenres] = useState([]);  // main genre state
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [genreModalVisible, setGenreModalVisible] = useState(false);
@@ -105,51 +105,18 @@ const FilterBar = ({ isSelectList,
 
   const isSelected = (item) => {
     if (['1', '2', '5'].includes(item.id)) {
- 
       return selectedSimpleFilter === item.id;
-
     }
- 
+
     if (item.id === '3') return selectedGenres.length > 0;
     if (item.id === '4') return selectedPlatforms.length > 0;
     return false;
   };
-  // Toggle selection
-  // const togglePlatform = (platformId) => {
-  //   setSelectedPlatforms((prev) =>
-  //     prev.includes(platformId)
-  //       ? prev.filter((id) => id !== platformId)
-  //       : [...prev, platformId]
-  //   );
-  // };
 
-  // Count selected services
-  const totalServices = platformsData.filter(p => !p.isTelecom).length;
   const selectedServices = selectedPlatforms.filter(id => {
     const platform = platformsData.find(p => p.id === id);
     return platform && !platform.isTelecom;
   }).length;
-
-
-  // const handlePlatformModalClose = (selected) => {
-  //   if (Array.isArray(selected)) {
-  //     setSelectedPlatforms(selected);
-
-
-  //     const selectedNames = platformsData
-  //       .filter(p => selected.includes(p.supported_platform))
-  //       .map(p => p.supported_platform);
-
-  //     setPlateFromItemName(selectedNames); // ✅ Platform names
-
-  //     const platformString = selectedNames.join('<-');
-   //     setPlatformFilterString(platformString);
- 
-   //   } else {
-  //     setSelectedPlatforms([]); // fallback to empty
-  //   }
-  //   setPlatformModalVisible(false);
-  // };
 
 
   useEffect(() => {
@@ -177,23 +144,6 @@ const FilterBar = ({ isSelectList,
       controller.abort();
     };
   }, [genreModalVisible, token]);
-
-
-  // useEffect(() => {
-  //   const fetchPlatforms = async () => {
-  //     try {
-  //       const data = await getUniquePlatforms({ token });
-  //       setPlatformsData(data?.results || []);
- 
-  //     } catch (error) {
-   //     }
-  //   };
-
-  //   if (platformModalVisible && token) {
-  //     fetchPlatforms();
-  //   }
-  // }, [platformModalVisible, token]);
-
 
   useEffect(() => {
     const controller = new AbortController();
@@ -237,7 +187,6 @@ const FilterBar = ({ isSelectList,
     try {
       if (!imageUrl || typeof imageUrl !== 'string') return '';
 
-      // 🔥 Remove backslashes
       imageUrl = imageUrl.replace(/\\/g, '');
 
       const urlParts = imageUrl.split('/');
@@ -245,32 +194,17 @@ const FilterBar = ({ isSelectList,
       const encodedFileName = encodeURIComponent(fileName ?? '');
       return [...urlParts, encodedFileName].join('/');
     } catch (e) {
-       return imageUrl;
+      return imageUrl;
     }
   };
 
-
-
-  // const fixImageUrl = (imageUrl: string): string => {
-  //   if (!imageUrl || typeof imageUrl !== 'string') return '';
-  //   try {
-  //     const urlParts = imageUrl.split('/');
-  //     const fileName = urlParts.pop();
-  //     const encodedFileName = encodeURIComponent(fileName ?? '');
-  //     const finalUrl = [...urlParts, encodedFileName].join('/');
-  //     return finalUrl;
-  //   } catch (e) {
-   //     return imageUrl;
-  //   }
-  // };
-
   const renderItem = ({ item }) => {
-    const selected = isSelected(item);  // ✅ Use state-based logic
+    const selected = isSelected(item);
 
     const selectedPlatformItems = platformsData.filter((p) =>
       selectedPlatforms.includes(p.supported_platform)
     );
-     return (
+    return (
       <TouchableOpacity
         onPress={() => handlePress(item)}
         style={[
@@ -280,9 +214,6 @@ const FilterBar = ({ isSelectList,
       >
         {item.id === '3' && selectedGenres.length > 0 ? (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* <Text style={[styles.filterText, selected && styles.selectedText]}>
-              {selectedGenres.length} {item?.title}
-            </Text> */}
 
             <CustomText
               size={14}
@@ -329,7 +260,7 @@ const FilterBar = ({ isSelectList,
               ))}
 
             </View>
-            {selectedPlatformItems.length && (
+            {selectedPlatformItems?.length && (
               <View style={styles.platefromCount} >
 
 
@@ -339,13 +270,13 @@ const FilterBar = ({ isSelectList,
                   style={{}}
                   font={font.PoppinsRegular}
                 >
-                  {selectedPlatformItems.length}
+                  {selectedPlatformItems?.length}
                 </CustomText>
 
               </View>
             )}
             <Image source={item?.img} style={styles.chevron}
-              tintColor={selectedPlatformItems.length > 0 ? Color.primary : Color.whiteText}
+              tintColor={selectedPlatformItems?.length > 0 ? Color.primary : Color.whiteText}
             />
           </View>
         ) : (
@@ -362,7 +293,7 @@ const FilterBar = ({ isSelectList,
             >
               {item?.title}
             </CustomText>
-            {item.img && (
+            {item?.img && (
               <Image
                 source={item?.img}
                 style={[styles.chevron, selected && { tintColor: Color.primary }]}
@@ -389,62 +320,58 @@ const FilterBar = ({ isSelectList,
         windowSize={7}
         removeClippedSubviews={false}
         getItemLayout={getItemLayout}
-        onScrollToIndexFailed={() => {}}
+        onScrollToIndexFailed={() => { }}
       />
       {/* GENRE MODAL */}
       {genreModalVisible &&
-      <GenreModal
-        isVisible={genreModalVisible}
-        onClose={() => setGenreModalVisible(false)}
-        reset={() => {
-          setTempGenres([]);
-          setSelectedGenres([]);
-          setFilterGenreString('');
-          setGenreModalVisible(false);
-        }}
-        genres={availableGenres}
-        selectedGenres={tempGenres}                  //  Modal tempGenres
-        setSelectedGenres={setTempGenres}            //  Modal in temp change
-        onApply={() => {
-          const genreString = tempGenres.join(',');
-          setSelectedGenres([...tempGenres]);        //  Final save on apply only
-          setFilterGenreString(genreString);         //  Send for API call
-          setGenreModalVisible(false);
-        }}
-
-      />
+        <GenreModal
+          isVisible={genreModalVisible}
+          onClose={() => setGenreModalVisible(false)}
+          reset={() => {
+            setTempGenres([]);
+            setSelectedGenres([]);
+            setFilterGenreString('');
+            setGenreModalVisible(false);
+          }}
+          genres={availableGenres}
+          selectedGenres={tempGenres}
+          setSelectedGenres={setTempGenres}
+          onApply={() => {
+            const genreString = tempGenres.join(',');
+            setSelectedGenres([...tempGenres]);
+            setFilterGenreString(genreString);
+            setGenreModalVisible(false);
+          }}
+        />
       }
 
-{platformModalVisible &&
-      <PlatformModals
-        visible={platformModalVisible}
-        platformsData={platformsData}
-        // platformsData={availablePlatforms}
-        selectedPlatforms={tempPlatforms}
-        setSelectedPlatforms={setTempPlatforms}
-        onApply={() => {
-          const selectedNames = platformsData
-            .filter(p => tempPlatforms.includes(p.supported_platform))
-            .map(p => p.supported_platform);
+      {platformModalVisible &&
+        <PlatformModals
+          visible={platformModalVisible}
+          platformsData={platformsData}
+          // platformsData={availablePlatforms}
+          selectedPlatforms={tempPlatforms}
+          setSelectedPlatforms={setTempPlatforms}
+          onApply={() => {
+            const selectedNames = platformsData
+              .filter(p => tempPlatforms?.includes(p?.supported_platform))
+              .map(p => p.supported_platform);
 
-          setSelectedPlatforms([...tempPlatforms]);
-          setPlateFromItemName(selectedNames);
-          setPlatformFilterString(selectedNames.join(','));
-          setPlatformModalVisible(false);
-        }}
-        reset={() => {
-          setTempPlatforms([]);
-          setSelectedPlatforms([]);
-          setPlateFromItemName([]);
-          setPlatformFilterString('');
-          setPlatformModalVisible(false);
-        }}
-        onClose={() => setPlatformModalVisible(false)}
-      />
-
+            setSelectedPlatforms([...tempPlatforms]);
+            setPlateFromItemName(selectedNames);
+            setPlatformFilterString(selectedNames.join(','));
+            setPlatformModalVisible(false);
+          }}
+          reset={() => {
+            setTempPlatforms([]);
+            setSelectedPlatforms([]);
+            setPlateFromItemName([]);
+            setPlatformFilterString('');
+            setPlatformModalVisible(false);
+          }}
+          onClose={() => setPlatformModalVisible(false)}
+        />
       }
-
-
     </View>
   );
 };
@@ -454,15 +381,12 @@ export default React.memo(FilterBar);
 const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
-    // flex: 1,
   },
   flatListContent: {
-    // paddingHorizontal: 5,
   },
   filterItem: {
     borderRadius: 20,
     paddingHorizontal: 14,
-    // paddingVertical: 4, // Add vertical padding to avoid text cut
     marginRight: 10,
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,4 +1,4 @@
- import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 export interface LoginParams {
   email: string;
@@ -9,5 +9,5 @@ export interface LoginParams {
 export interface RootStackParamList {
   SignUpScreen: undefined;
   PasswordReset: undefined;
-  [key: string]: undefined; // Adding an index signature
+  [key: string]: undefined;
 }

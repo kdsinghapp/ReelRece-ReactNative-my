@@ -183,7 +183,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
 
   // const { backnavigateTab, backnavigate } = route.params || {};
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.maincontainer}>
+    <SafeAreaView  edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />
       <View style={styles.container}>
         <HeaderCustom

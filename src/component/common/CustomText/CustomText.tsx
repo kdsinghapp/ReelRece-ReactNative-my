@@ -1,11 +1,11 @@
 import { Color } from '@theme/color';
 import React, { memo } from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
-  
+
 interface CustomTextProps extends TextProps {
   children: React.ReactNode;
-  font?: string;            // font family
-  size?: number;            // font size
+  font?: string;
+  size?: number;
   color?: string;           // text color
   lineHeight?: number;
   letterSpacing?: number;
@@ -30,9 +30,8 @@ const CustomText: React.FC<CustomTextProps> = ({
    return (
     <Text 
       disabled={disabled}
- 
       allowFontScaling={false}
-      numberOfLines={numberOfLines }
+      numberOfLines={numberOfLines}
       {...(numberOfLines ? { numberOfLines } : {})}
       style={[
         {

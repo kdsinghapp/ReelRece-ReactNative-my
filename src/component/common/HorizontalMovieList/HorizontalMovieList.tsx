@@ -255,7 +255,7 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
-      ) : data && data.length > 0 ? (
+      ) : data && data?.length > 0 ? (
         <>
           <FlatList
             data={data}

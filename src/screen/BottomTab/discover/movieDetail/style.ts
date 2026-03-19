@@ -2,53 +2,50 @@
 import { Dimensions, StyleSheet } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
-  const { height: windowHeight } = Dimensions.get('window');
+const { height: windowHeight } = Dimensions.get('window');
 
 
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.background, },
-  headerContainer:{
-flexDirection:'row',
-justifyContent:'space-between',
-alignItems:'center',
-paddingHorizontal:18,
-marginBottom:18,
-// marginTop:8,
-
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    marginBottom: 18,
   },
-  imageSize:{
-    width:24,
-    height:24,
-    resizeMode:'contain',
+  imageSize: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   posterContainer: {},
   poster: { width: '100%', height: 220 },
- icon: {
+  icon: {
     width: 24,
     height: 24,
 
 
   },
-  infoContainer: {  padding: 14, marginTop: 0,  },
+  infoContainer: { padding: 14, marginTop: 0, },
   title: {},
   subInfo: {
     color: Color.lightGrayText,
     fontSize: 12,
     fontFamily: font.PoppinsRegular,
     lineHeight: 14,
-    marginRight:0,
+    marginRight: 0,
   },
-  scoreRow: { flexDirection: 'row',
-     justifyContent: "space-between", 
-    //  marginVertical: 10,
-    alignItems:'center',
-    // backgroundColor:'green'
-    },
+  scoreRow: {
+    flexDirection: 'row',
+    justifyContent: "space-between",
+    alignItems: 'center',
+  },
   scoreBoxGreen: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:'center',
+    justifyContent: 'center',
   },
   scoreBoxYellow: {
     flexDirection: "row",
@@ -71,23 +68,27 @@ marginBottom:18,
     lineHeight: 16,
     marginRight: 12,
   },
-  scoreValue: { color: Color.whiteText,
-     fontWeight: 'bold' },
+  scoreValue: {
+    color: Color.whiteText,
+    fontWeight: 'bold'
+  },
 
-  scoreLabel: { color: Color.whiteText,
-     fontSize: 10 },
+  scoreLabel: {
+    color: Color.whiteText,
+    fontSize: 10
+  },
 
   description: {
     lineHeight: 19, fontSize: 14, fontFamily: font.PoppinsRegular
     , color: Color.lightGrayText,
-     marginTop:4,
-       marginBottom:10,
+    marginTop: 4,
+    marginBottom: 10,
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    alignItems:"center",
-    
+    alignItems: "center",
+
     // backgroundColor:'red'
     // marginTop: 4,
     // marginBottom: 10,
@@ -116,11 +117,9 @@ marginBottom:18,
     // marginTop: 30,
     alignItems: "center",
     // marginVertical: 24,
-     paddingHorizontal:24,
-    //   marginTop:
+    paddingHorizontal: 24,
   },
-  // linkText: { color: color.whitetext, fontSize: 14, fontWeight: "500", textAlign: "center" },
-
+  
   footerButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -130,7 +129,7 @@ marginBottom:18,
     color: Color.primary,
     // marginRight: 5,
     fontFamily: font.PoppinsMedium,
-    lineHeight:18
+    lineHeight: 18
   },
   arrowIcon: {
     height: 18,
@@ -139,7 +138,6 @@ marginBottom:18,
   },
 
   watchNowContainer: {
-
     flexDirection: 'row',
     // marginVertical:'auto',
     // marginTop: "5%",
@@ -155,7 +153,7 @@ marginBottom:18,
   watchNowImg: {
     height: 16,
     width: 16,
-    tintColor:Color.whiteText,
+    tintColor: Color.whiteText,
     // marginRight: 16,
 
   },
@@ -165,11 +163,11 @@ marginBottom:18,
     color: Color.whiteText,
     lineHeight: 18,
   },
- scrollBarTrack: {
+  scrollBarTrack: {
     width: 6,
     alignItems: 'center',
     marginRight: 4,
-    backgroundColor:Color.darkGrey
+    backgroundColor: Color.darkGrey
   },
   scrollBar: {
     width: 4,
@@ -191,10 +189,10 @@ marginBottom:18,
     height: windowHeight * 0.25,
     marginTop: 0,
     flexDirection: 'row',
-    overflow:'hidden',
+    overflow: 'hidden',
     // position: 'relative',
   },
-   tButton: {
+  tButton: {
     position: 'absolute',
     right: 10,
     bottom: 10,

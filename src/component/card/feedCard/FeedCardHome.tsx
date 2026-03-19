@@ -2,13 +2,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
+  Text,
   Image,
-  StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Animated,
-  NativeModules,
-  Platform
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Video from 'react-native-video';
@@ -16,10 +14,10 @@ import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
 import font from '@theme/font';
- import { useTrailerTracker } from '@hooks/useTrailerTracker';
+import { useTrailerTracker } from '@hooks/useTrailerTracker';
 import { useBookmarks } from '@hooks/useBookmark';
- import FastImage from 'react-native-fast-image';
- import { useDispatch, useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
@@ -31,13 +29,15 @@ import CustomText from '@components/common/CustomText/CustomText';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import { t } from 'i18next';
+import { followUser } from '@redux/Api/followService';
+import { AxiosError } from 'axios';
 
 
 const FeedCardHome = ({
-  screenName,activity,
+  screenName, activity,
   avatar, user, title, comment, poster, videoUri, isPaused, shouldAutoPlay, is_bookMark, videoIndex,
   rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username,
-  onBookmarkSuccess,
+  onBookmarkSuccess, suggested, onFollow, isFollowing: initialFollowing,
 }) => {
   const navigation = useNavigation();
   const [posterOpacity] = useState(new Animated.Value(1));
@@ -52,12 +52,14 @@ const FeedCardHome = ({
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isBookmarked, setIsBookmarked] = useState(!!is_bookMark);
   const [posterVisible, setPosterVisible] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(!!initialFollowing);
+  const [followLoading, setFollowLoading] = useState(false);
   const dispatch = useDispatch()
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
 
-   }, [videoUriRef.current])
+  }, [videoUriRef.current])
 
   const isPlaying = shouldAutoPlay && isVisible && shouldPlay && !paused;
   const isScreenFocused = useIsFocused();
@@ -65,10 +67,10 @@ const FeedCardHome = ({
 
 
   const hasInteractedRef = useRef(false);
-   useEffect(() => {
+  useEffect(() => {
     videoUriRef.current = videoUri;
   }, [videoUri]);
- 
+
   useEffect(() => {
     const shouldPlayVideo = shouldAutoPlay && isVisible && shouldPlay;
     setPaused(!shouldPlayVideo);
@@ -93,6 +95,10 @@ const FeedCardHome = ({
     setIsBookmarked(!!is_bookMark);
   }, [is_bookMark]);
 
+  useEffect(() => {
+    setIsFollowing(!!initialFollowing);
+  }, [initialFollowing]);
+
   const handleToggleBookmark = async () => {
     const prev = isBookmarked;
     setIsBookmarked(!prev); // Optimistic update
@@ -106,13 +112,27 @@ const FeedCardHome = ({
     }
   };
 
+  const handleFollowToggle = useCallback(async () => {
+    if (!token || !username || followLoading) return;
+    try {
+      setFollowLoading(true);
+      await followUser(token, username);
+      setIsFollowing(true);
+      onFollow?.(username);
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error?.response?.status === 409) {
+        setIsFollowing(true);
+      }
+    } finally {
+      setFollowLoading(false);
+    }
+  }, [token, username, followLoading, onFollow]);
+
   useEffect(() => {
-  const shouldTrigger = paused && !hasInteractedRef.current && imdb_id;
+    const shouldTrigger = paused && !hasInteractedRef.current && imdb_id;
     if (shouldTrigger) {
       hasInteractedRef.current = true;
- 
- 
- 
       trailerTracker.triggerInteractionIfAny();
       trailerTracker.resetTracker();
     }
@@ -121,7 +141,7 @@ const FeedCardHome = ({
   const compareHook = useCompareComponent(token);
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
-   };
+  };
   useEffect(() => {
     if (isVisible) {
       hasInteractedRef.current = false;
@@ -164,10 +184,10 @@ const FeedCardHome = ({
     if (paused) return;
 
     const progressPercent = data.currentTime / data.seekableDuration; // 👈 compute fraction between 0–1s
-     Animated.timing(progressAnim, {
+    Animated.timing(progressAnim, {
       toValue: progressPercent,
       duration: 250,
-      useNativeDriver: false, 
+      useNativeDriver: false,
     }).start();
     trailerTracker.onProgress({
       currentTime: data.currentTime,
@@ -190,56 +210,70 @@ const FeedCardHome = ({
 
   useEffect(() => {
     if (videoUri && videoUri !== stableVideoUri.current) {
-      stableVideoUri.current = videoUri; 
+      stableVideoUri.current = videoUri;
     }
   }, [videoUri, videoIndex]);
 
 
   const navigateOnPoster = (imdb_id: string, token: string) => {
-     navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
       imdb_idData: imdb_id,
       token,
     });
   }
   const item = {
-    username: username, 
+    username: username,
     name: user,
-    avatar:avatar.uri
+    avatar: avatar.uri
 
   };
 
 
 
-  const [isLowMemoryDevice, setIsLowMemoryDevice] = useState(false);
+  const hasRank =
+    activity === "bookmarked"
+      ? false
+      : ranked && ranked > 0;
 
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      NativeModules?.DeviceInfo?.isLowRamDevice?.().then(setIsLowMemoryDevice);
-    }
-  }, []);
-
-const hasRank =
-  activity === "bookmarked"
-    ? false
-    : ranked && ranked > 0;
- 
   const getActionLabel = () => {
-    if (activity === "bookmarked, ranked" || activity === "ranked, bookmarked" ||activity === "bookmarked,ranked" || activity === "ranked,bookmarked" ) {
-    return " ranked and bookmarked "; // <-- replace with whatever text you want
-  }
-if(activity =="bookmarked"){
-  return " bookmarked"
-}
-  if(activity =="ranked"){
-  return " ranked"
-}
-   return "";
-};
+    if (activity === "bookmarked, ranked" || activity === "ranked, bookmarked" || activity === "bookmarked,ranked" || activity === "ranked,bookmarked") {
+      return " ranked and bookmarked "; // <-- replace with whatever text you want
+    }
+    if (activity == "bookmarked") {
+      return " bookmarked"
+    }
+    if (activity == "ranked") {
+      return " ranked"
+    }
+    return "";
+  };
   return (
     <View style={styles.feedCard}>
+      {suggested && (
+        <View style={styles.suggestedRow}>
+          <CustomText
+            size={16}
+            color={Color.whiteText}
+            style={[{ marginBottom: 0, lineHeight: 25 }]}
+            font={font.PoppinsMedium}
+          >  {t('home.suggested')}</CustomText>
+          <TouchableOpacity
+            onPress={handleFollowToggle}
+            disabled={followLoading || isFollowing}
+            style={[styles.suggestedFollowButton, isFollowing && styles.suggestedFollowingButton]}>
+            {followLoading ? (
+              <ActivityIndicator color={Color.whiteText} size="small" />
+            ) : (
+              <Text style={styles.suggestedFollowText}>
+                {isFollowing ? t('common.following') : t('common.follow')}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={styles.feedHeader}>
-        <TouchableOpacity 
-        activeOpacity={1}
+        <TouchableOpacity
+          activeOpacity={1}
           onPress={() =>
             navigation.navigate(ScreenNameEnum.OtherProfile, { item: item })
           }
@@ -251,16 +285,16 @@ if(activity =="bookmarked"){
               cache: FastImage.cacheControl.immutable
             }}
             style={styles.feedAvatar}
-          
+
           />
         </TouchableOpacity>
-        <TouchableOpacity 
-                activeOpacity={1}
+        <TouchableOpacity
+          activeOpacity={1}
 
           style={{ flex: 1, flexDirection: "row", alignItems: "center", }}
           onPress={() => {
             handleNavigation(imdb_id, token);
-            
+
           }}
         >
           <View style={{ flex: 1, paddingRight: 10 }}>
@@ -275,8 +309,8 @@ if(activity =="bookmarked"){
                 color={Color.whiteText}
                 style={styles.rankedText}
                 font={font.PoppinsRegular}
-              > 
-              {getActionLabel()}
+              >
+                {getActionLabel()}
 
 
               </CustomText>
@@ -298,27 +332,27 @@ if(activity =="bookmarked"){
               font={font.PoppinsRegular}
             >{created_date}</CustomText>
           </View>
-            {/* FRIEND SCORE → ONLY WHEN RANK EXISTS */}
-  {hasRank && (
-           <TouchableOpacity  
-                   activeOpacity={1}
+          {/* FRIEND SCORE → ONLY WHEN RANK EXISTS */}
+          {hasRank && (
+            <TouchableOpacity
+              activeOpacity={1}
 
-           style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
+              style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
 
-      <RankingWithInfo
-        score={ranked}
-        title={scoreType === "Rec" ? "Rec Score" : t("discover.friendscore")}
-        description={
-          scoreType === "Rec"
-            ? t("discover.recscoredes") 
-            
-            // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-            :  t("discover.frienddes") 
-            // "This score shows the rating from your friend for this title."
-        }
-      />
-    </TouchableOpacity>
-  )}
+              <RankingWithInfo
+                score={ranked}
+                title={scoreType === "Rec" ? "Rec Score" : t("discover.friendscore")}
+                description={
+                  scoreType === "Rec"
+                    ? t("discover.recscoredes")
+
+                    // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                    : t("discover.frienddes")
+                  // "This score shows the rating from your friend for this title."
+                }
+              />
+            </TouchableOpacity>
+          )}
 
           {/* <TouchableOpacity style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
 
@@ -342,7 +376,7 @@ if(activity =="bookmarked"){
           color={Color.whiteText}
           style={styles.feedComment}
           font={font.PoppinsBold}
-        >{t("common.comment") }:
+        >{t("common.comment")}:
           <CustomText
             size={14}
             color={Color.whiteText}
@@ -357,10 +391,10 @@ if(activity =="bookmarked"){
       {/* Video / Poster */}
       <TouchableOpacity onPress={handleTogglePause}>
         <View style={styles.videoWrapper}>
-          <TouchableOpacity  
-                  activeOpacity={1}
-
-          activeOpacity={1} onPress={() => { navigateOnPoster(imdb_id, token) }} style={styles.posterOverlay}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => navigateOnPoster(imdb_id, token)}
+            style={styles.posterOverlay}>
             {/* {!isPlaying && poster && posterVisible && ( */}
             {!isPlaying && (
               <FastImage
@@ -372,46 +406,50 @@ if(activity =="bookmarked"){
                 style={styles.posterOverlay}
                 resizeMode={FastImage.resizeMode.stretch}
               />
-           )}
+            )}
           </TouchableOpacity>
-          {isLowMemoryDevice && !isVisible ? (
-            <Image source={{ uri: poster }}   resizeMode='stretch' style={styles.video} />
-          ) : (
+          {(isVisible || shouldPlay) && stableVideoUri.current && stableVideoUri.current.trim() ? (
             <Video
               source={{ uri: stableVideoUri.current }}
-
               resizeMode="cover"
               repeat
               paused={paused}
               style={styles.video}
               muted={isMuted}
-               automaticallyWaitsToMinimizeStalling={true} // iOS: auto buffer
+              automaticallyWaitsToMinimizeStalling={true}
               bufferConfig={{
                 minBufferMs: 3000,
                 maxBufferMs: 10000,
                 bufferForPlaybackMs: 1500,
                 bufferForPlaybackAfterRebufferMs: 3000,
               }}
-
-              onLoad={handleVideoLoad}               // <- pass data automatically
-              onReadyForDisplay={() => handleVideoLoad()}  // optional, for extra safety
+              onLoad={handleVideoLoad}
+              onReadyForDisplay={() => handleVideoLoad()}
               onProgress={onVideoProgress}
               onEnd={() => {
-
                 if (!imdb_id || hasInteractedRef.current) {
                   return;
                 }
                 hasInteractedRef.current = true;
                 trailerTracker.triggerInteractionIfAny();
               }}
-              ignoreSilentSwitch="ignore"
               playInBackground={false}
               playWhenInactive={false}
-               controls={false}
+              controls={false}
               disableFocus={true}
               hideShutterView
               shutterColor="transparent"
               progressUpdateInterval={250}
+            />
+          ) : (
+            <FastImage
+              source={{
+                ...poster,
+                priority: FastImage.priority.low,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              style={styles.video}
+              resizeMode={FastImage.resizeMode.stretch}
             />
           )}
 
@@ -432,8 +470,8 @@ if(activity =="bookmarked"){
 
 
           {!paused && (
-            <TouchableOpacity 
-                    activeOpacity={1}
+            <TouchableOpacity
+              activeOpacity={1}
 
               style={styles.tButton}
               // onPress={() => setMuted(!muted)}
@@ -451,25 +489,25 @@ if(activity =="bookmarked"){
 
       {/* Footer Actions */}
       <View style={styles.footerActions}>
-        <TouchableOpacity 
-                activeOpacity={1}
-   
+        <TouchableOpacity
+          activeOpacity={1}
+
           onPress={() =>
             handleRankingPress({
               imdb_id,
               title,
               release_year,
-              cover_image_url: poster?.uri || '', 
+              cover_image_url: poster?.uri || '',
             })
           }
-          // onPress={() =>
-          //   handleRankingPress({
-          //     imdb_id,
-          //     title,
-          //     release_year,
-          //     cover_image_url: poster?.uri || '', 
-          //   })
-          // }
+        // onPress={() =>
+        //   handleRankingPress({
+        //     imdb_id,
+        //     title,
+        //     release_year,
+        //     cover_image_url: poster?.uri || '', 
+        //   })
+        // }
         >
           <Image
             source={imageIndex.mdRankings}

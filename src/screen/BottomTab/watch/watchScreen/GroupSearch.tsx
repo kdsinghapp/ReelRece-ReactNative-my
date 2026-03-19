@@ -38,7 +38,7 @@ const GroupSearch = ({ groupData, searchQuery }: GroupSearchProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // change as needed
+    backgroundColor: '#000',
     paddingHorizontal: 16,
     paddingTop: 20
   },

@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, PermissionsAndroid, Platform } from 'react-native';
 import ImagePicker from "react-native-image-crop-picker";
 
@@ -11,25 +11,20 @@ const useEdit = () => {
   const [editingKey, setEditingKey] = useState('');
   const [editingValue, setEditingValue] = useState('');
 
-  const pickImageFromGallery = () => {
+  const pickImageFromGallery = useCallback(() => {
     ImagePicker.openPicker({
       width: 300,
       height: 400,
       cropping: false,
       compressImageQuality: 0.4,
       mediaType: 'photo',
-      // compressImageQuality: 0.2,
-
-
     })
       .then((image: object) => {
-        setImagePrfile(image)
+        setImagePrfile(image);
         setIsModalVisible(false);
       })
-      .catch((error) => {
-        
-      });
-  };
+      .catch(() => {});
+  }, []);
 
   const requestCameraPermission = async (): Promise<boolean> => {
     if (Platform.OS !== 'android') {
@@ -52,7 +47,7 @@ const useEdit = () => {
     }
   };
 
-  const takePhotoFromCamera = async () => {
+  const takePhotoFromCamera = useCallback(async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) {
       Alert.alert('Permission required', 'Camera permission is needed to take a photo.');
@@ -68,10 +63,10 @@ const useEdit = () => {
       });
       setImagePrfile(image);
       setIsModalVisible(false);
-    } catch (error: any) {
-      // user cancelled or error; optionally handle
+    } catch (_error) {
+      // user cancelled or error
     }
-  };
+  }, []);
   return {
     navigation,
     takePhotoFromCamera,

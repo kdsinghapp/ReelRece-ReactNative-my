@@ -16,10 +16,11 @@ import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
 import { toggleBookmark } from '@redux/Api/ProfileApi';
- import CustomText from '@components/common/CustomText/CustomText';
+import CustomText from '@components/common/CustomText/CustomText';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { t } from 'i18next';
+import RankingWithInfo from '@components/ranking/RankingWithInfo';
 
 const SearchMovieCom = ({
   movieData = [],
@@ -37,12 +38,9 @@ const SearchMovieCom = ({
   currentPage = 1,
   totalPages = 1,
 }) => {
-  
-  
-  
-  // ✅ All hooks MUST be called before any early returns (Rules of Hooks)
-  const compareHook = useCompareComponent(token);
-  
+ 
+   const compareHook = useCompareComponent(token);
+
   const formattedQuery = movieData.length === 0 ? searchQuery : '';
   const onEndReachedInFlight = useRef(false);
   const unlockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,7 +80,7 @@ const SearchMovieCom = ({
   };
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
-   };
+  };
 
 
 
@@ -95,7 +93,7 @@ const SearchMovieCom = ({
   //  Render Individual Movie
   const renderMovie = useCallback(({ item }) => {
     // const isSelected = selectedPlatforms?.includes(item?.id);
-     return (
+    return (
       <TouchableOpacity
         style={styles.movieCard}
         activeOpacity={0.9}
@@ -103,17 +101,17 @@ const SearchMovieCom = ({
         onPress={() => handleNavigation(item.imdb_id, token)}
       >
         <TouchableOpacity onPress={() => handleNavigation(item.imdb_id, token)}>
-          <Image source={{ uri: item?.cover_image_url }} style={styles.poster} 
-          resizeMode='stretch'
+          <Image source={{ uri: item?.cover_image_url }} style={styles.poster}
+            resizeMode='stretch'
           />
 
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.info} onPress={() => {
           handleNavigation(item?.imdb_id, token);
- 
- 
- }} >
+
+
+        }} >
           <TouchableOpacity style={styles.titleContainer} >
 
 
@@ -137,28 +135,34 @@ const SearchMovieCom = ({
             {item?.release_year}
           </CustomText>
         </TouchableOpacity>
-        <View style={{ justifyContent: 'flex-start', alignItems: 'flex-start', alignSelf: 'flex-start' }}  >
+        <View style={{ justifyContent: 'flex-start', alignItems: 'flex-end', alignSelf: 'flex-start' }}  >
           {/* <TouchableOpacity style={styles.iconprimary} onPress={() => setIsVisible(true)}>
            */}
+          <RankingWithInfo
+            score={item?.rec_score}
+            title={t("discover.recscore")}
+            description={t("discover.recscoredes")}
+          // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+            <TouchableOpacity style={styles.iconprimary}
+              onPress={() =>
+                handleRankingPress({
+                  imdb_id: item?.imdb_id,
+                  title: item?.title,
+                  release_year: item?.release_year, // or dynamic if available
+                  cover_image_url: item?.cover_image_url || '', // ensure string URL is passed
+                })
+              }
+            >
+              <Image
+                source={imageIndex.mdRankings}
+                resizeMode='contain'
+                style={styles.rankingIcon}
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconprimary}
-            onPress={() =>
-              handleRankingPress({
-                imdb_id: item?.imdb_id,
-                title: item?.title,
-                release_year: item?.release_year, // or dynamic if available
-                cover_image_url: item?.cover_image_url || '', // ensure string URL is passed
-              })
-            }
-          >
-            <Image
-              source={imageIndex.mdRankings}
-              resizeMode='contain'
-              style={styles.rankingIcon}
-            />
-          </TouchableOpacity>
-
-          {/* <TouchableOpacity
+            {/* <TouchableOpacity
             style={styles.iconprimary}
             onPress={() => toggleSave(item.imdb_id)}
           >
@@ -170,18 +174,17 @@ const SearchMovieCom = ({
             />
           </TouchableOpacity> */}
 
-
-          <TouchableOpacity
-            style={styles.iconprimary}
-            onPress={() => toggleSave(item.imdb_id)}
-          >
-            <Image
-              source={item?.saved ? imageIndex.save : imageIndex.saveMark}
-              style={{ height: 20, width: 20, marginTop: 8 }}
-              resizeMode='contain'
-            />
-          </TouchableOpacity>
-
+            <TouchableOpacity
+              style={styles.iconprimary}
+              onPress={() => toggleSave(item.imdb_id)}
+            >
+              <Image
+                source={item?.saved ? imageIndex.save : imageIndex.saveMark}
+                style={{ height: 20, width: 20, marginTop: 0 }}
+                resizeMode='contain'
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -216,8 +219,8 @@ const SearchMovieCom = ({
           ) : movieData.length === 0 ? (
             <View style={styles.noResultsContainer}>
               <Text style={styles.noResultsText}>
-              {t("emptyState.noresults")}
-                 {formattedQuery ? ` for "${formattedQuery}"` : ''}
+                {t("emptyState.noresults")}
+                {formattedQuery ? ` for "${formattedQuery}"` : ''}
               </Text>
             </View>
           ) : (
@@ -296,13 +299,13 @@ const styles = StyleSheet.create({
   rankingIcon: {
     height: 20,
     width: 20,
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   iconprimary: {
     paddingHorizontal: 8,
     height: 35,
     width: 30,
-    marginHorizontal: 4,
+    marginLeft: 8,
     // marginBottom: 14,
   },
   listContent: {

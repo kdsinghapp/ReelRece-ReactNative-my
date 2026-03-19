@@ -15,8 +15,7 @@ const useToggleFlag = (flagKey: FlagKey) => {
   const userProfile = useSelector((state: RootState) => state.auth.userGetData);
   const { refetchUserProfile } = useProfile();
 
-  const [flagValue, setFlagValue] = useState<boolean>(false);
-  //  Set initial value when userProfile changes
+  const [flagValue, setFlagValue] = useState<boolean>(false); 
   useEffect(() => {
     if (userProfile && userProfile.hasOwnProperty(flagKey)) {
       setFlagValue(userProfile?.[flagKey] ?? false);

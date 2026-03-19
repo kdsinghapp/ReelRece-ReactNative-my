@@ -4,11 +4,7 @@ import { StyleSheet } from 'react-native';
 import font from '@theme/font';
  
 const styles = StyleSheet.create({
-  // maincontainer: {
-  //   flex: 1,
-  //   backgroundColor: Color.background,
-  // },
-  scoreBox: {
+   scoreBox: {
     padding: 5,
     borderRadius: 12,
     width: '100%',
@@ -31,12 +27,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15
   },
-
-  // container: {
-  //   flex: 1,
-  //   marginHorizontal: 15,
-  //   paddingTop: 15,
-  // },
+ 
   searchBar: {
     flexDirection: 'row',
     backgroundColor: '#333',
@@ -64,44 +55,11 @@ const styles = StyleSheet.create({
     color: '#CDCDCD',
     fontSize: 14
 
-  },
-  // movieCard: {
-  //   flexDirection: 'row',
-  //   marginTop: 16,
-  // },
+  }, 
   movieCardButton: {
     flexDirection: 'row',
     flex: 1
-  },
-  // poster: {
-  //   width: 98,
-  //   height: 135,
-  //   borderRadius: 8,
-  // },
-  // info: {
-  //   flex: 1,
-  //   marginLeft: 15,
-  // },
-  //   title: {
-  //     color: Color.whiteText,
-  //     fontSize: 16,
-  // fontFamily:font.PoppinsMedium,
-  //   },
-  //   year: {
-  //     color: Color.placeHolder,
-  //     fontSize: 14,
-  //     marginTop: -14,
-  // fontFamily:font.PoppinsRegular,
-
-  //   },
-  // icons: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   gap: 8,
-  // },
-  // iconprimary: {
-  //   marginHorizontal: 4,
-  // },
+  }, 
   titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -133,21 +91,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-
-  // ranking movie list style
-
-  //  discoverprimaryContainer: {
-  //     backgroundColor: '#008ac9',
-  //     height: 50,
-  //     alignItems: 'center',
-  //     justifyContent: 'center',
-  //     // marginHorizontal: 20,
-  //     borderRadius: 10,
-  //     marginTop: 10,
-
-
-  //   },
-
+ 
   maincontainer: {
     flex: 1,
     backgroundColor: Color.background,
@@ -166,7 +110,6 @@ const styles = StyleSheet.create({
   movieCard: {
     flexDirection: 'row',
     marginTop: 16,
-    // backgroundColor:'red'
   },
   poster: {
     width: 98,
@@ -192,11 +135,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconprimary: {
-    marginHorizontal: 3,
-    // justifyContent:'flex-start',
-    // alignSelf:'flex-end',
-    flex: 1,
-    // backgroundColor:'orange'
+    marginHorizontal: 3, 
+    flex: 1, 
   },
   discoverprimaryContainer: {
     backgroundColor: '#008ac9',

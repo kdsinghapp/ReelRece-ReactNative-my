@@ -23,6 +23,7 @@ import { t } from 'i18next';
 import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import font from '@theme/font';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 
 const OtherWatchingProfile = () => {
@@ -265,17 +266,12 @@ const OtherWatchingProfile = () => {
           </View>
 
         </View>
-
-
-
-
-
       </View>
     )
   }, [token, handleToggleLovedImage, lovedImageMap, isSaved, movies]);
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.maincontainer}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />
       <View style={styles.container}>
 

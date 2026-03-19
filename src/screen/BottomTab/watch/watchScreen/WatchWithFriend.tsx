@@ -52,10 +52,10 @@ import { CustomStatusBar, FriendthinkModal, MovieInfoModal } from '@components/i
 import useMovie from '@screens/BottomTab/discover/movieDetail/useMovie';
 import { t } from 'i18next';
 import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notification';
- import RankingWithInfo from '@components/ranking/RankingWithInfo';
+import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import GroupScoreModal from '@components/modal/GroupScoreModal/GroupScoreModal';
 import { BASE_IMAGE_URL } from '@config/api.config';
- import ScreenNameEnum from '@routes/screenName.enum';
+import ScreenNameEnum from '@routes/screenName.enum';
 const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = width * 0.4;
 const SPACING = 7.9;
@@ -122,7 +122,7 @@ const BackgroundImage = memo(({ imageUri }) => {
 const WatchWithFriend = () => {
   const isOnline = useNetworkStatus();
   const route = useRoute()
-  const token = useSelector((state: RootState) => state.auth.token);
+  const token = useSelector((state: RootState) => state?.auth?.token);
   const navigation = useNavigation();
   const { groupProps: passedGroupProps, type, groupId, maxActivitiescnt } = route?.params || {};
   const [group, setGroup] = useState(passedGroupProps);
@@ -252,8 +252,8 @@ const WatchWithFriend = () => {
     // Preload next 2 images
     for (let i = 1; i <= 2; i++) {
       const nextIndex = activeIndex + i;
-      if (nextIndex < movies.length && movies[nextIndex]?.cover_image_url) {
-        imagesToPreload.push({ uri: movies[nextIndex].cover_image_url });
+      if (nextIndex < movies?.length && movies[nextIndex]?.cover_image_url) {
+        imagesToPreload?.push({ uri: movies[nextIndex].cover_image_url });
       }
     }
 
@@ -272,8 +272,8 @@ const WatchWithFriend = () => {
     const fetchGrouchActivities = async () => {
       const response = await getGroupActivitiesAction(token, groupId);
       if (response?.results?.length > 0) {
-        response.results.forEach(item => {
-          const imdbId = item.movie?.imdb_id;
+        response?.results?.forEach(item => {
+          const imdbId = item?.movie?.imdb_id;
           if (item?.preference === "like") {
             setLikes(prev => ({ ...prev, [imdbId]: true }));
           } else if (item.preference === "dislike") {
@@ -322,8 +322,8 @@ const WatchWithFriend = () => {
       try {
         setLoading(true);
         const response = await getGroupRecommendedMovies(token, groupId);
-        setGroupRecommend(response.results);
-        setGroupRecommendCopyData(response.results);
+        setGroupRecommend(response?.results);
+        setGroupRecommendCopyData(response?.results);
       } catch (err) {
         setError(true);
       } finally {
@@ -336,7 +336,7 @@ const WatchWithFriend = () => {
   // Search handler with debounce
   const debouncedSearch = useMemo(
     () =>
-      debounce((text) => {
+      debounce((text: string) => {
         getSreachGroupMovie(token, groupId, text);
       }, 500),
     [token, groupId]
@@ -614,8 +614,8 @@ const WatchWithFriend = () => {
 
           }}
           font={font.PoppinsRegular}
-          numberOfLines={1}          // limits to 1 line
-          ellipsizeMode="tail"       // adds "..." if text is too long
+          numberOfLines={1}      
+          ellipsizeMode="tail" 
         >
           {movie?.release_year} • {convertRuntime(movie?.runtime)} • {movie?.genres?.join(", ")}
         </CustomText>
@@ -626,9 +626,7 @@ const WatchWithFriend = () => {
             // marginBottom:22
           }]}
           onPress={() => groupScoreModalFunc({ imdb_id: imdbId, score: movie?.rec_score })}
-        >
-          {/* <Image source={imageIndex.puased} style={styles.watchNowImg} /> */}
-
+        > 
           <RankingWithInfo
             score={movie?.rec_score ?? '?'}
             title={t("discover.groupScore")}
@@ -643,33 +641,16 @@ const WatchWithFriend = () => {
           pointerEvents="box-none"
           style={{
             bottom: 18.5,
-           }}
+          }}
         >
 
           <DescriptionWithReadMore
             description={movie?.description}
             wordNo={80}
-            //      onViewMore={() =>
-            //     setInfoModal(true)
-            //   // setTimeout(() => {
-            //   //               if (!isScrollView.current) {
-            //   //                 setInfoModal(true);
-            //   //               }
-            //   //             }, 200)} 
-            //  }
-            descriptionStyle={{ textAlign: "center" }}
+                descriptionStyle={{ textAlign: "center" }}
             viewmoreStyle={{ textAlign: "center" }}
           />
-        </View>
-        {/* <TouchableOpacity
-          style={styles.watchNowContainer}
-          onPress={() => watchModalFunc({ imdb_id: imdbId })}
-        >
-          <Image source={imageIndex.puased} style={styles.watchNowImg} />
-          <CustomText size={14} color={Color.whiteText} font={font.PoppinsBold}>
-            Watch Now
-          </CustomText>
-        </TouchableOpacity> */}
+        </View> 
         <Pressable
           onPress={() => watchModalFunc({ imdb_id: imdbId })}
           style={({ pressed }) => [
@@ -682,12 +663,11 @@ const WatchWithFriend = () => {
               alignItems: 'center',
               width: width * 0.4,
               borderRadius: 10,
-              marginTop: Platform.OS === 'ios' ? -7 : 5,
+              marginTop: Platform.OS === 'ios' ? -10 : 5,
               bottom: Platform.OS === 'ios' ? 0 : 5,
               opacity: pressed ? 0.8 : 1,
             },
-          ]}
-          // Prevent ScrollView from stealing the touch on iOS
+          ]} 
           delayLongPress={200}
         >
           <Image source={imageIndex.puased} style={styles.watchNowImg}
@@ -705,17 +685,13 @@ const WatchWithFriend = () => {
     );
   };
   const totalMembers = memberCount ?? group1?.results?.length ?? 0;
-  // const remainingMembers = Math.max(totalMembers, 0);
-  // const remainingMembers = totalMembers;
   const remainingMembers = Math.max(totalMembers - 1, 0);
-  // Movie cards with animations
   const movieCard = useMemo(() => {
-    // ✅ Guard: Ensure displayMovies is an array
-    if (!Array.isArray(displayMovies) || displayMovies.length === 0) {
+    if (!Array.isArray(displayMovies) || displayMovies?.length === 0) {
       return [];
     }
 
-    return displayMovies.map((movie, index) => {
+    return displayMovies?.map((movie, index) => {
       // ✅ Skip invalid movies
       if (!movie) return null;
 
@@ -761,8 +737,8 @@ const WatchWithFriend = () => {
                 cache: FastImage.cacheControl.immutable,
               }}
               style={[styles.poster, {
-                bottom: 22.5 ,
-                marginTop: Platform.OS =="ios" ? 12.6:0
+                bottom: 22.5,
+                marginTop: Platform.OS == "ios" ? 12.6 : 0
               }]}
               resizeMode={FastImage.resizeMode.cover}
             />
@@ -791,13 +767,13 @@ const WatchWithFriend = () => {
   // ✅ Safe member data selection with array guards
   const membersData =
     (group?.members?.length || 0) >= (group1?.results?.length || 0)
-      ? (Array.isArray(group?.members) ? group.members : [])
+      ? (Array.isArray(group?.members) ? group?.members : [])
       : (Array.isArray(group1?.results) ? group1.results : []);
   const insets = useSafeAreaInsets();
 
   return (
     <KeyboardAvoidingView
-         behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
 
       style={{
         flex: 1,
@@ -813,7 +789,7 @@ const WatchWithFriend = () => {
         reducedTransparencyFallbackColor="white"
         // overlayColor='transparent'
       /> */}
-      <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={[styles.mincontainer, { flex: 1 }]}>
+      <SafeAreaView edges={isOnline ? ['top'] : []} style={[styles.mincontainer, { flex: 1 }]}>
         <CustomStatusBar translucent={true} />
 
         {/* Header */}
@@ -947,7 +923,7 @@ const WatchWithFriend = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
             />
-            {comment.length > 0 && (
+            {comment?.length > 0 && (
               <TouchableOpacity onPress={() => {
                 setcomment('');
                 setSearchResult([]);
@@ -1129,7 +1105,7 @@ const WatchWithFriend = () => {
          </View> */}
         <GroupMovieModal
           visible={modalVisible}
-          group={group1?.results || group.member}
+          group={group1?.results || group?.member}
           // group={group1?.results ||group.member}
           // group={group}
           groupId={groupId}

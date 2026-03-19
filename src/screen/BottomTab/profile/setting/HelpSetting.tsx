@@ -14,6 +14,7 @@ import { Color } from "@theme/color";
 import font from "@theme/font";
 import imageIndex from "@assets/imageIndex";
 import { t } from "i18next";
+import { useNetworkStatus } from "@hooks/useNetworkStatus";
 
 const HelpSetting = () => {
   const navigation = useNavigation();
@@ -118,9 +119,9 @@ const HelpSetting = () => {
       }))
       .filter((s) => s.items.length > 0);
   }, [sections, search]);
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
       <CustomStatusBar />
 
       <HeaderCustom
@@ -138,7 +139,7 @@ const HelpSetting = () => {
       </View>
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {filteredSections.map((section) => (
+        {filteredSections?.map((section) => (
           <TouchableOpacity
             key={section.id}
             style={styles.sectionCard}
@@ -150,7 +151,7 @@ const HelpSetting = () => {
               <Image source={imageIndex.rightArrow} style={styles.icon} />
             </View>
 
-            {section.items.map((item, index) => (
+            {section?.items?.map((item, index) => (
               <Text key={`${section.id}-${index}`} style={styles.detailText}>
                 {item}
               </Text>

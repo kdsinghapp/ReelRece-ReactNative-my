@@ -36,6 +36,7 @@ import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { ComparisonModal, CustomStatusBar } from '@components/index';
 import { t } from 'i18next';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 const FixedHomeScreen = () => {
   const token = useSelector((state: RootState) => state.auth.token); 
@@ -313,9 +314,9 @@ const FixedHomeScreen = () => {
 
     return <FeedCardShimmer />;
   }, [loadingFeed, loadingMore, hasMore, feedData.length]);
-
+ const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={isOnline ? ['left', 'right'] : []}>
       <CustomStatusBar />
 
       {/* Fixed Header */}

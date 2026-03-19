@@ -74,7 +74,7 @@ export const PopupLoggerComponent: React.FC = () => {
         animationType="slide"
         transparent={true}
       >
-        <SafeAreaView style={styles.modalContainer}>
+        <SafeAreaView  style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.header}>
               <Text style={styles.headerText}>Debug Logs</Text>

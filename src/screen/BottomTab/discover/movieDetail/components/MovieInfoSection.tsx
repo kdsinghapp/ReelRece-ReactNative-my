@@ -110,9 +110,14 @@ const MovieInfoSection = ({
           <View style={{}}>
             <RankingWithInfo
               score={item?.friends_rec_score == null || Number(item?.friends_rec_score) < 0 ? '?' : Number(item.friends_rec_score)}
-              title= {t("discover.friendscore")}
-              description={t("discover.frienddes")}
-            />
+              title= {t("discover.friendscore")} 
+            description={
+  item?.friends_rec_score === null ||
+  item?.friends_rec_score === -1 ||
+  item?.friends_rec_score === 0
+    ? t("discover.nofrienddes")
+    : t("discover.frienddes")
+}/>
           </View>
 
           <CustomText

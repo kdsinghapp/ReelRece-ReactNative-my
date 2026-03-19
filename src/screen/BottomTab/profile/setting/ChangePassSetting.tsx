@@ -1,4 +1,15 @@
-import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native'
 import React, { useState } from 'react'
 import { Color } from '@theme/color'
 import { useNavigation } from '@react-navigation/native'
@@ -11,7 +22,7 @@ import StatusBarCustom from '@components/common/statusBar/StatusBarCustom'
 import { Button, HeaderCustom, SuccessMessageCustom } from '@components/index'
 import imageIndex from '@assets/imageIndex'
 import { t } from 'i18next'
-
+import { useNetworkStatus } from '@hooks/useNetworkStatus'
 
 const ChangePassSetting = () => {
   const token = useSelector((state: RootState) => state.auth.token);
@@ -29,7 +40,6 @@ const ChangePassSetting = () => {
   const [toastMessage, setToastMessage] = useState('');
 
   const navigation = useNavigation();
-
 
   const toastMessFunc = ({ green = false, message = '' }) => {
     setToastMess(true);
@@ -57,86 +67,109 @@ const ChangePassSetting = () => {
     }
 
     try {
+      if (!email) {
+        toastMessFunc({ green: false, message: t("errorMessage.checkPassword") });
+        return;
+      }
       // 1. Current password verify (Login API)
       const tokenCheck = await loginUser_Api(email, currentPassword.trim());
-      if (!tokenCheck) {
+      if (!tokenCheck?.success || !tokenCheck?.data) {
         toastMessFunc({ green: false, message: t("errorMessage.currentNotMatch") });
-
         return;
       }
 
+      const authToken = tokenCheck.data;
       // 2. Change Password API
-      const res = await changePassword(tokenCheck, newPassword.trim());
+      const res = await changePassword(authToken, newPassword.trim());
       if (res?.password_reset === "success") {
-
         toastMessFunc({ green: true, message: t("errorMessage.passwordChangeSuccess") });
-
         navigation.goBack();
-      } else { 
       }
-
-    } catch (error) { 
+    } catch (_error) {
+      // handle error if needed
     }
   };
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
       <StatusBarCustom />
       <HeaderCustom
-        title=
-        {t("login.changepassword")}
+        title={t("login.changepassword")}
         backIcon={imageIndex.backArrow}
       />
 
-      {/* Current Password */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder= {t("login.currentpassword")}
-          placeholderTextColor={Color.placeHolder}
-          secureTextEntry={secureCurrent}
-          style={styles.input}
-          value={currentPassword}
-          onChangeText={setCurrentPassword}
-        />
-        <TouchableOpacity onPress={() => setSecureCurrent(!secureCurrent)}>
-          <Image style={styles.hideImage} source={secureCurrent ? imageIndex.eyes : imageIndex.view} />
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.formInner}>
+              {/* Current Password */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder={t("login.currentpassword")}
+                  placeholderTextColor={Color.placeHolder}
+                  secureTextEntry={secureCurrent}
+                  style={styles.input}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+                <TouchableOpacity onPress={() => setSecureCurrent(!secureCurrent)}>
+                  <Image style={styles.hideImage} source={secureCurrent ? imageIndex.eyes : imageIndex.view} />
+                </TouchableOpacity>
+              </View>
 
-      {/* New Password */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder={t("login.newpassword")}
-          placeholderTextColor={Color.placeHolder}
-          secureTextEntry={secureNew}
-          style={styles.input}
-          value={newPassword}
-          onChangeText={setNewPassword}
-        />
-        <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
-          <Image style={styles.hideImage} source={secureNew ? imageIndex.eyes : imageIndex.view} />
-        </TouchableOpacity>
-      </View>
+              {/* New Password */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder={t("login.newpassword")}
+                  placeholderTextColor={Color.placeHolder}
+                  secureTextEntry={secureNew}
+                  style={styles.input}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  autoComplete="off"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+                <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
+                  <Image style={styles.hideImage} source={secureNew ? imageIndex.eyes : imageIndex.view} />
+                </TouchableOpacity>
+              </View>
 
-      {/* Confirm Password */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder={t("login.confirmnewpassword")}
-          placeholderTextColor={Color.placeHolder}
-          secureTextEntry={secureConfirm}
-          style={styles.input}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-        <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
-          <Image style={styles.hideImage} source={secureConfirm ? imageIndex.eyes : imageIndex.view} />
-        </TouchableOpacity>
-      </View>
+              {/* Confirm Password */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder={t("login.confirmnewpassword")}
+                  placeholderTextColor={Color.placeHolder}
+                  secureTextEntry={secureConfirm}
+                  style={styles.input}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+                <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
+                  <Image style={styles.hideImage} source={secureConfirm ? imageIndex.eyes : imageIndex.view} />
+                </TouchableOpacity>
+              </View>
 
       {/* Save Button */}
-      <View style={{ paddingHorizontal: 18, marginTop: 10 }}>
+      <View style={styles.saveButtonWrap}>
         <Button title={t("common.save")} onPress={handleSave} />
       </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
 
       {toastMess && (
@@ -158,6 +191,16 @@ const styles = StyleSheet.create({
     backgroundColor: Color.background,
     paddingTop: 15,
   },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
+  },
+  formInner: {
+    paddingHorizontal: 0,
+  },
   inputContainer: {
     flexDirection: 'row',
     backgroundColor: Color.grey700,
@@ -165,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     marginBottom: 14,
-    height: 48,
+    height: 47,
     justifyContent: 'space-between',
     marginHorizontal: 15,
   },
@@ -173,15 +216,17 @@ const styles = StyleSheet.create({
     flex: 1,
     color: Color.whiteText,
     fontSize: 16,
-    lineHeight: 20,
-    fontFamily: font.PoppinsRegular,
-    height: 50,
-  },
+     fontFamily: font.PoppinsRegular,
+   },
   hideImage: {
     height: 18,
     width: 18,
     resizeMode: 'contain',
-    tintColor: Color.whiteText
-  }
+    tintColor: Color.whiteText,
+  },
+  saveButtonWrap: {
+    paddingHorizontal: 18,
+    marginTop: 10,
+  },
 });
 

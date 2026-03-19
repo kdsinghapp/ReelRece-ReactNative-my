@@ -116,53 +116,13 @@ const WoodsScreen = () => {
     loadingMore,
     currentPage,
     totalPages,
-  } = useWoodScreen();
-  // const {
-  //   togglePlatform,
-  //   isVisible, setIsVisible,
-  //   modalVisible, setModalVisible,
-  //   lovedImge, setlovedImge,
-  //   selectedPlatforms,
-  //   filteredItems, setFilteredItems,
-  //   searchFromAPI,
-  //   searchGroupFromApi,
-  //   loading,
-  // } = useWoodScreen();
+  } = useWoodScreen(); 
   const [searchQuery, setSearchQuery] = useState('');
 
   const token = useSelector((state: RootState) => state?.auth?.token); // ✅ outside  condition
   const compareHook = useCompareComponent(token);
   const insets = useSafeAreaInsets();
-
-
-  // const handleSearch = useCallback((query: string) => {
-  //   const lowerQuery = query.toLowerCase();
-  //   if (!lowerQuery.trim()) {
-  //     setFilteredItems([]);
-  //     return;
-  //   }
-
-  //   if (type === 'movie') {
-  //     if (token) {
-  //       searchFromAPI(lowerQuery, token); //  API based search
-  //     } else {
-  //     }
-  //   };
-
-  //   if (type === 'group') {
-  //     if (token) {
-  //       searchGroupFromApi(lowerQuery, token); // ✅ API based search
-  //     } else {
-  //     }
-  //     // const results = watchTogetherGroups.filter((group) =>
-  //     //   group.groupName.toLowerCase().includes(lowerQuery) )
-
-
-  //     // setFilteredItems(results);
-  //   }
-  // }, [type, token, searchQuery]);
-
-
+ 
   const handleSearch = useCallback(
     (query: string, page: number = 1, replace: boolean = false) => {
       if (!query.trim()) {
@@ -270,7 +230,7 @@ const WoodsScreen = () => {
   const handleClearSearch = useCallback(() => handleSearchInputChange(''), [handleSearchInputChange]);
 
   const movieSectionStyle = useMemo(
-    () => [styles.movieSection, { paddingBottom: Math.max(insets.bottom, 16) }],
+    () => [styles.movieSection, { paddingBottom:16}],
     [insets.bottom]
   );
 
@@ -280,7 +240,7 @@ const WoodsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.maincontainer} edges={!isOnline ? ['bottom'] : ['top', 'bottom']}>
+    <SafeAreaView style={styles.maincontainer}  edges={isOnline ? ['top'] : []}>
       <CustomStatusBar />
 
       <View style={styles.searchHeaderContainer}>
@@ -297,6 +257,7 @@ const WoodsScreen = () => {
             onChangeText={handleSearchInputChange}
             returnKeyType="search"
             allowFontScaling={false}
+            autoFocus
           />
           {!!searchQuery && (
             <TouchableOpacity onPress={handleClearSearch}>

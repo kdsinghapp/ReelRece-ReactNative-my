@@ -37,7 +37,6 @@ const PlatformRow = React.memo(({ item, isSelected, onToggle }: { item: Platform
 ));
 
 const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selectedPlatforms, setSelectedPlatforms }: PlatformModalsProps) => {
-
     const token = useSelector((state: RootState) => state.auth.token);
     const [toastMess, setToastMess] = useState(false);
     const [toastMessColorGreen, setToastMessGreen] = useState(false);
@@ -51,40 +50,6 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
         );
     }, [setSelectedPlatforms]);
 
-    // const restoreFormSetting = async () => {
-    //     try {
-    //         const response = await getUserSubscriptions(token)
-    //         let lengthItem = response?.data.length;
-
-    //         response?.data.map((ok) => {
-    //             togglePlatform(ok.subscription)
-
-    //         })
-    //     } catch (error) {
-
-    //     }
-    // }
-
-    // useEffect(()=> {
-    //     restoreFormSetting()
-    // })
-    // Select all platforms
-
-    //   const togglePlatformForRestore = (platformName) => {
-    //     setSelectedPlatforms(prev =>
-    //         prev.includes(platformName)
-    //             ? prev.filter(name => name !== platformName) // remove
-    //             : [...prev, platformName]                   // add
-    //     );
-    // };
-
-    // const togglePlatformForRestore = (index) => {
-    //     setSelectedPlatforms(prev =>
-    //         prev.includes(index)
-    //             ? prev                 // already selected, do nothing
-    //             : [...prev, index]     // add if not present
-    //     );
-    // };
     const restoreFormSetting = useCallback(async () => {
         try {
             const response = await getUserSubscriptions(token ?? '');
@@ -99,14 +64,14 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
             setToastMess(true);
         }
     }, [token, setSelectedPlatforms]);
- 
+
     const selectAll = useCallback(() => {
         setSelectedPlatforms(platformsData.map((platform: PlatformItem) => platform.supported_platform));
     }, [platformsData, setSelectedPlatforms]);
- 
+
     const selectedServices = useMemo(() => {
-        return selectedPlatforms.filter((id: string) => {
-            const platform = platformsData.find((p: PlatformItem) => p.supported_platform === id);
+        return selectedPlatforms?.filter((id: string) => {
+            const platform = platformsData?.find((p: PlatformItem) => p.supported_platform === id);
             return platform && !platform.isTelecom;
         }).length;
     }, [selectedPlatforms, platformsData]);
@@ -114,7 +79,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
     const handleClose = useCallback(() => onClose(selectedPlatforms), [onClose, selectedPlatforms]);
 
     const renderItem = useCallback(({ item }: { item: PlatformItem }) => {
-        const isSelected = selectedPlatforms.includes(item.supported_platform);
+        const isSelected = selectedPlatforms.includes(item?.supported_platform);
         return <PlatformRow item={item} isSelected={isSelected} onToggle={togglePlatform} />;
     }, [selectedPlatforms, togglePlatform]);
 
@@ -122,17 +87,14 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
 
     return (
         <Modal visible={visible} transparent animationType="slide">
-            {/* Background overlay */}
             <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={handleClose}>
                 <View style={styles.modalOverlayFill} />
             </TouchableOpacity>
             <View style={styles.modalBox}>
-                {/* <Text style={styles.modalTitle}>Platform</Text> */}
                 <CustomText
                     size={16}
                     color={Color.whiteText}
                     style={styles.modalTitle}
-                // font={font.PoppinsBold}
                 >
                     {(t("discover.platform"))}
 
@@ -146,7 +108,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                         style={styles.counterText}
                         font={font.PoppinsRegular}
                     >
-                         {(t("discover.services"))}
+                        {(t("discover.services"))}
 
                     </CustomText>
 
@@ -161,9 +123,6 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                     </CustomText>
                 </View>
 
-
-
-                {/* Select All button */}
                 <TouchableOpacity onPress={selectAll} style={styles.selectAllButton}>
 
                     <CustomText
@@ -178,7 +137,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
 
                 {/* Platforms list - FlatList only (no ScrollView) so virtualization works */}
                 <View style={styles.listContainer}>
-                    {platformsData.length === 0 ? (
+                    {platformsData?.length === 0 ? (
                         <ActivityIndicator color={Color.primary} size="small" />
                     ) : (
                         <FlatList
@@ -198,7 +157,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                 <View style={styles.bottomButtonContainerBox}  >
                     <View style={styles.bottomButtonContainer}>
                         <TouchableOpacity onPress={reset} style={styles.selectButton}>
-                         
+
                             <CustomText
                                 size={14}
                                 color={Color.lightGrayText}
@@ -210,7 +169,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                             </CustomText>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={onApply} style={styles.cancelButton}>
-                             <CustomText
+                            <CustomText
                                 size={14}
                                 color={Color.whiteText}
                                 style={[styles.buttonTxt, {
@@ -225,9 +184,6 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                     </View>
                 </View>
 
-
-
-                {/* Close button */}
                 <TouchableOpacity
                     onPress={restoreFormSetting}
                     style={styles.modalCloseBtn}>
@@ -249,7 +205,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                     />
                 )}
             </View>
- 
+
         </Modal>
     );
 };
@@ -303,7 +259,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     modalContent: {
-        // paddingBottom: 20,
     },
     modalItem: {
         flexDirection: 'row',
@@ -332,7 +287,7 @@ const styles = StyleSheet.create({
     modalItemTextWithMargin: {
         width: '77%',
         marginLeft: 10,
-    }, 
+    },
     resetButton: {
         backgroundColor: '#e0e0e0',
         padding: 12,

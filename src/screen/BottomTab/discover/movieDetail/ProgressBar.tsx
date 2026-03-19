@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, memo } from 'react';
-import { View, PanResponder, Animated, findNodeHandle } from 'react-native';
+import { View, PanResponder, Animated, } from 'react-native';
 import { Color } from '@theme/color';
 
 type ProgressBarProps = {
@@ -9,11 +9,11 @@ type ProgressBarProps = {
   onSeekEnd?: () => void;
 };
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ 
-  progress, 
-  onSeek, 
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  progress,
+  onSeek,
   onSeekStart,
-  onSeekEnd 
+  onSeekEnd
 }) => {
   const [width, setWidth] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -24,7 +24,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     setWidth(newWidth);
   };
 
-  // Update progress bar visualization
   useEffect(() => {
     if (width > 0) {
       const newX = progress * width;
@@ -40,38 +39,32 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   const handleSeek = (xPosition: number) => {
     if (width === 0) return;
-    
     const clampedX = Math.max(0, Math.min(xPosition, width));
     const newProgress = clampedX / width;
-    
-     
-    // Update visual immediately during seek
+
     progressAnim.setValue(clampedX);
-    
-    // Call seek callback with progress (0-1)
+
     onSeek(newProgress);
   };
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
-    
     onPanResponderGrant: (evt) => {
-       setIsSeeking(true);
+      setIsSeeking(true);
       onSeekStart?.();
       handleSeek(evt.nativeEvent.locationX);
     },
-    
+
     onPanResponderMove: (evt, gestureState) => {
-      // Get the touch position relative to the progress bar
       containerRef.current.measure((x, y, width, height, pageX, pageY) => {
         const relativeX = gestureState.moveX - pageX;
         handleSeek(relativeX);
       });
     },
-    
+
     onPanResponderRelease: () => {
-       setIsSeeking(false);
+      setIsSeeking(false);
       onSeekEnd?.();
     },
   });
@@ -81,14 +74,13 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <View
       ref={containerRef}
-      style={{ 
-        height: 20, // Increased touch area
+      style={{
+        height: 20,
         justifyContent: 'center',
       }}
       onLayout={handleLayout}
       {...panResponder.panHandlers}
     >
-      {/* Background track */}
       <View
         style={{
           height: 6,
@@ -96,7 +88,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           borderRadius: 3,
         }}
       />
-      
+
       {/* Progress fill */}
       <Animated.View
         style={{
@@ -109,7 +101,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           width: progressAnim,
         }}
       />
-       
+
     </View>
   );
 };

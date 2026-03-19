@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { FunctionComponent } from 'react';
+import React, { memo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _routes from '@routes/routes';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -10,14 +10,12 @@ import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMov
 const Stack = createNativeStackNavigator();
 
 
-const DiscoverTab: FunctionComponent = () => {
+const DiscoverTab = memo(() => {
   const _routess = [
     { name: ScreenNameEnum.DiscoverScreen, Component: DiscoverScreen },
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
-
-    // { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },  
    ];
 
   return (
@@ -26,11 +24,11 @@ const DiscoverTab: FunctionComponent = () => {
         headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
-
+        freezeOnBlur: true,
       }}>
-      {_routess.map((screen, index) => (
+      {_routess.map((screen) => (
         <Stack.Screen
-          key={index}
+          key={screen.name}
           name={screen.name}
           component={screen.Component}
         />
@@ -38,6 +36,7 @@ const DiscoverTab: FunctionComponent = () => {
 
     </Stack.Navigator>
   );
-};
+});
+DiscoverTab.displayName = 'DiscoverTab';
 
 export default DiscoverTab;

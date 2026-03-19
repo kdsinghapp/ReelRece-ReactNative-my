@@ -28,6 +28,7 @@ import imageIndex from '@assets/imageIndex';
 import { CustomStatusBar } from '@components/index';
 import { t } from 'i18next';
 import { BASE_IMAGE_URL } from '@config/api.config';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Type for each feed item
@@ -166,6 +167,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
       </View>
     );
   };
+  const isOnline = useNetworkStatus();
   return (
     <Modal
       visible={visible}
@@ -173,7 +175,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
       transparent
       onRequestClose={onClose}
     >
-      <SafeAreaView
+      <SafeAreaView edges={isOnline ? ['top'] : []}
         style={[
           styles.container,
           {

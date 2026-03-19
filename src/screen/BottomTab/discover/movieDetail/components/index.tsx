@@ -1,7 +1,3 @@
-/**
- * Components Index
- * Central export point for all MovieDetailScreen sub-components
- */
 
 export { default as MovieHeader } from './MovieHeader';
 export { default as VideoSection } from './VideoSection';

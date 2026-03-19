@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { FunctionComponent } from 'react';
+import React, { memo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _routes from '@routes/routes';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -10,7 +10,6 @@ import MainSetting from '@screens/BottomTab/profile/setting/MainSetting';
 import AccountSetting from '@screens/BottomTab/profile/setting/AccountSetting';
 import PlaybackSetting from '@screens/BottomTab/profile/setting/PlaybackSetting';
 import HelpSetting from '@screens/BottomTab/profile/setting/HelpSetting';
-import SettingLogOut from '@screens/BottomTab/profile/setting/SettingLogOut';
 import ChangePassSetting from '@screens/BottomTab/profile/setting/ChangePassSetting';
 import PrivacySetting from '@screens/BottomTab/profile/setting/PrivacySetting';
 import HelpMessage from '@components/settingHelp/helpMessage';
@@ -26,7 +25,7 @@ import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMov
 import OtherProfile from '@screens/BottomTab/home/otherProfile/OtherProfile';
 const Stack = createNativeStackNavigator();
 
-const ProfileTab: FunctionComponent = () => {
+const ProfileTab = memo(() => {
   const _routess = [
     { name: ScreenNameEnum.ProfileScreen, Component: ProfileScreen },
     { name: ScreenNameEnum.EditProfile, Component: EditProfile },
@@ -36,7 +35,6 @@ const ProfileTab: FunctionComponent = () => {
     { name: ScreenNameEnum.PlaybackSetting, Component: PlaybackSetting },
     { name: ScreenNameEnum.PrivacySetting, Component: PrivacySetting },
     { name: ScreenNameEnum.HelpSetting, Component: HelpSetting },
-    { name: ScreenNameEnum.SettingLogOut, Component: SettingLogOut },
     { name: ScreenNameEnum.ChangePassSetting, Component: ChangePassSetting },
     { name: ScreenNameEnum.HelpMessage, Component: HelpMessage },
     { name: ScreenNameEnum.GroupSearch, Component: GroupSearch },
@@ -58,11 +56,11 @@ const ProfileTab: FunctionComponent = () => {
         headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
-
+        freezeOnBlur: true,
       }}>
-      {_routess.map((screen, index) => (
+      {_routess.map((screen) => (
         <Stack.Screen
-          key={index}
+          key={screen.name}
           name={screen.name}
           component={screen.Component}
         />
@@ -70,6 +68,7 @@ const ProfileTab: FunctionComponent = () => {
 
     </Stack.Navigator>
   );
-};
+});
+ProfileTab.displayName = 'ProfileTab';
 
 export default ProfileTab;

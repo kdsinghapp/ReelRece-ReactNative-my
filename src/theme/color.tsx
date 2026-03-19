@@ -5,7 +5,8 @@ export const Color = {
   // darkGrey:'#1a1a1a',
   darkGrey: '#1A1A1A',
   background: "#000000",
-  primary: "#008AC9",
+  black: "#000000",
+  primary: "#00A8F5",
   graybackGround: "#1A1A1A",
   text: "#FFFFFF",
   // real file 
@@ -13,14 +14,14 @@ export const Color = {
   primary600: "#006c9d",
   modalBg: "#1a1a1a",
   grey: "#2D2D2E",
+  gray: "#1A1A1A",
   grey700: "#28292A",
   yellow1: "#F0D241",
-  // real file 
   buttonBackground: "#ff6347",
   whiteText: "#FFFFFF",
   textGray: "#8C8C8C",
   green: "#2AA147",
-  lightGrayText: "#CDCDCD",
+  lightGrayText: "#767676",
   lightPrimary: "#00A8F5",
   blueprimary: "#00A8F5",
   red: "#CA462A",
@@ -33,5 +34,4 @@ export const Color = {
   settingFreatureSvg: '#4EC8FF',
   settingFreatureSvgTras: 'rgba(7, 12, 17, 1)',
   TransperantColor: 'rgba(255, 255, 255, 0)',
-  // shimmerColors={['#181818ff', '#464545ff', '#181717ff']}
 };

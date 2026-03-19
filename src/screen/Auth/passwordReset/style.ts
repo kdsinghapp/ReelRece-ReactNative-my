@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   titlSub: {
     color: Color.whiteText,
-     fontSize: 16,
+     fontSize: 14,
     bottom: 5,
     marginTop:35,
     lineHeight:22

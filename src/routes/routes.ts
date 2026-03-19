@@ -11,6 +11,7 @@ import EmailVerify from "@screens/Auth/addUsername/EmailVerify";
 // import AddUsername from "@screens/Auth/AddUsername/AddUsername";
 // import EmailVerify from "@screens/Auth/addUsername/EmailVerify";
 import Login from "@screens/Auth/login/Login";
+import AddName from "@screens/Auth/addName/AddName";
 import OnboardingScreen from "@screens/Auth/onboardingScreen/OnboardingScreen";
 import OnboardingStepTwo from "@screens/Auth/onboardingScreen/OnboardingStepTwo";
 import NewPassword from "@screens/Auth/passwordReset/NewPassword";
@@ -25,13 +26,12 @@ import WatchScreen from "@screens/BottomTab/watch/watchScreen/WatchScreen";
 import ScreenNameEnum from "@routes/screenName.enum";
 
 
-const _routes = () => {
-
-  return {
-    REGISTRATION_ROUTE: [
+// Pre-computed route arrays for stable references (avoids re-renders)
+const REGISTRATION_ROUTE = [
       { name: ScreenNameEnum.WELCOME, Component: Welcome },
        { name: ScreenNameEnum.LoginScreen, Component: Login },
        { name: ScreenNameEnum.SignUpScreen, Component: Signup },
+       { name: ScreenNameEnum.AddName, Component: AddName },
        { name: ScreenNameEnum.PasswordReset, Component: PasswordReset },
        { name: ScreenNameEnum.AddUsername, Component: AddUsername },
       { name: ScreenNameEnum.TabNavigator, Component: TabNavigator },
@@ -45,11 +45,10 @@ const _routes = () => {
       { name: ScreenNameEnum.OnboardingScreen, Component: OnboardingScreen },
       { name: ScreenNameEnum.OnboardingScreen2, Component: OnboardingStepTwo },
       
-      // { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
-      
-    ],
+  // { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
+];
 
-    BOTTOMTAB_ROUTE: [
+const BOTTOMTAB_ROUTE = [
       {
         name: ScreenNameEnum.FeedTab,
         Component: FeedTab,
@@ -85,11 +84,12 @@ const _routes = () => {
         label: "Profile",
         logo: imageIndex.UserProfile,
         logo1: imageIndex.profileActive,
-      },
+    },
+  ];
 
-
-    ],
-  };
-};
+const _routes = () => ({
+  REGISTRATION_ROUTE,
+  BOTTOMTAB_ROUTE,
+});
 
 export default _routes;

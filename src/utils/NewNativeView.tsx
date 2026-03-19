@@ -1,7 +1,7 @@
 // NewNativeView.tsx - Simplified Version
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  requireNativeComponent, 
+import {
+  requireNativeComponent,
   View,
   Image,
   Animated,
@@ -21,12 +21,11 @@ interface VideoPlayerProps {
   onError?: (error: { error: string }) => void;
   onPlayPause?: (isPlaying: boolean) => void;
   onEnd?: () => void;
-  /** Called when native controller shows/hides (e.g. to show/hide mute button) */
   onControllerVisibilityChange?: (visible: boolean) => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
-  source, 
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  source,
   posterUrl,
   controllerEnabled = true,
   style,
@@ -35,16 +34,38 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onPlayPause,
   onEnd,
   onControllerVisibilityChange,
-  ...props 
-}) => {
+  ...props
+}: any) => {
   const [showPoster, setShowPoster] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  
+
   const posterOpacity = useRef(new Animated.Value(1)).current;
   const playerOpacity = useRef(new Animated.Value(0)).current;
   const playerRef = useRef(null);
 
+  // Use refs for callbacks to avoid re-registering event listeners when props change
+  const callbacksRef = useRef({
+    onLoad,
+    onError,
+    onPlayPause,
+    onEnd,
+    onControllerVisibilityChange,
+    onProgress: props.onProgress,
+  });
+
+  useEffect(() => {
+    callbacksRef.current = {
+      onLoad,
+      onError,
+      onPlayPause,
+      onEnd,
+      onControllerVisibilityChange,
+      onProgress: props.onProgress,
+    };
+  }, [onLoad, onError, onPlayPause, onEnd, onControllerVisibilityChange, props.onProgress]);
+
   const hidePoster = useCallback(() => {
+    if (!showPoster) return;
     Animated.parallel([
       Animated.timing(posterOpacity, {
         toValue: 0,
@@ -59,70 +80,94 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     ]).start(({ finished }) => {
       if (finished) setShowPoster(false);
     });
-  }, [posterOpacity, playerOpacity]);
+  }, [posterOpacity, playerOpacity, showPoster]);
 
-  // Event Listeners for Native Events
-  useEffect(() => {
-    const eventListeners = [];
-
-    // Listen for video ready – hide poster as soon as video is ready (duration may be 0 for HLS)
-    const readyListener = DeviceEventEmitter.addListener("onVideoReady", (event) => {
-      setIsVideoLoaded(true);
+  const onVideoProgress = useCallback((event: any) => {
+    const data = event?.nativeEvent || event;
+    // Hide poster on any progress if it's still showing
+    if (showPoster && data?.currentTime !== undefined) {
       hidePoster();
-      const durationInSeconds = event?.duration ?? 0;
-      onLoad?.({ duration: durationInSeconds });
-    });
+    }
+    callbacksRef.current.onProgress?.(data);
+  }, [hidePoster, showPoster]);
 
-    // Listen for play/pause events from native controller – hide poster when playback starts (fallback if onVideoReady is delayed)
-    const playPauseListener = DeviceEventEmitter.addListener("onPlayPause", (event) => {
-      if (event?.isPlaying !== undefined) {
-        onPlayPause?.(event.isPlaying);
-        if (event.isPlaying) {
-          setIsVideoLoaded(true);
-          hidePoster();
-        }
-      }
-    });
+  const handleNativeReady = useCallback((event: any) => {
+    const data = event?.nativeEvent || event;
+    setIsVideoLoaded(true);
+    hidePoster();
+    callbacksRef.current.onLoad?.({ duration: data?.duration ?? 0 });
+  }, [hidePoster]);
 
-    // Listen for video end
-    const endListener = DeviceEventEmitter.addListener("onVideoEnd", () => {
-       onEnd?.();
-    });
-
-    // Listen for native controller show/hide (for mute button visibility)
-    const controllerVisibilityListener = DeviceEventEmitter.addListener(
-      "onControllerVisibilityChange",
-      (event: { visible?: boolean }) => {
-        if (event?.visible !== undefined) {
-          onControllerVisibilityChange?.(event.visible);
-        }
-      }
-    );
-
-    // Listen for native playback error (e.g. load failed) so we hide poster and don't stay stuck
-    const errorListener = DeviceEventEmitter.addListener(
-      "onVideoError",
-      (event: { error?: string }) => {
+  const handleNativePlayPause = useCallback((event: any) => {
+    const data = event?.nativeEvent || event;
+    if (data?.isPlaying !== undefined) {
+      callbacksRef.current.onPlayPause?.(data.isPlaying);
+      if (data.isPlaying && showPoster) {
         setIsVideoLoaded(true);
         hidePoster();
-        onError?.({ error: event?.error ?? 'Unknown video error' });
+      }
+    }
+  }, [hidePoster, showPoster]);
+
+  const handleNativeEnd = useCallback(() => {
+    callbacksRef.current.onEnd?.();
+  }, []);
+
+  const handleNativeControllerVisibility = useCallback((event: any) => {
+    const data = event?.nativeEvent || event;
+    if (data?.visible !== undefined) {
+      callbacksRef.current.onControllerVisibilityChange?.(data.visible);
+    }
+  }, []);
+
+  // Event Listeners for Native Events (Global Emitter fallback)
+  useEffect(() => {
+    const eventListeners: any[] = [];
+
+    const readyListener = DeviceEventEmitter.addListener("onVideoReady", (event) => {
+      if (props.movieId && event?.movieId && props.movieId !== event.movieId) return;
+      handleNativeReady(event);
+    });
+
+    const playPauseListener = DeviceEventEmitter.addListener("onPlayPause", (event) => {
+      if (props.movieId && event?.movieId && props.movieId !== event.movieId) return;
+      handleNativePlayPause(event);
+    });
+
+    const endListener = DeviceEventEmitter.addListener("onVideoEnd", (event) => {
+      if (props.movieId && event?.movieId && props.movieId !== event.movieId) return;
+      handleNativeEnd();
+    });
+
+    const controllerVisibilityListener = DeviceEventEmitter.addListener(
+      "onControllerVisibilityChange",
+      (event) => {
+        if (props.movieId && event?.movieId && props.movieId !== event.movieId) return;
+        handleNativeControllerVisibility(event);
       }
     );
 
-    // Add all listeners to the array
+    const errorListener = DeviceEventEmitter.addListener(
+      "onVideoError",
+      (event) => {
+        if (props.movieId && event?.movieId && props.movieId !== event.movieId) return;
+        setIsVideoLoaded(true);
+        hidePoster();
+        callbacksRef.current.onError?.({ error: event?.error ?? 'Unknown video error' });
+      }
+    );
+
     eventListeners.push(readyListener, playPauseListener, endListener, controllerVisibilityListener, errorListener);
 
-    // Cleanup function
     return () => {
       eventListeners.forEach(listener => listener.remove());
     };
-  }, [onLoad, onPlayPause, onEnd, onControllerVisibilityChange, hidePoster]);
+  }, [props.movieId, handleNativeReady, handleNativePlayPause, handleNativeEnd, handleNativeControllerVisibility, hidePoster]);
 
   const onNativeError = (event: any) => {
     const eventData = event?.nativeEvent || event;
     const errorMessage = eventData?.error || 'Unknown video error';
-    console.error('Video error:', errorMessage);
-    onError?.({ error: errorMessage });
+    callbacksRef.current.onError?.({ error: errorMessage });
     setIsVideoLoaded(true);
     hidePoster();
   };
@@ -130,7 +175,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <View style={[styles.container, style]}>
       <View style={styles.videoContainer}>
-        {/* Android: render player first but invisible (opacity 0) so poster shows on top during load */}
         {Platform.OS === 'android' ? (
           <Animated.View style={[styles.videoWrapper, { opacity: playerOpacity }]}>
             <ExoPlayerView
@@ -138,21 +182,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
               style={styles.video}
               source={source}
               controllerEnabled={true}
-              onError={onNativeError}
               resizeMode="stretch"
               {...props}
+              onVideoReady={handleNativeReady}
+              onPlayPause={handleNativePlayPause}
+              onVideoEnd={handleNativeEnd}
+              onVideoError={onNativeError}
+              onControllerVisibilityChange={handleNativeControllerVisibility}
+              onProgress={onVideoProgress}
+              onError={onNativeError}
             />
           </Animated.View>
         ) : null}
-        {/* Poster on top during loading - visible first, then fades out when video ready */}
-        {posterUrl ? (
+
+        {posterUrl && showPoster ? (
           <Animated.Image
             source={{ uri: posterUrl }}
             style={[styles.poster, { opacity: posterOpacity }]}
             resizeMode="stretch"
           />
         ) : null}
-        
+
         {Platform.OS !== 'android' ? (
           <View style={styles.unsupportedContainer}>
             {posterUrl && (

@@ -6,14 +6,12 @@ export default {
     PoppinsMedium: 'Poppins-Medium',
     PoppinsExtraBold: 'Poppins-ExtraBold',
     PoppinsSemiBold: 'Poppins-SemiBold',
-    // PoppinsSemiBoldItalic: 'Poppins-SemiBoldItalic',
     PoppinsThin: 'Poppins-Thin',
     PoppinsThinItalic: 'Poppins-ThinItalic',
     sackersgothicstdheavy: 'sackersgothicstd-heavy',
     sackersgothicstdlight: 'sackersgothicstd-light',
     sackersgothicstdmedium: 'sackersgothicstd-medium',
-        PoppinsExtraBoldItalic: 'Poppins-ExtraBoldItalic',
+    PoppinsExtraBoldItalic: 'Poppins-ExtraBoldItalic',
     PoppinsExtraLightItalic: 'Poppins-ExtraLightItalic',
-  };
+};
 
- 

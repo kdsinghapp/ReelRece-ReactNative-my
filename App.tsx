@@ -1,9 +1,9 @@
  import React, { FunctionComponent, useEffect } from 'react';
 import { LogBox, NativeModules, Platform, Text, TextInput } from 'react-native';
 import 'react-native-gesture-handler';
-import AppNavigator from './src/navigators/AppNavigator'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initializeLoggerConsoleBridge, setSuppressAllLogs } from '@utils/LoggerConsoleBridge';
+import AppNavigator from '@navigators/AppNavigator';
  
 // ✅ STEP 1: Suppress only specific known warnings (keeps other dev warnings visible)
 // LogBox.ignoreLogs([

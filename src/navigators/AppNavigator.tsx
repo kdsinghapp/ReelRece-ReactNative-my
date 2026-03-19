@@ -56,7 +56,7 @@ const AppNavigator: React.FC = () => {
         <GestureHandlerRootView style={{ flex: 1, }}>
           <SafeAreaView
             style={{ flex: 1, backgroundColor: '#000000' }}
-            edges={isConnected ? ['bottom'] : ['top', 'bottom']}
+            edges={['bottom']}
           >
               {!isConnected && <OfflineBanner />}
             <NavigationContainer

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
-import { getOtherUserBookmarks, toggleBookmark } from '@redux/Api/ProfileApi';
+import { getOtherUserBookmarks,   } from '@redux/Api/ProfileApi';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { useBookmarks } from '@hooks/useBookmark';
@@ -17,8 +17,8 @@ import useHome from '../homeScreen/useHome';
 import { t } from 'i18next';
 import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-import EmptyListCustom from '@components/common/emptyList/EmptyListCustom';
-import font from '@theme/font';
+ import font from '@theme/font';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 
 const OtherWantProfile = () => {
@@ -174,9 +174,9 @@ const OtherWantProfile = () => {
       </View>
     );
   }, [isBookmarked, navigation, isVisible]);
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.maincontainer}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />
       <View style={styles.container}>
         <HeaderCustom title={username} backIcon={imageIndex.backArrow} />

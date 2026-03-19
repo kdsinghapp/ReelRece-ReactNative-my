@@ -23,6 +23,7 @@ import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 import { User } from '../../../../types/api.types';
 import { AxiosResponse } from 'axios';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 /** Other profile screen route params */
 type OtherProfileParams = { item?: User & { name?: string; username?: string } };
@@ -295,6 +296,7 @@ const OtherProfile = () => {
 
       return () => {
         isActive = false;
+        restoredRef.current = false;
       };
     }, [])
   );
@@ -478,12 +480,12 @@ const OtherProfile = () => {
           activity={feedItem?.activity}
           avatar={{ uri: avatarUri }}
           poster={{ uri: posterUri }}
-          user={feedItem.user?.name || feedItem.user?.username}
-          title={feedItem.movie?.title}
-          comment={feedItem.comment}
+          user={feedItem?.user?.name || feedItem?.user?.username}
+          title={feedItem?.movie?.title}
+          comment={feedItem?.comment}
           release_year={feedItem?.movie?.release_year?.toString()}
-          videoUri={feedItem.movie?.trailer_url}
-          imdb_id={feedItem.movie?.imdb_id}
+          videoUri={feedItem?.movie?.trailer_url}
+          imdb_id={feedItem?.movie?.imdb_id}
           created_date={feedItem?.created_date}
           token={token ?? ''}
           rankPress={() => setIsVisible(true)}
@@ -589,9 +591,9 @@ const OtherProfile = () => {
       );
     });
   }, [combinedData]); 
-
+const isOnline = useNetworkStatus();
    return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar />
       <HeaderCustom
         title={item?.name ?? item?.username ?? t("home.userProfile")}  

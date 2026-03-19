@@ -8,8 +8,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
-
-// Direct screen imports - NO NESTED NAVIGATORS
+ 
 import HomeScreen from '@screens/BottomTab/home/homeScreen/FixedHomeScreen';
 import DiscoverScreen from '@screens/BottomTab/discover/discoverScreen/DiscoverScreen';
 import RankingScreen from '@screens/BottomTab/ranking/rankingScreen/RankingScreen';
@@ -17,8 +16,7 @@ import WatchScreen from '@screens/BottomTab/watch/watchScreen/WatchScreen';
 import ProfileScreen from '@screens/BottomTab/profile/profileScreen/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
-
-// Simple tab icon component
+ 
 const TabIcon = React.memo(({ focused, logo, logo1, label }: { focused: boolean; logo: string; logo1: string; label: string }) => (
   <View style={{ alignItems: 'center' }}>
     <Image
@@ -52,8 +50,7 @@ const SimplifiedTabNavigator = React.memo(() => {
   const isMultiSelect = useSelector(
     (state: RootState) => state.multiSelect?.isMultiSelectMode || false
   );
-
-  // Simple tab configuration - no nested navigators
+ 
   const tabs = useMemo(() => [
     {
       name: ScreenNameEnum.HOME_SCREEN,

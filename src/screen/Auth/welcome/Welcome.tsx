@@ -14,7 +14,7 @@ import font from "@theme/font";
 
 // ✅ add this
 import { useTranslation } from "react-i18next";
-import { getRatedMovies } from "@redux/Api/movieApi";
+import { getAllRatedMovies, getRatedMovies } from "@redux/Api/movieApi";
 import LoadingModal from "@utils/Loader";
 
 const { width } = Dimensions.get("window");
@@ -37,6 +37,7 @@ const Welcome = () => {
   const userProfile = useSelector((state: RootState) => state.auth.userGetData);
   const [valid, setValid] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [ratedCount, setRatedCount] = useState(0)
 
   useEffect(() => {
     bothBookMovie();
@@ -53,37 +54,41 @@ const Welcome = () => {
 
   const goToInitialScreen = () => {
     if (userProfile?.email_id && valid) {
-      navigation.replace(ScreenNameEnum.TabNavigator, {
-        screen: ScreenNameEnum.RankingTab,
-      });
-            //  navigation.navigate(ScreenNameEnum.OnboardingScreen);
-
+      if (ratedCount < 5) {
+        navigation.replace(ScreenNameEnum.OnboardingScreen);
+      } else {
+        navigation.replace(ScreenNameEnum.TabNavigator, {
+          screen: ScreenNameEnum.RankingTab,
+        });
+      }
     } else {
       navigation.navigate(ScreenNameEnum.LoginScreen);
     }
   };
 
-
   const bothBookMovie = async () => {
-      setLoading(true);
-      try {
-        const response = await getRatedMovies(token);
-         // setMovies(response?.results || []);
-      } catch (error) {
-       
-        if(error?.status == 401){
-          setValid(false)
-         }
-        // Error handled silently
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const response = await getAllRatedMovies(token);
+      const count = Array.isArray(response?.results) ? response.results.length : 0;
+      setRatedCount(count);
+    } catch (error: any) {
+      if (error?.status === 401 || error?.statusCode === 401) {
+        setValid(false)
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <CustomStatusBar backgroundColor="transparent" translucent />
-{/* {loading && <LoadingModal visible={loading}/>} */}
+      {loading && <LoadingModal visible={loading} />}
       <View style={styles.posterWrapper}>
         {moviePosters.map((column, columnIndex) => {
           const isAtTop = columnIndex % 2 === 0;
@@ -123,16 +128,16 @@ const Welcome = () => {
             <Image source={imageIndex.appLogo} style={styles.logo} resizeMode="stretch" />
 
             <CustomText
-              size={28}
+              size={24}
               color={Color.primary}
               style={styles.heading}
-              font={font.PoppinsBold}
+              font={font.PoppinsSemiBold}
             >
               {t("welcome.title")}
             </CustomText>
 
             <CustomText
-              size={16}
+              size={14}
               color={Color.primary}
               style={styles.subHeading}
               font={font.PoppinsRegular}
@@ -258,9 +263,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.99)",
   },
   logo: {
-    width: 60,
-    height: 72,
-    marginBottom: 10,
+    width: 56,
+    height: 65,
+    marginBottom: 12,
     marginTop: 5,
     borderRadius: 8,
   },
@@ -273,14 +278,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Color.whiteText,
     textAlign: "center",
-    marginBottom: 20,
-    marginTop: 18,
+    marginBottom: 24,
+    marginTop: 12,
     lineHeight: 22,
   },
   contentWrapper: {
     marginHorizontal: 16,
     position: "absolute",
-    bottom: 28,
+    bottom: 62,
     left: 0,
     right: 0,
     zIndex: 10,

@@ -9,5 +9,11 @@ export interface LoginParams {
 export interface RootStackParamList {
   SignUpScreen: undefined;
   PasswordReset: undefined;
-  [key: string]: undefined; // Adding an index signature
+  EmailVerify: { email: string; password?: string; purpose?: string };
+  AddName: { email: string; password?: string };
+  AddUsername: { email: string; password?: string; firstName?: string; lastName?: string };
+  StreamService: { fromSignUp?: boolean };
+  TabNavigator: undefined;
+  LoginScreen: undefined;
+  [key: string]: any;
 }

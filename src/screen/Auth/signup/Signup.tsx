@@ -38,7 +38,7 @@ export default function Signup() {
   const isOnline = useNetworkStatus()
 
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={{
       flex: 1,
       backgroundColor: "black"
     }}>
@@ -48,7 +48,7 @@ export default function Signup() {
       <ScrollView showsVerticalScrollIndicator={false} >
 
         <View
-          style={[styles.viewCont, { marginTop: 50, }]}>
+          style={[styles.viewCont, { marginTop: 20, }]}>
           <TouchableOpacity onPress={() => navigating.goBack()} >
             <Image source={imageIndex.backArrow} style={styles.backIcon} />
           </TouchableOpacity>
@@ -59,16 +59,16 @@ export default function Signup() {
               style={styles.imgLogo} resizeMode='contain'
             />
             <Image
-                                   source={imageIndex.reelRecs}
-                                   style={{
-                                 height: 18,
-                         width: 95,
-                         marginTop: 6,
-                         resizeMode: 'contain', // important for proper image fit
-                                   }}  
-                                 />
+              source={imageIndex.reelRecs}
+              style={{
+                height: 18,
+                width: 95,
+                marginTop: 6,
+                resizeMode: 'contain', // important for proper image fit
+              }}
+            />
           </View>
-          <View style={{ marginTop: 34 }}>
+          <View style={{ marginTop: 36 }}>
             <Text style={styles.loginHeading}>{t("login.create_account",)}</Text>
 
           </View>
@@ -92,13 +92,15 @@ export default function Signup() {
               text={password}
               onChangeText={handlePassText}
               placeholder={t("login.password",)}
-              showEye={false}
+
+              showEye={true}
+              hide={true}
             />
             <InputFieldCustom
               placeholder={t("login.confirmpassword",)}
               onChangeText={handleConfirmPassText}
-
-              showEye={false}
+              showEye={true}
+              hide={true}
             />
             {confirmPasswordError ? <Text style={styles.redText}>{confirmPasswordError}</Text> : null}
             {passwordError ? <Text style={styles.redText}>{passwordError}</Text> : null}
@@ -145,7 +147,7 @@ export default function Signup() {
           <View
             style={styles.titlView}>
             <Text style={styles.tite}>
-            {t("login.already_have",)}
+              {t("login.already_have",)}
             </Text>
             <TouchableOpacity
               style={{}}

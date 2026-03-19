@@ -36,7 +36,7 @@ export default function PasswordReset() {
     showToast,
   } = useToastMessage();
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
+    <SafeAreaView  edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
       {loading && <LoadingModal />}
@@ -70,10 +70,10 @@ export default function PasswordReset() {
           <View style={{ marginTop: 40 }}>
             <CustomText
 
-              size={24}
+              size={20}
               color={Color.whiteText}
               style={styles.loginHeading}
-              font={font.PoppinsBold}
+              font={font.PoppinsSemiBold}
             >
                            {t("login.password_reset",)}
 
@@ -84,7 +84,7 @@ export default function PasswordReset() {
 
           <CustomText
 
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={styles.titlSub}
             font={font.PoppinsRegular}

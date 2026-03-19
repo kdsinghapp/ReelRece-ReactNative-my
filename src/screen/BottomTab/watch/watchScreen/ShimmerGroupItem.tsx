@@ -12,15 +12,12 @@ const ShimmerGroupItem = () => {
       <LinearGradient
         colors={['#1a1a1a', '#1a1a1a']}
         style={styles.gradientContainer}
-      >
-        {/* Left: Profile Image */}
+      > 
         <ShimmerPlaceholder
           LinearGradient={LinearGradient}
           shimmerColors={shimmerColors}
           style={styles.userImage}
         />
-
-        {/* Right: Text Section */}
         <View style={styles.textContainer}>
           {/* Title line */}
           <ShimmerPlaceholder

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { FunctionComponent } from 'react';
+import React, { memo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _routes from '@routes/routes';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -16,7 +16,7 @@ const Stack = createNativeStackNavigator();
 
 
 
-const FeedTab: FunctionComponent = () => {
+const FeedTab = memo(() => {
   const _routess = [
     { name: ScreenNameEnum.HOME_SCREEN, Component: HomeScreen },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
@@ -27,9 +27,7 @@ const FeedTab: FunctionComponent = () => {
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
     { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
-
-
-    // more routes...
+ 
   ];
 
   return (
@@ -38,11 +36,11 @@ const FeedTab: FunctionComponent = () => {
         headerShown: false,
         gestureEnabled: true,
         gestureDirection: 'horizontal',
-
+        freezeOnBlur: true,
       }}>
-      {_routess.map((screen, index) => (
+      {_routess.map((screen) => (
         <Stack.Screen
-          key={index}
+          key={screen.name}
           name={screen.name}
           component={screen.Component}
         />
@@ -50,6 +48,7 @@ const FeedTab: FunctionComponent = () => {
 
     </Stack.Navigator>
   );
-};
+});
+FeedTab.displayName = 'FeedTab';
 
 export default FeedTab;

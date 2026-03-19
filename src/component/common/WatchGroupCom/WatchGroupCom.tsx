@@ -8,7 +8,6 @@ import { Color } from '@theme/color';
 import GroupAllAvatars from '@components/common/GroupAllAvatars/GroupAllAvatars';
 import GroupInterestCycle from '@screens/BottomTab/watch/watchScreen/GroupInterestCycle';
 export const GroupListItem = ({
-
   group,
   isSettingsMode,
   onGroupSelect,
@@ -20,35 +19,12 @@ export const GroupListItem = ({
 
 }) => {
   const navigation = useNavigation();
-  // const handlePress = useCallback(() => {
-  //   if (isMultiSelectMode) {
-  //     // ✅ Checkbox select + Modal open both
-  //     //       onGroupSelect(group);           // selection logic
-  //     setSelectedGroup(group);        // modal show purpose
-  //     // setIsSettingsMode(true);        // modal active flag
-  //   } else if (isSettingsMode) {
-  //     onGroupSelect(group);           // modal open logic
-  //   } else if (!navigationOff) {
-  //     // navigation.navigate(ScreenNameEnum.WatchWithFriend, { group:group });
-  //      navigation.navigate(ScreenNameEnum.WatchWithFriend, {
-  //     groupProps: group,
-  //     groupId: group?.groupId,
-  //     // 👈 now groupId is also explicitly passed
-  //   });
-  //   }
-  // }, [isMultiSelectMode, isSettingsMode, group, selectedGroupIds]);
-
+  
 
   const handlePress = useCallback(async () => {
     if (isMultiSelectMode) {
-      // setSelectedGroup(group);
-
-      // await AsyncStorage.setItem('selected_group', JSON.stringify(group)); // ✅ Store
-    }
-    // else if (isSettingsMode) {
-    //   // onGroupSelect(group);
-    //   // await AsyncStorage.setItem('selected_group', JSON.stringify(group)); // ✅ Store
-    // } 
+        }
+   
 
     else if (!navigationOff) {
       await AsyncStorage.setItem('selected_group', JSON.stringify(group)); // ✅ Store
@@ -69,14 +45,7 @@ export const GroupListItem = ({
 
   }, [isMultiSelectMode, group, selectedGroupIds]);
 
-
-
-
-  // useEffect(() => {
-  //   if (isMultiSelectMode && !isSettingsMode) {
-  //     setIsSettingsMode(true);
-  //   }
-  // }, [isMultiSelectMode]);
+ 
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -173,11 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 92,
     borderRadius: 20,
-  },
-  // userImagesContainer: {
-  //   flexDirection: 'row',
-  //   marginRight: 12,
-  // },
+  }, 
   userImage: {
     width: 50,
     height: 50,

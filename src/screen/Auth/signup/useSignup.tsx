@@ -3,7 +3,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { checkEmailExists, checkUsernameAvailability, confirmEmailCodeApi, loginUser_Api, sendOTPToEmail_GET, signupWithUsername } from '@redux/Api/authService';
+import { checkEmailExists, checkUsernameAvailability, confirmEmailCodeApi, loginUser_Api, sendOTPToEmail_GET, signupWithUsername, updateUserProfile } from '@redux/Api/authService';
 import { RootStackParamList } from './SignupTypes';
 import Toast from 'react-native-toast-message';
 import { useDispatch } from 'react-redux';
@@ -21,7 +21,11 @@ const useSignup = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [usernameError, setUsernameError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
   const [toastMess, setToastMess] = useState(false)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const dispatch = useDispatch();
@@ -176,38 +180,52 @@ const useSignup = () => {
     try {
       setLoading(true);
       const check = await checkUsernameAvailability(trimmedUsername);
- 
+
       if (!check.success) {
         Toast.show({ type: 'error', text1: check.message || 'Failed to check username' });
         return;
       }
-      // if (check.available) {
-      //   setUsernameError(t('errorMessage.usernamealready'))
-
-      //   return;
-      // }
-      const result = await signupWithUsername(email, password, trimmedUsername);
       
+      const result = await signupWithUsername(email, password, trimmedUsername);
+
       if (!result?.success) {
-         // Toast.show({ type: 'error', text1: result?.message || 'Signup failed' });
         Toast.show({ type: 'error', text1: 'Username already exists' });
         return;
       }
-      const token = await loginUser_Api(email, password);
-       const token1 = token?.data
-      dispatch(loginSuccess({ token: token1 }));
-      Toast.show({ type: 'success', text1: 'Account created 🎉' });
-      navigation.navigate(ScreenNameEnum.StreamService, {
-        fromSignUp: true,
-      })
-      BackHandler.addEventListener("hardwareBackPress", () => true);
-
-      // navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: ScreenNameEnum.TabNavigator }],
-      // });
+      const tokenResponse = await loginUser_Api(email, password);
+      const token = tokenResponse?.data;
+      if (token) {
+        dispatch(loginSuccess({ token }));
+        Toast.show({ type: 'success', text1: 'Username set 🎉' });
+        navigation.navigate(ScreenNameEnum.AddName, {
+          email: email,
+          password: password,
+        });
+        BackHandler.addEventListener("hardwareBackPress", () => true);
+      }
     } catch (error) {
       Toast.show({ type: 'error', text1: 'Something went wrong' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateName = async (firstName: string, lastName: string, token: string) => {
+    if (!firstName.trim()) {
+      setFirstNameError(t('errorMessage.firstnamerequired', "First name is required"));
+      return;
+    }
+    try {
+      setLoading(true);
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      const result = await updateUserProfile(token, { name: fullName });
+      
+      Toast.show({ type: 'success', text1: 'Profile updated 🎉' });
+      navigation.navigate(ScreenNameEnum.StreamService, {
+        fromSignUp: true,
+      });
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Failed to update name' });
     } finally {
       setLoading(false);
     }
@@ -221,10 +239,17 @@ const useSignup = () => {
     navigation,
     handleVerify,
     handleFinalSignup,
+    handleUpdateName,
     username,
     setUsername,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     setToastMess, toastMess,
     usernameError,
+    firstNameError,
+    lastNameError,
   };
 };
 

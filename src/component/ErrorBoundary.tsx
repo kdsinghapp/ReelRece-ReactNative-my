@@ -41,11 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
       errorBoundaryName: name
     });
 
-    if (__DEV__) {
-     }
-    // TODO: Log to crash reporting service
   }
-
   handleReset = () => {
     this.setState({ hasError: false, error: null });
   };
@@ -75,7 +71,6 @@ class ErrorBoundary extends Component<Props, State> {
         </View>
       );
     }
-
     return this.props.children;
   }
 }

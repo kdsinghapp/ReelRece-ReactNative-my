@@ -164,7 +164,7 @@ const usePasswordReset = (options = {}) => {
 
       const res = await resetPassword(emailToUse, password);
       if (res.success) {
-        showToast({ message: res.success, green: true });
+        showToast({ message:  "Password changed successfully!", green: true });
 
         setTimeout(() => {
           navigation.navigate(ScreenNameEnum.LoginScreen);

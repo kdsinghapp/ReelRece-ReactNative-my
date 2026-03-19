@@ -396,6 +396,7 @@ import {
   View, Text, FlatList, TouchableOpacity, Image, StyleSheet,
   TextInput, Dimensions, Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { Color } from '@theme/color';
 import imageIndex from '@assets/imageIndex';
@@ -654,6 +655,9 @@ const SelectFriendCom: React.FC<Props> = ({
           </TouchableOpacity>
         )}
       </View>
+      <ScrollView style={{
+        marginBottom:110
+      }}>
       <FlatList
         data={filteredUsers}
         ListEmptyComponent={() => (
@@ -666,6 +670,7 @@ const SelectFriendCom: React.FC<Props> = ({
         // contentContainerStyle={[styles.listContent, type === 'createGroup' && styles.listContentCreateGroup]}
         initialNumToRender={18}
         removeClippedSubviews
+         
       
         maxToRenderPerBatch={24}
 
@@ -683,6 +688,7 @@ const SelectFriendCom: React.FC<Props> = ({
           null
         }
       />
+      </ScrollView>
     </View>
   );
 };
@@ -722,7 +728,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-  },
+   },
   listContent: {
     paddingBottom: 70,
   },

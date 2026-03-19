@@ -1,4 +1,3 @@
-
 import { StyleSheet } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -8,14 +7,12 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: Color.background,
       paddingTop:16,
-  
     },
     avatar: {
       width: 100,
       height: 100,
       borderRadius: 50,
-      alignSelf: 'center',
-      // resizeMode:'contain',
+      alignSelf: 'center', 
     },
     button: {
       alignSelf: 'center',

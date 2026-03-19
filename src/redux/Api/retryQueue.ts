@@ -96,6 +96,16 @@ export function queueForReconnect(config: QueuedConfig): void {
   enqueue(config);
 }
 
+/** Check if device is offline (async). Use to skip retries and queue immediately when offline. */
+export async function isOffline(): Promise<boolean> {
+  try {
+    const state = await NetInfo.fetch();
+    return !(state.isConnected ?? false);
+  } catch {
+    return true; // Assume offline on error
+  }
+}
+
 // ─── Core Retry Logic ───────────────────────────────────────────────────
 
 export interface RetryResult {

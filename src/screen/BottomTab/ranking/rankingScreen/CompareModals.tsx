@@ -45,9 +45,9 @@ const CompareModals = ({
     currentComparisonIndex,
     handleNextComparison,
      isStepsModalVisible,     
-    currentStep,              //  current step count
-    setCurrentStep,           //  set step count
-    setStepsModalVisible,     //  set step modal visibility
+    currentStep,
+    setCurrentStep,
+    setStepsModalVisible,  
     handleCloseRating,
 
   } = useCompareHook;
@@ -68,7 +68,6 @@ const CompareModals = ({
     if (anyModalOpen) {
       wasAnyModalOpen.current = true;
     } else if (wasAnyModalOpen.current && !anyModalOpen) {
-      // All modals closed after being open - call onModalClose
       wasAnyModalOpen.current = false;
       onModalClose?.();
     }

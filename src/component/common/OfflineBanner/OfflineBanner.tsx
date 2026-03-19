@@ -1,17 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OfflineBanner: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.banner}>
+    <SafeAreaView edges={['top']} style={styles.banner}>
       <View style={styles.indicator} />
       <Text style={styles.text} allowFontScaling={false}>
         {t('common.offline')}
       </Text>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -78,6 +78,17 @@ const ProfileCard = ({
                 />
 
             </ShimmerPlaceholder>
+            {/* {!butt && ( */}
+            <View style={{ alignItems: 'center', marginTop: 10 }}>
+                {username && (
+                    <Text allowFontScaling={false} style={styles.usernameText}>@{username}</Text>
+                )}
+                {bio ? (
+                    <Text allowFontScaling={false} style={styles.bioTextTop}>{bio}</Text>
+                ) : null}
+            </View>
+            {/* )} */}
+
             <View style={styles.statsContainer}>
                 <TouchableOpacity style={styles.statBox}
                     onPress={() => {
@@ -102,7 +113,7 @@ const ProfileCard = ({
                 </TouchableOpacity>
             </View>
             {/* <Text style={styles.bioText}>{bio}</Text> */}
-            {bio ? (
+            {butt && bio ? (
                 <Text allowFontScaling={false} style={styles.bioText}>{bio}</Text>
             ) : null}
             {butt ? (
@@ -178,6 +189,20 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
+    },
+    usernameText: {
+        fontSize: 16,
+        color: Color.whiteText,
+        fontFamily: font.PoppinsSemiBold,
+        marginTop: 8,
+    },
+    bioTextTop: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: Color.whiteText,
+        fontFamily: font.PoppinsRegular,
+        marginTop: 4,
+        paddingHorizontal: 20,
     },
     nameText: {
         fontSize: 20,

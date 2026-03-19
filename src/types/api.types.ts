@@ -1,20 +1,4 @@
-/**
- * Central Type Definitions for ReelRece API
- * This file contains all shared types to reduce  usage across the codebase
- */
 
-// ============================================
-// API RESPONSE TYPES (Standardized)
-// ============================================
-
-/**
- * Standardized API Response Type
- * 
- * All API functions should return this type for consistency.
- * Import from '@utils/apiErrorHandler' for helper functions.
- * 
- * @template T - The type of data returned on success
- */
 export interface ApiResponse<T> {
   /** Indicates if the API call was successful */
   success: boolean;
@@ -287,10 +271,6 @@ export interface Activity {
   created_at: string;
 }
 
-// ============================================
-// TRAILER INTERACTION TYPES
-// ============================================
-
 export interface TrailerInteractionData {
   imdb_id: string;
   trailer_url: string;
@@ -298,10 +278,7 @@ export interface TrailerInteractionData {
   end_at: string;
 }
 
-// ============================================
-// SEARCH & FILTER TYPES
-// ============================================
-
+ 
 export interface SearchParams {
   query?: string;
   genres?: string[];

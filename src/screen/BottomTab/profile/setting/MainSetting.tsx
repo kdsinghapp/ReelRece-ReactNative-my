@@ -1,24 +1,25 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { t } from "i18next";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Color } from "@theme/color";
 import font from "@theme/font";
 import imageIndex from "@assets/imageIndex";
-
 import ScreenNameEnum from "@routes/screenName.enum";
 import StatusBarCustom from "@components/common/statusBar/StatusBarCustom";
 import { HeaderCustom, SuccessMessageCustom } from "@components/index";
 import LogoutModal from "@components/modal/logoutModal/logoutModal";
-
 import { logoutApi } from "@redux/Api/authService";
 import TokenService from "@services/TokenService";
-import { persistor, RootState } from "@redux/store";
+import { persistor, purgeStore, RootState } from "@redux/store";
 import { logout } from "@redux/feature/authSlice";
+import { clearResponseCache } from "@redux/Api/responseCache";
+import { clearMovieCache } from "@redux/feature/movieCacheSlice/MovieCacheManager";
 import { RootStackParamList } from "@navigators/type";
+import { useNetworkStatus } from "@hooks/useNetworkStatus";
 
 type MenuItem = {
   id: string;
@@ -28,9 +29,12 @@ type MenuItem = {
 };
 type MainSettingRouteProp = RouteProp<RootStackParamList>;
 
+const ListSeparator = () => <View style={styles.separator} />;
+const ListFooter = () => <View style={styles.separator} />;
+
 const MainSetting = () => {
-  const navigation = useNavigation ();
-const route = useRoute<MainSettingRouteProp>();
+  const navigation = useNavigation();
+  const route = useRoute<MainSettingRouteProp>();
   const { toastTrue } = route?.params || {};
 
   const dispatch = useDispatch();
@@ -110,7 +114,7 @@ const route = useRoute<MainSettingRouteProp>();
     };
   }, [toastTrue]);
 
-  const handleLogoutConfirm = async () => {
+  const handleLogoutConfirm = useCallback(async () => {
     setLogoutModalVisible(false);
 
     const authToken = token;
@@ -123,39 +127,64 @@ const route = useRoute<MainSettingRouteProp>();
     } finally {
       await TokenService.clearToken();
       await persistor.purge();
+      dispatch(purgeStore());
+      clearResponseCache();
+      clearMovieCache();
+
+      const userSpecificKeys = [
+        'currentStep',
+        'homeIndex',
+        'profileIndex',
+        'otherProfileIndex',
+        'selected_group',
+        'hasSeenSwipeTooltip',
+        'hasSeenTooltip',
+        'tooltipShown',
+      ];
+      await AsyncStorage.multiRemove(userSpecificKeys).catch(() => {});
 
       navigation.reset({
         index: 0,
         routes: [{ name: ScreenNameEnum.LoginScreen }],
       });
     }
-  };
+  }, [token, dispatch, navigation]);
 
-  const onPressItem = (item: MenuItem) => {
-    if (item?.screenName === "SettingLogOut") {  
-      setLogoutModalVisible(true);
-      return;
-    }
+  const onPressItem = useCallback(
+    (item: MenuItem) => {
+      if (item?.screenName === "SettingLogOut") {
+        setLogoutModalVisible(true);
+        return;
+      }
 
-    if (item?.screenName === "FeatureRequest") {
-      navigation.navigate(ScreenNameEnum[item.screenName], {});
-      return;
-    }
+      if (item?.screenName === "FeatureRequest") {
+        navigation.navigate(ScreenNameEnum[item.screenName], {});
+        return;
+      }
 
-    navigation.navigate(ScreenNameEnum[item.screenName]);
-  };
-
-  const renderItem = ({ item }: { item: MenuItem }) => (
-    <TouchableOpacity onPress={() => onPressItem(item)} style={styles.menuItem} activeOpacity={0.8}>
-      <Image source={item?.icon} style={styles.icon} tintColor={Color.primary} />
-      <Text allowFontScaling={false} style={styles.label}>
-        {item?.label}
-      </Text>
-    </TouchableOpacity>
+      navigation.navigate(ScreenNameEnum[item.screenName]);
+    },
+    [navigation]
   );
 
+  const renderItem = useCallback(
+    ({ item }: { item: MenuItem }) => (
+      <TouchableOpacity onPress={() => onPressItem(item)} style={styles.menuItem} activeOpacity={0.8}>
+        <Image source={item?.icon} style={styles.icon} tintColor={Color.primary} />
+        <Text allowFontScaling={false} style={styles.label}>
+          {item?.label}
+        </Text>
+      </TouchableOpacity>
+    ),
+    [onPressItem]
+  );
+
+  const keyExtractor = useCallback((item: MenuItem) => item.id, []);
+
+  const handleCloseLogoutModal = useCallback(() => setLogoutModalVisible(false), []);
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
       <StatusBarCustom />
 
       <HeaderCustom title={t("setting.header")} backIcon={imageIndex.backArrow} />
@@ -163,14 +192,15 @@ const route = useRoute<MainSettingRouteProp>();
       <View style={styles.menuBox}>
         <FlatList
           data={menuData}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListFooterComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={ListSeparator}
+          ListFooterComponent={ListFooter}
           initialNumToRender={10}
           maxToRenderPerBatch={10}
           windowSize={7}
           removeClippedSubviews
+          showsVerticalScrollIndicator={false}
         />
       </View>
 
@@ -186,7 +216,7 @@ const route = useRoute<MainSettingRouteProp>();
         title={t("setting.logout.title")}
         details={t("setting.logout.details")}
         visible={logoutModalVisible}
-        onCancel={() => setLogoutModalVisible(false)}
+        onCancel={handleCloseLogoutModal}
         onConfirm={handleLogoutConfirm}
       />
     </SafeAreaView>

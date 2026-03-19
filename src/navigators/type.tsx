@@ -1,7 +1,6 @@
 import ScreenNameEnum from "@routes/screenName.enum";
 
- 
-// navigation/types.ts
+  
 export type DiscoverTabParamList = {
   [ScreenNameEnum.DiscoverScreen]: { isSelectList: string; type: string };
 };
@@ -14,6 +13,5 @@ export type RootStackParamList = {
    [ScreenNameEnum.MovieDetailScreen]: { item };
     [ScreenNameEnum.OtherProfile]: { item };
     [ScreenNameEnum.WoodsScreen]: never;
-
-  // other root stack screens...
+ 
 };

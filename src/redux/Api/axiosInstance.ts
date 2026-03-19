@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import TokenService from '@services/TokenService';
 import { getAxiosConfig } from '@config/api.config';
 import { store, persistor, purgeStore } from '@redux/store';
@@ -8,8 +9,11 @@ import { errorToast } from '@utils/customToast';
 import {
   getRetryBehavior,
   queueForReconnect,
+  isOffline,
   sleep,
 } from '@redux/Api/retryQueue';
+import { cacheResponse, getCachedResponse, clearResponseCache } from '@redux/Api/responseCache';
+import { clearMovieCache } from '@redux/feature/movieCacheSlice/MovieCacheManager';
 
 // ✅ Base configuration from centralized config
 const axiosInstance = axios.create(getAxiosConfig());
@@ -91,9 +95,15 @@ axiosInstance.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-// ✅ Response interceptor
+// ✅ Response success: cache GET responses for offline use
 axiosInstance.interceptors.response.use(
-  response => response,
+  response => {
+    const method = (response.config?.method || 'get').toLowerCase();
+    if (method === 'get' && response.config) {
+      cacheResponse(response.config, response);
+    }
+    return response;
+  },
   async error => {
     const config = error.config as InternalAxiosRequestConfig & { __retryCount?: number };
     const status = error.response?.status;
@@ -115,8 +125,21 @@ axiosInstance.interceptors.response.use(
               // ignore purge errors
             }
             store.dispatch(purgeStore());
+            clearResponseCache();
+            clearMovieCache();
+            const userSpecificKeys = [
+              'currentStep',
+              'homeIndex',
+              'profileIndex',
+              'otherProfileIndex',
+              'selected_group',
+              'hasSeenSwipeTooltip',
+              'hasSeenTooltip',
+              'tooltipShown',
+            ];
+            await AsyncStorage.multiRemove(userSpecificKeys).catch(() => {});
             resetToLogin();
-            hasTriggered401Logout = false; // allow 401 logout again after next login
+            hasTriggered401Logout = false;
           }, 1000);
         }
       } else {
@@ -129,8 +152,25 @@ axiosInstance.interceptors.response.use(
       error.isNetworkError = true;
     }
 
-    // Smart retry: exponential backoff + offline queue
+    // Offline data: serve from cache for GET requests when network fails
+    if (config && error.isNetworkError) {
+      const method = (config.method || 'get').toLowerCase();
+      if (method === 'get') {
+        const cached = getCachedResponse(config);
+        if (cached) return Promise.resolve(cached);
+      }
+    }
+
+    // Smart retry: when OFFLINE, queue immediately (no retries); when ONLINE, retry with backoff
     if (config && !error.tokenInvalid && !error.noToken && status !== 403) {
+      if (error.isNetworkError) {
+        const offline = await isOffline();
+        if (offline) {
+          queueForReconnect(config);
+          return Promise.reject(error);
+        }
+      }
+
       const behavior = getRetryBehavior(error, config);
       if (behavior.shouldRetry && behavior.delayMs != null) {
         config.__retryCount = (config.__retryCount ?? 0) + 1;

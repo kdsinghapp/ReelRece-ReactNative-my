@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { calculateMovieRating, getAllRatedMovies, getAllRated_with_preference, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
-import { setModalClosed, setRefetchProfileActivity } from '@redux/feature/modalSlice/modalSlice';
+import { setModalClosed } from '@redux/feature/modalSlice/modalSlice';
+import { fetchProfileFeed, fetchProfileRatedMovies, fetchProfileBookmarks } from '@redux/feature/profileSlice';
 import { getUserProfile } from '@redux/Api/authService';
 import { setUserProfile } from '@redux/feature/authSlice';
 import { errorToast } from '@utils/customToast';
@@ -10,7 +11,7 @@ import { errorToast } from '@utils/customToast';
 /** Number of movies to rank before step progress modal (show after 1st and 5th) */
 export const STEPPER_VALUE = 5;
 
-export const useCompareComponent = (token: string) => {
+export const useCompareComponent = (token: string, options?: { onRatingSuccess?: () => void }) => {
   // ---- Core state ----
   const [selectedMovie, setSelectedMovie] = useState<string | object>();
   const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
@@ -46,6 +47,12 @@ export const useCompareComponent = (token: string) => {
   const shouldShowStepModalRef = useRef(false);
   /** Prefetched comparison lists by preference (love/like/dislike) for the current selectedMovieId - used to avoid API wait on preference select */
   const prefetchedByPreferenceRef = useRef<Record<string, unknown[]>>({});
+
+  const performCalculateRating = useCallback(async (payload: any) => {
+    const res = await calculateMovieRating(token, payload);
+    options?.onRatingSuccess?.();
+    return res;
+  }, [token, options]);
    useEffect(() => {
     fetchUserProfile()
   }, [token])
@@ -146,11 +153,7 @@ export const useCompareComponent = (token: string) => {
     setMid(midVal);
     midRef.current = midVal;
   }, []);
-
-    // setSelectedMovie(movie);
-    // setSelectedMovieId(movie?.imdb_id ?? null);
-    // setFeedbackVisible(true);
-  // ---- Open feedback modal ----
+ 
   const openFeedbackModal = useCallback((movie: string | object) => {
     setSelectionHistory([]);
     setComparisonMovies([]);
@@ -178,7 +181,7 @@ export const useCompareComponent = (token: string) => {
               setComparisonVisible(false);
               if (selectedMovie?.imdb_id) {
                 try {
-                  await calculateMovieRating(token, {
+                  await performCalculateRating({
                     imdb_id: selectedMovie?.imdb_id,
                     preference: pref,
                   });
@@ -200,7 +203,7 @@ export const useCompareComponent = (token: string) => {
             setComparisonVisible(false);
             if (selectedMovie?.imdb_id) {
               try {
-                await calculateMovieRating(token, {
+                await performCalculateRating({
                   imdb_id: selectedMovie?.imdb_id,
                   preference: pref,
                 });
@@ -228,17 +231,7 @@ export const useCompareComponent = (token: string) => {
     if (!selectedMovie || !secondMovieData || !userPreference.preference) return;
 
     try {
-
-      // API call: treat as first movie won by default
-      // await recordUserPreferences(
-      //   token,
-      //   userPreference.preference,
-      //   selectedMovie.imdb_id,
-      //   secondMovieData.imdb_id,
-      //   selectedMovie.imdb_id
-      // );
-
-      // Decide whether to update high or low based on lastAction
+ 
       if (lastAction === 'first') {
         const newHigh = midRef.current - 1;
         const newMid = Math.floor((lowRef.current + newHigh) / 2);
@@ -274,7 +267,7 @@ export const useCompareComponent = (token: string) => {
 
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
-            await calculateMovieRating(token, {
+            await performCalculateRating({
               imdb_id: selectedMovie?.imdb_id,
               preference: userPreference?.preference,
             });
@@ -286,8 +279,7 @@ export const useCompareComponent = (token: string) => {
           }
         }
         return;
-      }
-      // Otherwise → proceed with next comparison
+      } 
       setCurrentStep(s => s + 1);
 
     } catch (err) {
@@ -330,9 +322,11 @@ export const useCompareComponent = (token: string) => {
         .catch(() => recordPairwiseDecision(token, pairwisePayload))
         .then(() => {
           if (imdbId && pref) {
-            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then(() => {
+            return performCalculateRating({ imdb_id: imdbId, preference: pref }).then(() => {
             dispatch(setModalClosed(true));
-            dispatch(setRefetchProfileActivity(true));
+            dispatch(fetchProfileFeed({ reset: true }) as any);
+            dispatch(fetchProfileRatedMovies() as any);
+            dispatch(fetchProfileBookmarks() as any);
           });
           }
         })
@@ -397,10 +391,12 @@ export const useCompareComponent = (token: string) => {
         .catch(() => recordPairwiseDecision(token, pairwisePayload))
         .then(() => {
           if (imdbId && pref) {
-            return calculateMovieRating(token, { imdb_id: imdbId, preference: pref }).then((res) => {
+            return performCalculateRating({ imdb_id: imdbId, preference: pref }).then((res) => {
               if (res) {
                 dispatch(setModalClosed(true));
-                dispatch(setRefetchProfileActivity(true));
+                dispatch(fetchProfileFeed({ reset: true }) as any);
+                dispatch(fetchProfileRatedMovies() as any);
+                dispatch(fetchProfileBookmarks() as any);
               }
             });
           }
@@ -449,14 +445,13 @@ export const useCompareComponent = (token: string) => {
         setSelectionHistory([]);
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
-
-            await calculateMovieRating(token, {
+            await performCalculateRating({
               imdb_id: selectedMovie.imdb_id,
               preference: userPreference.preference,
             });
           } catch (error) {
             try {
-              await calculateMovieRating(token, {
+              await performCalculateRating({
                 imdb_id: selectedMovie.imdb_id,
                 preference: userPreference.preference,
               });
@@ -495,7 +490,7 @@ export const useCompareComponent = (token: string) => {
         });
         if (selectedMovie?.imdb_id && userPreference.preference) {
           try {
-            await calculateMovieRating(token, {
+            await performCalculateRating({
               imdb_id: selectedMovie.imdb_id,
               preference: userPreference.preference,
             });

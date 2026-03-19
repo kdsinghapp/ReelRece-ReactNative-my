@@ -178,8 +178,7 @@ const Followers = () => {
 
   const toggleFollow = useCallback(async (username: string) => {
     const key = tabs[activeTab];
-
-    // ✅ Guard: Ensure userData[key] is an array
+ 
     const currentUserList = Array.isArray(userData[key]) ? userData[key] : [];
     const updatedList = currentUserList.map((u: object | string) =>
       u?.username === username ? { ...u, following: !u.following } : u
@@ -256,10 +255,10 @@ const Followers = () => {
       <TouchableOpacity
         style={[styles.followprimary, item.following && styles.followingprimary]}
         // onPress={() => toggleFollow(item.id)}
-        onPress={() => toggleFollow(item.username)}
+        onPress={() => toggleFollow(item?.username)}
       >
-        <Text style={[styles.followText, item.following && styles.followingText]}>
-          {item.following ? t("common.following") : t("common.follow")}
+        <Text style={[styles.followText, item?.following && styles.followingText]}>
+          {item?.following ? t("common.following") : t("common.follow")}
         </Text>
       </TouchableOpacity>
     </View>
@@ -271,22 +270,20 @@ const Followers = () => {
       const wasOffline = !isConnected && state.isConnected;
       setIsConnected(state.isConnected);
 
-      // Auto-reload when reconnecting and data is empty
       if (wasOffline && activeUsers.length === 0) {
         fetchUsers(1, true);
       }
       if (!wasOffline) {
-        //  errorToast('No Internet! \n Please check your network connection')
-      }
+     }
     });
 
     return () => unsubscribe();
   }, [isConnected, activeUsers.length]);
   return (
-    <SafeAreaView edges={!isConnected ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: Color.background }}>
+    <SafeAreaView  edges={isConnected ? ['top'] : []} style={{ flex: 1, backgroundColor: Color.background }}>
       <StatusBarCustom />
       <View style={{ marginBottom: 10 }} />
-      <HeaderCustom title={userName} backIcon={imageIndex.backArrow} />
+      <HeaderCustom title={otherUsername} backIcon={imageIndex.backArrow} />
       <View style={styles.container}>
         <View style={[styles.tabRow, { marginTop: 14 }]}>
           {tabs.map((tab, index) => (
@@ -304,12 +301,7 @@ const Followers = () => {
           ))}
         </View>
         <View style={styles.marginH15}>
-          {/* <SearchBarCustom
-            placeholder="Search Followers"
-            value={search}
-            onSearchChange={setSearch}
-          /> */}
-
+ 
           <SearchBarCustom
             placeholder={
               tabs[activeTab] === t("home.suggested")
@@ -374,7 +366,7 @@ const styles = StyleSheet.create({
   tabText: { color: Color.placeHolder, fontSize: 14, fontFamily: font.PoppinsMedium },
 
   tabTextActive: { color: Color.whiteText, fontFamily: font.PoppinsBold, fontSize: 14, },
-  tabUnderline: { height: 3, backgroundColor: Color.primary, width: '60%', marginTop: 4, },
+  tabUnderline: { height: 2.2, backgroundColor: Color.primary, width: '60%', marginTop: 4, },
   userRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   avatarContainer: { position: 'relative', marginRight: 12 },
   userName: { flex: 1, color: Color.whiteText, fontSize: 14, fontFamily: font.PoppinsMedium },

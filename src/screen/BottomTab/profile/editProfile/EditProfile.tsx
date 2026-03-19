@@ -79,13 +79,11 @@ const profileData = useMemo(() => [
   }, [token]);
 
   const handleEdit = useCallback((key: string) => {
-    const selectedItem = profileData.find(item => item.key === key);
-    if (selectedItem) {
-      setEditingKey(selectedItem.key);
-      setEditingValue(selectedItem.value);
-      setModalVisible(true);
-    }
-  }, [profileData]);
+    const value = profileFields[key as keyof typeof profileFields] ?? '';
+    setEditingKey(key);
+    setEditingValue(value);
+    setModalVisible(true);
+  }, [profileFields.name, profileFields.username, profileFields.pronouns, profileFields.bio]);
 
   const fieldLabel = useMemo(
     () => (editingKey ? editingKey.charAt(0).toUpperCase() + editingKey.slice(1) : ''),
@@ -122,37 +120,45 @@ const profileData = useMemo(() => [
   const avatarUri = imagePath
     ? imagePath
     : userProfile?.avatar
-      ? `${BASE_IMAGE_URL}${userProfile.avatar}?nocache=${Date.now()}`
+      ? `${BASE_IMAGE_URL}${userProfile.avatar}`
       : undefined;
 
+  const avatarSource = useMemo(
+    () =>
+      avatarUri
+        ? {
+            uri: avatarUri,
+            priority: FastImage.priority.low,
+            cache: FastImage.cacheControl.immutable,
+          }
+        : imageIndex.UserProfile,
+    [avatarUri]
+  );
+
+  const scrollContentStyle = useMemo(() => ({ paddingBottom: 24 }), []);
+  const viewContainerStyle = useMemo(() => [styles.container, { padding: 20 }], []);
+
+  const handleOpenImagePicker = useCallback(() => setIsModalVisible(true), []);
+
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <StatusBarCustom />
       <HeaderCustom title= {t("home.editprofile")}   backIcon={imageIndex.backArrow} />
-      <View style={[styles.container, { padding: 20 }]}>
+      <View style={viewContainerStyle}>
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={scrollContentStyle}
           keyboardShouldPersistTaps="handled"
         >
           <FastImage
             style={styles.avatar}
-            source={
-              avatarUri
-                ? {
-                    uri: avatarUri,
-                    priority: FastImage.priority.low,
-                    cache: FastImage.cacheControl.immutable,
-                  }
-                : imageIndex.UserProfile
-            }
+            source={avatarSource}
             resizeMode={FastImage.resizeMode.cover}
           />
 
-          <TouchableOpacity style={styles.button} onPress={() => setIsModalVisible(true)}>
+          <TouchableOpacity style={styles.button} onPress={handleOpenImagePicker}>
             <Text style={styles.buttonText}>{t("home.changepicture")}</Text>
           </TouchableOpacity>
-
           {profileData.map((item) => (
             <View key={item.key} style={styles.fieldRow}>
               <Text style={styles.label}>{item.label}</Text>

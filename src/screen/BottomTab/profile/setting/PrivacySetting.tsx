@@ -3,30 +3,23 @@ import React from 'react';
 import { Color } from '@theme/color';
 import { useNavigation } from '@react-navigation/native';
 import useToggleFlag from './useToggleFlag';
- import font from '@theme/font';
+import font from '@theme/font';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomStatusBar, HeaderCustom } from '@components/index';
 import imageIndex from '@assets/imageIndex';
 import CustomSwitch from '@components/common/CustomSwitch/CustomSwitch';
 import { t } from 'i18next';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 const PrivacySetting = () => {
   const navigation = useNavigation();
-
-  // const [isPrivateAccount, setIsPrivateAccount] = useState(false);
-  // const [requireGroupApproval, setRequireGroupApproval] = useState(false);
-  // const [optOutDataSharing, setOptOutDataSharing] = useState(false); 
-  // const togglePrivateAccount = () => setIsPrivateAccount(prev => !prev);
-  // const toggleGroupApproval = () => setRequireGroupApproval(prev => !prev);
-  // const toggleDataSharing = () => setOptOutDataSharing(prev => !prev);
-
-
+ 
   const { flagValue: isPrivateAccount, handleToggle: handlePriveToggle } = useToggleFlag("is_private");
   const { flagValue: optOutDataSharing, handleToggle: handleOptOutDataToggle } = useToggleFlag("opt_out_third_party_data_sharing");
   const { flagValue: requireGroupApproval, handleToggle: handleGroupApprovalToggle } = useToggleFlag("group_add_approval_required");
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
       <CustomStatusBar />
       <HeaderCustom
         title={t("setting.menu.privacy")}
@@ -70,7 +63,6 @@ const PrivacySetting = () => {
         />
       </View>
 
-      {/* Opt Out of Third-Party Data Sharing */}
       <View style={styles.detailContainer}>
         <View style={{ flex: 1, maxWidth: '90%', paddingRight: 10 }}>
           <Text style={styles.headingText}>{t("setting.privacy.optOutDataSharing")}</Text>
@@ -78,21 +70,11 @@ const PrivacySetting = () => {
             {t("setting.privacy.optOutDataSharingDesc")}
           </Text>
         </View>
-        {/* <Switch
-          trackColor={{ false: '#767577', true: '#004565' }}
-          thumbColor={optOutDataSharing ? '#008AC9' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleDataSharing}
-          value={optOutDataSharing}
-        /> */}
         <CustomSwitch
           value={optOutDataSharing}
           onValueChange={handleOptOutDataToggle}
         />
       </View>
-
-
-
     </SafeAreaView>
   );
 };

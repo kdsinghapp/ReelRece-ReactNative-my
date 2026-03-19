@@ -27,7 +27,6 @@ export default function AddUsername() {
     username,
     setUsername,
     usernameError,
-    // email, password 
   } = useSignup()
   const route = useRoute();
   const { email, password } = route?.params || {};
@@ -35,7 +34,7 @@ export default function AddUsername() {
   const isOnline = useNetworkStatus()
 
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={{
       flex: 1,
       backgroundColor: "black"
     }}>
@@ -56,30 +55,30 @@ export default function AddUsername() {
               style={styles.imgLogo}
               resizeMode="contain"
             />
-                     <Image
-                       source={imageIndex.reelRecs}
-                       style={{
-                     height: 18,
-             width: 95,
-             marginTop: 6,
-             resizeMode: 'contain', // important for proper image fit
-                       }}  
-                     />
+            <Image
+              source={imageIndex.reelRecs}
+              style={{
+                height: 18,
+                width: 95,
+                marginTop: 6,
+                resizeMode: 'contain',
+              }}
+            />
           </View>
           <View style={{ marginTop: 30 }}>
 
             <CustomText
-              size={24}
+              size={20}
               color={Color.whiteText}
               style={styles.loginHeading}
-              font={font.PoppinsBold}
+              font={font.PoppinsSemiBold}
             >
               {t("login.yourusername",)}
             </CustomText>
             {/* <Text style={styles.loginHeading}>Your username</Text> */}
           </View>
           <CustomText
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={styles.titlSub}
             font={font.PoppinsRegular}
@@ -129,20 +128,15 @@ export default function AddUsername() {
           <View style={{
             marginTop: 30
           }}>
-
             <ButtonCustom
               title={t("login.next",)}
               onPress={() => {
                 handleFinalSignup(username, email, password);
               }}
-            // buttonStyle={styles.saveButton}
             />
-
-
           </View>
         </View>
       </ScrollView>
-
     </SafeAreaView>
   );
 }

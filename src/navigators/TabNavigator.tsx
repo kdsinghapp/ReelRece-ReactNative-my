@@ -11,8 +11,7 @@ import font from "@theme/font";
 import { Platform } from "react-native";
 
 const Tab = createBottomTabNavigator();
-
-// Memoized TabIcon to prevent unnecessary re-renders
+ 
 const TabIcon = React.memo(({ focused, logo, logo1, label }) => (
   <>
     <Image

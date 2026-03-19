@@ -331,7 +331,6 @@ const FeedCard = ({
                 hasInteractedRef.current = true;
                 trailerTracker.triggerInteractionIfAny();
               }}
-              ignoreSilentSwitch="ignore"
               playInBackground={false}
               playWhenInactive={false}
                controls={false}

@@ -19,7 +19,7 @@ import ResponsiveSize from '@utils/ResponsiveSize';
     width:24,
     resizeMode:'contain',
     marginHorizontal:16,
-    marginTop: 50,
+    marginTop: 20,
   },
   inputView: { marginTop: ResponsiveSize.marginTop(1), paddingVertical: hp(1), },
   txtHeading: {
@@ -32,8 +32,8 @@ import ResponsiveSize from '@utils/ResponsiveSize';
   loginHeading: {
     color: Color.whiteText,
     textAlign: "center",
-    fontFamily:font.PoppinsBold,
-    fontSize: 28,
+    fontFamily:font.PoppinsSemiBold,
+    fontSize: 20,
     //  marginTop: 30,
 
   },
@@ -91,7 +91,7 @@ import ResponsiveSize from '@utils/ResponsiveSize';
   },
   titlSub: {
     color: Color.whiteText,
-     fontSize: 16,
+     fontSize: 14,
     bottom: 5,
     marginTop:30,
     lineHeight:22

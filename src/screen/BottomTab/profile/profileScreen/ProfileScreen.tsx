@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ViewToken } from 'react-native';
 import styles from './style';
-import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
 import HorizontalMovieList from '@components/common/HorizontalMovieList/HorizontalMovieList';
@@ -102,7 +102,7 @@ const ProfileScreen = () => {
     fetchFeed: (source: string, username?: string, force?: boolean) => Promise<void>;
     fetchSuggestedFriends: () => Promise<void>;
   } | null>(null);
-  const onViewableItemsChangedRef = useRef<(info: { viewableItems: ViewToken<ViewableListItem>[] }) => void>(() => {});
+  const onViewableItemsChangedRef = useRef<(info: { viewableItems: ViewToken<ViewableListItem>[] }) => void>(() => { });
   const playIndexRef = useRef<number | null>(null);
 
   const handleRefresh = useCallback(async () => {
@@ -161,7 +161,7 @@ const ProfileScreen = () => {
   }, [feedData]);
 
 
-   useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       if (token && !userProfile) {
         refetchUserProfile();
@@ -206,6 +206,7 @@ const ProfileScreen = () => {
 
       return () => {
         isActive = false;
+        restoredRef.current = false;
       };
     }, [])
   );
@@ -232,7 +233,7 @@ const ProfileScreen = () => {
   const viewabilityConfigRef = useRef({
     itemVisiblePercentThreshold: 90,
     minimumViewTime: 250
-  }); 
+  });
 
   useEffect(() => {
     playIndexRef.current = playIndex;
@@ -282,10 +283,6 @@ const ProfileScreen = () => {
     }
   }, [isFocused]);
 
-
-
-
-
   const fetchBookmarks = useCallback(async () => {
     try {
       setLoadingBookmark(true);
@@ -322,26 +319,6 @@ const ProfileScreen = () => {
     fetchRatedMovies();
   }, [token, fetchRatedMovies]);
 
-
-  // -------------------------
-  // HISTORY MOVIES FETCH
-  // -------------------------
-
-  // const fetchHistory = async () => {
-  //   try {
-  //     setLoadingRecs(true);
-  //     const history = await getHistoryApi(token);
-  //     setHistoryMovies(history?.results || []);
-  //   } catch (err) {
-  //   } finally {
-  //     setLoadingRecs(false);
-  //   }
-  // };
-  // useEffect(() => {
-  //   if (!token) return;
-
-  //   fetchHistory();
-  // }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -396,9 +373,6 @@ const ProfileScreen = () => {
         try {
           await ref.fetchBookmarks();
           await ref.fetchHistory1();
-          if (token && email_da_data?.username) {
-            fetchFeed('profile', email_da_data.username, true);
-          }
         } catch (error) {
         }
       };
@@ -472,7 +446,7 @@ const ProfileScreen = () => {
   // When user rates or bookmarks elsewhere: refetch Recent Activity + Ranked + Want to Watch so profile reflects latest actions
   useEffect(() => {
     if (!refetchProfileActivity || !token || !email_da_data?.username) return;
-    fetchFeed('profile', email_da_data.username, true);
+    fetchFeed('profile', email_da_data.username, true, true); // Silent update
     fetchBookmarks();
     fetchRatedMovies();
     dispatch(setRefetchProfileActivity(false));
@@ -635,11 +609,6 @@ const ProfileScreen = () => {
 
           <Text style={styles.sectionTitle}>{t("home.recentactivities")}</Text>
         </View>
-        {/* <Text style={{fontSize:44,color:'red'}}>{savedMovies}</Text> */}
-
-        {/* feedcard data */}
-        {/* {renderFeedList} */}
-        {/* </View> */}
       </>
     )
   }
@@ -681,7 +650,7 @@ const ProfileScreen = () => {
 
   const handleRankPress = useCallback(() => setIsVisible(true), [setIsVisible]);
 
-  const renderItem = useCallback(({ item, index }: { item: { type?: string; movie?: object; user?: object; [k: string]: unknown }; index: number }) => {
+  const renderItem = useCallback(({ item, index }: { item: { type?: string; movie?: object; user?: object;[k: string]: unknown }; index: number }) => {
     if (!item) return null;
     if (item.type === 'profileCard') {
       return (
@@ -689,7 +658,8 @@ const ProfileScreen = () => {
           imageUri={avatarUrl}
           imageLoading={imageLoading}
           setImageLoading={setImageLoading}
-          name={userProfile?.name}
+          name={userProfile?.name ? userProfile?.name : userProfile?.username}
+          username={userProfile?.username}
           rank={`${userProfile?.ranked}`}
           rankscreenData={rankingMovie}
           followers={`${userProfile?.followers_count ?? (userProfile as unknown as Record<string, unknown>)?.followers ?? 0}`}
@@ -747,6 +717,7 @@ const ProfileScreen = () => {
           isPaused={index - 1 !== playIndex}
           is_bookMark={item?.is_bookmarked}
           onBookmarkSuccess={fetchBookmarks}
+          created_date={item?.created_date}
         />
       );
     }
@@ -798,7 +769,7 @@ const ProfileScreen = () => {
     }
 
     // 🔴 No more data
-    if (!hasMore && combinedData.length > 0) {
+    if (!hasMore && combinedData?.length > 0) {
       return (
         <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
@@ -820,31 +791,31 @@ const ProfileScreen = () => {
   const fiter = useMemo(() => {
     const data = combinedData ?? [];
     const result: typeof data = [];
-    const feedMap = new Map<string, { _activities: Set<string>; [k: string]: unknown }>();
+    const feedMap = new Map<string, { _activities: Set<string>;[k: string]: unknown }>();
 
     data.forEach((item: { type?: string; movie?: { imdb_id?: string }; activity?: string; rec_score?: number; is_bookmarked?: boolean }) => {
       if (item?.type !== 'feed') {
-        result.push(item as never);
+        result?.push(item as never);
         return;
       }
       const imdbId = item?.movie?.imdb_id;
-      if (!imdbId || !item.activity || item.rec_score === -1) return;
+      if (!imdbId || !item?.activity || item?.rec_score === -1) return;
       if (!feedMap.has(imdbId)) {
-        feedMap.set(imdbId, { ...item, _activities: new Set([item.activity]) } as never);
+        feedMap.set(imdbId, { ...item, _activities: new Set([item?.activity]) } as never);
         return;
       }
       const existing = feedMap.get(imdbId)!;
-      existing._activities.add(item.activity);
-      if (item.is_bookmarked === true) (existing as { is_bookmarked?: boolean }).is_bookmarked = true;
+      existing?._activities?.add(item?.activity);
+      if (item?.is_bookmarked === true) (existing as { is_bookmarked?: boolean }).is_bookmarked = true;
     });
 
     feedMap.forEach((item) => {
       const activityOrder = ['ranked', 'bookmarked'];
       (item as { activity?: string }).activity = activityOrder
-        .filter((a) => item._activities.has(a))
+        .filter((a) => item?._activities.has(a))
         .join(', ');
-      delete item._activities;
-      result.push(item as never);
+      delete item?._activities;
+      result?.push(item as never);
     });
     return result;
   }, [combinedData]);
@@ -858,13 +829,13 @@ const ProfileScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar />
       <LoadingModal visible={(loading && !loadingTimeout) || (!userProfile && !loadingTimeout)} />
-      <View style={{ paddingTop: 18, flex:1}}>
+      <View style={{ paddingTop: 18, flex: 1 }}>
         {/* <Text style={{fontSize:22, color:'red'}} >{userProfile.name}</Text> */}
         <HeaderCustom
-          title={userProfile?.name}
+          title={userProfile?.name ?? userProfile?.username ?? ''}
           rightIcon={imageIndex.settings}
           onRightPress={() => navigation.navigate(ScreenNameEnum.MainSetting)}
         />

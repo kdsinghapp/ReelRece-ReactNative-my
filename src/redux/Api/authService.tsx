@@ -184,13 +184,17 @@ export const checkUsernameAvailability = async (username) => {
 export const signupWithUsername = async (
   email: string, 
   password: string, 
-  username: string
+  username: string,
+  firstName?: string,
+  lastName?: string
 ): Promise<ApiResponse<UserProfile>> => {
   try {
     const response = await axiosInstance.post('/signup', {
       email_id: email,
       password: password,
       username: username,
+      first_name: firstName,
+      last_name: lastName,
     });
 
     return {
@@ -341,8 +345,7 @@ export const resetPassword = async (
       }
     );
 
-    Alert.alert("Password changed successfully!");
-     return {
+      return {
       success: true,
       data: response?.data,
     };
@@ -413,39 +416,7 @@ export const getUserProfile = async (token: string): Promise<UserProfile> => {
      throw error;
   }
 };
-
-
-
-
-// export const uploadAvatarImage = async (token: string, image) => {
-//   try {
  
-
-//     const formData = new FormData();
-//     formData.append('avatar', {
-//       uri: image?.path || image?.uri,
-//       type: image?.mime || 'image/jpeg',
-//       name: 'avatar.jpg',
-//     });
-
-//     const response = await axios.post(
-//       'http://reelrecs.us-east-1.elasticbeanstalk.com/v1/avatar',
-//       formData,
-//       {
-//         headers: {
-//           'Content-Type': 'multipart/form-data',
-//           Authorization: `Token ${token}`,
-//         },
-//       }
-//     );
- 
-//     // getUserProfile(token)
-
-//     return response;
-//   } catch (error) {
- //     throw error;
-//   }
-// };
 
 export interface ImagePickerResult {
   path?: string;
@@ -456,8 +427,7 @@ export const uploadAvatarImage = async (
   token: string, 
   image: ImagePickerResult
 ): Promise<{ data: { avatar_url: string } }> => {
-
-  // ✅ allowed image mime types
+ 
   const allowedTypes = [
     "image/jpeg",
     "image/png",
@@ -494,37 +464,7 @@ export const uploadAvatarImage = async (
     throw error;
   }
 };
-
-// export const uploadAvatarImage = async (
-//   token: string, 
-//   image: ImagePickerResult
-// ): Promise<{ data: { avatar_url: string } }> => {
-//   try {
-//     const formData = new FormData();
-//     formData.append('avatar', {
-//       uri: image?.path || image?.uri,
-//       type: image?.mime || 'image/jpeg',
-//       name: 'avatar.jpg',
-//     } as unknown as Blob);
-
-//     const response = await axiosInstance.post(
-//       `/avatar`,
-//       formData,
-//       {
-//         headers: {
-//           'Content-Type': 'multipart/form-data',
-//           Authorization: `Token ${token}`,
-//         },
-//       }
-//     );
-
-//      return response; 
-//   } catch (error: unknown) {
-//     const err = error as { response?: { data?: unknown }; message?: string };
-//      throw error;
-//   }
-// };
-
+ 
 export const updateProfileFlags = async (
   token: string, 
   flags: ProfileFlags

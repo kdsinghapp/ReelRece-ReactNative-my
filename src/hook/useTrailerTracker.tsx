@@ -45,31 +45,7 @@ export const useTrailerTracker = (token: string) => {
     trailer_url: string;
     startTime: number;
     endTime: number;
-  } | null>(null);
-  // const triggerInteractionIfAny = async () => {
-  //   const imdb_id = currentImdbIdRef.current;
-  //   if (!imdb_id) return;
-
-  //   const data = trackingMapRef.current.get(imdb_id);
-   //   if (!data || data.endTime <= data.startTime) {
-   //     return;
-  //   }
-
-  //   try {
- 
-  //     await recordTrailerInteraction(token, {
-  //       imdb_id,
-  //       trailer_url: data.trailer_url,
-  //       start_at: formatSecondsToHMS(data.startTime),
-  //       end_at: formatSecondsToHMS(data.endTime),
-  //     });
-
-  //     trackingMapRef.current.delete(imdb_id);
-  //     currentImdbIdRef.current = null;
-  //   } catch (err) {
-   //   }
-  // };
-// Just inside triggerInteractionIf ()
+  } | null>(null); 
 
    const triggerInteractionIfAny = async () => {
      const last = lastValidEntryRef.current;
@@ -86,8 +62,7 @@ export const useTrailerTracker = (token: string) => {
       });
     } catch (err) {
      }
-
-    // ✅ Don't reset lastValidEntryRef here — let it be reused if needed
+ 
   };
 
   const resetTracker = () => {

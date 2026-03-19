@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { DiscoverTabParamList, RootStackParamList } from '@navigators/type';
+import {   RootStackParamList } from '@navigators/type';
  
 const useHome = () => {
     type NavigationProp = NativeStackNavigationProp<RootStackParamList>;

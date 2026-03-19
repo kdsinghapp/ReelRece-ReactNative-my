@@ -69,9 +69,6 @@
 //     width: 33,
 //     resizeMode: 'contain',
 //   },
-//   tite:{
-//     fontSize: 16, lineHeight: 20, color: Color.whiteText,  
-//   },
 //   subTitle: { lineHeight: 16, marginTop: 33, marginBottom: 15, fontSize: 16, color: Color.whiteText, textAlign: "center", fontWeight: "700" }
 // });
 // export default styles;

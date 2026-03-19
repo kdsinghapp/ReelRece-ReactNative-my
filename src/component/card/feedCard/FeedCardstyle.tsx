@@ -10,6 +10,36 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 16,
   },
+  suggestedRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  suggestedLabel: {
+    color: Color.whiteText,
+    fontFamily: font.PoppinsMedium,
+    fontSize: 14,
+  },
+  suggestedFollowButton: {
+    backgroundColor: Color.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 90,
+  },
+  suggestedFollowingButton: {
+    backgroundColor: Color.background,
+    borderColor: Color.whiteText,
+    borderWidth: 0.5,
+  },
+  suggestedFollowText: {
+    color: Color.whiteText,
+    fontFamily: font.PoppinsBold,
+    fontSize: 12,
+  },
   feedHeader: {
     flexDirection: 'row',
 
@@ -80,14 +110,14 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 3,
-    backgroundColor: Color.grey, // Optional: background for contrast
+    backgroundColor: Color.grey,
     zIndex: 3,
     borderBottomLeftRadius: 3,
     borderBottomRightRadius: 3,
   },
   progressBar: {
     height: 3,
-    backgroundColor: Color.primary, // Blue color line
+    backgroundColor: Color.primary,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
   },

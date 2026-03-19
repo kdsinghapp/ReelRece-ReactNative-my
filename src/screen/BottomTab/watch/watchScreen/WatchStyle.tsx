@@ -9,8 +9,7 @@ import { Platform, StyleSheet } from "react-native";
   container: {
     flex: 1,
     backgroundColor: Color.background,
-    // marginTop: 18,
-  },
+   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -67,8 +66,7 @@ import { Platform, StyleSheet } from "react-native";
     width: 20,
   },
   groupsContainer: {
-    flex: 1,
-    marginBottom: 50,
+    flex: 1, 
     marginTop: 20,
   },
   modalOverlay: {

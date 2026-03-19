@@ -1,16 +1,14 @@
 import {
   View,
-  Text,
   Image,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import React, { useEffect } from 'react';
- import imageIndex from '@assets/imageIndex';
- import ScreenNameEnum from '@routes/screenName.enum';
-// import style from './style';
+import imageIndex from '@assets/imageIndex';
+import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
- import style from '@screens/Auth/signup/style';
+import style from '@screens/Auth/signup/style';
 import { Color } from '@theme/color';
 import CustomText from '@components/common/CustomText/CustomText';
 import ButtonCustom from '@components/common/button/ButtonCustom';
@@ -31,23 +29,18 @@ export default function Login() {
     handlePassText,
     emailError,
     passwordError,
-    validSuccess,
-    toastMess,  
-    toastMessColorGreen, 
-    toastMessage,  
-    email, password, emptyAlert } = useLogin()    
-  useEffect(() => {
-    if (validSuccess) {
-       navigation.navigate(ScreenNameEnum.TabNavigator)
-    }
-  }, [validSuccess]);
-   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={style.mainViewLogin}>
+    toastMess,
+    toastMessColorGreen,
+    toastMessage,
+    email, password, emptyAlert } = useLogin()
+  
+  return (
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={style.mainViewLogin}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
       {loading ? <LoadingModal /> : null}
       <ScrollView showsVerticalScrollIndicator={false} >
-     
+
         <View
           style={style.viewCont}>
           <View style={styles.appLogoContainer}>
@@ -59,33 +52,32 @@ export default function Login() {
             <Image
               source={imageIndex.reelRecs}
               style={{
-            height: 18,
-    width: 95,
-    marginTop: 6,
-    resizeMode: 'contain', // important for proper image fit
-              }}  
+                height: 18,
+                width: 95,
+                marginTop: 6,
+                resizeMode: 'contain',
+              }}
             />
-          
+
           </View>
 
-          <View style={{ marginTop: 30 }}>
+          <View style={{ marginTop: 36 }}>
             <CustomText
               size={24}
               color={Color.whiteText}
               style={style.loginHeading}
-              font={font.PoppinsBold}
+              font={font.PoppinsSemiBold}
             >
-             {t("login.title",)}
+              {t("login.title",)}
             </CustomText>
             {emptyAlert && (
               <CustomText
-
                 size={24}
                 color={Color.whiteText}
                 style={style.loginHeading}
                 font={font.PoppinsBold}
               >
-                 {t("login.title",)}
+                {t("login.title",)}
               </CustomText>
             )}
           </View>
@@ -95,7 +87,6 @@ export default function Login() {
               text={email}
               onChangeText={handleIdentityText}
               placeholder={t("login.email",)}
-              validSuccess={validSuccess}
               autoFocus={true}
 
             />
@@ -111,13 +102,13 @@ export default function Login() {
               </CustomText>
               : null}
             <InputFieldCustom
-                             lable={t("login.password",)}
+              lable={t("login.password",)}
 
               text={password}
               onChangeText={handlePassText}
               placeholder={t("login.password",)}
               showEye={true}
-              hide={true} //  This controls initial hiding
+              hide={true}
             />
             {passwordError ?
               <CustomText
@@ -126,7 +117,7 @@ export default function Login() {
                 style={style.redText}
                 font={font.PoppinsRegular}
               >
-                {emailError}
+                {passwordError}
               </CustomText>
               : null}
             <TouchableOpacity
@@ -143,20 +134,20 @@ export default function Login() {
                 style={style.pass}
                 font={font.PoppinsRegular}
               >
-          {t("login.reset_password",)}
+                {t("login.reset_password",)}
               </CustomText>
- 
+
             </TouchableOpacity>
           </View>
           <View style={{
-             marginTop: 30,
+            marginTop: 30,
           }}>
             <ButtonCustom
               title={t("login.sign_in")}
               onPress={LoginFunction}
-            textStyle={{
-              color:Color.whiteText
-            }}
+              textStyle={{
+                color: Color.whiteText
+              }}
             />
 
           </View>
@@ -165,9 +156,9 @@ export default function Login() {
             size={16}
             color={Color.whiteText}
             style={style.subTitle}
-            font={font.PoppinsBold}
+            font={font.PoppinsRegular}
           >
-                    {t("login.or_continue_with",)}
+            {t("login.or_continue_with",)}
 
           </CustomText>
           <View style={styles.otherLoginContainer}>
@@ -198,34 +189,34 @@ export default function Login() {
           </View>
 
         </View>
-          <View
-        style={style.titlView}>
-        <CustomText
-          size={16}
-          color={Color.whiteText}
-          style={style.tite}
-          font={font.PoppinsBold}
-        >
-         {t("login.no_account",)}
-        </CustomText>
-        <TouchableOpacity
-          style={{}}
-          onPress={() => {
-            navigation.navigate(ScreenNameEnum.SignUpScreen)
-          }}>
+        <View
+          style={style.titlView}>
           <CustomText
-
             size={16}
-            color={Color.primary}
-            style={style.text}
-            font={font.PoppinsRegular}
+            color={Color.whiteText}
+            style={style.tite}
+            font={font.PoppinsBold}
           >
-            {t("login.sign_up",)}
+            {t("login.no_account",)}
           </CustomText>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={{}}
+            onPress={() => {
+              navigation.navigate(ScreenNameEnum.SignUpScreen)
+            }}>
+            <CustomText
+
+              size={16}
+              color={Color.primary}
+              style={style.text}
+              font={font.PoppinsRegular}
+            >
+              {""} {t("login.sign_up",)}
+            </CustomText>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    
+
       {toastMess && (
         <SuccessMessageCustom
           textColor={Color.whiteText}

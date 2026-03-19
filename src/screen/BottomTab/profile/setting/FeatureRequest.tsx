@@ -29,6 +29,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import imageIndex from '@assets/imageIndex';
 import { Button, CustomStatusBar , HeaderCustom, SuccessMessageCustom } from '@components/index';
 import { t } from 'i18next';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 const FeatureRequest = () => {
   const token = useSelector((state: RootState) => state.auth.token);
 
@@ -471,11 +472,10 @@ const FeatureRequest = () => {
       </KeyboardAvoidingView>
     );
   };
-
+const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {/* <View style={[styles.container, { backgroundColor: Color.background }]}> */}
-      <LinearGradient
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={{ flex: 1 }}>
+       <LinearGradient
         colors={[Color.settingFreatureSvgTras, Color.background,]}
         style={styles.container}
       >

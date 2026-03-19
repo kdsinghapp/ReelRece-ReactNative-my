@@ -15,6 +15,7 @@ import imageIndex from '@assets/imageIndex'
 import { CustomStatusBar, HeaderCustom } from '@components/index'
 import { t } from 'i18next'
 import NetInfo from '@react-native-community/netinfo';
+import { useNetworkStatus } from '@hooks/useNetworkStatus'
 
 
 const numColumns = 4;
@@ -76,11 +77,10 @@ const StreamService = () => {
     try {
       if (pageToLoad === 1) {
         setIsRefreshing(true);
-        setIsLoading(true); // initial / search load 
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
       }
-      else setIsLoadingMore(true);
-
-      setIsLoading(true);
 
       const resp = await getUniquePlatforms({
         token,
@@ -165,8 +165,7 @@ const StreamService = () => {
 
   
   const getFilteredData = () => {
-    let data = [...platformData];
-
+    let data = [...(Array.isArray(platformData) ? platformData : [])];
     if (searchQuery) {
       data = data.filter((item) =>
         item?.supported_platform?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -179,11 +178,21 @@ const StreamService = () => {
         data = data.sort((a, b) => (a.popular === b.popular ? 0 : a.popular ? -1 : 1));
       }
     }
-
     return data;
   };
 
-
+  /** When user taps "All platforms", load all remaining pages so full list (e.g. 275) is shown */
+  useEffect(() => {
+    if (
+      filterMode !== 'more' ||
+      debouncedSearch !== '' ||
+      isLoading ||
+      isLoadingMore ||
+      page >= totalPages ||
+      !token
+    ) return;
+    fetchPlatformsPage({ pageToLoad: page + 1, query: debouncedSearch, replace: false });
+  }, [filterMode, page, totalPages, isLoading, isLoadingMore, token, debouncedSearch]);
 
 
   /** ---- Selection Handling ---- */
@@ -349,8 +358,9 @@ const StreamService = () => {
       </TouchableOpacity>
     </View>
   );
+  const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
       <CustomStatusBar backgroundColor={Color.grey} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -358,7 +368,7 @@ const StreamService = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1 , }}>
             <View style={styles.streamHeader} >
               <HeaderCustom
                 title={(t("home.streamingservices"))}
@@ -369,7 +379,14 @@ const StreamService = () => {
               <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
               <View style={styles.serviceCountComntainer}>
                 <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
-                  {selectedPlatforms?.length} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
+                  <Text style={{
+                    color:"#CDCDCD"
+                  }}>
+                    {getFilteredData()?.length}
+                  
+                   {" "}Services,{" "}
+                   </Text> 
+                  {selectedPlatforms?.length  ||"0"} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
                 </Text>
               </View>
 
@@ -466,7 +483,7 @@ const StreamService = () => {
                   if (isLoading || isRefreshing) {
                     return <ActivityIndicator style={{ margin: 12 }} />;
                   }
-                  if (!isLoading && platformData.length === 0 && debouncedSearch?.length > 0) {
+                  if (!isLoading && platformData?.length === 0 && debouncedSearch?.length > 0) {
                     return <Text style={styles.noResultsText}>{t("setting.streaming.noServicesFound")}</Text>;
                   }
                   return null;
@@ -539,8 +556,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2A2A2A',
   },
   selectedItemGlow: {
-    shadowColor: Color.orang,
-    shadowOffset: { width: 3, height: 5 },
+     shadowOffset: { width: 3, height: 5 },
     shadowOpacity: 0.8,
     shadowRadius: 16,
     elevation: 3,
@@ -566,11 +582,11 @@ const styles = StyleSheet.create({
   },
   mostPopularContainer: {
     width: '34%',
-    height: 40,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Color.grey,
-    borderRadius: 20,
+    borderRadius: 18,
     marginHorizontal: 8,
     marginBottom: 10,
 
@@ -679,17 +695,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   selectText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: font.PoppinsBold,
     color: Color.whiteText,
     // marginBottom:4,
     alignSelf: 'center',
+    marginTop:5
   },
   serviceCountComntainer: {
     flexDirection: 'row',
     alignSelf: 'center',
-    // marginTop: 10,
-    marginBottom: 4,
+    marginTop: 2,
+    marginBottom: 7,
   },
   serviceCountText: {
     fontSize: 12,

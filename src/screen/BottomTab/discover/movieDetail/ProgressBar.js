@@ -3,7 +3,7 @@ import { View, PanResponder, Animated } from 'react-native';
   import { Color } from '@theme/color';
 
 type ProgressBarProps = {
-  progress: number; // 0..1
+  progress: number; 
   onSeek: (value: number) => void;
 };
 
@@ -31,8 +31,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, onSeek }) => {
       onSeek(newProgress);
     },
   });
-
-  // Update position when `progress` changes from video playback
+ 
   useEffect(() => {
     if (width > 0) {
       Animated.timing(panX, {
@@ -43,21 +42,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, onSeek }) => {
     }
   }, [progress, width]);
 
-
 return (
   <View
     style={{ height: 6, backgroundColor: Color.darkGrey, borderRadius: 3 }}
     onLayout={handleLayout}
-    onStartShouldSetResponder={() => true} // allow tap
+    onStartShouldSetResponder={() => true} 
     onResponderRelease={(event) => {
       if (width === 0) return;
-      const tapX = event.nativeEvent.locationX; // tap position
+      const tapX = event.nativeEvent.locationX; 
       const newProgress = Math.max(0, Math.min(tapX / width, 1));
-      panX.setValue(newProgress * width); // update knob position
-      onSeek(newProgress); // trigger seek callback
+      panX.setValue(newProgress * width);
+      onSeek(newProgress);
     }}
   >
-    {/* Filled progress bar */}
     <Animated.View
       style={{
         position: 'absolute',
@@ -69,8 +66,6 @@ return (
         width: panX,
       }}
     />
-
-    {/* Draggable knob */}
     <Animated.View
       style={{
         position: 'absolute',

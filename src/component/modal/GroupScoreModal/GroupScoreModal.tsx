@@ -16,19 +16,14 @@ import { t } from 'i18next';
 import CustomText from '@components/common/CustomText/CustomText';
 import { getMembersScores } from '@redux/Api/GroupApi';
 
-interface members {
-  avatar?: string,
-  following?: boolean,
-  name?: string,
-  username?: string,
-}
-
 interface GroupScoreModalProps {
   visible?: boolean,
   onClose?: () => void,
   heading?: string,
-  groupMembers: members[],
   token: string,
+  imdb_id: string,
+  groupId: string,
+  groupScore?: number | string,
 }
 
 const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
@@ -44,7 +39,6 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
   const [searchText, setSearchText] = useState('');
   const ProfileUserName = useSelector((state: RootState) => state.auth.userGetData?.username);
   const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState<string | null>(null)
   const [loadingUsername, setLoadingUsername] = useState<string | null>(null);
   useEffect(() => {
     // setMembers(groupMembers)
@@ -90,7 +84,6 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
     try {
       const response = await getMembersScores(token, groupId, imdb_id)
       const filteredResults = response?.results?.filter(member => member?.preference !== undefined);
-
       if (filteredResults) {
         setMembers(filteredResults)
       }
@@ -186,8 +179,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
                           <TouchableOpacity
-                            style={{ marginRight: 12 }}
-                            onPress={() => {
+                             onPress={() => {
                               onClose()
                               navigation.navigate(ScreenNameEnum.OtherProfile, { item: currentUser })
                             }}

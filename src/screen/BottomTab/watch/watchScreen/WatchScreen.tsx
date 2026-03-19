@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useLayoutEffect, useRef, Suspense, useMemo, memo } from 'react';
+import React, { useEffect, useState, useCallback, useRef, Suspense, useMemo, memo } from 'react';
 import {
   View,
   Image,
@@ -14,7 +14,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import ScreenNameEnum from '@routes/screenName.enum';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
-import { setMultiSelectMode, toggleMultiSelectMode } from '@redux/feature/multiSelectSlice';
+import { setMultiSelectMode } from '@redux/feature/multiSelectSlice';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
 import LogoutModal from '@components/modal/logoutModal/logoutModal';
@@ -31,9 +31,7 @@ import ShimmerGroupItem from './ShimmerGroupItem';
 import Notification from '@screens/BottomTab/home/homeScreen/Notification/Notification';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
-import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-import { errorToast } from '@utils/customToast';
 
 import WatchGroupCom, { GroupListItem } from '@components/common/WatchGroupCom/WatchGroupCom';
 // const Notifi cation = React.lazy(() => import('../../home/homeScreen/Notification/Notification'));
@@ -65,7 +63,7 @@ const WatchScreen = () => {
   const [selectedGroupIds, setSelectedGroupIds] = useState([]);
   const [groupSettingModal, setGroupSettingModal] = useState(false);
   const groupsData = useSelector((state: RootState) => (state.watch?.groupsData ?? []) as { groupId: string; groupName: string; isMuted: boolean; members: unknown[]; activities: unknown[]; max_activities_cnt: number }[]);
-  const loadingGroups = useSelector((state: RootState) => state.watch.loadingGroups);
+  const loadingGroups = useSelector((state: RootState) => state?.watch?.loadingGroups);
   const bottomBarAnim = useRef(new Animated.Value(0)).current;
   const modalButtonsAnim = useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
@@ -91,8 +89,7 @@ const WatchScreen = () => {
         setRefreshing(true);
         fetchGroups();
       } else {
-        // errorToast('No Internet! \n Please check your network connection');
-      }
+       }
     });
     return () => unsubscribe();
   }, [fetchGroups]);
@@ -540,15 +537,9 @@ const WatchScreen = () => {
   });
 
   return (
-    <SafeAreaView edges={!isConnected ? ['bottom'] : ['top', 'bottom']} style={WatchStyle.mincontainer}>
-
-
-
+    <SafeAreaView  edges={isConnected ? ['top'] : []} style={WatchStyle.mincontainer}>
       <CustomStatusBar translucent={true} />
-      {/* <View  style={{backgroundColor:'red',flex:1,zIndex:9345}} >
-          <CacheManagerUI /> 
-        
-        </View> */}
+  
       <View style={WatchStyle.container}>
         {/* {renderHeaderSection()} */}
 
@@ -557,8 +548,6 @@ const WatchScreen = () => {
         {/* {headerSection}
         {userActions}
           {groupList} */}
-
-
 
         <HeaderSection
           isSettingsMode={isSettingsMode}
@@ -569,6 +558,7 @@ const WatchScreen = () => {
           <FlatList
             data={groupsData}
             keyExtractor={keyExtractor}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={
               <View style={{ marginBottom: 20 }}>
                 <UserActions
@@ -579,40 +569,40 @@ const WatchScreen = () => {
               </View>
             }
             renderItem={renderGroupItem}
-          contentContainerStyle={{ paddingBottom: 70, paddingHorizontal: 10 }}
-          initialNumToRender={5}
-          maxToRenderPerBatch={10}
-          windowSize={5}
-          removeClippedSubviews={true}
-          ListEmptyComponent={
-            loadingGroups ? (
-              // <View>
-              //   {[1, 2, 3].map((i) => (
-              //     <ShimmerGroupItem key={i} />
-              //   ))}
-              // </View>
-              <ActivityIndicator color={Color.primary} size={'large'} />
-            ) : (
-              <View style={{ paddingVertical: 40, paddingHorizontal: 24, alignItems: 'center' }}>
-                <CustomText
-                  size={16}
-                  color={Color.placeHolder}
-                  style={{ textAlign: 'center' }}
-                  font={font.PoppinsMedium}
-                >
-                  {t('emptyState.noGroupsYet')}
-                </CustomText>
-                <TouchableOpacity
-                  style={{ marginTop: 16, paddingVertical: 10, paddingHorizontal: 20, backgroundColor: Color.primary, borderRadius: 8 }}
-                  onPress={() => navigation.navigate(ScreenNameEnum.CreateGroupScreen)}
-                >
-                  <CustomText size={14} color={Color.whiteText} font={font.PoppinsMedium}>
-                    {t('home.CreateGroup')}
+            contentContainerStyle={{ paddingBottom: 70, paddingHorizontal: 10 }}
+            initialNumToRender={5}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
+            ListEmptyComponent={
+              loadingGroups ? (
+                // <View>
+                //   {[1, 2, 3].map((i) => (
+                //     <ShimmerGroupItem key={i} />
+                //   ))}
+                // </View>
+                <ActivityIndicator color={Color.primary} size={'small'} />
+              ) : (
+                <View style={{ paddingVertical: 40, paddingHorizontal: 24, alignItems: 'center' }}>
+                  <CustomText
+                    size={16}
+                    color={Color.placeHolder}
+                    style={{ textAlign: 'center' }}
+                    font={font.PoppinsMedium}
+                  >
+                    {t('emptyState.noGroupsYet')}
                   </CustomText>
-                </TouchableOpacity>
-              </View>
-            )
-          }
+                  <TouchableOpacity
+                    style={{ marginTop: 16, paddingVertical: 10, paddingHorizontal: 20, backgroundColor: Color.primary, borderRadius: 8 }}
+                    onPress={() => navigation.navigate(ScreenNameEnum.CreateGroupScreen)}
+                  >
+                    <CustomText size={14} color={Color.whiteText} font={font.PoppinsMedium}>
+                      {t('home.CreateGroup')}
+                    </CustomText>
+                  </TouchableOpacity>
+                </View>
+              )
+            }
           />
         </View>
       </View>
@@ -626,7 +616,7 @@ const WatchScreen = () => {
           <TouchableNativeFeedback>
             <View style={WatchStyle.modalContent}>
 
-              <Suspense fallback={<ActivityIndicator color={Color.primary} size={'large'} />
+              <Suspense fallback={<ActivityIndicator color={Color.primary} size={'small'} />
                 //  <View>
                 //     {[1,2,3].map((i) => (
                 //       <ShimmerGroupItem key={i} />
@@ -666,10 +656,10 @@ const WatchScreen = () => {
           <TouchableOpacity
             style={WatchStyle.bottomActionButton}
             onPress={() => {
-              if (selectedGroupIds.length === groupsData.length) {
+              if (selectedGroupIds?.length === groupsData?.length) {
                 setSelectedGroupIds([]);
               } else {
-                setSelectedGroupIds(groupsData.map(group => group.groupId));
+                setSelectedGroupIds(groupsData?.map(group => group?.groupId));
               }
             }}
           >
@@ -679,14 +669,14 @@ const WatchScreen = () => {
               style={WatchStyle.bottomActionText}
               font={font.PoppinsMedium}
             >
-              {selectedGroupIds.length === groupsData.length ? (t("home.deselectall")) : (t("home.selectAll"))}
+              {selectedGroupIds?.length === groupsData?.length ? (t("home.deselectall")) : (t("home.selectAll"))}
 
             </CustomText>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[WatchStyle.bottomActionButton, { alignItems: 'center' }]}
-            onPress={() => selectedGroupIds.length > 0 && setLogoutModalVisible(true)}
+            onPress={() => selectedGroupIds?.length > 0 && setLogoutModalVisible(true)}
           >
             <Image
               style={[WatchStyle.modalImg,]}
@@ -743,7 +733,7 @@ const WatchScreen = () => {
         onConfirm={() => {
           if (selectedGroup) {
             deleteSelectedGroups(selectedGroup);
-          } else if (selectedGroupIds.length > 0) {
+          } else if (selectedGroupIds?.length > 0) {
 
             deleteSelectedGroups();
           }

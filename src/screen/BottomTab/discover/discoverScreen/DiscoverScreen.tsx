@@ -24,14 +24,13 @@ import font from '@theme/font';
 import imageIndex from '@assets/imageIndex';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { Trending_without_Filter } from '@redux/Api/movieApi';
-
- 
- import CustomText from '@components/common/CustomText/CustomText';
+import CustomText from '@components/common/CustomText/CustomText';
 
 import { RootState } from '@redux/store';
 import SortbyModal from '@components/modal/SortbyModal/SortbyModal';
 import FilterBar from './FilterBar';
 import { CustomStatusBar } from '@components/index';
+import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 type MovieItem = {
   imdb_id?: string;
@@ -222,14 +221,14 @@ const DiscoverScreen = () => {
     [token, buildUrl, setTrending]
   );
 
-   useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (isSelectList != null && ['1', '2', '5'].includes(String(isSelectList))) {
       const next = String(isSelectList);
       setSelectedSimpleFilter(prev => (prev !== next ? next : prev));
     }
   }, [isSelectList]);
 
-   useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       const applyParams = () => {
         const fromRef = routeParamsRef.current?.isSelectList;
@@ -247,7 +246,7 @@ const DiscoverScreen = () => {
     }, [navigation])
   );
 
-   useEffect(() => {
+  useEffect(() => {
     const currentFingerprint = `${selectedSimpleFilter}-${filterGenreString}-${platformFilterString}-${selectedSortId}-${contentSelect}`;
     if (filterFingerprintRef.current !== currentFingerprint) {
       filterFingerprintRef.current = currentFingerprint;
@@ -287,14 +286,14 @@ const DiscoverScreen = () => {
   const renderItem = useCallback(
     ({ item }: { item: MovieItem }) => {
       if (!item) return null;
-       const coverSource = item?.cover_image_url?.trim()
-      ? {
+      const coverSource = item?.cover_image_url?.trim()
+        ? {
           uri: item.cover_image_url,
           priority: FastImage.priority.high,
           cache: FastImage.cacheControl.immutable,
-          
+
         }
-      : null;
+        : null;
       return (
         <TouchableOpacity
           onPress={() => goToDetail(item)}
@@ -305,7 +304,6 @@ const DiscoverScreen = () => {
             style={styles.image}
             source={coverSource}
             resizeMode={FastImage.resizeMode.stretch}
-
           />
           <View style={styles.rating}>
             <RankingWithInfo
@@ -369,9 +367,9 @@ const DiscoverScreen = () => {
       </View>
     );
   }, [loading]);
-
+  const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar />
 
       {/* Header */}
@@ -430,7 +428,6 @@ const DiscoverScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
-
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => setSortByModal(true)}

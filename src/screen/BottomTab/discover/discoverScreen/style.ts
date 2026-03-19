@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   card: { width: '48%', marginBottom: 15, borderRadius: 10, overflow: 'hidden', },
   image: {
     width: '100%',
-    aspectRatio: 2 / 3, // common poster ratio
+    aspectRatio: 2 / 3,
     borderRadius: 8,
   },
   rating: {
@@ -36,15 +36,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 12,
   },
-
   ratingText: { color: Color.whiteText, fontWeight: 'bold' },
   list: { paddingBottom: 200, flexGrow: 1 },
   sortbyImg: { height: 16, width: 16, resizeMode: 'contain' },
-  // sortByText:{fontSize:12, color:Color.whiteText,marginLeft:7 ,fontFamily:font.PoppinsRegular},
 
   contentTypeContainer: {
     width: '45%', flexDirection: 'row', justifyContent: "space-between",
-    //  backgroundColor: "#191919", 
     backgroundColor: Color.green,
     borderRadius: 20
   },
@@ -61,7 +58,6 @@ const styles = StyleSheet.create({
   },
   contentTypeWrapper: {
     flexDirection: 'row',
-    // paddingVertical: 4,
     height: 27,
     borderRadius: 20,
     backgroundColor: Color.graybackGround,
@@ -70,16 +66,12 @@ const styles = StyleSheet.create({
   },
   contentTypeButton: {
     flex: 1,
-    // height:'%',
-    // paddingVertical: "auto",
     height: '99%',
     backgroundColor: Color.graybackGround,
 
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    // marginBottom: 6,
-    // marginRight: 6,
   },
   contentTypeButtonActive: {
     backgroundColor: Color.grey,

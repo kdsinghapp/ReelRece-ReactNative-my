@@ -2,21 +2,20 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import imageIndex from '@assets/imageIndex';
-import { BottomSheet,   CustomStatusBar,   HeaderCustom, ProfileOther,  } from '@components';
+import { BottomSheet, CustomStatusBar, HeaderCustom, ProfileOther, } from '@components';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
- import { Color } from '@theme/color';
-  import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
+import { Color } from '@theme/color';
+import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { useBookmarks } from '@hooks/useBookmark';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
-import {   getRatedMovies } from '@redux/Api/movieApi';
+import { getRatedMovies } from '@redux/Api/movieApi';
 import FastImage from 'react-native-fast-image';
 import { t } from 'i18next';
-
 
 const OtherWatchingProfile = () => {
   const isOnline = useNetworkStatus();
@@ -59,7 +58,7 @@ const OtherWatchingProfile = () => {
 
   useEffect(() => {
     bothBookMovie()
-   }, [token, username])
+  }, [token, username])
 
   const handleToggleLovedImage = useCallback((movieId: string) => {
     setLovedImageMap(prev => ({
@@ -78,30 +77,30 @@ const OtherWatchingProfile = () => {
         )
       );
     } catch (error) {
-     }
+    }
   };
 
 
-   const compareHook = useCompareComponent(token);
+  const compareHook = useCompareComponent(token);
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
-   };
+  };
 
 
-const handleNavigation = (imdb_id: string, token: string) => {
+  const handleNavigation = (imdb_id: string, token: string) => {
     navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
-    // Alert.alert(imdb_id, token)
+
   };
 
 
   const renderMovie = useCallback(({ item, index }) => {
     setIsSaved(item?.is_bookmarked ?? false)
- 
+
     return (
       <View style={[styles.movieCard, { paddingHorizontal: 0 }]} >
-        <TouchableOpacity  activeOpacity={0.8}   onPress={() => handleNavigation(item?.imdb_id, token)} >
+        <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} >
           {/* <Image source={{ uri: item?.cover_image_url }} style={styles.poster} /> */}
- <FastImage
+          <FastImage
             style={styles.poster}
             source={{
               uri: item?.cover_image_url,
@@ -112,7 +111,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity  activeOpacity={0.8}    onPress={() => handleNavigation(item?.imdb_id, token)}  style={styles.info}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.info}>
           <View style={{ flexDirection: "row", }}>
             <Text numberOfLines={2} style={[styles.title]}>{item?.title}</Text>
             {/* <Text  style={[styles.title]}>"ffgefrgdf gdf gdfg dfffeffffaffsdfsfff gdf g df gdfgdf g df</Text> */}
@@ -138,10 +137,10 @@ const handleNavigation = (imdb_id: string, token: string) => {
             {/* <RankingCard ranked={item?.rec_score} /> */}/
             <RankingWithInfo
               score={item?.rec_score}
-              title={t("discover.friendscore")}  
+              title={t("discover.friendscore")}
               description=
-              {t("discover.frienddes")}  
-       
+              {t("discover.frienddes")}
+
             />
           </View>
 
@@ -184,8 +183,8 @@ const handleNavigation = (imdb_id: string, token: string) => {
   }, [token, handleToggleLovedImage, lovedImageMap, isSaved, movies]);
 
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{
-      flex:1
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={{
+      flex: 1
     }}>
       <CustomStatusBar />
       <View style={styles.container}>
@@ -202,7 +201,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
           data={movies}
           keyExtractor={(item, index) => `${item?.imdb_id}-${index}`}
           renderItem={renderMovie}
-          
+
           ListHeaderComponent={() => (
             <>
               <View style={{
@@ -248,7 +247,7 @@ const handleNavigation = (imdb_id: string, token: string) => {
           onClose={() => setBottomModal(false)}
           // onSelect={() => setBottomModal(false)}
           onSelect={(option) => option.action()}
-         />
+        />
       )}
       {/* <CompareModals token={token} useCompareHook={compareHook} /> */}
     </SafeAreaView>

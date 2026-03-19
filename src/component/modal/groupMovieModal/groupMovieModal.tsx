@@ -140,10 +140,12 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
                             onPress={() => setUserSectionOpen(!userSectionOpen)}
                         >
                             <Text style={styles.sectionTitle}>Liked by User</Text>
-                            {userSectionOpen ? 
-                                <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
-                                <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
-                            }
+                            <View style={styles.arrowWrapper}>
+                                {userSectionOpen ? 
+                                    <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
+                                    <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                                }
+                            </View>
                         </TouchableOpacity>
                         
                         <View style={{ maxHeight: '35%' }}>
@@ -221,10 +223,12 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
                             onPress={() => setGroupSectionOpen(!groupSectionOpen)}
                         >
                             <Text style={styles.sectionTitle}>Liked by Group</Text>
-                            {groupSectionOpen ? 
-                                <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
-                                <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
-                            }
+                            <View style={styles.arrowWrapper}>
+                                {groupSectionOpen ? 
+                                    <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
+                                    <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                                }
+                            </View>
                         </TouchableOpacity>
                         
                         {groupSectionOpen && (
@@ -345,18 +349,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 14,
+        // paddingVertical: 14,
         paddingHorizontal: 20,
         marginVertical: 10,
         backgroundColor: Color.grey,
         borderRadius: 10,
         marginHorizontal: 20,
+        height:50
     },
     sectionTitle: {
         fontSize: 14,
         color: Color.whiteText,
         fontFamily: font.PoppinsBold,
-        lineHeight: 22,
+        lineHeight: 50,
     },
     userItem: {
         flexDirection: 'row',
@@ -472,6 +477,12 @@ const styles = StyleSheet.create({
     slider: {
         width: '100%',
         height: 40,
+    },
+    arrowWrapper: {
+        width: 22,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     arrowStyle: {
         height: 22,

@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import isEqual from "lodash.isequal";
 import FeedCardHome from "./FeedCardHome";
-
 
   const MemoFeedCardHome = React.memo(FeedCardHome, (prev, next) => {
     if (prev.imdb_id !== next.imdb_id) return false;
@@ -14,36 +13,10 @@ import FeedCardHome from "./FeedCardHome";
     if (prev.shouldAutoPlay !== next.shouldAutoPlay) return false;
     if (prev.videoIndex !== next.videoIndex) return false;
     if (prev.onBookmarkSuccess !== next.onBookmarkSuccess) return false;
+    if (prev.suggested !== next.suggested) return false;
+    if (prev.onFollow !== next.onFollow) return false;
+    if (prev.isFollowing !== next.isFollowing) return false;
     return true;
   });
 
   export default MemoFeedCardHome;
-
-
-
-// import React from "react";
-// import FeedCard from "./FeedCard";
-
-// const MemoFeedCard = React.memo(FeedCard, (prev, next) => {
- //   // simple equality checks
-//   return (
-//     prev.imdb_id === next.imdb_id &&
-//     prev.title === next.title &&
-//     prev.comment === next.comment &&
-//     prev.release_year === next.release_year &&
-//     prev.ranked === next.ranked &&
-//     prev.avatar === next.avatar &&
-//     prev.poster === next.poster &&
-//     prev.videoUri === next.videoUri &&
-//     prev.shouldPlay === next.shouldPlay &&
-//     prev.isVisible === next.isVisible &&
-//     prev.isPaused === next.isPaused &&
-//     prev.isMuted === next.isMuted &&
-//     prev.shouldAutoPlay === next.shouldAutoPlay &&
-//     prev.videoIndex === next.videoIndex &&
-//     prev.token === next.token &&
-//     prev.onRankPress === next.onRankPress // make sure parent memoizes this
-//   );
-// });
-
-// export default MemoFeedCard;

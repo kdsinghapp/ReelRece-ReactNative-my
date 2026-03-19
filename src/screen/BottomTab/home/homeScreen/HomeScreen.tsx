@@ -99,12 +99,12 @@ const App = () => {
     try {
       dispatch(resetHomeFeedPagination());
       await Promise.all([
-        dispatch(fetchHomeFeed({ reset: true })).unwrap().catch(() => {}),
-        dispatch(fetchHomeTrending()).unwrap().catch(() => {}),
-        dispatch(fetchHomeRecommend()).unwrap().catch(() => {}),
-        dispatch(fetchHomeBookmarks()).unwrap().catch(() => {}),
-        dispatch(fetchHomeRecentUsers()).unwrap().catch(() => {}),
-        dispatch(fetchHomeSuggestedFriends()).unwrap().catch(() => {}),
+        dispatch(fetchHomeFeed({ reset: true })).unwrap().catch(() => { }),
+        dispatch(fetchHomeTrending()).unwrap().catch(() => { }),
+        dispatch(fetchHomeRecommend()).unwrap().catch(() => { }),
+        dispatch(fetchHomeBookmarks()).unwrap().catch(() => { }),
+        dispatch(fetchHomeRecentUsers()).unwrap().catch(() => { }),
+        dispatch(fetchHomeSuggestedFriends()).unwrap().catch(() => { }),
       ]);
     } finally {
       setRefreshing(false);
@@ -112,7 +112,7 @@ const App = () => {
   }, [isOnline, dispatch]);
 
   onRefreshRef.current = onRefresh;
- 
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const online = state.isConnected && state.isInternetReachable;
@@ -126,7 +126,7 @@ const App = () => {
   }, []);
 
   const combinedData = useMemo(() => {
-     return [
+    return [
       { type: 'profileStatus' },
       { type: 'header' },
       // ...discoverItem,
@@ -237,7 +237,7 @@ const App = () => {
         lastPlayedIndexRef.current = target;
       }
       timeoutRef.current = null;
-    }, 800);
+    }, 300);
   }).current;
 
   // Initial load: all home APIs via Redux
@@ -250,14 +250,12 @@ const App = () => {
     dispatch(fetchHomeSuggestedFriends());
   }, [token, dispatch]);
 
-  // Feed: first page on mount when token exists
   useEffect(() => {
     if (!token || initialFeedFetchedRef.current) return;
     initialFeedFetchedRef.current = true;
     dispatch(fetchHomeFeed({ reset: true }));
   }, [token, dispatch]);
 
-  // Focus effect for restoring index
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -279,11 +277,12 @@ const App = () => {
 
       return () => {
         isActive = false;
+        restoredRef.current = false;
       };
     }, [])
   );
 
-   useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       if (!token) return;
       dispatch(fetchHomeFeed({ reset: true, silent: true }));
@@ -404,9 +403,18 @@ const App = () => {
         isPaused={index - 1 !== playIndex}
         is_bookMark={item?.is_bookmarked}
         screenName='Home__Screen'
+        suggested={
+          item?.suggested === true ||
+          (Array.isArray(suggestedFriends) &&
+            suggestedFriends.some(
+              (f: { username?: string }) => f?.username === item?.user?.username
+            ))
+        }
+        onFollow={handleFollowSuggested}
+        isFollowing={item?.user?.is_following}
       />
     );
-  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress]);
+  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress, suggestedFriends]);
 
   const renderItem = useCallback(({ item, index }) => {
     if (item?.type === 'profileStatus') {
@@ -495,7 +503,7 @@ const App = () => {
   const handleScrollBeginDrag = useCallback(() => {
     if (!hasScrolled) setHasScrolled(true);
   }, [hasScrolled]);
- 
+
   const processedFeedData = useMemo(() => {
     const result: (object | string | null | number)[] = [];
     const feedMap = new Map();
@@ -551,7 +559,7 @@ const App = () => {
 
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar />
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -580,7 +588,7 @@ const App = () => {
         data={processedFeedData}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        extraData={`${bookmarkData?.length ?? 0}-${trendingData?.length ?? 0}-${recommendData?.length ?? 0}`}
+        extraData={`${bookmarkData?.length ?? 0}-${trendingData?.length ?? 0}-${recommendData?.length ?? 0}-${suggestedFriends?.length ?? 0}`}
         onEndReached={handleEndReached}
         contentContainerStyle={listContentStyle}
         onEndReachedThreshold={0.5}

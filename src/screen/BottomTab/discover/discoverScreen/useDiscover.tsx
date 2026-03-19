@@ -6,14 +6,14 @@ const useDiscover = () => {
 
   const [sortByModal, setSortByModal] = useState(false);
   const [contentSelect, setContentSelect] = useState(1);
-  const [selectedSortId, setSelectedSortId] = useState(1); // Default: Rec Score
+  const [selectedSortId, setSelectedSortId] = useState(1); 
   const [platformId, setPlatformId] = useState<string[]>([]);
   const [trending, setTrending] = useState([]);
 
   const contantFilter = (item) => {
 
-    if (contentSelect === item.id) {
-      setContentSelect(item.type);
+    if (contentSelect === item?.id) {
+      setContentSelect(item?.type);
      } else {
       setContentSelect(item.id);
      }

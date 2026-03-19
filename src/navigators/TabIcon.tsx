@@ -1,8 +1,8 @@
 import React from "react";
 import { Image, Text } from "react-native";
 import { Color } from "@theme/color";
-import font from "@theme/font";
-// ✅ Pure Component
+import font from "@theme/font"; 
+
 const TabIcon = React.memo(({ focused, logo, logo1, label }) => (
   <>
     <Image

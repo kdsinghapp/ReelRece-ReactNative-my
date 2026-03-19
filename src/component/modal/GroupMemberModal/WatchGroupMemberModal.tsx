@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';

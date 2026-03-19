@@ -15,7 +15,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScrollView } from 'react-native-gesture-handler';
 import styles from './style';
 import useMovie from './useMovie';
-import ProgressBar from './ProgressBar';
 import { Color } from '@theme/color';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
@@ -68,7 +67,6 @@ const MovieDetailScreen = () => {
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPosition, setSeekPosition] = useState(0);
   const [movieData, setMovieData] = useState([null, null, null]);
-  // const [savedMovies, setSavedMovies] = useState({});
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(1); // Start at the middle item
@@ -91,21 +89,17 @@ const MovieDetailScreen = () => {
   const [sessionList, setSessionList] = useState<{ id: number; session: string }[]>([]);
   const [reviews, setReviews] = useState([])
   const [progress, setProgress] = useState(1);
-  // const [videoIndex, setVideoIndex] = useState(null);
   const posterOpacity = useRef(new Animated.Value(1)).current;
   const [isScreenFocused, setIsScreenFocused] = useState(true);
   const [isVideoPaused, setIsVideoPaused] = useState(false)
   const trailerTracker = useTrailerTracker(token);
   const videoRef = useRef(null);
   const [duration, setDuration] = useState(0);
-  // const [movieData__has_rated, setMovieData__has_rated] = useState(false);
-  // const [page, setPage] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentSeedId, setCurrentSeedId] = useState(imdb_idData);
   const [matchingQueue, setMatchingQueue] = useState([]);
   const matchingQueueRef = useRef<(typeof matchingQueue)>([]);
   const preloadInProgressRef = useRef(false);
-  // const fetchedIdsRef = useRef(new Set());
   const isInitialLoad = useRef(true);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const isResettingRef = useRef(false);
@@ -117,12 +111,9 @@ const MovieDetailScreen = () => {
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  // explain scroll refs   
-  const scrollRef = useRef(null);
   const [wholeContentHeight, setWholeContentHeight] = useState(1);
   const [visibleContentHeight, setVisibleContentHeight] = useState(0);
   const [scrollIndicatorHeight, setScrollIndicatorHeight] = useState(0);
-  const [scrollIndicatorPosition, setScrollIndicatorPosition] = useState(0);
   const has_rated_ref = useRef(false);
   const [hasRatedForCommentModal, setHasRatedForCommentModal] = useState(false);
   const [commetText, setCommentText] = useState('')
@@ -168,7 +159,6 @@ const MovieDetailScreen = () => {
     }
   }, [movieData]);
 
-  // Show swipe tooltip once for new users after movie detail is ready
   useEffect(() => {
     if (swipeTooltipCheckDone.current || loading || !movieData?.[currentIndex]) return;
     swipeTooltipCheckDone.current = true;
@@ -185,7 +175,6 @@ const MovieDetailScreen = () => {
       return newMap;
     });
 
-    // Background API call (doesn't block UI)
     try {
       const res = await toggleBookmarkHook(imdb_id);
       if (typeof res === 'boolean') {
@@ -198,7 +187,6 @@ const MovieDetailScreen = () => {
         dispatch(fetchHomeBookmarks({ silent: true }));
       }
     } catch (err) {
-      // revert on failure
       setBookmarkMap(prev => {
         const newMap = { ...prev, [imdb_id]: current };
         bookmarkMapRef.current = newMap;
@@ -211,7 +199,6 @@ const MovieDetailScreen = () => {
       scrollEnabled: outerScrollEnableds.current
     });
   }, [outerScrollEnableds.current]);
-  // Screen focus: unmount video when user navigates away (tab switch, back) to stop audio
   useFocusEffect(
     useCallback(() => {
       setIsScreenFocused(true);
@@ -235,7 +222,6 @@ const MovieDetailScreen = () => {
           getMatchingMovies(token, imdb_idData)
         ]);
 
-        // Load initial movie
         // const meta = await getMovieMetadata(token, imdb_idData);
         setMovieData([null, meta, null]);
         setCurrentSeedId(imdb_idData);
@@ -267,7 +253,13 @@ const MovieDetailScreen = () => {
   useEffect(() => {
     posterOpacity.setValue(1);
     setProgress(0)
-  }, [movieData]);
+  }, [movieData, posterOpacity]);
+
+  const setPausedState = useCallback((isPlaying: boolean) => {
+    setPaused(!isPlaying);
+  }, []);
+
+  const handleVideoSeek = useCallback((position: any) => { }, []);
 
   // more movie sheet
   const openMoreModal = useCallback(() => {
@@ -417,7 +409,6 @@ const MovieDetailScreen = () => {
 
     try {
       const response = await getEpisodes(token, imdb_id);
-
       let episodesData = [];
       if (Array.isArray(response)) {
         episodesData = response;
@@ -471,7 +462,6 @@ const MovieDetailScreen = () => {
     }
   };
 
-  // Example in the event handler when opening the modal:
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -521,8 +511,7 @@ const MovieDetailScreen = () => {
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
   }, []);
-
-  // Compare modals
+ 
   const compareHook = useCompareComponent(token);
   const isFeedbackModal = compareHook.isFeedbackVisible;
   const isComparisonVisible = compareHook.isComparisonVisible;
@@ -540,8 +529,6 @@ const MovieDetailScreen = () => {
       setHasRatedForCommentModal(!!currentMovie?.has_rated);
     }
   }, [currentIndex, movieData]);
-  // }, [currentIndex, movieData]);
-
 
   const showCommenRankingCheck = () => {
     if (!movieData[currentIndex]?.has_rated && !has_rated_ref.current) {
@@ -556,15 +543,13 @@ const MovieDetailScreen = () => {
     }
   };
 
-  // Comment modal: only open when THIS screen's ranking flow closes (via onModalClose), not when ranking finishes on another tab.
-
   const checkHasRated = () => {
     if (has_rated_ref.current) {
     } else {
     }
   };
 
-  const handleVideoLoad = (data: { duration: number }) => {
+  const handleVideoLoad = useCallback((data: { duration: number }) => {
     setVideoDuration(data.duration);
     setDuration(data.duration);
 
@@ -574,7 +559,7 @@ const MovieDetailScreen = () => {
       duration: 500,
       useNativeDriver: true,
     }).start();
-  };
+  }, [posterOpacity]);
   const [currentTime, setCurrentTime] = useState(0);
   // Fix the progress handler
 
@@ -753,12 +738,12 @@ const MovieDetailScreen = () => {
                   repeat
                   muted={isMuted}
                   paused={paused || isFeedbackModal || isComparisonVisible || thinkModal}
-                  onPlayPause={(isPlaying) => setPaused(!isPlaying)}
-                  onControllerVisibilityChange={(visible) => setIsShowMuteIcon(visible)}
+                  onPlayPause={setPausedState}
+                  onControllerVisibilityChange={setIsShowMuteIcon}
                   onProgress={onVideoProgress}
                   seekTo={isSeeking ? seekPosition : undefined}
                   onLoad={handleVideoLoad}
-                  onSeek={(position) => { }}
+                  onSeek={handleVideoSeek}
                   ref={videoRef}
                 />
               ) : (
@@ -905,11 +890,17 @@ const MovieDetailScreen = () => {
                   <View style={{}} >
 
                     <RankingWithInfo
-                      score={item?.friends_rec_score == null || Number(item?.friends_rec_score) < 0 ? '?' : Number(item.friends_rec_score)}
+                      score={item?.friends_rec_score == null || Number(item?.friends_rec_score) <= 0 ? 'N/A' : Number(item.friends_rec_score)}
                       title={t("discover.friendscore")}
-                      description=
-                      {t("discover.ratingscoreshows")}
-
+                      // description=
+                      // {t("discover.ratingscoreshows")}
+                      description={
+                        item?.friends_rec_score === null ||
+                          item?.friends_rec_score === -1 ||
+                          item?.friends_rec_score === 0
+                          ? t("discover.nofrienddes")
+                          : t("discover.frienddes")
+                      }
                     // "This score shows the rating from your friend for this title."
                     />
                   </View>
@@ -921,7 +912,6 @@ const MovieDetailScreen = () => {
                     font={font.PoppinsMedium}
                   >
                     {t("discover.friendscore")}
-
                   </CustomText>
                 </TouchableOpacity>
 
@@ -964,7 +954,6 @@ const MovieDetailScreen = () => {
                     <View style={{ flexDirection: 'row', height: recommendationRowHeight, marginTop: 10 }}>
 
                       <ScrollView
-
                         nestedScrollEnabled={false}
                         showsVerticalScrollIndicator={false}
                         bounces={true}
@@ -987,15 +976,11 @@ const MovieDetailScreen = () => {
                           style={styles.gradient}
                         />
                       </ScrollView>
-
                     </View>
-
-
                   </View>
                 ) :
                 <Text style={styles.description} >{t("emptyState.nodescription")}</Text>}
 
-              {/* Where to Watch - platforms from movie metadata */}
               {item?.platforms && Array.isArray(item.platforms) && item.platforms.length > 0 && (
                 <View style={styles.whereToWatchSection}>
                   <CustomText
@@ -1059,11 +1044,8 @@ const MovieDetailScreen = () => {
             </View>
             <View style={{
               justifyContent: 'space-between',
-              paddingBottom: 10,
-              flex: 1,
-              maxHeight: windowHeight * 0.24,
-              // backgroundColor: 'red'
-
+              paddingBottom: 80,
+              flex: 1
             }}>
               <View style={{
                 flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10,
@@ -1075,16 +1057,10 @@ const MovieDetailScreen = () => {
                   onPress={() => setWatchNow(true)}
                 >
                   <Image style={styles.watchNowImg} source={imageIndex.puased} resizeMode='contain' />
-
                 </TouchableOpacity>
-
-
-
                 <TouchableOpacity
                   style={[styles.watchNowContainer, {
                     backgroundColor: Color.primary, width: primaryButtonWidth,
-
-
                   }]}
                   onPress={() => {
                     handleRankingPress({
@@ -1132,12 +1108,12 @@ const MovieDetailScreen = () => {
               <View style={{ marginBottom: 20, paddingHorizontal: 16 }}>
 
 
-                <ProgressBar
+                {/* <ProgressBar
                   progress={progress}
                   onSeek={handleSeek}
                   onSeekStart={() => setIsSeeking(true)}
                   onSeekEnd={() => setIsSeeking(false)}
-                />
+                /> */}
 
               </View>
             </View>

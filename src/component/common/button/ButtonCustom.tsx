@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, Platform, Image, ActionSheetIOS, ActivityIndicator } from 'react-native';
 import { Color } from '@theme/color';
- import font from '@theme/font';
-import CustomText from '@components/common/CustomText/CustomText';   
+import font from '@theme/font';
+import CustomText from '@components/common/CustomText/CustomText';
 // Define props type
 interface CustomButtonProps {
   title: string;
@@ -10,8 +10,8 @@ interface CustomButtonProps {
   buttonStyle?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
-  source?: string | boolean| null| number
-  loaderFollow?:boolean;
+  source?: string | boolean | null | number
+  loaderFollow?: boolean;
 }
 
 // Functional component
@@ -20,7 +20,7 @@ const ButtonCustom: React.FC<CustomButtonProps> = ({
   onPress,
   buttonStyle,
   textStyle,
-  disabled = false, 
+  disabled = false,
   source,
   loaderFollow,
 }) => {
@@ -33,23 +33,23 @@ const ButtonCustom: React.FC<CustomButtonProps> = ({
       disabled={disabled}
       activeOpacity={0.7}
     >
-{/* { loaderFollow &&
+      {/* { loaderFollow &&
 <ActivityIndicator color={Color.primary} size={'small'}  />
 
 } */}
       {/* <Text style={[styles.buttonText, textStyle]}>{title}</Text> */}
-        {loaderFollow ? (
+      {loaderFollow ? (
         <ActivityIndicator color={Color.whiteText} size="small" />
       ) : (
         // <Text style={[styles.buttonText, textStyle]}>{title}</Text>
         <CustomText
-                  size={14}
-                  color={Color.primary}
-                 style={[styles.buttonText, textStyle]}
-                  font={font.PoppinsMedium}
-                >
-                  {title}
-                </CustomText>
+          size={14}
+          color={Color.primary}
+          style={[styles.buttonText, textStyle]}
+          font={font.PoppinsMedium}
+        >
+          {title}
+        </CustomText>
       )}
       {
         source && (
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: Color.primary,
     // paddingVertical: 20,
     paddingHorizontal: 24,
-    height: 50,
+    height: 48,
     // p: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -94,13 +94,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Color.whiteText,
-    fontSize: 18,
+    fontSize: 16,
     lineHeight: 24,
     // marginVertical:12,
-    fontFamily:font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
   },
   disabledButton: {
   },
 });
 
-export default  React.memo(ButtonCustom);
+export default React.memo(ButtonCustom);

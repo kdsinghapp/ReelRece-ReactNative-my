@@ -2,27 +2,26 @@
 import { StyleSheet } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
- 
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.background },
   header: {
-     top: 0,               // Stick to top
+    top: 0,               // Stick to top
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     height: 50,
-    width:"100%",
+    width: "100%",
     backgroundColor: Color.headerTransparent, // ✅ Transparent
     zIndex: 10,  // ✅ This is clean
     //  marginBottom:20,
   },
-
-  logo: {  color: Color.whiteText,  marginLeft: 12 },
+  logo: { color: Color.whiteText, marginLeft: 12 },
   search: { fontSize: 20, color: Color.whiteText },
 
-  avatarList: { paddingBottom:10, paddingHorizontal:14             , },
+  avatarList: { paddingBottom: 10, paddingHorizontal: 14, },
   avatar: {
     width: 60,
     height: 60,

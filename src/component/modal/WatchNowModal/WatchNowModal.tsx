@@ -16,7 +16,7 @@ import {
 import { Color } from '@theme/color';
 import imageIndex from '@assets/imageIndex';
 import font from '@theme/font';
- import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
@@ -76,9 +76,9 @@ const WatchNowModal = ({
       const list = Array.isArray(raw)
         ? raw
         : (raw as { data?: unknown[]; platforms?: unknown[] })?.data ??
-          (raw as { platforms?: unknown[] })?.platforms ??
-          [];
-      
+        (raw as { platforms?: unknown[] })?.platforms ??
+        [];
+
       setPlatforms(Array.isArray(list) ? (list as WatchPlatformItem[]) : []);
     } catch (error) {
       setPlatforms([]);
@@ -122,9 +122,9 @@ const WatchNowModal = ({
     selectedSortOption === 'All'
       ? platforms
       : platforms.filter((p) => {
-          const normalized = normalizeWatchType(p?.watch_type);
-          return normalized === selectedSortOption;
-        });
+        const normalized = normalizeWatchType(p?.watch_type);
+        return normalized === selectedSortOption;
+      });
 
   const filteredPlatforms = filteredByType.filter(
     (item, index, self) =>
@@ -151,27 +151,27 @@ const WatchNowModal = ({
     }
   };
   const insets = useSafeAreaInsets();
-   const getModalHeight = () => {
-     const videoHeight = screenHeight * 0.40;
-     const availableHeight = screenHeight - videoHeight;
-     
-     let modalHeight = availableHeight  
-     
-     return Math.min(modalHeight, screenHeight * 0.65);
-   };
- 
+  const getModalHeight = () => {
+    const videoHeight = screenHeight * 0.40;
+    const availableHeight = screenHeight - videoHeight;
+
+    let modalHeight = availableHeight
+
+    return Math.min(modalHeight, screenHeight * 0.65);
+  };
+
   const getModalBottomPadding = () => {
-     let bottomPadding = 0;
-     
-     if (Platform.OS === 'ios') {
-       bottomPadding = Math.max(insets.bottom, 12);
-     } else {
-       // For Android with gesture navigation, add more padding
-       bottomPadding = Math.max(insets.bottom + 10, 20);
-     }
-     
-     return bottomPadding;
-   };
+    let bottomPadding = 0;
+
+    if (Platform.OS === 'ios') {
+      bottomPadding = Math.max(insets.bottom, 12);
+    } else {
+      // For Android with gesture navigation, add more padding
+      bottomPadding = Math.max(insets.bottom + 10, 20);
+    }
+
+    return bottomPadding;
+  };
   const renderPlatform = ({ item }: { item: WatchPlatformItem }) => {
     const hasUrl =
       (item?.deeplink && String(item.deeplink).trim()) ||
@@ -214,8 +214,8 @@ const WatchNowModal = ({
     );
   };
 
- 
-  
+
+
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
       <View style={styles.mainContainer}>
@@ -224,81 +224,81 @@ const WatchNowModal = ({
         </TouchableWithoutFeedback>
 
         <View style={styles.overlay} pointerEvents="box-none">
-            <View
-              style={[
-                styles.modalContent,
-                {
-                  height: getModalHeight(),
-                  paddingBottom: getModalBottomPadding(),
-                },
-              ]}
-            >
-              <View style={styles.headerContainer}>
-                <View style={{ width: 22 }} />
-                <Text style={styles.headingTitle}>{t("common.watchNow")}</Text>
-                <TouchableOpacity onPress={onClose}>
-                  <Image source={imageIndex.closeimg} style={styles.closeImg} />
-                </TouchableOpacity>
-              </View>
-
-              {/* Top Filters */}
-              <View style={styles.filterRow}>
-                {filterOptions.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[
-                      styles.filterButton,
-                      selectedSortOption === item.option && styles.activeFilter,
-                    ]}
-                    // onPress={() => setSelectedSortOption(item.option)}
-                    onPress={() => {
-                      const apiWatchType = getWatchTypeLabel(item.option);
-                      // setSelectFilterOp(getWatchTypeLabel(item.option))
-                      setSelectedSortOption(item.option);
-                      setSelectFilterOp(apiWatchType);
-                    }}
-
-                  >
-                    <Text
-                      style={[
-                        styles.filterText,
-                        selectedSortOption === item.option && styles.activeFilterText,
-                      ]}
-                    >
-                      {item.option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Platform List */}
-              {/* Platform List Section */}
-              {watchModalLoad ? (
-                <View style={styles.loaderContainer}>
-                  <ActivityIndicator color={Color.primary} size="large" />
-                </View>
-              ) : Array.isArray(filteredPlatforms) && filteredPlatforms.length === 0 ? (
-                <View style={styles.loaderContainer}>
-                  <Text style={styles.NotAvaibleText}>{t("emptyState.noresults")}</Text>
-                </View>
-              ) : (
-                <View style={styles.listWrapper}>
-                  <FlatList
-                    data={filteredPlatforms}
-                    keyExtractor={(item, index) =>
-                      `${item?.supported_platform ?? ''}-${item?.watch_type ?? ''}-${index}`
-                    }
-                    renderItem={renderPlatform}
-                    contentContainerStyle={{ paddingVertical: 10 }}
-                    initialNumToRender={10}
-                    showsVerticalScrollIndicator={false}
-                    maxToRenderPerBatch={10}
-                    windowSize={7}
-                    removeClippedSubviews={Platform.OS === 'android'}
-                  />
-                </View>
-              )}
+          <View
+            style={[
+              styles.modalContent,
+              {
+                height: getModalHeight(),
+                paddingBottom: getModalBottomPadding(),
+              },
+            ]}
+          >
+            <View style={styles.headerContainer}>
+              <View style={{ width: 22 }} />
+              <Text style={styles.headingTitle}>{t("common.watchNow")}</Text>
+              <TouchableOpacity onPress={onClose}>
+                <Image source={imageIndex.closeimg} style={styles.closeImg} />
+              </TouchableOpacity>
             </View>
+
+            {/* Top Filters */}
+            <View style={styles.filterRow}>
+              {filterOptions.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.filterButton,
+                    selectedSortOption === item.option && styles.activeFilter,
+                  ]}
+                  // onPress={() => setSelectedSortOption(item.option)}
+                  onPress={() => {
+                    const apiWatchType = getWatchTypeLabel(item.option);
+                    // setSelectFilterOp(getWatchTypeLabel(item.option))
+                    setSelectedSortOption(item.option);
+                    setSelectFilterOp(apiWatchType);
+                  }}
+
+                >
+                  <Text
+                    style={[
+                      styles.filterText,
+                      selectedSortOption === item.option && styles.activeFilterText,
+                    ]}
+                  >
+                    {item.option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Platform List */}
+            {/* Platform List Section */}
+            {watchModalLoad ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator color={Color.primary} size="small" />
+              </View>
+            ) : Array.isArray(filteredPlatforms) && filteredPlatforms.length === 0 ? (
+              <View style={styles.loaderContainer}>
+                <Text style={styles.NotAvaibleText}>{t("emptyState.noresults")}</Text>
+              </View>
+            ) : (
+              <View style={styles.listWrapper}>
+                <FlatList
+                  data={filteredPlatforms}
+                  keyExtractor={(item, index) =>
+                    `${item?.supported_platform ?? ''}-${item?.watch_type ?? ''}-${index}`
+                  }
+                  renderItem={renderPlatform}
+                  contentContainerStyle={{ paddingVertical: 10 }}
+                  initialNumToRender={10}
+                  showsVerticalScrollIndicator={false}
+                  maxToRenderPerBatch={10}
+                  windowSize={7}
+                  removeClippedSubviews={Platform.OS === 'android'}
+                />
+              </View>
+            )}
+          </View>
         </View>
         {Platform.OS === 'android' && insets.bottom > 0 && (
           <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Color.grey,
   },
-    gestureSafeArea: {
+  gestureSafeArea: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -474,19 +474,20 @@ const styles = StyleSheet.create({
 
   },
   NotAvaibleText: {
-    fontSize: 16,
-    color: Color.grey700,
-    fontFamily: font.PoppinsRegular
+    fontSize: 14,
+    color: Color.textGray,
+    fontFamily: font.PoppinsRegular,
+    textAlign: "center"
   },
 
-   mainContainer: {
+  mainContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   videoAreaPlaceholder: {
-    height: '39%', 
+    height: '39%',
   },
-   modalContent: {
+  modalContent: {
     backgroundColor: Color.modalBg,
     paddingTop: 16,
     paddingHorizontal: 16,

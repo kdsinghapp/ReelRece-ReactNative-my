@@ -5,9 +5,8 @@ import WatchGroupCom from '@components/common/WatchGroupCom/WatchGroupCom';
 import { t } from 'i18next';
 const GroupSearchScreen = () => {
   const [searchText, setSearchText] = useState('');
-
-  // Filtered groups
-  const filteredGroups = watchTogetherGroups.filter(group =>
+ 
+  const filteredGroups = watchTogetherGroups?.filter(group =>
     group?.groupName?.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -20,8 +19,7 @@ const GroupSearchScreen = () => {
         value={searchText}
         onChangeText={setSearchText}
       />
-
-      {/* Reusable Component */}
+ 
       <WatchGroupCom groups={filteredGroups} />
     </View>
   );

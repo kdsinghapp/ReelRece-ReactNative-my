@@ -130,26 +130,38 @@ const FeedCardScroll = ({
     [autoPlayEnabled, playIndex, currentVisibleIndex, isMuted, token]
   );
 
+  const keyExtractor = useCallback(
+    (item: { movie?: { imdb_id?: string } }, index: number) =>
+      item?.movie?.imdb_id || `feed-${index}`,
+    []
+  );
+
+  const onEndReached = useCallback(() => {
+    if (hasMore && !loading && typeof fetchFeed === 'function') fetchFeed('home');
+  }, [hasMore, loading, fetchFeed]);
+
+  const ListFooterComponent = useCallback(
+    () =>
+      loading ? (
+        <View style={{ paddingVertical: 20 }}>
+          <ActivityIndicator size="small" />
+        </View>
+      ) : null,
+    [loading]
+  );
+
   return (
     <FlatList
       ref={flatListRef}
       data={data}
       renderItem={renderItem}
-      keyExtractor={(item, index) => item.movie?.imdb_id || `feed-${index}`}
-      onEndReached={() => {
-        if (hasMore && !loading && typeof fetchFeed === 'function') fetchFeed('home');
-      }}
+      keyExtractor={keyExtractor}
+      onEndReached={onEndReached}
       onEndReachedThreshold={0.6}
       viewabilityConfigCallbackPairs={useRef([
         { viewabilityConfig, onViewableItemsChanged: onViewableItemsChangedRef }
       ]).current}
-      ListFooterComponent={() =>
-        loading ? (
-          <View style={{ paddingVertical: 20 }}>
-            <ActivityIndicator size="small" />
-          </View>
-        ) : null
-      }
+      ListFooterComponent={ListFooterComponent}
       initialNumToRender={2}
       maxToRenderPerBatch={8}
       windowSize={10}

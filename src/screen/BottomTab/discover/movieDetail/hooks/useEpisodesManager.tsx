@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef,   useCallback } from 'react';
 import { getEpisodes, getEpisodesBySeason } from '@redux/Api/movieApi';
 
 /**
@@ -25,7 +25,7 @@ export const useEpisodesManager = (token: string) => {
         episodesData = response;
       }
 
-      const formattedEpisodes = episodesData.map((ep: object| string | null | number, index: number) => ({
+      const formattedEpisodes = episodesData?.map((ep: object| string | null | number, index: number) => ({
         id: index + 1,
         title: ep.episode_name || `Episode ${index + 1}`,
         duration: ep.runtime ? `${ep.runtime} min` : "Unknown",
@@ -47,7 +47,7 @@ export const useEpisodesManager = (token: string) => {
 
       if (response && typeof response === "object") {
         const seasonKeys = Object.keys(response);
-        const dynamicList = seasonKeys.map((key) => ({
+        const dynamicList = seasonKeys?.map((key) => ({
           id: Number(key),
           session: `Season ${key}`,
         }));

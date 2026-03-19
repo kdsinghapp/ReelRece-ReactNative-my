@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { FunctionComponent } from 'react';
+import React, { memo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _routes from '@routes/routes';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -13,7 +13,7 @@ import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMov
 
 const Stack = createNativeStackNavigator();
 
-const WatchTab: FunctionComponent = () => {
+const WatchTab = memo(() => {
   const _routess = [
     { name: ScreenNameEnum.WatchScreen, Component: WatchScreen },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
@@ -21,9 +21,7 @@ const WatchTab: FunctionComponent = () => {
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
     { name: ScreenNameEnum.GroupSearch, Component: GroupSearchScreen },
     { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
-
-    // { name: ScreenNameEnum.WatchWithFriend , Component:wa},  
+    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail }, 
   ];
 
   return (
@@ -33,10 +31,11 @@ const WatchTab: FunctionComponent = () => {
         gestureEnabled: true,
         gestureDirection: 'horizontal',
         contentStyle: { backgroundColor: '#ff0404ff' },
+        freezeOnBlur: true,
       }}>
-      {_routess.map((screen, index) => (
+      {_routess.map((screen) => (
         <Stack.Screen
-          key={index}
+          key={screen.name}
           name={screen.name}
           component={screen.Component}
         />
@@ -44,6 +43,7 @@ const WatchTab: FunctionComponent = () => {
 
     </Stack.Navigator>
   );
-};
+});
+WatchTab.displayName = 'WatchTab';
 
 export default WatchTab;

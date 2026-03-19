@@ -14,19 +14,17 @@ type Props = {
 const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
   const safeRanked = ranked ?? "";
   const rankNum = parseFloat(String(safeRanked));
-  const hasValidScore = !isNaN(rankNum) && String(safeRanked).trim() !== "";
+  const isNA = String(safeRanked).trim().toUpperCase() === "N/A";
+  const hasValidScore = !isNaN(rankNum) && String(safeRanked).trim() !== "" && rankNum > 0;
 
   const windowHeight = Dimensions.get('window').height * 0.05;
   const windowWidth = Dimensions.get('window').width * 0.088;
 
-  let backgroundColor = "#CA462A";
+  let backgroundColor = Color.primary;
   let showBackArrow = false;
 
   if (hasValidScore) {
-    if (rankNum === -1.0 || rankNum === 0.0 || rankNum === -1) {
-      backgroundColor = Color.primary;
-      showBackArrow = true;
-    } else if (rankNum < 3.34) {
+    if (rankNum < 3.34) {
       backgroundColor = "#CA462A";
     } else if (rankNum <= 6.7) {
       backgroundColor = "#eac613";
@@ -35,14 +33,16 @@ const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
     }
   } else {
     backgroundColor = Color.primary;
-    showBackArrow = true;
+    if (!isNA) {
+      showBackArrow = true;
+    }
   }
 
   const displayText = hasValidScore
     ? rankNum === 10
       ? "10"
       : rankNum.toFixed(1)
-    : "?";
+    : isNA ? "N/A" : "?";
 
   // ========================
   // Shimmer logic
@@ -67,14 +67,14 @@ const RankingCard: React.FC<Props> = ({ ranked, loading = false }) => {
       ) : (
         <SvgText
           x="7"
-          y="10"
+          y={displayText === "N/A" ? "9.5" : "10"}
           fill={Color.whiteText}
-          fontSize="5.5"
+          fontSize={displayText === "N/A" ? "4.5" : "5.5"}
           fontWeight="bold"
           fontFamily={font.PoppinsBold}
           textAnchor="middle"
         >
-          {displayText} 
+          {displayText === "N/A" ? " N/A": displayText}
         </SvgText>
       )}
     </Svg>

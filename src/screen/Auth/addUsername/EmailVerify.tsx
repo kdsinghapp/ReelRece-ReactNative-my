@@ -98,7 +98,7 @@ const response  = await sendOTPToEmail_GET(email)
     }
   }, [code]);
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={{ flex: 1, backgroundColor: 'black' }}>
+    <SafeAreaView  edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: 'black' }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* <AuthBack /> */}
@@ -131,17 +131,17 @@ const response  = await sendOTPToEmail_GET(email)
 
           <CustomText
 
-            size={24}
+            size={20}
             color={Color.whiteText}
             style={[styles.loginHeading, { marginTop: 25 }]}
-            font={font.PoppinsBold}
+            font={font.PoppinsSemiBold}
           >
             {t("login.verifyEmail")}
           </CustomText>
 
 
           <CustomText
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={styles.instructionText}
             font={font.PoppinsRegular}
@@ -156,7 +156,7 @@ const response  = await sendOTPToEmail_GET(email)
 
           <CustomText
 
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={styles.emailText}
             font={font.PoppinsBold}
@@ -184,11 +184,17 @@ const response  = await sendOTPToEmail_GET(email)
                 onBlur={() => setFocusedIndex(null)}
                 onChangeText={(text) => handleChange(text, index)}
                 onKeyPress={({ nativeEvent }) => {
-                  if (nativeEvent.key === 'Backspace' && code[index] === '') {
-                    if (index > 0) {
-                      inputRefs.current[index - 1]?.focus();
+                  if (nativeEvent.key === 'Backspace') {
+                    if (code[index] === '') {
+                      if (index > 0) {
+                        inputRefs.current[index - 1]?.focus();
+                        const newCode = [...code];
+                        newCode[index - 1] = '';
+                        setCode(newCode);
+                      }
+                    } else {
                       const newCode = [...code];
-                      newCode[index - 1] = '';
+                      newCode[index] = '';
                       setCode(newCode);
                     }
                   }
