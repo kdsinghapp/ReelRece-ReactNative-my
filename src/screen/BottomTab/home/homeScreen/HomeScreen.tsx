@@ -43,7 +43,6 @@ import {
 } from '@redux/feature/homeSlice';
 
 
-
 const App = () => {
   const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token);
@@ -68,6 +67,8 @@ const App = () => {
     loadingTrending,
     loadingRecs,
     loadingBookmark,
+    trendingError,
+    recommendError,
   } = useSelector((state: RootState) => state.home);
 
   const [notificationModal, setNotificationModal] = useState(false);
@@ -289,9 +290,9 @@ const App = () => {
       dispatch(fetchHomeBookmarks({ silent: true }));
       dispatch(fetchHomeRecentUsers({ silent: true }));
       dispatch(fetchHomeSuggestedFriends({ silent: true }));
-      dispatch(fetchHomeTrending({ silent: true }));
-      dispatch(fetchHomeRecommend({ silent: true }));
-    }, [token, dispatch])
+      dispatch(fetchHomeTrending({ silent: trendingData.length > 0 }));
+      dispatch(fetchHomeRecommend({ silent: recommendData.length > 0 }));
+    }, [token, dispatch, trendingData.length, recommendData.length])
   );
 
   // Save index
@@ -403,6 +404,7 @@ const App = () => {
         isPaused={index - 1 !== playIndex}
         is_bookMark={item?.is_bookmarked}
         screenName='Home__Screen'
+        feedData={feedData}
         suggested={
           item?.suggested === true ||
           (Array.isArray(suggestedFriends) &&
@@ -414,7 +416,7 @@ const App = () => {
         isFollowing={item?.user?.is_following}
       />
     );
-  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress, suggestedFriends]);
+  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress, suggestedFriends, feedData]);
 
   const renderItem = useCallback(({ item, index }) => {
     if (item?.type === 'profileStatus') {
@@ -439,6 +441,8 @@ const App = () => {
           loadingBookmark={loadingBookmark}
           loadingRecs={loadingRecs}
           onFeedReached={handleFeedReached}
+          trendingError={trendingError}
+          recommendError={recommendError}
         />
       );
     }
@@ -476,6 +480,9 @@ const App = () => {
     handleFeedReached,
     handleSeeAllSuggested,
   ]);
+
+
+
   const goToSearchScreen = useCallback(() => {
     navigation.navigate(ScreenNameEnum.WoodsScreen, {
       type: 'movie',
@@ -567,8 +574,8 @@ const App = () => {
             source={imageIndex.reelRecsHome}
             resizeMode='cover'
             style={{
-              height: 43,
-              width: 133
+              height: 28,
+              width: 131
             }}
           />
         </View>
@@ -588,7 +595,7 @@ const App = () => {
         data={processedFeedData}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        extraData={`${bookmarkData?.length ?? 0}-${trendingData?.length ?? 0}-${recommendData?.length ?? 0}-${suggestedFriends?.length ?? 0}`}
+        extraData={`${feedData?.length ?? 0}-${bookmarkData?.length ?? 0}-${trendingData?.length ?? 0}-${recommendData?.length ?? 0}-${suggestedFriends?.length ?? 0}`}
         onEndReached={handleEndReached}
         contentContainerStyle={listContentStyle}
         onEndReachedThreshold={0.5}

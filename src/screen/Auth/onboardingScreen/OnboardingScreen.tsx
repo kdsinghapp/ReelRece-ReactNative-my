@@ -25,7 +25,7 @@ import { Button } from '@components/index';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { fetchRankingRatedMovies, fetchRankingSuggestionMovies } from '@redux/feature/rankingSlice';
-import { searchMovies } from '@redux/Api/movieApi';
+import { searchMovies, deleteRatedMovie } from '@redux/Api/movieApi';
 import { RootState, AppDispatch } from '@redux/store';
 import RankingWithInfo from '../../../component/ranking/RankingWithInfo';
 import { Movie } from '../../../types/api.types';
@@ -102,7 +102,7 @@ const FloatingColumn = ({
 /* ----------------------------------
    RATING SCREEN CONSTANTS
 -----------------------------------*/
-const SLOT_COUNT = 5;
+const SLOT_COUNT = 6;
 const SLOT_GAP = 8;
 const HORIZONTAL_PADDING = 16;
 const totalSlotWidth = width - HORIZONTAL_PADDING * 2 - SLOT_GAP * (SLOT_COUNT - 1);
@@ -159,7 +159,7 @@ const OnboardingScreen = () => {
       dispatch(fetchRankingSuggestionMovies(1));
     }
   });
-  const { openFeedbackModal, currentStep } = compareHook;
+  const { openFeedbackModal, currentStep, refreshStepCount } = compareHook;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -285,6 +285,18 @@ const OnboardingScreen = () => {
     return slotMovie || ratedItem;
   });
 
+  const handleRemoveMovie = async (item: any) => {
+    if (!token || !item?.imdb_id) return;
+
+    try {
+      await deleteRatedMovie(token, item.imdb_id);
+      dispatch(fetchRankingRatedMovies());
+      refreshStepCount();
+    } catch (error) {
+      // Ignore
+    }
+  };
+
   const displayMovies = searchQuery.trim() ? searchResults : suggestionMoviesFromRedux;
 
   const renderGridItem = ({ item }: { item: Movie }) => {
@@ -313,13 +325,13 @@ const OnboardingScreen = () => {
           </View>
         )}
         {/* {hasScore && ( */}
-        <TouchableOpacity style={styles.rankingOverlay}>
+        {/* <TouchableOpacity style={styles.rankingOverlay}>
           <RankingWithInfo
             score={item.rec_score}
             title={t("discover.recscore")}
             description={t("discover.moviedes")}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* )} */}
       </TouchableOpacity>
     );
@@ -397,7 +409,7 @@ const OnboardingScreen = () => {
           />
         )}
         <>
-          <Text style={styles.title}>Pick and Rate 5 Titles</Text>
+          <Text style={styles.title}>Pick and Rate 6 Titles</Text>
           <Text style={styles.subtitle}>Your ratings guide us to titles that fit your taste.</Text>
         </>
 
@@ -416,6 +428,15 @@ const OnboardingScreen = () => {
                           style={styles.slotPoster}
                           resizeMode={FastImage.resizeMode.stretch}
                         />
+                        <TouchableOpacity
+                          style={styles.removeBtn}
+                          onPress={() => handleRemoveMovie(item)}
+                        >
+                          <Image
+                            source={imageIndex.closeCircle}
+                            style={styles.removeIcon}
+                          />
+                        </TouchableOpacity>
                       </View>
                     )}
 
@@ -482,7 +503,7 @@ const OnboardingScreen = () => {
               tintColor={'#FFF'}
             />
             <Text style={styles.buttonText}>
-              {isContinueEnabled ? "Finished (5/5)" : `Rated (${currentRatedCount}/${SLOT_COUNT})`}
+              {isContinueEnabled ? `Finished (${SLOT_COUNT}/${SLOT_COUNT})` : `Rated (${currentRatedCount}/${SLOT_COUNT})`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -492,6 +513,7 @@ const OnboardingScreen = () => {
         token={token || ''}
         useCompareHook={compareHook}
         onModalClose={handleModalClose}
+        isOnboarding={true}
       />
     </SafeAreaView>
   );
@@ -711,5 +733,19 @@ const styles = StyleSheet.create({
   nextButtonGreen: {
     backgroundColor: '#35C75A',
     borderRadius: 8,
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 12,
+    padding: 2,
+    zIndex: 20,
+  },
+  removeIcon: {
+    width: 18,
+    height: 18,
+    tintColor: '#FFF',
   },
 });

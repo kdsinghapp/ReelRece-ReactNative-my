@@ -9,7 +9,6 @@ import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDeta
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
 import GroupSearchScreen from '@screens/BottomTab/watch/watchScreen/GroupSearchScreen';
 import WatchWithFriend from '@screens/BottomTab/watch/watchScreen/WatchWithFriend';
-import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,7 +20,6 @@ const WatchTab = memo(() => {
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
     { name: ScreenNameEnum.GroupSearch, Component: GroupSearchScreen },
     { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail }, 
   ];
 
   return (

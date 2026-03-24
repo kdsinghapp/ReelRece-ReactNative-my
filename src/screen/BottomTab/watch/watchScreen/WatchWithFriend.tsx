@@ -373,11 +373,13 @@ const WatchWithFriend = () => {
     token: string,
     groupId: string,
     selectedUsers?: string[],
-    groupValue?: number
+    groupValue?: number,
+    popularityPenalty?: number
   ) => {
+    const hasFilters = (selectedUsers && selectedUsers.length > 0) || (groupValue && groupValue > 0) || (popularityPenalty !== undefined && popularityPenalty !== 0.5);
     try {
-      const response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers);
-      if (totalFilterApply && response.results.length > 0) {
+      const response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers, popularityPenalty);
+      if (hasFilters && response?.results?.length > 0) {
         setGroupRecommend(response.results);
         setActiveIndex(0);
       } else {
@@ -385,12 +387,13 @@ const WatchWithFriend = () => {
         setActiveIndex(0);
       }
     } catch (error) {
-      throw error;
+      setGroupRecommend(groupRecommendCopyData);
+      setActiveIndex(0);
     }
   };
 
   useEffect(() => {
-    if (totalFilterApply.length == 0 || totalFilterApply == '') {
+    if (totalFilterApply === 0) {
       setGroupRecommend(groupRecommendCopyData);
       setActiveIndex(0);
     }
@@ -1134,7 +1137,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Header styles
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

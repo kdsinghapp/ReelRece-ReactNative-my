@@ -33,12 +33,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginVertical: 5,
     marginLeft: 12,
-    fontFamily: font.PoppinsBold
+    fontFamily: font.PoppinsSemiBold
   },
   cardList: { paddingBottom: 10 },
   backArrowImg: {
-    height: 20,
-    width: 20,
+    height: 24,
+    width: 24,
     resizeMode: "contain",
     marginLeft: 14
 

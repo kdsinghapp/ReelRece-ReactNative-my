@@ -30,6 +30,7 @@ const PUBLIC_ENDPOINTS = [
   '/reset-password',
   '/check-username',
   '/existing-user',
+  '/social-login',
 ];
 
 // Check if endpoint requires auth

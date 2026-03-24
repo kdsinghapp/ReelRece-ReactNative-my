@@ -16,6 +16,7 @@ import FeedCardHome from "./FeedCardHome";
     if (prev.suggested !== next.suggested) return false;
     if (prev.onFollow !== next.onFollow) return false;
     if (prev.isFollowing !== next.isFollowing) return false;
+    if (!isEqual(prev.feedData, next.feedData)) return false;
     return true;
   });
 

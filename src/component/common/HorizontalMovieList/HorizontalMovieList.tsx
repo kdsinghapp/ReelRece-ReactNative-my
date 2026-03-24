@@ -49,7 +49,8 @@ interface HorizontalMovieListProps {
   disableBottomSheet?: string;
   emptyData?: string;
   scoreType?: "Rec" | "Friend";
-  my_profile?: boolean
+  my_profile?: boolean;
+  error?: boolean;
 }
 const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
   title,
@@ -72,7 +73,8 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
   disableBottomSheet,
   scoreType,
   onEndReached,
-  my_profile
+  my_profile,
+  error = false,
 }) => {
   const navigation = useNavigation();
   const token = useSelector((state: RootState) => state.auth.token);
@@ -116,12 +118,23 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
     (item: { imdb_id?: string }) => {
       const imdb_idData = item?.imdb_id;
       if (!imdb_idData) return;
+      const index = Array.isArray(data) ? data.findIndex((m: any) => m?.imdb_id === imdb_idData) : -1;
       navigation.navigate(ScreenNameEnum.MovieDetailScreen as never, {
         imdb_idData,
         token,
-      });
+        movieList: data || [],
+        initialIndex: index >= 0 ? index : 0,
+        source: 'horizontalList',
+        filterGenreString: '',
+        platformFilterString: '',
+        selectedSimpleFilter: '1',
+        selectedSortId: null,
+        contentSelect: null,
+        currentPage: 1,
+        totalPages: 1,
+      } as never);
     },
-    [navigation, token]
+    [navigation, token, data]
   );
 
   const renderItem = useCallback(
@@ -233,10 +246,10 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
       <View style={styles.header}>
 
         <CustomText
-          size={22}
+          size={16}
           color={Color.whiteText}
           style={styles.sectionTitle}
-          font={font.PoppinsBold}
+          font={font.PoppinsSemiBold}
         >
           {title}
         </CustomText>
@@ -287,9 +300,9 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
         <CustomText
           size={14}
           color={Color.whiteText}
-           font={font.PoppinsRegular}
+          font={font.PoppinsRegular}
         >
-          {emptyData}
+          {error ? t('emptyState.couldNotLoad') : emptyData}
         </CustomText>
       )}
       <ScoreIntroModal
@@ -313,8 +326,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: Color.whiteText,
     fontSize: 16,
-    lineHeight: 18,
-    fontFamily: font.PoppinsBold,
+    lineHeight: 19.4,
+    fontFamily: font.PoppinsSemiBold,
   },
   arrowIconContainer:{
     height:32,
@@ -336,8 +349,8 @@ const styles = StyleSheet.create({
     alignItems:'center',
   },
   movieCard: {
-    width: 110,
-    height: 160,
+    width: 104,
+    height: 156,
     borderRadius: 8,
     overflow: 'hidden',
     justifyContent: 'flex-end',

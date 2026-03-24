@@ -499,9 +499,10 @@ const OtherProfile = () => {
           isPaused={index - 1 !== playIndex}
           is_bookMark={feedItem?.is_bookmarked}
           screenName="OtherProfile__Screen"
+          feedData={feedData}
         />
     );
-  }, [currentVisibleIndex, playIndex, autoPlayEnabled, otherUserData?.username, token, isVisible, setIsVisible]);
+  }, [currentVisibleIndex, playIndex, autoPlayEnabled, otherUserData?.username, token, isVisible, setIsVisible, feedData]);
 
   type ListItem = { type: string; id?: number; movie?: FeedItemShape['movie']; user?: FeedItemShape['user'] } & FeedItemShape;
   const renderItem = useCallback(({ item, index }: { item: ListItem; index: number }) => {

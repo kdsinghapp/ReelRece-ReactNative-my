@@ -692,6 +692,8 @@ const ProfileScreen = () => {
       const posterUri = item.movie.horizontal_poster_url;
       const posterSource = posterUri ? { uri: posterUri } : null;
 
+      const feedIndex = feedData.findIndex(f => f.movie?.imdb_id === item.movie?.imdb_id);
+
       return (
         <MemoFeedCardHome
           key={item.movie?.imdb_id}
@@ -718,6 +720,8 @@ const ProfileScreen = () => {
           is_bookMark={item?.is_bookmarked}
           onBookmarkSuccess={fetchBookmarks}
           created_date={item?.created_date}
+          feedData={feedData}
+          initialIndex={feedIndex !== -1 ? feedIndex : 0}
         />
       );
     }

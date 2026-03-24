@@ -10,7 +10,7 @@ import imageIndex from '@assets/imageIndex';
 import { SuccessMessageCustom } from '@components/index';
 import { t } from 'i18next';
 
-type PlatformItem = { supported_platform: string; icon: string; isTelecom?: boolean };
+type PlatformItem = { supported_platform: string; display_name?: string; icon: string; isTelecom?: boolean };
 
 interface PlatformModalsProps {
     visible: boolean;
@@ -29,7 +29,7 @@ const PlatformRow = React.memo(({ item, isSelected, onToggle }: { item: Platform
         <View style={styles.platformRow}>
             <Image source={{ uri: item.icon }} style={styles.platformIcon} resizeMode="contain" />
             <CustomText size={14} color={Color.whiteText} style={styles.modalItemTextWithMargin} font={font.PoppinsMedium} numberOfLines={1}>
-                {item.supported_platform}
+                {item.display_name || item.supported_platform}
             </CustomText>
         </View>
         <Image source={isSelected ? imageIndex.checKBoxActive : imageIndex.checkBox} style={styles.checkboxIcon} />

@@ -124,6 +124,8 @@ const FeedCardScroll = ({
           isVisible={index === currentVisibleIndex}
           shouldPlay={index === playIndex}
           isPaused={index !== playIndex}
+          feedData={data}
+          initialIndex={index}
         />
       );
     },

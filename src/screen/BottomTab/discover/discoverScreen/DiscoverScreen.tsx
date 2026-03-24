@@ -93,12 +93,24 @@ const DiscoverScreen = () => {
   const goToDetail = useCallback(
     (item: MovieItem) => {
       if (!item?.imdb_id) return;
+      const index = Array.isArray(trending) ? trending.findIndex(m => m.imdb_id === item.imdb_id) : -1;
+
       navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
         imdb_idData: item.imdb_id,
         token,
+        movieList: trending,
+        initialIndex: index >= 0 ? index : 0,
+        source: 'discover',
+        filterGenreString,
+        platformFilterString,
+        selectedSimpleFilter,
+        selectedSortId,
+        contentSelect,
+        currentPage,
+        totalPages
       });
     },
-    [navigation, token]
+    [navigation, token, trending, filterGenreString, platformFilterString, selectedSimpleFilter, selectedSortId, contentSelect, currentPage, totalPages]
   );
 
   const getFilterTitle = useCallback((id: number | null) => {

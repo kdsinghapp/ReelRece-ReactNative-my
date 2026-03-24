@@ -37,7 +37,7 @@ const FeedCardHome = ({
   screenName, activity,
   avatar, user, title, comment, poster, videoUri, isPaused, shouldAutoPlay, is_bookMark, videoIndex,
   rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username,
-  onBookmarkSuccess, suggested, onFollow, isFollowing: initialFollowing,
+  onBookmarkSuccess, suggested, onFollow, isFollowing: initialFollowing, feedData = []
 }) => {
   const navigation = useNavigation();
   const [posterOpacity] = useState(new Animated.Value(1));
@@ -149,7 +149,21 @@ const FeedCardHome = ({
     }
   }, [isVisible]);
   const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
+    const movieIndex = Array.isArray(feedData) ? feedData.findIndex((m: any) => m?.movie?.imdb_id === imdb_id) : -1;
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: imdb_id,
+      token: token,
+      movieList: feedData || [],
+      initialIndex: movieIndex >= 0 ? movieIndex : 0,
+      source: 'feedHome',
+      filterGenreString: '',
+      platformFilterString: '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: 1,
+      totalPages: 1,
+    })
   };
 
   // Clear video buffer when component unmounts
@@ -216,9 +230,20 @@ const FeedCardHome = ({
 
 
   const navigateOnPoster = (imdb_id: string, token: string) => {
+    const movieIndex = Array.isArray(feedData) ? feedData.findIndex((m: any) => m?.movie?.imdb_id === imdb_id) : -1;
     navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
       imdb_idData: imdb_id,
       token,
+      movieList: feedData || [],
+      initialIndex: movieIndex >= 0 ? movieIndex : 0,
+      source: 'feedHome',
+      filterGenreString: '',
+      platformFilterString: '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: 1,
+      totalPages: 1,
     });
   }
   const item = {
@@ -252,7 +277,7 @@ const FeedCardHome = ({
       {suggested && (
         <View style={styles.suggestedRow}>
           <CustomText
-            size={16}
+            size={13}
             color={Color.whiteText}
             style={[{ marginBottom: 0, lineHeight: 25 }]}
             font={font.PoppinsMedium}
@@ -299,15 +324,13 @@ const FeedCardHome = ({
         >
           <View style={{ flex: 1, paddingRight: 10 }}>
             <CustomText
-              size={15}
+              size={14}
               color={Color.whiteText}
               style={styles.feedUser}
-              font={font.PoppinsBold}
             >{user}
               <CustomText
-                size={14}
-                color={Color.whiteText}
-                style={styles.rankedText}
+                size={13}
+                style={[styles.rankedText, {color: Color.subText}]}
                 font={font.PoppinsRegular}
               >
                 {getActionLabel()}
@@ -320,7 +343,7 @@ const FeedCardHome = ({
               size={16}
               color={Color.lightPrimary}
               style={styles.feedTitle}
-              font={font.PoppinsBold}
+              font={font.PoppinsSemiBold}
               numberOfLines={2}
             >{title}</CustomText>
 
@@ -372,13 +395,13 @@ const FeedCardHome = ({
 
       {(comment ?? '').trim() !== '' && (
         <CustomText
-          size={14}
+          size={13}
           color={Color.whiteText}
           style={styles.feedComment}
-          font={font.PoppinsBold}
+          font={font.PoppinsSemiBold}
         >{t("common.comment")}:
           <CustomText
-            size={14}
+            size={13}
             color={Color.whiteText}
             style={{
               marginLeft: 6,

@@ -23,12 +23,13 @@ export const styles = StyleSheet.create({
   },
   suggestedFollowButton: {
     backgroundColor: Color.primary,
-    paddingVertical: 8,
+    // paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: 90,
+    height:36
   },
   suggestedFollowingButton: {
     backgroundColor: Color.background,
@@ -46,19 +47,18 @@ export const styles = StyleSheet.create({
     marginBottom: 0,
   },
   feedAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 60,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     marginRight: 10,
   },
   feedUser: {
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsMedium,
     marginBottom: 4,
     // marginTop: 3,
   },
   rankedText: {
     marginVertical: 4,
-    // fontWeight:'500',
     marginLeft: 4,
     color: Color.whiteText,
   },
@@ -137,13 +137,13 @@ export const styles = StyleSheet.create({
     marginTop: 12,
   },
   footerIcon: {
-    height: 20,
-    width: 20,
+    height: 24,
+    width: 24,
     marginRight: 14,
   },
   footerSaveIcon: {
-    height: 20,
-    width: 20,
+    height: 24,
+    width: 24,
     marginRight: 10,
   },
   footerDivider: {

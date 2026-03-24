@@ -21,7 +21,6 @@ import StreamService from '@screens/BottomTab/profile/setting/StreamService';
 import FeatureRequest from '@screens/BottomTab/profile/setting/FeatureRequest';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen'
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
-import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
 import OtherProfile from '@screens/BottomTab/home/otherProfile/OtherProfile';
 const Stack = createNativeStackNavigator();
 
@@ -45,7 +44,6 @@ const ProfileTab = memo(() => {
     { name: ScreenNameEnum.OtherWatchingProfile, Component: OtherWatchingProfile },
     { name: ScreenNameEnum.WatchSaveUser, Component: WatchSaveUser },  
     { name: ScreenNameEnum.OtherWantProfile, Component: OtherWantProfile }, 
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
     
   ];

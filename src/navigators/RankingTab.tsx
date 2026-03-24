@@ -7,7 +7,6 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen';
 import OtherProfile from '@screens/BottomTab/home/otherProfile/OtherProfile';
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
-import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
  const Stack = createNativeStackNavigator();
 
 const RankingTab = memo(() => {
@@ -16,7 +15,6 @@ const RankingTab = memo(() => {
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.OtherProfile, Component: OtherProfile },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
   ];
 
   return (

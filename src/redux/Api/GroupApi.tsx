@@ -418,7 +418,8 @@ export const getGroupActivitiesAction = async (
   token: string,
   groupId: string,
   n_members?: number,
-  members?: string[]) => {
+  members?: string[],
+  popularity_penalty?: number) => {
  
   try {
     // Validate inputs
@@ -430,7 +431,7 @@ export const getGroupActivitiesAction = async (
     }
 
     // Build params object
-    const params: Record<string> = { group_id: groupIdValidation.sanitized };
+    const params: Record<string, any> = { group_id: groupIdValidation.sanitized };
     
     if (members && members.length > 0) {
       const membersValidation = validateStringArray(members, {
@@ -449,6 +450,10 @@ export const getGroupActivitiesAction = async (
         params.n_members = nMembersValidation.value;
       } else {
        }
+    }
+
+    if (popularity_penalty !== undefined && popularity_penalty !== null) {
+      params.popularity_penalty = popularity_penalty;
     }
 
     const response = await axiosInstance.get('/group/filter-movies', {

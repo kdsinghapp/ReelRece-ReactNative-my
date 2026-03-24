@@ -84,23 +84,35 @@ const SearchMovieCom = ({
 
 
 
-  const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.SearchMovieDetail, { imdb_idData: imdb_id, token: token })
-    // navigation.navigate(ScreenNameEnum.SearchMovieDetail)
-    // Alert.alert(imdb_id)
+  const handleNavigation = (imdb_id: string, token: string, index: number) => {
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: imdb_id,
+      token: token,
+      movieList: movieData || [],
+      initialIndex: index >= 0 ? index : 0,
+      source: 'search',
+      filterGenreString: '',
+      platformFilterString: selectedPlatforms?.join(',') || '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: currentPage,
+      totalPages: totalPages,
+      searchQuery: searchQuery,
+    });
   }
 
   //  Render Individual Movie
-  const renderMovie = useCallback(({ item }) => {
+  const renderMovie = useCallback(({ item, index }) => {
     // const isSelected = selectedPlatforms?.includes(item?.id);
     return (
       <TouchableOpacity
         style={styles.movieCard}
         activeOpacity={0.9}
         // onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: item?.imdb_id, token: token })}
-        onPress={() => handleNavigation(item.imdb_id, token)}
+        onPress={() => handleNavigation(item.imdb_id, token, index)}
       >
-        <TouchableOpacity onPress={() => handleNavigation(item.imdb_id, token)}>
+        <TouchableOpacity onPress={() => handleNavigation(item.imdb_id, token, index)}>
           <Image source={{ uri: item?.cover_image_url }} style={styles.poster}
             resizeMode='stretch'
           />
@@ -108,7 +120,7 @@ const SearchMovieCom = ({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.info} onPress={() => {
-          handleNavigation(item?.imdb_id, token);
+          handleNavigation(item?.imdb_id, token, index);
 
 
         }} >

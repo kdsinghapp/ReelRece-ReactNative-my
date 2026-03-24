@@ -1,6 +1,6 @@
 
-import { Dimensions, StyleSheet } from 'react-native';
-import { hp, wp } from '@utils/Constant';
+import {  StyleSheet } from 'react-native';
+import { hp } from '@utils/Constant';
 import { Color } from '@theme/color';
 
 import font from '@theme/font';

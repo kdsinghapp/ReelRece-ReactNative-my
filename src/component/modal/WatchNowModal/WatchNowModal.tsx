@@ -30,6 +30,7 @@ const filterOptions = [
 
 export interface WatchPlatformItem {
   supported_platform?: string;
+  display_name?: string;
   watch_type?: string;
   deeplink?: string;
   deeplink_ios?: string;
@@ -73,6 +74,7 @@ const WatchNowModal = ({
         watch_type: undefined,
       });
       const raw = (response as { data?: unknown })?.data ?? response;
+
       const list = Array.isArray(raw)
         ? raw
         : (raw as { data?: unknown[]; platforms?: unknown[] })?.data ??
@@ -178,6 +180,8 @@ const WatchNowModal = ({
       (item?.deeplink_ios && String(item.deeplink_ios).trim()) ||
       (item?.web && String(item.web).trim());
 
+    const platformDisplayName = item?.display_name || item?.supported_platform || '?';
+
     return (
       <View style={styles.platformRow}>
         {item?.image_url ? (
@@ -193,13 +197,18 @@ const WatchNowModal = ({
         ) : (
           <View style={[styles.platformLogo, styles.platformLogoPlaceholder]}>
             <Text style={styles.platformLogoPlaceholderText} numberOfLines={1}>
-              {item?.supported_platform?.slice(0, 2) || '?'}
+              {platformDisplayName.slice(0, 2).toUpperCase()}
             </Text>
           </View>
         )}
-        <Text style={styles.platformName} numberOfLines={1}>
-          {item?.supported_platform}
-        </Text>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Text style={styles.platformName} numberOfLines={1}>
+            {platformDisplayName}
+          </Text>
+          <Text style={styles.action} numberOfLines={1}>
+            {normalizeWatchType(item?.watch_type)}
+          </Text>
+        </View>
         <TouchableOpacity
           style={[
             styles.watchBtn,

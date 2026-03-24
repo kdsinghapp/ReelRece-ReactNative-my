@@ -46,7 +46,7 @@ interface FeedbackModalProps {
   onSubmit: (preference: 'love' | 'like' | 'dislike') => void;
   onOpenSecondModal?: () => void;
   isLoading?: boolean;
-  selectedMovie?: { imdb_id?: string; [key: string]: unknown };
+  selectedMovie?: { imdb_id?: string;[key: string]: unknown };
   /** When 'comparison', show "Which do you prefer?" instead of "How was it?". Omit or 'feedback' for original behavior. */
   step?: 'feedback' | 'comparison';
   /** Called when user adds a review in the feedback step so parent can update comment count in real time. */
@@ -59,6 +59,8 @@ interface FeedbackModalProps {
   onSkipSelect?: () => void;
   handleCloseRating?: () => void;
   comparisonMovies?: MovieForComparison[];
+  isOnboarding?: boolean;
+  hasComparisonsAvailable?: (pref: 'love' | 'like' | 'dislike') => boolean;
 }
 
 
@@ -84,6 +86,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   onSkipSelect,
   handleCloseRating: handleCloseRatingProp,
   comparisonMovies = [],
+  isOnboarding = false,
+  hasComparisonsAvailable,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const modalContentAnim = useRef(new Animated.Value(-screenWidth)).current;
@@ -157,7 +161,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
         rightCardAnim.setValue(screenWidth);
         const result = onAfterSlideOut?.();
         if (result && typeof (result as Promise<unknown>)?.then === 'function') {
-          (result as Promise<unknown>).catch(() => {});
+          (result as Promise<unknown>).catch(() => { });
         }
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -185,18 +189,18 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   //     keyboardDidHideListener.remove();
   //   };
   // }, []);
- 
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      
-      
-      if(Platform.OS == "ios" ){
-setModalMarginTop(-133);
-      } else{
-      setModalMarginTop(10);
+
+
+      if (Platform.OS == "ios") {
+        setModalMarginTop(-133);
+      } else {
+        setModalMarginTop(10);
       }
-     
-     
+
+
     });
     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
       setModalMarginTop(90);
@@ -252,28 +256,40 @@ setModalMarginTop(-133);
 
 
   // Loved it
-  const handleLovedIt = useCallback(() => {
+  const handleLovedIt = () => {
     fileLogger.info('User selected: Love It');
     setPreference('love');
     setSelectedOption('lovedIt');
-    setShowFeedback(true);
-  }, []);
+    if (isOnboarding) {
+      nextPress('love');
+    } else {
+      setShowFeedback(true);
+    }
+  };
 
   // Okay
-  const handleOkay = useCallback(() => {
+  const handleOkay = () => {
     fileLogger.info('User selected: It Was Okay');
     setPreference('like');
     setSelectedOption('okay');
-    setShowFeedback(true);
-  }, []);
+    if (isOnboarding) {
+      nextPress('like');
+    } else {
+      setShowFeedback(true);
+    }
+  };
 
   // Didn't like
-  const handleDidntLike = useCallback(() => {
+  const handleDidntLike = () => {
     fileLogger.info('User selected: Didnt Like It');
     setPreference('dislike');
     setSelectedOption('notLike');
-    setShowFeedback(true);
-  }, []);
+    if (isOnboarding) {
+      nextPress('dislike');
+    } else {
+      setShowFeedback(true);
+    }
+  };
 
   const handleCloseRating = useCallback(() => {
     if (step === 'comparison' && handleCloseRatingProp) {
@@ -283,9 +299,11 @@ setModalMarginTop(-133);
     }
   }, [step, handleCloseRatingProp, onClose]);
 
-  const nextPress = () => {
+  const nextPress = (selectedPref?: 'love' | 'like' | 'dislike') => {
+    const activePref = selectedPref || preference;
+
     fileLogger.info('FeedbackModal nextPress START', {
-      preference,
+      preference: activePref,
       hasText: !!text.trim(),
       movieTitle,
       movieYear,
@@ -294,19 +312,45 @@ setModalMarginTop(-133);
 
     Keyboard.dismiss();
 
-    if (!preference) {
+    if (!activePref) {
       setPreferenceMsg(true);
       return;
     }
 
+    const runAsync = async () => {
+      try {
+        if (text.trim() !== '' && selectedMovie?.imdb_id) {
+          fileLogger.info('Posting comment', { movieId: selectedMovie.imdb_id, textLength: text.length });
+          const response = await postComment(token, selectedMovie.imdb_id, text);
+          fileLogger.info('Comment posted successfully', { response });
+          onReviewAdded?.(selectedMovie.imdb_id);
+        }
+        setText('');
+        fileLogger.info('Calling onSubmit callback', { preference: activePref });
+        onSubmit(activePref);
+        fileLogger.info('nextPress COMPLETE - success');
+      } catch (error: unknown) {
+        const err = error as { message?: string; stack?: string };
+        fileLogger.error('Error in nextPress', { error: String(error), message: err?.message, stack: err?.stack });
+        setFeedbackVisible?.(false);
+      }
+    };
+
+    const hasComparisons = hasComparisonsAvailable?.(activePref) ?? true;
+
+    if (!hasComparisons) {
+      setTimeout(() => {
+        runAsync();
+      }, 200);
+      return;
+    }
+
     const CENTER_TO_LEFT_DURATION = 480;
-    // Match comparison left card position: left card starts at padding 14; feedback poster (170px) is centered so left edge at screenWidth/2 - 85
     const comparisonLeftEdge = 14;
     const posterWidth = wp(45);
     const centerPosterLeftEdge = screenWidth / 2 - posterWidth / 2;
     const slideToX = comparisonLeftEdge - centerPosterLeftEdge;
 
-    // Animate center poster to real left position (no jump when comparison appears)
     Animated.parallel([
       Animated.timing(centerPosterSlideAnim, {
         toValue: slideToX,
@@ -329,25 +373,6 @@ setModalMarginTop(-133);
     ]).start(({ finished }) => {
       if (finished) runAsync();
     });
-
-    const runAsync = async () => {
-      try {
-        if (text.trim() !== '' && selectedMovie?.imdb_id) {
-          fileLogger.info('Posting comment', { movieId: selectedMovie.imdb_id, textLength: text.length });
-          const response = await postComment(token, selectedMovie.imdb_id, text);
-          fileLogger.info('Comment posted successfully', { response });
-          onReviewAdded?.(selectedMovie.imdb_id);
-        }
-        setText('');
-        fileLogger.info('Calling onSubmit callback', { preference });
-        onSubmit(preference);
-        fileLogger.info('nextPress COMPLETE - success');
-      } catch (error: unknown) {
-        const err = error as { message?: string; stack?: string };
-        fileLogger.error('Error in nextPress', { error: String(error), message: err?.message, stack: err?.stack });
-        setFeedbackVisible?.(false);
-      }
-    };
   };
 
   const lastStepRef = useRef<'feedback' | 'comparison'>(step);
@@ -396,7 +421,7 @@ setModalMarginTop(-133);
                             <FastImage
                               style={[styles.comparisonPoster, { borderWidth: comparisonSelected === 'first' ? 2 : 0 }]}
                               source={leftPosterSource}
-                        resizeMode={FastImage.resizeMode.stretch}
+                              resizeMode={FastImage.resizeMode.stretch}
                             />
                           )}
                         </Grayscale>
@@ -430,7 +455,7 @@ setModalMarginTop(-133);
                               ]}
                               source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
                               resizeMode={FastImage.resizeMode.contain}
-                              
+
                               onLoad={() => {
                                 if (!rightCardSlideInDoneRef.current) {
                                   rightCardSlideInDoneRef.current = true;
@@ -438,15 +463,16 @@ setModalMarginTop(-133);
                                 }
                               }}
                             />
-                            {rightMovie.rating != null && (
-                              <View style={styles.ratingBadge}>
-                                <RankingWithInfo
-                                  score={Number(rightMovie.rating)}
-                                  title="Rec Score"
-                                  description={t('discover.recscoredes')}
-                                />
-                              </View>
-                            )}
+                            {isOnboarding == false &&
+                              rightMovie.rating != null && (
+                                <View style={styles.ratingBadge}>
+                                  <RankingWithInfo
+                                    score={Number(rightMovie.rating)}
+                                    title="Rec Score"
+                                    description={t('discover.recscoredes')}
+                                  />
+                                </View>
+                              )}
                           </Grayscale>
                         </View>
                         <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
@@ -532,16 +558,18 @@ setModalMarginTop(-133);
                   </CustomText>
                 </View>
               </Animated.View>
-              <Animated.View style={[{ width: Dimensions.get('window').width * 0.95, marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
-                <TouchableOpacity style={styles.reviewConatainer}>
-                  <CustomReviewInput placeholder={t('modal.writeReview')} text={text} setText={setText} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => nextPress()}>
-                  <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>
-                    {t('common.next')}
-                  </CustomText>
-                </TouchableOpacity>
-              </Animated.View>
+              {!isOnboarding && (
+                <Animated.View style={[{ width: Dimensions.get('window').width * 0.95, marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
+                  <TouchableOpacity style={styles.reviewConatainer}>
+                    <CustomReviewInput placeholder={t('modal.writeReview')} text={text} setText={setText} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => nextPress()}>
+                    <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>
+                      {t('common.next')}
+                    </CustomText>
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
             </View>
           </View>
 
@@ -592,7 +620,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   heading: {
-    color: Color.whiteText, 
+    color: Color.whiteText,
     fontSize: 22,
     marginBottom: 12,
   },
@@ -614,7 +642,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 7,
-   },
+  },
   lovedIt: {
     paddingVertical: 10,
     paddingHorizontal: 8,
@@ -704,7 +732,7 @@ const styles = StyleSheet.create({
   comparisonYear: {
     marginTop: 6,
     marginLeft: 1,
-    textAlign:'left'
+    textAlign: 'left'
   },
   orContainer: {
     position: 'absolute',

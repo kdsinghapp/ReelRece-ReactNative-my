@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
     VERIFY_EMAIL: '/verify-email',
     RESET_PASSWORD: '/reset-password',
     UPLOAD_AVATAR: '/avatar',
+    SOCIAL_LOGIN: '/social-login',
   },
 
   // User endpoints

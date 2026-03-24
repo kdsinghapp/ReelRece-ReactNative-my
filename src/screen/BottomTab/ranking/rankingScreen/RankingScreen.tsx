@@ -476,9 +476,23 @@ const RankingScreen = () => {
 
   const handleNavigation = useCallback(
     (imdb_id: string, navToken: string | null) => {
-      navigation.navigate(ScreenNameEnum.MovieDetailScreen as never, { imdb_idData: imdb_id, token: navToken } as never);
+      const index = Array.isArray(ratedMovie) ? ratedMovie.findIndex(m => m?.imdb_id === imdb_id) : -1;
+      navigation.navigate(ScreenNameEnum.MovieDetailScreen as never, {
+        imdb_idData: imdb_id,
+        token: navToken,
+        movieList: ratedMovie,
+        initialIndex: index >= 0 ? index : 0,
+        source: 'ranking',
+        filterGenreString: '',
+        platformFilterString: '',
+        selectedSimpleFilter: '1',
+        selectedSortId: null,
+        contentSelect: null,
+        currentPage: 1,
+        totalPages: 1,
+      } as never);
     },
-    [navigation]
+    [navigation, ratedMovie]
   );
 
   const handleRankingPress = useCallback(
@@ -496,6 +510,7 @@ const RankingScreen = () => {
         <NormalMovieCard
           token={token}
           item={item}
+          movieList={displayMovies}
           onPressClose={() => handleRemoveMovie(imdbId)}
           onPressRanking={() => handleRankingPress(item as { imdb_id?: string })}
           flatlistTop={flatlistTop}
@@ -505,7 +520,7 @@ const RankingScreen = () => {
         />
       );
     },
-    [token, flatlistTop, handleRemoveMovie, handleRankingPress]
+    [token, flatlistTop, displayMovies, handleRemoveMovie, handleRankingPress]
   );
 
   // Helper functions for loading states
@@ -749,7 +764,7 @@ const RankingScreen = () => {
           zIndexVal={activeZIndex[itemId]}
           zeroAnimatedValue={zeroAnimatedValue}
           panHandlers={getPanResponder(itemId)}
-          onNavigate={handleNavigation}
+          onNavigate={(id, t) => handleNavigation(id, t, index)}
           onSwap={swapItems}
           onStartDrag={onStartDragStable}
         />
@@ -831,18 +846,20 @@ const RankingScreen = () => {
           }
         //  contentContainerStyle={{ flexGrow: 1 }}
         >
-          {currentStep <= STEPPER_VALUE && (
+          {/* {currentStep <= STEPPER_VALUE && (
             <StepProgressBar
               totalSteps={totalSteps}
               showwithStepCount={true}
               disable={true}
               currentStepModal={currentStep}
             />
-          )}
+          )} */}
 
 
           {/* Rated Movies Section */}
-          {currentStep > STEPPER_VALUE && (
+          {
+          // currentStep > STEPPER_VALUE && 
+          (
             loadingRated ? (
               <View style={{ paddingHorizontal: 10, marginTop: 14 }}>
                 {Array.from({ length: 8 }).map((_, index) => (

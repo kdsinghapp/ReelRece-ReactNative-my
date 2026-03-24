@@ -72,6 +72,29 @@ export const loginUser_Api = (email: string, password: string): Promise<ApiRespo
     'Login failed'
   );
 
+export const socialLogin_Api = (
+  provider: 'google' | 'facebook' | 'apple',
+  accessToken: string,
+): Promise<ApiResponse<string>> =>
+  safeApiCall(
+    async () => {
+      const response = await axiosInstance.post('/social-login', {
+        provider,
+        access_token: accessToken,
+      });
+
+      const validation = validateResponse(loginResponseSchema, response.data, {
+        endpoint: '/social-login',
+        strict: true,
+      });
+
+      const { token } = unwrapValidation(validation);
+
+      return token;
+    },
+    'Social login failed'
+  );
+
 
 /**
  * Check if email already exists in the system

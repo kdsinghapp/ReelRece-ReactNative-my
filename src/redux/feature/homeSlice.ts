@@ -32,11 +32,13 @@ export interface HomeState {
   loadingTrending: boolean;
   loadingRecs: boolean;
   loadingBookmark: boolean;
+  trendingError: boolean;
+  recommendError: boolean;
 }
 
 const initialState: HomeState = {
   feedData: [],
-  feedPage: 1,
+  feedPage: 0, // Start at 0: indicates no page loaded yet; first fetch should be page 1
   feedTotalPages: 1,
   feedHasMore: true,
   loadingFeed: false,
@@ -50,6 +52,8 @@ const initialState: HomeState = {
   loadingTrending: true,
   loadingRecs: true,
   loadingBookmark: true,
+  trendingError: false,
+  recommendError: false,
 };
 
 type FetchHomeFeedArg = { reset?: boolean; silent?: boolean };
@@ -184,7 +188,7 @@ const homeSlice = createSlice({
   reducers: {
     resetHomeFeedPagination(state) {
       state.feedData = [];
-      state.feedPage = 1;
+      state.feedPage = 0; // Reset to 0: next fetch should be page 1
       state.feedHasMore = true;
     },
   },
@@ -216,7 +220,8 @@ const homeSlice = createSlice({
           state.feedPage = current_page ?? state.feedPage;
         }
         state.feedTotalPages = total_pages ?? 1;
-        state.feedHasMore = (results?.length ?? 0) > 0 && (current_page ?? 1) < (total_pages ?? 1);
+        // Fix: Check if more pages exist, regardless of current page having results
+        state.feedHasMore = (current_page ?? 1) < (total_pages ?? 1);
       })
       .addCase(fetchHomeFeed.rejected, (state) => {
         state.loadingFeed = false;
@@ -247,27 +252,33 @@ const homeSlice = createSlice({
     builder
       .addCase(fetchHomeTrending.pending, (state, action) => {
         if (!action.meta.arg?.silent) state.loadingTrending = true;
+        state.trendingError = false;
       })
       .addCase(fetchHomeTrending.fulfilled, (state, action) => {
         state.loadingTrending = false;
         state.trendingData = action.payload ?? [];
+        state.trendingError = false;
       })
       .addCase(fetchHomeTrending.rejected, (state) => {
         state.loadingTrending = false;
+        state.trendingError = true;
       });
 
     // Recommend
     builder
       .addCase(fetchHomeRecommend.pending, (state, action) => {
         if (!action.meta.arg?.silent) state.loadingRecs = true;
+        state.recommendError = false;
       })
       .addCase(fetchHomeRecommend.fulfilled, (state, action) => {
         state.loadingRecs = false;
         state.recommendData = action.payload ?? [];
+        state.recommendError = false;
       })
       .addCase(fetchHomeRecommend.rejected, (state) => {
         state.loadingRecs = false;
         state.recommendData = [];
+        state.recommendError = true;
       });
 
     // Bookmarks

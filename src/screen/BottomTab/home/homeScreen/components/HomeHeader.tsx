@@ -16,6 +16,8 @@ type Props = {
   loadingBookmark: boolean;
   loadingRecs: boolean;
   onFeedReached: () => void;
+  trendingError?: boolean;
+  recommendError?: boolean;
 };
 
 const HomeHeader = React.memo(({
@@ -26,6 +28,8 @@ const HomeHeader = React.memo(({
   loadingBookmark,
   loadingRecs,
   onFeedReached,
+  trendingError = false,
+  recommendError = false,
 }: Props) => {
   const handleLayout = useCallback(() => {
     onFeedReached();
@@ -51,6 +55,7 @@ const HomeHeader = React.memo(({
           loading={loadingTrending}
           emptyData={t('emptyState.noTrending')}
           scoreType="Rec"
+          error={trendingError}
         />
         <HorizontalMovieList
           title={t('home.recsForYou')}
@@ -61,6 +66,7 @@ const HomeHeader = React.memo(({
           loading={loadingRecs}
           emptyData={t('emptyState.noRecsForYou')}
           scoreType="Rec"
+          error={recommendError}
         />
         {bookmarkData?.length > 0 && (
           <HorizontalMovieList

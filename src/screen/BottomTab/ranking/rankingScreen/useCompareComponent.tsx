@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'; 
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { calculateMovieRating, getAllRatedMovies, getAllRated_with_preference, recordPairwiseDecision, rollbackPairwiseDecisions } from '@redux/Api/movieApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
@@ -9,7 +9,7 @@ import { setUserProfile } from '@redux/feature/authSlice';
 import { errorToast } from '@utils/customToast';
 
 /** Number of movies to rank before step progress modal (show after 1st and 5th) */
-export const STEPPER_VALUE = 5;
+export const STEPPER_VALUE = 6;
 
 export const useCompareComponent = (token: string, options?: { onRatingSuccess?: () => void }) => {
   // ---- Core state ----
@@ -53,7 +53,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     options?.onRatingSuccess?.();
     return res;
   }, [token, options]);
-   useEffect(() => {
+  useEffect(() => {
     fetchUserProfile()
   }, [token])
   const fetchUserProfile = useCallback(async () => {
@@ -138,7 +138,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
           prefetchedByPreferenceRef.current[pref] = [];
         }
       })
-    ).catch(() => {});
+    ).catch(() => { });
   }, [token]);
 
   /** Apply a pre-fetched list to state and binary search bounds (no API call). */
@@ -153,7 +153,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     setMid(midVal);
     midRef.current = midVal;
   }, []);
- 
+
   const openFeedbackModal = useCallback((movie: string | object) => {
     setSelectionHistory([]);
     setComparisonMovies([]);
@@ -165,17 +165,39 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
   }, [setFeedbackVisible, setSelectedMovie, setSelectedMovieId, prefetchComparisonByPreference]);
 
   const handleFeedbackSubmit = useCallback(
-      // Switch to comparison step immediately so animation can run right away
+    // Switch to comparison step immediately so animation can run right away
     (pref: 'love' | 'like' | 'dislike') => {
       setUserPreference({ preference: pref });
+
+      const prefetched = prefetchedByPreferenceRef.current[pref];
+      const hasPrefetched = Array.isArray(prefetched);
+
+      // Direct close for first movie (no comparisons) if list is known empty
+      if (hasPrefetched && prefetched.length === 0) {
+        setFeedbackVisible(false);
+        setComparisonVisible(false); // Make sure comparison is not shown
+        if (selectedMovie?.imdb_id) {
+          performCalculateRating({
+            imdb_id: selectedMovie.imdb_id,
+            preference: pref,
+          }).then(() => {
+            setCurrentStep((s) => {
+              const next = s + 1;
+              if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+              AsyncStorage.setItem('currentStep', String(next));
+              return next;
+            });
+          }).catch(handleCloseRating);
+        }
+        return;
+      }
 
       setComparisonVisible(true);
       setFeedbackVisible(false);
 
       (async () => {
         try {
-          const prefetched = prefetchedByPreferenceRef.current[pref];
-          if (Array.isArray(prefetched) && prefetched.length >= 0) {
+          if (hasPrefetched) {
             applyComparisonList(prefetched);
             if (prefetched.length === 0) {
               setComparisonVisible(false);
@@ -227,11 +249,32 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
   );
 
   const handleSkipSetFirst = async () => {
+    // Direct close if no comparison movies (e.g., first movie rating)
+    if (!secondMovieData) {
+      setComparisonVisible(false);
+      if (selectedMovie?.imdb_id && userPreference.preference) {
+        try {
+          await performCalculateRating({
+            imdb_id: selectedMovie.imdb_id,
+            preference: userPreference.preference,
+          });
+          setCurrentStep((s) => {
+            const next = s + 1;
+            if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+            AsyncStorage.setItem('currentStep', String(next));
+            return next;
+          });
+        } catch (error) {
+          handleCloseRating();
+        }
+      }
+      return;
+    }
 
-    if (!selectedMovie || !secondMovieData || !userPreference.preference) return;
+    if (!selectedMovie || !userPreference.preference) return;
 
     try {
- 
+
       if (lastAction === 'first') {
         const newHigh = midRef.current - 1;
         const newMid = Math.floor((lowRef.current + newHigh) / 2);
@@ -255,7 +298,6 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
         midRef.current = newMid;
       }
 
-      // if (lowRef.current > highRef.current || !comparisonMovies[midRef.current]) {
       if (lowRef.current > highRef.current || !comparisonMovies[midRef.current]) {
         setComparisonVisible(false);
         setCurrentStep((s) => {
@@ -279,7 +321,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
           }
         }
         return;
-      } 
+      }
       setCurrentStep(s => s + 1);
 
     } catch (err) {
@@ -323,11 +365,11 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
         .then(() => {
           if (imdbId && pref) {
             return performCalculateRating({ imdb_id: imdbId, preference: pref }).then(() => {
-            dispatch(setModalClosed(true));
-            dispatch(fetchProfileFeed({ reset: true }) as any);
-            dispatch(fetchProfileRatedMovies() as any);
-            dispatch(fetchProfileBookmarks() as any);
-          });
+              dispatch(setModalClosed(true));
+              dispatch(fetchProfileFeed({ reset: true }) as any);
+              dispatch(fetchProfileRatedMovies() as any);
+              dispatch(fetchProfileBookmarks() as any);
+            });
           }
         })
         .catch(() => {
@@ -573,6 +615,11 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     }
   }, [token]);
 
+  const hasComparisonsAvailable = useCallback((pref: 'love' | 'like' | 'dislike') => {
+    const list = prefetchedByPreferenceRef.current[pref];
+    return Array.isArray(list) && list.length > 0;
+  }, []);
+
   return {
     // State
     selectedMovie,
@@ -598,6 +645,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     handleSelectSecond,
     handleNextComparison,
     handleSkipSetFirst,
+    hasComparisonsAvailable, // Add this
     resetComparisonData,
     // Step progressbar
     isStepsModalVisible,

@@ -19,6 +19,7 @@ const NormalMovieCard = ({
   imdb_id,
   isFirstItem,
   onFirstRankIconMeasure,
+  movieList = [],
 }: {
   item: object & { is_bookmarked?: boolean; cover_image_url?: string; title?: string; release_year?: string; imdb_id?: string; };
   onPressClose: () => void;
@@ -29,6 +30,7 @@ const NormalMovieCard = ({
   token: string;
   isFirstItem?: boolean;
   onFirstRankIconMeasure?: (x: number, y: number) => void;
+  movieList?: any[];
 }) => {
   const [save, setSave] = useState(false);
   const navigation = useNavigation();
@@ -37,7 +39,21 @@ const NormalMovieCard = ({
   const { isBookmarked, toggleBookmark } = useBookmarks(token);
 
   const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token });
+    const movieIndex = Array.isArray(movieList) ? movieList.findIndex((m: any) => m?.imdb_id === imdb_id) : -1;
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: imdb_id,
+      token: token,
+      movieList: movieList || [],
+      initialIndex: movieIndex >= 0 ? movieIndex : 0,
+      source: 'normalCard',
+      filterGenreString: '',
+      platformFilterString: '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: 1,
+      totalPages: 1,
+    });
   };
 
   const handleToggleBookmark = async () => {

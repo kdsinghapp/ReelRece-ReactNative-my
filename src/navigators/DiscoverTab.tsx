@@ -6,7 +6,6 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import DiscoverScreen from '@screens/BottomTab/discover/discoverScreen/DiscoverScreen';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen';
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
-import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
 const Stack = createNativeStackNavigator();
 
 
@@ -15,7 +14,6 @@ const DiscoverTab = memo(() => {
     { name: ScreenNameEnum.DiscoverScreen, Component: DiscoverScreen },
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
    ];
 
   return (

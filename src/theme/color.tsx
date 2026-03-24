@@ -20,6 +20,7 @@ export const Color = {
   buttonBackground: "#ff6347",
   whiteText: "#FFFFFF",
   textGray: "#8C8C8C",
+  subText:'#CDCDCD',
   green: "#2AA147",
   lightGrayText: "#767676",
   lightPrimary: "#00A8F5",

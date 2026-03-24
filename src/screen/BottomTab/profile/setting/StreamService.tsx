@@ -26,7 +26,7 @@ const StreamService = () => {
   const token = useSelector((state: RootState) => state.auth.token);
   const route = useRoute();
   const { fromSignUp } = route?.params || {};
-  const navigation = useNavigation() 
+  const navigation = useNavigation()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMode, setFilterMode] = useState<| 'popular' | 'more'>('popular');
   const [platefromdata, setPlatefromdata] = useState([])
@@ -41,7 +41,7 @@ const StreamService = () => {
   const [platformData, setPlatformData] = useState<object | string | null | number[]>([]); // current loaded items
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1)
-   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
 
   /** ---- Fetch User Subscriptions ---- */
@@ -71,7 +71,10 @@ const StreamService = () => {
     replace?: boolean;
     signal?: AbortSignal;
   }) => {
-    if (isFetchingRef.current) return;
+    if (isFetchingRef.current) {
+      setTimeout(() => fetchPlatformsPage({ pageToLoad, query, replace, signal }), 200);
+      return;
+    }
     isFetchingRef.current = true;
 
     try {
@@ -88,7 +91,7 @@ const StreamService = () => {
         query,
         page: pageToLoad,
         signal,
-      }); 
+      });
       const results =
         (resp?.results || []).map((item) => ({
           ...item,
@@ -107,7 +110,7 @@ const StreamService = () => {
         );
       }
       setPage(pageToLoad);
-      setTotalPages(resp?.total_pages ?? resp?.totalPages ?? 1);
+      setTotalPages((prev) => resp?.total_pages ?? resp?.totalPages ?? prev);
     } catch (err) {
     } finally {
       isFetchingRef.current = false;
@@ -147,7 +150,7 @@ const StreamService = () => {
   /** ---- Helpers ---- */
   const fixImageUrl = (imageUrl: string): string => {
     try {
-  
+
       const urlParts = imageUrl.split('/');
       const fileName = urlParts.pop();
       const encodedFileName = encodeURIComponent(fileName ?? '');
@@ -163,7 +166,7 @@ const StreamService = () => {
     }
   }, [searchQuery]);
 
-  
+
   const getFilteredData = () => {
     let data = [...(Array.isArray(platformData) ? platformData : [])];
     if (searchQuery) {
@@ -191,7 +194,11 @@ const StreamService = () => {
       page >= totalPages ||
       !token
     ) return;
-    fetchPlatformsPage({ pageToLoad: page + 1, query: debouncedSearch, replace: false });
+    const t = setTimeout(() => {
+      fetchPlatformsPage({ pageToLoad: page + 1, query: debouncedSearch, replace: false });
+    }, 400);
+
+    return () => clearTimeout(t);
   }, [filterMode, page, totalPages, isLoading, isLoadingMore, token, debouncedSearch]);
 
 
@@ -307,60 +314,77 @@ const StreamService = () => {
 
   const renderItem = ({ item }) => {
     const isSelected = selectedPlatforms.includes(item?.supported_platform.toString());
+    const platformDisplayName = item?.display_name || item?.supported_platform || '?';
+
     return (
       <TouchableOpacity
         onPress={() => toggleSelection(item?.supported_platform)}
         activeOpacity={0.7}
         style={[styles.item, isSelected && styles.selectedItemGlow]}
       >
-        <FastImage
-          source={{
-            uri: item?.image_url,
-            priority: FastImage.priority.low,
-            cache: FastImage.cacheControl.web
-          }}
-          // style={styles.image}
-          style={[styles.image, isSelected && styles.imageActive]}
-
-          resizeMode={FastImage.resizeMode.contain}
-        />
+        {item?.image_url ? (
+          <FastImage
+            source={{
+              uri: item?.image_url,
+              priority: FastImage.priority.low,
+              cache: FastImage.cacheControl.web
+            }}
+            style={[styles.image, isSelected && styles.imageActive]}
+            resizeMode={FastImage.resizeMode.contain}
+          />
+        ) : (
+          <Text style={styles.placeholderText}>
+            {platformDisplayName.slice(0, 2).toUpperCase()}
+          </Text>
+        )}
       </TouchableOpacity>
     );
   };
   useEffect(() => {
   }, [platefromdata])
 
-  const renderSelectedItem = ({ item }) => (
-    <View style={styles.selectedItemContainer}>
-      <TouchableOpacity
-        onPress={() => removeSelectedItem(item?.supported_platform.toString())}
-        style={styles.selectedItem}
-      >
-        <FastImage
-          style={styles.selectedImage}
-          source={{
-            uri: item?.image_url,
-            priority: FastImage.priority.low,
-            cache: FastImage.cacheControl.immutable,
-          }}
-          resizeMode={FastImage.resizeMode.contain}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.ItemCloseContainer}
-        onPress={() => removeSelectedItem(item?.supported_platform.toString())}
-      >
-        <Image
-          source={imageIndex.closeWhite}
-          style={styles.ItemClose}
-          resizeMode='contain'
-        />
-      </TouchableOpacity>
-    </View>
-  );
+  const renderSelectedItem = ({ item }) => {
+    const platformDisplayName = item?.display_name || item?.supported_platform || '?';
+    return (
+      <View style={styles.selectedItemContainer}>
+        <TouchableOpacity
+          onPress={() => removeSelectedItem(item?.supported_platform.toString())}
+          style={styles.selectedItem}
+        >
+          {item?.image_url ? (
+            <FastImage
+              style={styles.selectedImage}
+              source={{
+                uri: item?.image_url,
+                priority: FastImage.priority.low,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              resizeMode={FastImage.resizeMode.contain}
+            />
+          ) : (
+            <View style={[styles.selectedImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A2A' }]}>
+              <Text style={[styles.placeholderText, { fontSize: 14 }]}>
+                {platformDisplayName.slice(0, 2).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.ItemCloseContainer}
+          onPress={() => removeSelectedItem(item?.supported_platform.toString())}
+        >
+          <Image
+            source={imageIndex.closeWhite}
+            style={styles.ItemClose}
+            resizeMode='contain'
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  };
   const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar backgroundColor={Color.grey} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -368,7 +392,7 @@ const StreamService = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1 , }}>
+          <View style={{ flex: 1, }}>
             <View style={styles.streamHeader} >
               <HeaderCustom
                 title={(t("home.streamingservices"))}
@@ -380,13 +404,13 @@ const StreamService = () => {
               <View style={styles.serviceCountComntainer}>
                 <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
                   <Text style={{
-                    color:"#CDCDCD"
+                    color: "#CDCDCD"
                   }}>
                     {getFilteredData()?.length}
-                  
-                   {" "}Services,{" "}
-                   </Text> 
-                  {selectedPlatforms?.length  ||"0"} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
+
+                    {" "}Services,{" "}
+                  </Text>
+                  {selectedPlatforms?.length || "0"} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
                 </Text>
               </View>
 
@@ -455,16 +479,21 @@ const StreamService = () => {
             <View style={{ alignSelf: 'center', flex: 1 }}>
               <FlatList
                 data={getFilteredData()}
-                keyExtractor={(item) => item?.supported_platform.toString()}
+                keyExtractor={(item, index) => `${item?.supported_platform}-${index}`}
                 numColumns={numColumns}
-                contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 8, }}
+                contentContainerStyle={{ alignItems: 'center', paddingVertical: 8 }}
                 renderItem={renderItem}
                 showsHorizontalScrollIndicator={false}
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={7}
-                removeClippedSubviews
+                removeClippedSubviews={false}
+                initialNumToRender={70}
+                maxToRenderPerBatch={70}
+                windowSize={11}
+                getItemLayout={(data, index) => ({
+                  length: imageSize + 12,
+                  offset: (imageSize + 12) * Math.floor(index / numColumns),
+                  index,
+                })}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode="on-drag"
                 refreshControl={
@@ -556,7 +585,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2A2A2A',
   },
   selectedItemGlow: {
-     shadowOffset: { width: 3, height: 5 },
+    shadowOffset: { width: 3, height: 5 },
     shadowOpacity: 0.8,
     shadowRadius: 16,
     elevation: 3,
@@ -603,6 +632,11 @@ const styles = StyleSheet.create({
     height: '97%',
     borderRadius: 16,
     // borderColor:Color.red
+  },
+  placeholderText: {
+    color: Color.whiteText,
+    fontSize: 18,
+    fontFamily: font.PoppinsBold,
   },
   imageActive: {
     borderWidth: 2,
@@ -700,7 +734,7 @@ const styles = StyleSheet.create({
     color: Color.whiteText,
     // marginBottom:4,
     alignSelf: 'center',
-    marginTop:5
+    marginTop: 5
   },
   serviceCountComntainer: {
     flexDirection: 'row',

@@ -267,6 +267,8 @@ const FixedHomeScreen = () => {
         shouldPlay={index === playIndex}
         isPaused={index !== playIndex}
         is_bookMark={item?.is_bookmarked}
+        feedData={feedData}
+        initialIndex={index}
       />
     );
   }, [autoPlayEnabled, playIndex, isFocused, loading, currentVisibleIndex, token, isMuted]);

@@ -172,7 +172,21 @@ const OtherWatchingProfile = () => {
 
 
   const handleNavigation = (imdb_id: string, token: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token: token })
+    const index = Array.isArray(movies) ? movies.findIndex(m => m?.imdb_id === imdb_id) : -1;
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: imdb_id,
+      token: token,
+      movieList: movies,
+      initialIndex: index >= 0 ? index : 0,
+      source: 'otherWatchingProfile',
+      filterGenreString: '',
+      platformFilterString: '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: 1,
+      totalPages: 1,
+    });
   };
 
 

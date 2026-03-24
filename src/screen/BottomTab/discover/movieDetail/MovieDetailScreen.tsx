@@ -23,7 +23,7 @@ import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
-import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction } from '@redux/Api/movieApi';
+import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction, Trending_without_Filter, searchMovies } from '@redux/Api/movieApi';
 import { getMatchingMovies } from '@redux/Api/ProfileApi';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
@@ -62,7 +62,70 @@ const MovieDetailScreen = () => {
   const route = useRoute();
   const [watchModalLoad, setWatchModalLoad] = useState(null);
 
-  const { imdb_idData, token } = route?.params;
+  const { 
+    imdb_idData, 
+    token, 
+    movieList = [], 
+    initialIndex = 0, 
+    source = null,
+    filterGenreString,
+    platformFilterString,
+    selectedSimpleFilter,
+    selectedSortId,
+    contentSelect,
+    currentPage = 1,
+    totalPages = 1,
+    searchQuery = '',
+  } = route?.params || {};
+
+  const [currentFeedIndex, setCurrentFeedIndex] = useState(initialIndex);
+  const [localMovieList, setLocalMovieList] = useState(movieList);
+  const currentFeedIndexRef = useRef(initialIndex);
+  useEffect(() => {
+    currentFeedIndexRef.current = currentFeedIndex;
+  }, [currentFeedIndex]);
+  const [feedPage, setFeedPage] = useState(currentPage);
+  const [feedTotalPages, setFeedTotalPages] = useState(totalPages);
+  
+  // Discover & Search Pagination recreator
+  const fetchNextFeedPage = async () => {
+    if ((source !== 'discover' && source !== 'search') || feedPage >= feedTotalPages || loadingMore) return;
+    try {
+      setLoadingMore(true);
+      let results: any[] = [];
+
+      if (source === 'discover') {
+        let baseEndpoint = '';
+        if (selectedSimpleFilter === '1') baseEndpoint = '/recommend-movies?sort_by=rec_score';
+        else if (selectedSimpleFilter === '2') baseEndpoint = '/trending';
+        else if (selectedSimpleFilter === '5') baseEndpoint = '/bookmarks';
+        
+        const urlStarts = baseEndpoint.includes('?')
+          ? `${baseEndpoint}&country=US&page=${feedPage + 1}`
+          : `${baseEndpoint}?country=US&page=${feedPage + 1}`;
+
+        let url = urlStarts;
+        if (filterGenreString) url += `&genres=${filterGenreString}`;
+        if (platformFilterString) url += `&platforms=${platformFilterString}`;
+        if (selectedSortId) url += `&sort_by=${selectedSortId}`;
+        if (contentSelect) url += `&media_type=${contentSelect}`;
+        
+        const result = await Trending_without_Filter({ token, url });
+        results = result?.results || [];
+      } else if (source === 'search' && searchQuery) {
+        const result = await searchMovies(searchQuery, token, feedPage + 1);
+        results = result?.data?.results || [];
+      }
+
+      if (results.length > 0) {
+         setLocalMovieList(prev => [...prev, ...results]);
+         setFeedPage(feedPage + 1);
+      }
+    } catch (e) {
+    } finally {
+      setLoadingMore(false);
+    }
+  };
   const { toggleBookmark: toggleBookmarkHook } = useBookmarks(token);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPosition, setSeekPosition] = useState(0);
@@ -307,38 +370,68 @@ const MovieDetailScreen = () => {
     }
   };
 
-  const preloadNextMovie = useCallback(async () => {
+  const preloadNextMovie = useCallback(async (direction = 'next') => {
     if (preloadInProgressRef.current || isResettingRef.current) return;
     preloadInProgressRef.current = true;
     try {
-      let queue = [...matchingQueueRef.current];
-      if (!queue.length) {
-        const matching = await getMatchingMovies(token, currentSeedId);
-        queue = matching?.results || [];
+      if (!localMovieList || localMovieList.length === 0) {
+        // Fallback to random matching movies for deep links
+        let queue = [...matchingQueueRef.current];
+        if (!queue.length) {
+          const matching = await getMatchingMovies(token, currentSeedId);
+          queue = matching?.results || [];
+          setMatchingQueue(queue);
+        }
+        if (!queue.length) return;
+        const randomIndex = Math.floor(Math.random() * queue.length);
+        const nextMovie = queue[randomIndex];
+        queue.splice(randomIndex, 1);
         setMatchingQueue(queue);
+        const meta = await getMovieMetadata(token, nextMovie?.imdb_id);
+        if (!meta) return;
+        setMovieData((prev) => [prev[0], prev[1], meta]);
+        return;
       }
-      if (!queue.length) return;
-      const randomIndex = Math.floor(Math.random() * queue.length);
-      const nextMovie = queue[randomIndex];
-      queue.splice(randomIndex, 1);
-      setMatchingQueue(queue);
-      const meta = await getMovieMetadata(token, nextMovie?.imdb_id);
-      if (!meta) return;
-      setMovieData((prev) => {
-        if (prev[2] != null) return prev;
-        return [prev[0], prev[1], meta];
-      });
+
+      // Sequential navigation from source feed
+      const targetIndex = direction === 'next' ? currentFeedIndexRef.current + 1 : currentFeedIndexRef.current - 1;
+      
+      if (targetIndex >= 0 && targetIndex < localMovieList.length) {
+        const nextMovieItem = localMovieList[targetIndex];
+        const imdbIdToFetch = nextMovieItem?.imdb_id || nextMovieItem?.movie?.imdb_id;
+        const meta = await getMovieMetadata(token, imdbIdToFetch);
+        if (!meta) return;
+        
+        setMovieData((prev) => {
+          if (direction === 'next') {
+            return [prev[0], prev[1], meta];
+          } else {
+            return [meta, prev[1], prev[2]];
+          }
+        });
+      } else {
+        // Upper or lower bounds reached
+        setMovieData((prev) => {
+           if (direction === 'next') return [prev[0], prev[1], null];
+           return [null, prev[1], prev[2]];
+        });
+
+        // Trigger pagination load if hitting the edge
+        if (direction === 'next' && targetIndex >= localMovieList.length) {
+           fetchNextFeedPage();
+        }
+      }
     } catch (_) {
-      // ignore; next scroll will fallback to fetch
     } finally {
       preloadInProgressRef.current = false;
     }
-  }, [token, currentSeedId]);
+  }, [token, currentSeedId, currentFeedIndex, localMovieList, source]);
 
   useEffect(() => {
-    if (loading || !movieData[1] || movieData[2] != null || isResettingRef.current) return;
-    preloadNextMovie();
-  }, [loading, movieData[1], movieData[2], preloadNextMovie]);
+    if (loading || !movieData[1] || isResettingRef.current) return;
+    if (movieData[2] == null) preloadNextMovie('next');
+    if (movieData[0] == null) preloadNextMovie('prev');
+  }, [loading, movieData, preloadNextMovie, isResettingRef.current]);
 
   const handleMomentumScrollEnd = useCallback(async (event: { nativeEvent: { contentOffset: { y: number } } }) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -346,6 +439,7 @@ const MovieDetailScreen = () => {
 
     if (newIndex !== currentIndex && !isResettingRef.current) {
       if (newIndex === 2 && movieData[2]) {
+        // Swiped down (Next)
         isResettingRef.current = true;
         const nextMovie = movieData[2];
         setProgress(0);
@@ -355,42 +449,62 @@ const MovieDetailScreen = () => {
         setVideoMountKey((k) => k + 1);
         setIsVideoTransitioning(true);
         setMovieData([null, nextMovie, null]);
+        
+        setCurrentFeedIndex(prev => prev + 1); // increment array position
+
         flatListRef.current?.scrollToIndex({ index: 1, animated: false });
         setTimeout(() => {
           setCurrentIndex(1);
           isResettingRef.current = false;
           setIsVideoTransitioning(false);
           setPaused(false);
-          preloadNextMovie();
+          preloadNextMovie('next');
+          preloadNextMovie('prev');
         }, 250);
         return;
       }
-      if (newIndex === 0 || newIndex === 2) {
-        isResettingRef.current = true;
-        const prevId = movieData[1]?.imdb_id || currentSeedId;
-        setMovieData([null, null, null]);
-        setProgress(0);
-        setVideoMountKey((k) => k + 1);
-        const newMovie = await fetchNextMovieFromQueue(prevId);
-        if (newMovie) {
-          setIsVideoTransitioning(true);
-          setMovieData([null, newMovie, null]);
-          setIsLoading(false);
-          setCurrentSeedId(newMovie.imdb_id);
-          flatListRef.current?.scrollToIndex({ index: 1, animated: false });
-          setTimeout(() => {
-            setCurrentIndex(1);
-            isResettingRef.current = false;
-            setIsVideoTransitioning(false);
-            setPaused(false);
-            preloadNextMovie();
-          }, 250);
-        } else {
-          isResettingRef.current = false;
+
+      if (newIndex === 0) {
+        // Swiped up (Previous) - but check if we're at the beginning
+        if (currentFeedIndexRef.current <= 0) {
+          // Already at the first movie, reset scroll to center
+          flatListRef.current?.scrollToIndex({ index: 1, animated: true });
+          setCurrentIndex(1);
+          return;
         }
+
+        if (!movieData[0]) return;
+
+        isResettingRef.current = true;
+        const prevMovie = movieData[0];
+        setProgress(0);
+        saveBookMark_Ref.current = prevMovie?.is_bookmarked ?? false;
+        setSelectedMovie(prevMovie?.imdb_id ?? null);
+        setCurrentSeedId(prevMovie?.imdb_id ?? currentSeedId);
+        setVideoMountKey((k) => k + 1);
+        setIsVideoTransitioning(true);
+        setMovieData([null, prevMovie, null]);
+
+        setCurrentFeedIndex(prev => prev - 1); // decrement array position
+
+        flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+        setTimeout(() => {
+          setCurrentIndex(1);
+          isResettingRef.current = false;
+          setIsVideoTransitioning(false);
+          setPaused(false);
+          preloadNextMovie('next');
+          preloadNextMovie('prev');
+        }, 250);
+        return;
+      }
+
+      // Edge scenario failsafes
+      if (newIndex === 0 || newIndex === 2) {
+          isResettingRef.current = false;
       }
     }
-  }, [currentIndex, movieData, currentSeedId, ITEM_HEIGHT, preloadNextMovie]);
+  }, [currentIndex, movieData, currentSeedId, currentFeedIndex, ITEM_HEIGHT, preloadNextMovie]);
   const [EpisodesLoder, setEpisodesLoder] = useState(false)
 
   useEffect(() => {

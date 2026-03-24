@@ -8,50 +8,55 @@ import {
     FlatList,
     Image,
     TouchableNativeFeedback,
-     LayoutChangeEvent
+    LayoutChangeEvent,
+    ActivityIndicator,
+    ScrollView,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
- import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 import { BASE_IMAGE_URL } from '@config/api.config';
 
 const THUMB_SIZE = 24;
 const BUBBLE_WIDTH = 50;
 const BUBBLE_HEIGHT = 30;
 const ARROW_SIZE = 6;
- 
+
 const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId, token, filterFunc, groupTotalMember }) => {
     const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
     const [userSectionOpen, setUserSectionOpen] = useState(true);
     const [groupSectionOpen, setGroupSectionOpen] = useState(true);
     const [groupValue, setGroupValue] = useState(0);
+    const [popularityValue, setPopularityValue] = useState(50);
     const [sliderWidth, setSliderWidth] = useState(0);
-     const group_members = group?.members || group;
-// const groupTotalMember = group_members?.map(item => ({
-//     ...item,
-//     active: (item.activities_cnt ?? 0) > 0,
-//   }))
-//   .filter(item => item.active === true)
-//   .length;
+    const [isApplying, setIsApplying] = useState(false);
+    const [popularitySectionOpen, setPopularitySectionOpen] = useState(true);
+    const group_members = group?.members || group;
+    // const groupTotalMember = group_members?.map(item => ({
+    //     ...item,
+    //     active: (item.activities_cnt ?? 0) > 0,
+    //   }))
+    //   .filter(item => item.active === true)
+    //   .length;
 
- 
+
     let countfilter = 0;
-    
+
     const toggleUser = (id: number) => {
 
-         // Double-check that we're only toggling active users
+        // Double-check that we're only toggling active users
         const user = group_members?.find(member => member?.username === id);
         if (user && (user?.active === false)) {
             return; // Don't toggle inactive users
         }
-        
+
         setSelectedUsers(prev =>
             prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]
         );
     };
-    
+
     useEffect(() => {
         if (groupValue > 0) {
             countfilter = 1;
@@ -63,45 +68,45 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
     // PERFECT BUBBLE POSITIONING - Centers bubble over thumb in ALL cases
     const getBubblePosition = () => {
         if (groupTotalMember === 0 || sliderWidth === 0) return 0;
-        if(groupValue ==0){
+        if (groupValue == 0) {
 
-        } else if(groupValue == 4 )
-     {           const trackWidth = sliderWidth - THUMB_SIZE;
-   
-         if (groupValue === groupTotalMember) return trackWidth - (BUBBLE_WIDTH / 2) + (THUMB_SIZE / 2);
-        
-        // Calculate percentage of current value
-        const percentage = groupValue / groupTotalMember;
-          const thumbCenter = (percentage * trackWidth) + (THUMB_SIZE / 2);
- const bubbleLeft = thumbCenter - (BUBBLE_WIDTH / 
-    
-    2);
-    
-         return bubbleLeft +1;
+        } else if (groupValue == 4) {
+            const trackWidth = sliderWidth - THUMB_SIZE;
+
+            if (groupValue === groupTotalMember) return trackWidth - (BUBBLE_WIDTH / 2) + (THUMB_SIZE / 2);
+
+            // Calculate percentage of current value
+            const percentage = groupValue / groupTotalMember;
+            const thumbCenter = (percentage * trackWidth) + (THUMB_SIZE / 2);
+            const bubbleLeft = thumbCenter - (BUBBLE_WIDTH /
+
+                2);
+
+            return bubbleLeft + 1;
 
 
-        } else{
+        } else {
 
-                    const trackWidth = sliderWidth - THUMB_SIZE;
-    
-         // Handle edge cases
-        if (groupValue === 0) return 0;
-        if (groupValue === groupTotalMember) return trackWidth - (BUBBLE_WIDTH / 2) + (THUMB_SIZE / 2);
-        
-        // Calculate percentage of current value
-        const percentage = groupValue / groupTotalMember;
-          const thumbCenter = (percentage * trackWidth) + (THUMB_SIZE / 2);
- const bubbleLeft = thumbCenter - (BUBBLE_WIDTH / 
-    
-    2);
- 
+            const trackWidth = sliderWidth - THUMB_SIZE;
 
-          return bubbleLeft -2.5;
+            // Handle edge cases
+            if (groupValue === 0) return 0;
+            if (groupValue === groupTotalMember) return trackWidth - (BUBBLE_WIDTH / 2) + (THUMB_SIZE / 2);
+
+            // Calculate percentage of current value
+            const percentage = groupValue / groupTotalMember;
+            const thumbCenter = (percentage * trackWidth) + (THUMB_SIZE / 2);
+            const bubbleLeft = thumbCenter - (BUBBLE_WIDTH /
+
+                2);
+
+
+            return bubbleLeft - 2.5;
         }
         // Calculate available track width (excluding thumb radius on both ends)
 
     };
-    
+
 
     const handleSliderLayout = (e: LayoutChangeEvent) => {
         const { width } = e.nativeEvent.layout;
@@ -111,12 +116,13 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
     const resetFilters = () => {
         setSelectedUsers([]);
         setGroupValue(0);
+        setPopularityValue(50);
         countfilter = 0;
         onClose();
     };
 
     return (
-        <Modal 
+        <Modal
             animationType="slide"
             transparent
             visible={visible}
@@ -133,154 +139,199 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
                             </TouchableOpacity>
                         </View>
 
-                        {/* Liked by User Section */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            style={styles.sectionHeader}
-                            onPress={() => setUserSectionOpen(!userSectionOpen)}
-                        >
-                            <Text style={styles.sectionTitle}>Liked by User</Text>
-                            <View style={styles.arrowWrapper}>
-                                {userSectionOpen ? 
-                                    <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
-                                    <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
-                                }
-                            </View>
-                        </TouchableOpacity>
-                        
-                        <View style={{ maxHeight: '35%' }}>
-                            {userSectionOpen && (
-                                <FlatList
-                                    data={group_members}
-                                    keyExtractor={item => item?.username.toString()}
-                                    renderItem={({ item }) => {
-                                        const selected = selectedUsers.includes(item?.username);
-                                        const isActive = item?.active ?? true; // Default to true for backward compatibility
-                                        const activitiesCount = item?.activities_cnt ?? 0;
-                                        
-                                        return (
-                                            <View style={[
-                                                styles.userItem,
-                                                !isActive && styles.userItemInactive
-                                            ]}>
-                                                <FastImage
-                                                    style={[
-                                                        styles.avatar,
-                                                        !isActive && styles.avatarInactive
-                                                    ]}
-                                                    source={{
-                                                        uri: `${BASE_IMAGE_URL}${item?.avatar}`,
-                                                        priority: FastImage.priority.low,
-                                                        cache: FastImage.cacheControl.immutable,
-                                                    }}
-                                                    resizeMode={FastImage.resizeMode.cover}
-                                                />
-                                                <View style={styles.userInfo}>
-                                                    <Text style={[
-                                                        styles.userName,
-                                                        !isActive && styles.userNameInactive
-                                                    ]}>
-                                                        {item?.name ? item?.name : item?.username}
-                                                    </Text>
-                                                    {activitiesCount > 0 && (
-                                                        <Text style={styles.activityCount}>
-                                                            {activitiesCount} {activitiesCount === 1 ? 'activity' : 'activities'}
-                                                        </Text>
-                                                    )}
-                                                </View>
-                                                <TouchableOpacity 
-                                                    onPress={() => isActive && toggleUser(item?.username)}
-                                                    disabled={!isActive}
-                                                    style={styles.checkboxContainer}
-                                                >
-                                                    <Image
-                                                        source={
-                                                            selected && isActive
-                                                                ? imageIndex.checKBoxActive
-                                                                : imageIndex.checkBox
-                                                        }
-                                                        style={[
-                                                            styles.checkboxIcon,
-                                                            !isActive && styles.checkboxInactive
-                                                        ]}
-                                                    />
-                                                </TouchableOpacity>
-                                            </View>
-                                        );
-                                    }}
-                                    initialNumToRender={10}
-                                    maxToRenderPerBatch={10}
-                                    windowSize={7}
-                                    removeClippedSubviews
-                                />
-                            )}
-                        </View>
-                        
-                        {/* Liked by Group Section */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            style={styles.sectionHeader}
-                            onPress={() => setGroupSectionOpen(!groupSectionOpen)}
-                        >
-                            <Text style={styles.sectionTitle}>Liked by Group</Text>
-                            <View style={styles.arrowWrapper}>
-                                {groupSectionOpen ? 
-                                    <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> : 
-                                    <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
-                                }
-                            </View>
-                        </TouchableOpacity>
-                        
-                        {groupSectionOpen && (
-                            <View style={styles.sliderSection}>
-                                <Text style={styles.groupValue}>0</Text>
-                                
-                                <View style={styles.sliderWrapper}>
-                                    {/* Slider Container with Bubble */}
-                                    <View 
-                                        style={styles.sliderContainer}
-                                        onLayout={handleSliderLayout}
-                                    >
-                                        {/* Bubble positioned absolutely */}
-                                        {sliderWidth > 0 && (
-                                            <View
-                                                style={[
-                                                    styles.bubbleContainer,
-                                                    { 
-left: groupValue  == 0 ?  -9.5 :  groupValue  == groupTotalMember ?   sliderWidth-42:getBubblePosition(),                                                    }
-                                                ]}
-                                            >
-                                                <View style={styles.bubble}>
-                                                    <Text style={styles.bubbleText}>{groupValue}</Text>
-                                                    <Image
-                                                        source={imageIndex.thumpUP}
-                                                        resizeMode="contain"
-                                                        style={styles.likeIcon}
-                                                    />
-                                                </View>
-                                                <View style={styles.bubbleArrow} />
-                                            </View>
-                                        )}
-                                        
-                                        {/* Slider Component */}
-                                        <Slider
-                                            style={styles.slider}
-                                            minimumValue={0}
-                                            maximumValue={groupTotalMember || 0}
-                                            step={1}
-                                            value={groupValue}
-                                            onValueChange={value => setGroupValue(Math.round(value))}
-                                            minimumTrackTintColor={Color.primary}
-                                            maximumTrackTintColor="#ccc"
-                                            thumbTintColor={Color.whiteText}
-                                            thumbSize={THUMB_SIZE}
-                                        />
-                                    </View>
+                        <ScrollView contentContainerStyle={{ paddingBottom: 110, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+                            {/* Liked by User Section */}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={styles.sectionHeader}
+                                onPress={() => setUserSectionOpen(!userSectionOpen)}
+                            >
+                                <Text style={styles.sectionTitle}>Liked by User</Text>
+                                <View style={styles.arrowWrapper}>
+                                    {userSectionOpen ?
+                                        <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> :
+                                        <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                                    }
                                 </View>
-                                
-                                <Text style={styles.groupValue}>{groupTotalMember}</Text>
+                            </TouchableOpacity>
+
+                            <View>
+                                {userSectionOpen && (
+                                    <FlatList
+                                        scrollEnabled={false}
+                                        data={group_members}
+                                        keyExtractor={item => item?.username.toString()}
+                                        renderItem={({ item }) => {
+                                            const selected = selectedUsers.includes(item?.username);
+                                            const isActive = item?.active ?? true; // Default to true for backward compatibility
+                                            const activitiesCount = item?.activities_cnt ?? 0;
+
+                                            return (
+                                                <View style={[
+                                                    styles.userItem,
+                                                    !isActive && styles.userItemInactive
+                                                ]}>
+                                                    <FastImage
+                                                        style={[
+                                                            styles.avatar,
+                                                            !isActive && styles.avatarInactive
+                                                        ]}
+                                                        source={{
+                                                            uri: `${BASE_IMAGE_URL}${item?.avatar}`,
+                                                            priority: FastImage.priority.low,
+                                                            cache: FastImage.cacheControl.immutable,
+                                                        }}
+                                                        resizeMode={FastImage.resizeMode.cover}
+                                                    />
+                                                    <View style={styles.userInfo}>
+                                                        <Text style={[
+                                                            styles.userName,
+                                                            !isActive && styles.userNameInactive
+                                                        ]}>
+                                                            {item?.name ? item?.name : item?.username}
+                                                        </Text>
+                                                        {activitiesCount > 0 && (
+                                                            <Text style={styles.activityCount}>
+                                                                {activitiesCount} {activitiesCount === 1 ? 'activity' : 'activities'}
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                    <TouchableOpacity
+                                                        onPress={() => isActive && toggleUser(item?.username)}
+                                                        disabled={!isActive}
+                                                        style={styles.checkboxContainer}
+                                                    >
+                                                        <Image
+                                                            source={
+                                                                selected && isActive
+                                                                    ? imageIndex.checKBoxActive
+                                                                    : imageIndex.checkBox
+                                                            }
+                                                            style={[
+                                                                styles.checkboxIcon,
+                                                                !isActive && styles.checkboxInactive
+                                                            ]}
+                                                        />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            );
+                                        }}
+                                        initialNumToRender={10}
+                                        maxToRenderPerBatch={10}
+                                        windowSize={7}
+                                        removeClippedSubviews
+                                    />
+                                )}
                             </View>
-                        )}
+
+                            {/* Liked by Group Section */}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={styles.sectionHeader}
+                                onPress={() => setGroupSectionOpen(!groupSectionOpen)}
+                            >
+                                <Text style={styles.sectionTitle}>Liked by Group</Text>
+                                <View style={styles.arrowWrapper}>
+                                    {groupSectionOpen ?
+                                        <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> :
+                                        <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                                    }
+                                </View>
+                            </TouchableOpacity>
+
+                            {groupSectionOpen && (
+                                <View style={styles.sliderSection}>
+                                    <Text style={styles.groupValue}>0</Text>
+
+                                    <View style={styles.sliderWrapper}>
+                                        {/* Slider Container with Bubble */}
+                                        <View
+                                            style={styles.sliderContainer}
+                                            onLayout={handleSliderLayout}
+                                        >
+                                            {/* Bubble positioned absolutely */}
+                                            {sliderWidth > 0 && (
+                                                <View
+                                                    style={[
+                                                        styles.bubbleContainer,
+                                                        {
+                                                            left: groupValue == 0 ? -9.5 : groupValue == groupTotalMember ? sliderWidth - 42 : getBubblePosition(),
+                                                        }
+                                                    ]}
+                                                >
+                                                    <View style={styles.bubble}>
+                                                        <Text style={styles.bubbleText}>{groupValue}</Text>
+                                                        <Image
+                                                            source={imageIndex.thumpUP}
+                                                            resizeMode="contain"
+                                                            style={styles.likeIcon}
+                                                        />
+                                                    </View>
+                                                    <View style={styles.bubbleArrow} />
+                                                </View>
+                                            )}
+
+                                            {/* Slider Component */}
+                                            <Slider
+                                                style={styles.slider}
+                                                minimumValue={0}
+                                                maximumValue={groupTotalMember || 0}
+                                                step={1}
+                                                value={groupValue}
+                                                onValueChange={value => setGroupValue(Math.round(value))}
+                                                minimumTrackTintColor={Color.primary}
+                                                maximumTrackTintColor="#ccc"
+                                                thumbTintColor={Color.whiteText}
+                                                thumbSize={THUMB_SIZE}
+                                            />
+                                        </View>
+                                    </View>
+
+                                    <Text style={styles.groupValue}>{groupTotalMember}</Text>
+                                </View>
+                            )}
+
+                            {/* Popularity Penalty Section */}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                style={styles.sectionHeader}
+                                onPress={() => setPopularitySectionOpen(!popularitySectionOpen)}
+                            >
+                                <Text style={styles.sectionTitle}>Popularity Penalty</Text>
+                                <View style={styles.arrowWrapper}>
+                                    {popularitySectionOpen ?
+                                        <Image source={imageIndex.arrowUp} style={styles.arrowStyle} /> :
+                                        <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                                    }
+                                </View>
+                            </TouchableOpacity>
+
+                            {popularitySectionOpen && (
+                                <View style={styles.sliderSection}>
+                                    <Text style={[styles.groupValue, { fontSize: 12 }]}>0%</Text>
+                                    <View style={styles.sliderWrapper}>
+                                        <View style={styles.sliderContainer}>
+                                            <Slider
+                                                style={styles.slider}
+                                                minimumValue={0}
+                                                maximumValue={100}
+                                                step={1}
+                                                value={popularityValue}
+                                                onValueChange={value => setPopularityValue(Math.round(value))}
+                                                minimumTrackTintColor={Color.primary}
+                                                maximumTrackTintColor="#ccc"
+                                                thumbTintColor={Color.whiteText}
+                                            />
+                                            <Text style={{ color: 'white', position: 'absolute', top: -14, alignSelf: 'center', fontFamily: font.PoppinsMedium, fontSize: 12 }}>
+                                                {popularityValue}%
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <Text style={[styles.groupValue, { fontSize: 12 }]}>100%</Text>
+                                </View>
+                            )}
+
+                        </ScrollView>
 
                         {/* Footer buttons */}
                         <View style={styles.bottomButtonContainerBox}>
@@ -288,21 +339,35 @@ left: groupValue  == 0 ?  -9.5 :  groupValue  == groupTotalMember ?   sliderWidt
                                 <TouchableOpacity onPress={resetFilters} style={styles.selectButton}>
                                     <Text style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]}>Reset</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity  
+                                <TouchableOpacity
 
-  disabled={groupTotalMember<=  0}
-                                    onPress={() => {
-                                        onClose();
-                                        filterFunc(selectedUsers, groupValue);
-                                    }} 
+                                    disabled={groupTotalMember <= 0 || isApplying}
+                                    onPress={async () => {
+                                        setIsApplying(true);
+                                        try {
+                                            await filterFunc(selectedUsers, groupValue, popularityValue / 100);
+                                        } catch (e) {
+                                            // handled in parent
+                                        } finally {
+                                            setIsApplying(false);
+                                            onClose();
+                                        }
+                                    }}
                                     style={[
-    styles.cancelButton,
-    groupTotalMember <=0  && {
-        opacity:0.6
-    },
-  ]}
+                                        styles.cancelButton,
+                                        (groupTotalMember <= 0 || isApplying) && {
+                                            opacity: 0.6
+                                        },
+                                    ]}
                                 >
-                                    <Text style={styles.buttonTxt}>Apply</Text>
+                                    {isApplying ? (
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <ActivityIndicator size="small" color="white" style={{ marginRight: 6 }} />
+                                            <Text style={styles.buttonTxt}>Filtering...</Text>
+                                        </View>
+                                    ) : (
+                                        <Text style={styles.buttonTxt}>Apply</Text>
+                                    )}
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -355,7 +420,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color.grey,
         borderRadius: 10,
         marginHorizontal: 20,
-        height:50
+        height: 50
     },
     sectionTitle: {
         fontSize: 14,
@@ -420,11 +485,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: 20,
-         marginHorizontal: 11,
+        marginHorizontal: 11,
     },
     sliderWrapper: {
         flex: 1,
-         position: 'relative',
+        position: 'relative',
     },
     sliderContainer: {
         width: '100%',
@@ -491,20 +556,22 @@ const styles = StyleSheet.create({
         tintColor: Color.primary,
     },
     bottomButtonContainerBox: {
-        height: 90,
-        bottom: 20,
+        height: 80,
+        bottom: 0,
         position: 'absolute',
-        right: 20,
-        left: 20,
-         // backgroundColor: "rgba(26, 26, 26,0.8)",
+        right: 0,
+        left: 0,
+        paddingHorizontal: 20,
+        zIndex: 999,
+        elevation: 5,
+        backgroundColor: '#1A1A1A', // Solid background to prevent transparent overlaps
     },
     bottomButtonContainer: {
         flexDirection: 'row',
-        marginBottom: 14,
-        marginTop: 24,
-        // maxHeight: '42%',
+        marginBottom: 10,
+        marginTop: 15,
         justifyContent: 'space-between',
-        flex:1
+        flex: 1
     },
     selectButton: {
         width: '46%',

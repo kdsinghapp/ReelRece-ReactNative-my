@@ -11,7 +11,6 @@ import OtherWantProfile from '@screens/BottomTab/home/otherWatchingProfile/Other
 import Followers from '@screens/BottomTab/profile/followerTab/Followers';
 import MovieDetailScreen from '@screens/BottomTab/discover/movieDetail/MovieDetailScreen';
 import WoodsScreen from '@screens/BottomTab/ranking/woodsScreen/WoodsScreen';
-import SearchMovieDetail from '@screens/BottomTab/discover/movieDetail/SearchMovieDetail';
 const Stack = createNativeStackNavigator();
 
 
@@ -26,7 +25,6 @@ const FeedTab = memo(() => {
     { name: ScreenNameEnum.OtherWantProfile, Component: OtherWantProfile },   // PROFILE2
     { name: ScreenNameEnum.MovieDetailScreen, Component: MovieDetailScreen },
     { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-    { name: ScreenNameEnum.SearchMovieDetail, Component: SearchMovieDetail },
  
   ];
 

@@ -1,5 +1,3 @@
-
-
 import { View, TextInput, Image, TouchableOpacity } from 'react-native';
 import React, { useRef, useState } from 'react';
 import imageIndex from '@assets/imageIndex';
@@ -50,7 +48,6 @@ export default function InputFieldCustom({ validSuccess = undefined, ...props })
               textAlignVertical: 'center',
               paddingVertical: 0,
               includeFontPadding: false,
-
             }}
             onChangeText={onChangeText}
             value={text}

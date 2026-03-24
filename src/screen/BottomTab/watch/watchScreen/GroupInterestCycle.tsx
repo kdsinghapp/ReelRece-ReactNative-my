@@ -13,57 +13,129 @@ const GroupInterestCycle = ({ group,
   const [currentIndex, setCurrentIndex] = useState(0);
   const creator = group?.createdBy || group?.members?.[0] || null;
 
-  const interestUsers =
-    group?.activities && group.activities.length > 0
-      ? group.activities
-        .map((activity) => {
-          const member = group?.members?.find(
-            (mem) => mem?.username === activity.user?.username
-          );
+  const interestUsers = React.useMemo(() => {
+    if (!group?.activities || group.activities.length === 0) {
+      const membersExceptCreator = group?.members?.filter(
+        (m) => creator && (m.username !== creator.username && m.username !== creator)
+      ) || [];
+      
+      const creatorName = creator?.name || creator?.username || 'Owner';
+      const memberCount = membersExceptCreator.length;
+      let addedText = '';
 
-          return {
-            userName: member?.name || activity.user?.username || 'Unknown User',
-            avatar: member?.avatar || '/avatar/default.jpg',
-            userInterest: {
-              action: activity.preference === 'like',
-              actionTime: activity?.pref_record_date || null,
-              movieName: activity.movie?.title || 'a movie',
-            },
-          };
-        })
-        .filter(Boolean)
-      : (() => {
-          const membersExceptCreator = group?.members?.filter(
-            (m) => creator && (m.username !== creator.username && m.username !== creator)
-          ) || [];
-          
-          const creatorName = creator?.name || creator?.username || 'Owner';
-          const memberCount = membersExceptCreator.length;
-          let addedText = '';
+      if (memberCount === 1) {
+        addedText = `${membersExceptCreator[0]?.name || membersExceptCreator[0]?.username}`;
+      } else if (memberCount === 2) {
+        addedText = `${membersExceptCreator[0]?.name || membersExceptCreator[0]?.username} & ${membersExceptCreator[1]?.name || membersExceptCreator[1]?.username}`;
+      } else if (memberCount > 2) {
+        addedText = `${membersExceptCreator.slice(0, 2).map(m => m.name || m.username).join(', ')} & ${memberCount - 2} others`;
+      }
 
-          if (memberCount === 1) {
-            addedText = `${membersExceptCreator[0]?.name || membersExceptCreator[0]?.username}`;
-          } else if (memberCount === 2) {
-            addedText = `${membersExceptCreator[0]?.name || membersExceptCreator[0]?.username} and ${membersExceptCreator[1]?.name || membersExceptCreator[1]?.username}`;
-          } else if (memberCount > 2) {
-            addedText = `${membersExceptCreator[0]?.name || membersExceptCreator[0]?.username}, ${membersExceptCreator[1]?.name || membersExceptCreator[1]?.username} +${memberCount - 2} others`;
+      if (!addedText) addedText = 'created the group';
+
+      return [
+        {
+          userName: creatorName,
+          avatar: creator?.avatar || '/avatar/default.jpg',
+          isAddedActivity: true,
+          userInterest: {
+            action: addedText === 'created the group' ? '' : 'added',
+            actionTime: null,
+            movieName: addedText === 'created the group' ? 'created the group' : `${addedText} to the group`,
+          },
+        },
+      ];
+    }
+
+    const processed = [];
+    const groupCreationActivity = group.activities.find(a => a.preference === 'created_group');
+
+    if (groupCreationActivity) {
+      const creatorName = groupCreationActivity.user?.name || groupCreationActivity.user?.username || 'Owner';
+      
+      processed.push({
+        userName: creatorName,
+        avatar: groupCreationActivity.user?.avatar || '/avatar/default.jpg',
+        preference: 'created_group',
+        userInterest: {
+          action: 'created the group',
+          actionTime: groupCreationActivity?.pref_record_date || null,
+          movieName: '', 
+        }
+      });
+
+      const creatorAdded = group.activities.filter(a => a.preference === 'added' && a.user?.username === groupCreationActivity.user?.username);
+      if (creatorAdded.length > 0) {
+        const addedMembers = creatorAdded.map(a => a.another_user?.name || a.another_user?.username || 'Someone').filter(Boolean);
+        let formattedMembers = '';
+        
+        if (addedMembers.length === 1) {
+          formattedMembers = addedMembers[0];
+        } else if (addedMembers.length === 2) {
+          formattedMembers = `${addedMembers[0]} & ${addedMembers[1]}`;
+        } else if (addedMembers.length > 2) {
+          formattedMembers = `${addedMembers.slice(0, -1).join(', ')} & ${addedMembers[addedMembers.length - 1]}`;
+        }
+
+        processed.push({
+          userName: creatorName,
+          avatar: groupCreationActivity.user?.avatar || '/avatar/default.jpg',
+          preference: 'added',
+          userInterest: {
+            action: 'added',
+            actionTime: creatorAdded[0]?.pref_record_date || null,
+            movieName: `${formattedMembers} to the group`,
           }
+        });
+      }
+    }
 
-          if (!addedText) addedText = 'created group';
+    group.activities.forEach((activity) => {
+      if (activity.preference === 'created_group') return;
+      if (activity.preference === 'added' && groupCreationActivity && activity.user?.username === groupCreationActivity.user?.username) return;
 
-          return [
-            {
-              userName: creatorName,
-              avatar: creator?.avatar || '/avatar/default.jpg',
-              isAddedActivity: true,
-              userInterest: {
-                action: addedText === 'created group' ? '' : 'added',
-                actionTime: null,
-                movieName: addedText === 'created group' ? 'created group' : addedText,
-              },
-            },
-          ];
-        })();
+      const member = group?.members?.find(
+        (mem) => mem?.username === activity.user?.username
+      );
+
+      let action = '';
+      let movieName = '';
+
+      if (activity.preference === 'like') {
+        action = 'liked';
+        movieName = activity.movie?.title || 'a movie';
+      } else if (activity.preference === 'dislike') {
+        action = 'disliked';
+        movieName = activity.movie?.title || 'a movie';
+      } else if (activity.preference === 'added') {
+        action = 'added';
+        movieName = `${activity.another_user?.name || activity.another_user?.username || 'someone'} to the group`;
+      }
+
+      processed.push({
+        userName: member?.name || activity.user?.username || 'Unknown User',
+        avatar: member?.avatar || '/avatar/default.jpg',
+        preference: activity.preference,
+        userInterest: {
+          action: action,
+          actionTime: activity?.pref_record_date || null,
+          movieName: movieName,
+        },
+      });
+    });
+
+    return processed;
+  }, [group, creator]);
+
+  useEffect(() => {
+    if (interestUsers.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % interestUsers.length);
+    }, 4000); // Cycle every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [interestUsers.length]);
 
   const isSelected = Array.isArray(selectedGroupIds) && selectedGroupIds?.includes(group?.groupId);
   const user = interestUsers?.[currentIndex] ?? null;
@@ -183,21 +255,19 @@ const GroupInterestCycle = ({ group,
                 {user?.userName}
               </Text>
 
-              {interest?.movieName !== "has been added to the group" && (
+              {interest?.action && (
                 <CustomText
                   size={12}
                   lineHeight={14}
                   color={Color.whiteText}
                   style={{
-                    color: user?.isAddedActivity ? Color.whiteText : (interest?.action ? 'lightgreen' : 'red'),
+                    color: interest?.action === 'liked' ? 'lightgreen' : interest?.action === 'disliked' ? 'red' : interest?.action === 'created the group' ? '#00AFFF' : Color.whiteText,
                     marginRight: 3,
                   }}
                   font={font.PoppinsRegular}
                   numberOfLines={1}
                 >
-                  {user?.userInterest?.action === "other" ? null : (
-                    <>{user?.isAddedActivity ? interest?.action : (interest?.action ? "liked" : "disliked")}</>
-                  )}
+                  {interest?.action}
                 </CustomText>
               )}
 

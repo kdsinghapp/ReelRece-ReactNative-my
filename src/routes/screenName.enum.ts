@@ -88,10 +88,6 @@ enum ScreenNameEnum {
   /** Detailed movie information */
   MovieDetailScreen = "MovieDetailScreen",
 
-  /** Movie detail from search results */
-  SearchMovieDetail = 'SearchMovieDetail',
-
-
   // ============================================
   // RANKING SCREENS
   // ============================================

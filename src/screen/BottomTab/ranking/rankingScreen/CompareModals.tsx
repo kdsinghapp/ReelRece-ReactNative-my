@@ -19,11 +19,13 @@ const CompareModals = ({
   useCompareHook,
   onModalClose,
   onReviewAdded,
+  isOnboarding = false,
 }: {
   token: string;
   useCompareHook: ReturnType<typeof import('./useCompareComponent').useCompareComponent>;
   onModalClose?: () => void;
   onReviewAdded?: (imdb_id: string) => void;
+  isOnboarding?: boolean;
 }) => {
   const {
     selectedMovie,
@@ -49,7 +51,7 @@ const CompareModals = ({
     setCurrentStep,
     setStepsModalVisible,  
     handleCloseRating,
-
+    hasComparisonsAvailable, // Add this
   } = useCompareHook;
   const dispatch = useDispatch();
   useEffect(() => {
@@ -111,12 +113,15 @@ const CompareModals = ({
         <FeedbackModal
           visible={isAnyModalVisible}
           step={step}
+          isOnboarding={isOnboarding}
           onClose={() => {
             if (isComparisonStep) {
               handleCloseRating();
+              /*
               if (currentStep === 1 || currentStep === STEPPER_VALUE) {
                 setStepsModalVisible(true);
               }
+              */
               resetComparisonData();
               setSelectedMovie(undefined as never);
             } else {
@@ -165,15 +170,19 @@ const CompareModals = ({
           onSkipSelect={handleSkipSetFirst}
           handleCloseRating={() => {
             handleCloseRating();
+            /*
             if (currentStep === 1 || currentStep === STEPPER_VALUE) {
               setStepsModalVisible(true);
             }
+            */
             resetComparisonData();
             setSelectedMovie(undefined as never);
           }}
           comparisonMovies={Array.isArray(comparisonMovies) ? (comparisonMovies as MovieForComparison[]) : []}
+          hasComparisonsAvailable={hasComparisonsAvailable}
         />
       )}
+      {/* 
       {(currentStep === 1 || currentStep === STEPPER_VALUE) && (
         <StepProgressModal
           visible={isStepsModalVisible}
@@ -191,6 +200,7 @@ const CompareModals = ({
           totalSteps={STEPPER_VALUE}
         />
       )}
+      */}
 
 
     </>

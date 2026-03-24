@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   Image,
-   TouchableOpacity,
-   Animated,
+  TouchableOpacity,
+  Animated,
   NativeModules,
   Platform
 } from 'react-native';
@@ -18,8 +18,8 @@ import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModal
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { useTrailerTracker } from '@hooks/useTrailerTracker';
 import { useBookmarks } from '@hooks/useBookmark';
- import FastImage from 'react-native-fast-image';
- import { useDispatch, useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
 import { styles } from './FeedCardstyle';
@@ -32,7 +32,8 @@ import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 const FeedCard = ({
   screenName,
   avatar, user, title, comment, poster, videoUri, isPaused, shouldAutoPlay, is_bookMark, videoIndex,
-  rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username
+  rankPress, isVisible, ranked, imdb_id, created_date, token, release_year, shouldPlay, scoreType, username,
+  feedData = []
 }) => {
   const navigation = useNavigation();
   const [posterOpacity] = useState(new Animated.Value(1));
@@ -57,10 +58,10 @@ const FeedCard = ({
 
 
   const hasInteractedRef = useRef(false);
-   useEffect(() => {
+  useEffect(() => {
     videoUriRef.current = videoUri;
   }, [videoUri]);
- 
+
   useEffect(() => {
     const shouldPlayVideo = shouldAutoPlay && isVisible && shouldPlay;
     setPaused(!shouldPlayVideo);
@@ -114,7 +115,21 @@ const FeedCard = ({
     }
   }, [isVisible]);
   const handleNavigation = useCallback((id: string, tok: string) => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: id, token: tok });
+    const movieIndex = Array.isArray(feedData) ? feedData.findIndex((m: any) => m?.movie?.imdb_id === id) : -1;
+    navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+      imdb_idData: id,
+      token: tok,
+      movieList: feedData || [],
+      initialIndex: movieIndex >= 0 ? movieIndex : 0,
+      source: 'feed',
+      filterGenreString: '',
+      platformFilterString: '',
+      selectedSimpleFilter: '1',
+      selectedSortId: null,
+      contentSelect: null,
+      currentPage: 1,
+      totalPages: 1,
+    });
   }, [navigation]);
 
   // Clear video buffer when component unmounts
@@ -172,7 +187,7 @@ const FeedCard = ({
 
   useEffect(() => {
     if (videoUri && videoUri !== stableVideoUri.current) {
-      stableVideoUri.current = videoUri; 
+      stableVideoUri.current = videoUri;
     }
   }, [videoUri, videoIndex]);
 
@@ -214,7 +229,7 @@ const FeedCard = ({
       NativeModules?.DeviceInfo?.isLowRamDevice?.().then(setIsLowMemoryDevice);
     }
   }, []);
- 
+
   return (
     <View style={styles.feedCard}>
       <View style={styles.feedHeader}>
@@ -235,7 +250,7 @@ const FeedCard = ({
                 style={styles.rankedText}
                 font={font.PoppinsRegular}
               >                  {t("common.ranked",)}
-              
+
               </CustomText>
             </CustomText>
 
@@ -259,13 +274,13 @@ const FeedCard = ({
 
             <RankingWithInfo
               score={ranked}
-              title={scoreType === "Rec" ? "Rec Score" :t("discover.friendscore")}
- 
+              title={scoreType === "Rec" ? "Rec Score" : t("discover.friendscore")}
+
               description={
                 scoreType === "Rec"
-                  ?  t("discover.recscoredes")
-                  :  t("discover.frienddes") 
-                  // "This score shows the rating from your friend for this title."
+                  ? t("discover.recscoredes")
+                  : t("discover.frienddes")
+                // "This score shows the rating from your friend for this title."
               }
             />
           </TouchableOpacity>
@@ -312,7 +327,7 @@ const FeedCard = ({
               paused={paused}
               style={styles.video}
               muted={isMuted}
-               automaticallyWaitsToMinimizeStalling={true} // iOS: auto buffer
+              automaticallyWaitsToMinimizeStalling={true} // iOS: auto buffer
               bufferConfig={{
                 minBufferMs: 3000,
                 maxBufferMs: 10000,
@@ -333,7 +348,7 @@ const FeedCard = ({
               }}
               playInBackground={false}
               playWhenInactive={false}
-               controls={false}
+              controls={false}
               disableFocus={true}
               hideShutterView
               shutterColor="transparent"

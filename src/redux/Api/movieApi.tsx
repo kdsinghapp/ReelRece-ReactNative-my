@@ -1,12 +1,12 @@
 import axiosInstance from "@redux/Api/axiosInstance";
-import { 
-  Movie, 
-  MovieMetadata, 
-  Episode, 
-  PaginatedResponse, 
-  PairwiseDecisionPayload, 
+import {
+  Movie,
+  MovieMetadata,
+  Episode,
+  PaginatedResponse,
+  PairwiseDecisionPayload,
   CalculateRatingPayload,
-  TrailerInteractionData 
+  TrailerInteractionData
 } from "@types/api.types";
 import {
   validateImdbId,
@@ -29,10 +29,10 @@ import { Alert } from "react-native";
 //                 Authorization: `Token ${params.token}`
 //             }
 //         })
- //         return response;
+//         return response;
 
 //     } catch {
- //         return { success: false, error: error?.response?.data || error.message };
+//         return { success: false, error: error?.response?.data || error.message };
 //     }
 // }
 
@@ -124,7 +124,7 @@ export const getUniqueGenres = async (
     });
     return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -184,15 +184,15 @@ export const getRatedMovies = async (token: string, page: number = 1): Promise<P
     // Validate page
     const pageValidation = validatePage(page);
     if (!pageValidation.isValid) {
-     }
+    }
 
     const response = await axiosInstance.get('/rated-movies', {
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ page: pageValidation.value }),
     });
-      return response.data;
+    return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -208,9 +208,9 @@ export const getAllRatedMovies = async (token: string) => {
     const response = await axiosInstance.get(`/ranked-movies`, {
       headers: { Authorization: `Token ${token}` }
     });
-     return response.data;
+    return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -223,7 +223,7 @@ export const getAllRated_with_preference = async (token: string, preference: str
       required: true,
       maxLength: 50,
     });
-    
+
     if (!preferenceValidation.isValid) {
       throwValidationError('Preference', preferenceValidation.error);
     }
@@ -232,9 +232,9 @@ export const getAllRated_with_preference = async (token: string, preference: str
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ preference: preferenceValidation.sanitized }),
     });
-     return response.data;
+    return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -246,65 +246,65 @@ export const recordPairwiseDecision = async (token: string, payload: PairwiseDec
     payload,
     { headers: { Authorization: `Token ${token}` } }
   );
-   return response.data;
+  return response.data;
 };
 
 export const recordPairwiseDecision1 = async (token: string, payload: PairwiseDecisionPayload) => {
-   const response = await axiosInstance.post(
+  const response = await axiosInstance.post(
     API_ENDPOINTS.MOVIE.RECORD_DECISION_WITH_RATING,
     payload,
     { headers: { Authorization: `Token ${token}` } }
   );
-   return response.data;
+  return response.data;
 };
 
 
-export const getOtherUserRatedMovies = async (token: string, username?: string,page = 1 ) => {
+export const getOtherUserRatedMovies = async (token: string, username?: string, page = 1) => {
 
-   try {
+  try {
     const response = await axiosInstance.get(`/rated-movies?username=${username}&page=${page}`, {
       headers: { Authorization: `Token ${token}` },
     })
-     return response.data
+    return response.data
   } catch (error) {
-     throw error
+    throw error
   }
 }
 
 
 
-export const getCommonBookmarks = async (token: string, page =1 ) => {
+export const getCommonBookmarks = async (token: string, page = 1) => {
   try {
     const response = await axiosInstance.get(`/bookmarks?page=${page}`, {
       headers: { Authorization: `Token ${token}` },
     })
-     return response.data
+    return response.data
   } catch (error) {
-     throw error
+    throw error
   }
 }
 
 
-export const getCommonBookmarkOtherUser = async (token: string,username:string, page=1) => {
+export const getCommonBookmarkOtherUser = async (token: string, username: string, page = 1) => {
   try {
     // Validate inputs
     const usernameValidation = validateUsername(username);
     const pageValidation = validatePage(page);
-    
+
     if (!usernameValidation.isValid) {
       throwValidationError('Username', usernameValidation.error);
     }
 
     const response = await axiosInstance.get('/bookmarks-common', {
       headers: { Authorization: `Token ${token}` },
-      params: createSafeParams({ 
+      params: createSafeParams({
         username: usernameValidation.sanitized,
         page: pageValidation.value
       }),
     })
-     return response.data
+    return response.data
   } catch (error) {
-     throw error
+    throw error
   }
 }
 
@@ -321,11 +321,11 @@ export const getMovieMetadata = async (token: string, imdb_id: string): Promise<
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ imdb_id: imdbIdValidation.sanitized }),
     });
- 
+
 
     return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   };
 };
 
@@ -341,14 +341,14 @@ export const getEpisodes = async (token: string, imdb_id: string): Promise<Episo
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ imdb_id: imdbIdValidation.sanitized }),
     })
-     return response.data;
+    return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 }
 
 export const getEpisodesBySeason = async (token: string, imdb_id: string, season: number): Promise<Episode[] | Record<string, unknown>> => {
-   try {
+  try {
     const imdbIdValidation = validateImdbId(imdb_id);
     if (!imdbIdValidation.isValid) {
       throwValidationError('IMDB ID', imdbIdValidation.error);
@@ -357,9 +357,9 @@ export const getEpisodesBySeason = async (token: string, imdb_id: string, season
       headers: { Authorization: `Token ${token}` },
       params: { imdb_id: imdbIdValidation.sanitized, season },
     });
-     return response.data;
+    return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -373,9 +373,9 @@ export const getRankingSuggestionMovie = async (token: string, page = 1) => {
       },
       params: { page }
     })
-      return response.data
+    return response.data
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -383,7 +383,7 @@ export const recordTrailerInteraction = async (
   token: string,
   data: TrailerInteractionData
 ): Promise<{ success: boolean }> => {
- 
+
   try {
     const response = await axiosInstance.post(`/record-user-trailer-interaction`,
       data,
@@ -393,11 +393,11 @@ export const recordTrailerInteraction = async (
         },
       },
     );
- 
+
     return response.data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
-     throw error;
+    throw error;
   }
 };
 
@@ -405,7 +405,7 @@ export const calculateMovieRating = async (
   token: string,
   payload: CalculateRatingPayload
 ): Promise<boolean> => {
-   try {
+  try {
     const response = await axiosInstance.post(
       '/calculate-movie-rating',
       payload,
@@ -413,10 +413,10 @@ export const calculateMovieRating = async (
         headers: { Authorization: `Token ${token}` },
       }
     );
-     return true;
+    return true;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown } };
-     throw error;
+    throw error;
   }
 };
 
@@ -426,16 +426,31 @@ export const rollbackPairwiseDecisions = async (
   token: string,
   imdbId: string
 ): Promise<{ success: boolean; message?: string }> => {
- 
+
   try {
     const response = await axiosInstance.delete('/rollback-pairwise-decisions', {
       headers: { Authorization: `Token ${token}` },
       data: { imdb_id: imdbId },
     });
 
-     return response.data;
+    return response.data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown } };
-     throw error;
+    throw error;
+  }
+};
+
+export const deleteRatedMovie = async (
+  token: string,
+  imdbId: string
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const response = await axiosInstance.delete('/delete-rated-movie', {
+      headers: { Authorization: `Token ${token}` },
+      data: { imdb_id: imdbId },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    throw error;
   }
 };

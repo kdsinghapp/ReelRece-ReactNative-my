@@ -83,6 +83,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
     // setthinkModal(true);
     try {
       const response = await getMembersScores(token, groupId, imdb_id)
+    
       const filteredResults = response?.results?.filter(member => member?.preference !== undefined);
       if (filteredResults) {
         setMembers(filteredResults)

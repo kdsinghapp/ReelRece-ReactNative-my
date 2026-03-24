@@ -1,4 +1,4 @@
- import { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import {
   validateImdbId,
   validateString,
@@ -34,7 +34,7 @@ export const getMoviePlatforms = async ({
 
     // Build params
     const params: Record<string, string> = { imdb_id: imdbIdValidation.sanitized };
-    
+
     if (country) {
       const countryValidation = validateString(country, {
         fieldName: 'Country',
@@ -44,7 +44,7 @@ export const getMoviePlatforms = async ({
         params.country = countryValidation.sanitized;
       }
     }
-    
+
     if (watch_type) {
       const watchTypeValidation = validateString(watch_type, {
         fieldName: 'Watch type',
@@ -55,15 +55,15 @@ export const getMoviePlatforms = async ({
       }
     }
 
-     const response = await axiosInstance.get('/platforms', {
+    const response = await axiosInstance.get('/platforms', {
       headers: {
         Authorization: `Token ${token}`,
       },
       params: createSafeParams(params),
     });
-     return response;
+    return response;
   } catch (error) {
-     return [];
+    return [];
   }
 };
 
@@ -74,29 +74,29 @@ export const getRecentActiveUsers = async (token: string): Promise<AxiosResponse
     const response = await axiosInstance.get<{ results: User[] }>('/recent-active-users', {
       headers: { Authorization: `Token ${token}` },
     });
- 
+
     return response; // don't wrap in `[]`, let caller handle .data?.results
   } catch (error) {
-     // Create a minimal AxiosResponse-like object
+    // Create a minimal AxiosResponse-like object
     return {
       data: { results: [] },
       status: 500,
       statusText: 'Error',
       headers: {},
-      config: {} ,
+      config: {},
     } as AxiosResponse<{ results: User[] }>;
   }
 };
 
 export const getOthereUsers = async (token: string, username: string): Promise<AxiosResponse<User> | User[]> => {
-   try {
-     const response = await axiosInstance.get<User>('/user-profile', {
+  try {
+    const response = await axiosInstance.get<User>('/user-profile', {
       params: { username },
       headers: { Authorization: `Token ${token}` },
     });
-     return response || [];
+    return response || [];
   } catch (error) {
-     return [];
+    return [];
   }
 };
 
@@ -109,10 +109,10 @@ export const userBookMark = async (token: string): Promise<AxiosResponse<Bookmar
         },
       }
     );
- 
+
     return response;
   } catch (error) {
-     return undefined;
+    return undefined;
   }
 };
 interface Bookmark {
@@ -131,13 +131,13 @@ interface BookmarksResponse {
 }
 
 export const getUserBookmarks = async (token: string): Promise<BookmarksResponse> => {
-   try {
+  try {
     const response = await axiosInstance.get("/bookmarks", {
       headers: { Authorization: `Token ${token}` },
     });
-     return response.data; // ✅ only the useful data
+    return response.data; // ✅ only the useful data
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -149,22 +149,22 @@ export const getUserBookmarks = async (token: string): Promise<BookmarksResponse
 //       { imdb_id },
 //       { headers: { Authorization: `Token ${token}` } }
 //     );
- 
- //     return true; // Successfully bookmarked
+
+//     return true; // Successfully bookmarked
 //   } catch (error) {
 //     if (error.response?.status === 409) {
- 
+
 //       // Already bookmarked → remove it
 //       try {
 //         await axiosInstance.delete("/bookmark", {
 //           headers: { Authorization: `Token ${token}` },
 //           data: { imdb_id },
 //         });
- //         return false;
+//         return false;
 //       } catch (deleteError) {
-  //       }
+//       }
 //     } else {
- //       throw error;
+//       throw error;
 //     }
 //   }
 // };
@@ -178,25 +178,25 @@ export const toggleBookmark = async (token: string, imdb_id: string): Promise<bo
   try {
     // Try adding first
     const addRes = await axiosInstance.post(BOOKMARK_ENDPOINT, { imdb_id }, { headers });
- 
+
     if (addRes.status === 200 || addRes.status === 201) {
- 
-       return true; // Added
+
+      return true; // Added
     }
   } catch (error: unknown) {
     const err = error as { response?: { status?: number; data?: unknown } };
     if (err?.response?.status === 409) {
-       // Already exists → Try deleting
+      // Already exists → Try deleting
       const delRes = await axiosInstance.delete(BOOKMARK_ENDPOINT, {
         headers,
         data: { imdb_id },
       });
 
-       if (delRes.status === 200) {
-         return false; // Removed
+      if (delRes.status === 200) {
+        return false; // Removed
       }
     } else {
-       throw error;
+      throw error;
     }
   }
 
@@ -206,21 +206,21 @@ export const toggleBookmark = async (token: string, imdb_id: string): Promise<bo
 
 
 
-export const getOtherUserBookmarks = async (token: string, username?: string,page = 1): Promise<BookmarksResponse> => {
+export const getOtherUserBookmarks = async (token: string, username?: string, page = 1): Promise<BookmarksResponse> => {
   try {
     // Validate inputs
     const { validateUsername, validatePage } = await import('../../utils/apiInputValidator');
-    
+
     const params: Record<string> = {};
-    
+
     if (username) {
       const usernameValidation = validateUsername(username);
       if (usernameValidation.isValid) {
         params.username = usernameValidation.sanitized;
       } else {
-       }
+      }
     }
-    
+
     const pageValidation = validatePage(page);
     if (pageValidation.isValid) {
       params.page = pageValidation.value;
@@ -232,7 +232,7 @@ export const getOtherUserBookmarks = async (token: string, username?: string,pag
     });
     return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -261,7 +261,7 @@ export const getMatchingMovies = async (
     });
     return response.data;
   } catch (error) {
-     throw error;
+    throw error;
   }
 };
 
@@ -269,7 +269,7 @@ export const getMatchingMovies = async (
 
 // history api
 
-export const getHistoryApi = async (token: string, username?: string,page = 1) => {
+export const getHistoryApi = async (token: string, username?: string, page = 1) => {
   try {
     // Validate inputs
     const { validateUsername, validatePage } = await import('../../utils/apiInputValidator');
@@ -280,13 +280,13 @@ export const getHistoryApi = async (token: string, username?: string,page = 1) =
     if (pageValidation.isValid) {
       params.page = pageValidation.value;
     }
-    
+
     if (username) {
       const usernameValidation = validateUsername(username);
       if (usernameValidation.isValid) {
         params.username = usernameValidation.sanitized;
       } else {
-       }
+      }
     }
 
     const response = await axiosInstance.get('/history', {
@@ -295,8 +295,8 @@ export const getHistoryApi = async (token: string, username?: string,page = 1) =
       },
       params: createSafeParams(params),
     });
-     return response.data; // ✅ return result
+    return response.data; // ✅ return result
   } catch (error) {
-     return null;
+    return null;
   }
 };

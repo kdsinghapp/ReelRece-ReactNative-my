@@ -335,16 +335,27 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
   const isSmallDevice = screenHeight < 700;
 
   const goToDetail = useCallback(
-    (item: Movie) => {
+    (item: Movie, index?: number) => {
+      const movieIndex = index !== undefined ? index : moreMovie.findIndex((m: Movie) => m?.imdb_id === item?.imdb_id);
       onClose();
       setTimeout(() => {
         navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
           imdb_idData: item?.imdb_id,
           token,
+          movieList: moreMovie || [],
+          initialIndex: movieIndex >= 0 ? movieIndex : 0,
+          source: 'moreLikeThis',
+          filterGenreString: '',
+          platformFilterString: '',
+          selectedSimpleFilter: '1',
+          selectedSortId: null,
+          contentSelect: null,
+          currentPage: 1,
+          totalPages: 1,
         });
       }, 250);
     },
-    [navigation, token, onClose]
+    [navigation, token, onClose, moreMovie]
   );
 
   useEffect(() => {
@@ -486,7 +497,7 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                     <TouchableOpacity
                       key={item.imdb_id || index.toString()}
                       activeOpacity={0.7}
-                      onPress={() => goToDetail(item)}
+                      onPress={() => goToDetail(item, index)}
                       style={[
                         styles.movieCard,
                         { 
