@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
   },
 
   description: {
-    lineHeight: 19, fontSize: 14, fontFamily: font.PoppinsRegular
-    , color: Color.lightGrayText,
+    lineHeight: 19, fontSize: 13, fontFamily: font.PoppinsRegular,
+    color: Color.whiteText,
     marginTop: 4,
     marginBottom: 10,
   },
@@ -88,11 +88,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: "center",
-
-    // backgroundColor:'red'
-    // marginTop: 4,
-    // marginBottom: 10,
-
   },
 
   btnContainer: {
@@ -113,23 +108,24 @@ const styles = StyleSheet.create({
   netflixText: { color: Color.whiteText, marginLeft: 6 },
   footerNav: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     // marginTop: 30,
     alignItems: "center",
     // marginVertical: 24,
     paddingHorizontal: 24,
   },
-  
+
   footerButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   linkText: {
-    fontSize: 14,
+    fontSize: 13,
     color: Color.primary,
     // marginRight: 5,
     fontFamily: font.PoppinsMedium,
-    lineHeight: 18
+    lineHeight: 18,
+    marginRight: 20
   },
   arrowIcon: {
     height: 18,
@@ -299,6 +295,17 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: font.PoppinsMedium,
     color: Color.whiteText,
+  },
+  descriptionLabel: {
+    color: Color.whiteText,
+    fontFamily: font.PoppinsMedium,
+    fontSize: 14,
+    marginTop: 8,
+  },
+  descriptionValue: {
+    color: Color.whiteText,
+    fontFamily: font.PoppinsRegular,
+    fontSize: 13,
   },
 });
 

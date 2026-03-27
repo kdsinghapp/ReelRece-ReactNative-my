@@ -116,11 +116,11 @@ const OtherWantProfile = () => {
   };
 
   const handleNavigation = (imdb_id: string, token: string) => {
-    const index = Array.isArray(datamovie) ? datamovie.findIndex((m: any) => m?.imdb_id === imdb_id) : -1;
+    const index = Array.isArray(movies) ? movies.findIndex((m: any) => m?.imdb_id === imdb_id) : -1;
     navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
       imdb_idData: imdb_id,
       token: token,
-      movieList: datamovie || [],
+      movieList: movies || [],
       initialIndex: index >= 0 ? index : 0,
       source: 'otherWantProfile',
       filterGenreString: '',

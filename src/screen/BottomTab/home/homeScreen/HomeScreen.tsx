@@ -41,6 +41,7 @@ import {
   fetchHomeBookmarks,
   resetHomeFeedPagination,
 } from '@redux/feature/homeSlice';
+import { usePendingInvitesCount } from '@hooks/usePendingInvitesCount';
 
 
 const App = () => {
@@ -51,6 +52,7 @@ const App = () => {
   );
   const isMuted = false;
   const { navigation, setIsVisible } = useHome();
+  const { hasPendingInvites, pendingCount } = usePendingInvitesCount(token);
 
   const {
     feedData,
@@ -581,8 +583,13 @@ const App = () => {
         </View>
 
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={() => setNotificationModal(true)}>
+          <TouchableOpacity onPress={() => setNotificationModal(true)} style={{ position: 'relative' }}>
             <Image source={imageIndex.normalNotification} style={styles.backArrowImg} />
+            {hasPendingInvites && (
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>{pendingCount > 9 ? '9+' : pendingCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={goToSearchScreen}>

@@ -2,7 +2,7 @@
 import React, { useState, useRef, memo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import Popover from "react-native-popover-view";
-  import RankingCard from "@components/ranking/RankingCard";
+import RankingCard from "@components/ranking/RankingCard";
 import { Color } from "@theme/color";
 import font from "@theme/font";
 import { t } from "i18next";
@@ -24,12 +24,11 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
   const [visible, setVisible] = useState(false);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const touchableRef = useRef(null);
- 
- 
+
+
   const handlePress = (event: string) => {
     const { pageY } = event.nativeEvent;
 
-    // Bottom me space kam hai to top, warna bottom
     if (screenHeight - pageY < 225) {
       setPlacement("top");
     } else {
@@ -97,14 +96,14 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
         ref={touchableRef}
         onPress={handlePress}
         activeOpacity={0.8}
-        style={[styles.cardWrapper,{
-         }]}
+        style={[styles.cardWrapper, {
+        }]}
       >
-   <RankingCard ranked={score ?? '?'} loading={loading} />
- 
+        <RankingCard ranked={score ?? '?'} loading={loading} />
+
 
       </TouchableOpacity>
-   
+
     </View>
   );
 };
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
     zIndex: 22,
     overflow: "visible",
     justifyContent: "center",
-    marginLeft:5
+    marginLeft: 5
   },
   cardWrapper: {},
   tooltipBox: {

@@ -41,12 +41,26 @@ const styles = StyleSheet.create({
     width: 24,
     resizeMode: "contain",
     marginLeft: 14
-
-
-  }
-
-
-
-
+  },
+  badgeContainer: {
+    position: 'absolute',
+    right: -4,
+    top: -4,
+    backgroundColor: Color.red,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+    borderWidth: 1.5,
+    borderColor: Color.background,
+  },
+  badgeText: {
+    color: Color.whiteText,
+    fontSize: 10,
+    fontFamily: font.PoppinsBold,
+    lineHeight: 12,
+  },
 });
 export default styles;

@@ -20,7 +20,7 @@ import font from '@theme/font';
 import LogoutModal from '@components/modal/logoutModal/logoutModal';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { leaveGroup, toggleGroupNotification } from '@redux/Api/GroupApi';
+import { leaveGroup, toggleGroupNotification, getPendingInvitations, acceptInvitation, rejectInvitation } from '@redux/Api/GroupApi';
 import { fetchWatchGroups, updateGroupsAfterLeave } from '@redux/feature/watchSlice';
 import { WatchStyle } from './WatchStyle';
 import { getUserProfile } from '@redux/Api/authService';
@@ -34,6 +34,7 @@ import { t } from 'i18next';
 import NetInfo from '@react-native-community/netinfo';
 
 import WatchGroupCom, { GroupListItem } from '@components/common/WatchGroupCom/WatchGroupCom';
+import { usePendingInvitesCount } from '@hooks/usePendingInvitesCount';
 // const Notifi cation = React.lazy(() => import('../../home/homeScreen/Notification/Notification'));
 // const LogoutModal = React.lazy(() => import('@components/modal/logoutModal/logoutModal'));
 
@@ -57,6 +58,7 @@ const WatchScreen = () => {
   const { getAllGroupReference } = route?.params || {};   // first come from groupsettingmodal
   const navigation = useNavigation();
   const [notificationModal, setNotificationModal] = useState(false);
+  const { hasPendingInvites, pendingCount } = usePendingInvitesCount(token);
   const [isSettingsMode, setIsSettingsMode] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -89,7 +91,7 @@ const WatchScreen = () => {
         setRefreshing(true);
         fetchGroups();
       } else {
-       }
+      }
     });
     return () => unsubscribe();
   }, [fetchGroups]);
@@ -478,7 +480,7 @@ const WatchScreen = () => {
 
 
 
-  const HeaderSection = memo(({ isSettingsMode, goToSearchScreen, setNotificationModal }) => {
+  const HeaderSection = memo(({ isSettingsMode, goToSearchScreen, setNotificationModal, hasPending }: any) => {
     return (
       <View style={WatchStyle.header}>
         <View style={WatchStyle.headerLeft}>
@@ -486,21 +488,23 @@ const WatchScreen = () => {
             size={20}
             color={Color.placeHolder}
             style={[WatchStyle.logo,]}
-            // style={[WatchStyle.logo, { color: isSettingsMode ? Color.yellow1 : Color.whiteText }]}
             font={font.PoppinsBold}
           >
             {(t("home.watchtogether"))}
-
-            {/* {isSettingsMode ? 'Groups setting testing' : 'Watch Together'} */}
           </CustomText>
         </View>
 
         <View style={WatchStyle.headerRight}>
-          <TouchableOpacity onPress={() => setNotificationModal(true)}>
+          <TouchableOpacity onPress={() => setNotificationModal(true)} style={{ position: 'relative' }}>
             <Image
               source={imageIndex.normalNotification}
               style={WatchStyle.notificationIcon}
             />
+            {/* {hasPending && (
+              <View style={WatchStyle.badgeContainer}>
+                <CustomText style={WatchStyle.badgeText}>{pendingCount > 9 ? '9+' : pendingCount}</CustomText>
+              </View>
+            )} */}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={goToSearchScreen}
@@ -509,7 +513,6 @@ const WatchScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-
     );
   });
 
@@ -537,9 +540,9 @@ const WatchScreen = () => {
   });
 
   return (
-    <SafeAreaView  edges={isConnected ? ['top'] : []} style={WatchStyle.mincontainer}>
+    <SafeAreaView edges={isConnected ? ['top'] : []} style={WatchStyle.mincontainer}>
       <CustomStatusBar translucent={true} />
-  
+
       <View style={WatchStyle.container}>
         {/* {renderHeaderSection()} */}
 
@@ -553,6 +556,7 @@ const WatchScreen = () => {
           isSettingsMode={isSettingsMode}
           goToSearchScreen={goToSearchScreen}
           setNotificationModal={setNotificationModal}
+          hasPending={hasPendingInvites}
         />
         <View style={WatchStyle.groupsContainer}>
           <FlatList

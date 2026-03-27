@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
- import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import CustomText from '../CustomText/CustomText';
 import { t } from 'i18next';
 
@@ -72,7 +72,7 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
       >
         <CustomText
           size={fontSize}
-          color={Color.lightGrayText}
+          color={Color.whiteText}
           style={textStyle}
           font={font.PoppinsRegular}
         >

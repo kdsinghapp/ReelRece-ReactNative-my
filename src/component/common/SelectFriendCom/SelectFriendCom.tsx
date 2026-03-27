@@ -417,6 +417,7 @@ interface Member {
   userImage: { uri: string };
   send: boolean;
   online: boolean;
+  is_mutual?: boolean;
 }
 
 interface Props {
@@ -476,6 +477,7 @@ const SelectFriendCom: React.FC<Props> = ({
         userImage: { uri: item?.avatar?.includes('http') ? item?.avatar : `${BASE_IMAGE_URL}${item.avatar}` },
         send: false,
         online: false,
+        is_mutual: item?.is_mutual,
       }));
 
 
@@ -584,9 +586,14 @@ const SelectFriendCom: React.FC<Props> = ({
         />
         {item.online && <View style={styles.onlineIndicator} />}
       </View>
-      <Text allowFontScaling={false} style={styles.memberName}>
-        {item?.name && item?.name.trim() !== '' ? item?.name : item?.id}
-      </Text>
+      <View style={{ flex: 1 }}>
+        <Text allowFontScaling={false} style={styles.memberName}>
+          {item?.name && item?.name.trim() !== '' ? item?.name : item?.id}
+        </Text>
+        <Text allowFontScaling={false} style={styles.mutualLabel}>
+          {item?.is_mutual ? 'Instant add' : 'Invite'}
+        </Text>
+      </View>
       {/* { item?.name &&  item?.name.trim() !== '' ? 
       <Text style={styles.memberName}>dfd</Text>
       : <Text style={styles.memberName}>{item?.name}</Text>
@@ -762,10 +769,15 @@ const styles = StyleSheet.create({
     borderColor: Color.background,
   },
   memberName: {
-    flex: 1,
     color: Color.whiteText,
     fontSize: 14,
     fontFamily: font.PoppinsMedium
+  },
+  mutualLabel: {
+    color: Color.placeHolder,
+    fontSize: 10,
+    fontFamily: font.PoppinsRegular,
+    marginTop: 2,
   },
   checkbox: {
     alignItems: 'center',

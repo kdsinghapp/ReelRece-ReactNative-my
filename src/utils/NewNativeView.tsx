@@ -42,6 +42,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const posterOpacity = useRef(new Animated.Value(1)).current;
   const playerOpacity = useRef(new Animated.Value(0)).current;
   const playerRef = useRef(null);
+  const isHidingRef = useRef(false);
 
   // Use refs for callbacks to avoid re-registering event listeners when props change
   const callbacksRef = useRef({
@@ -65,7 +66,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [onLoad, onError, onPlayPause, onEnd, onControllerVisibilityChange, props.onProgress]);
 
   const hidePoster = useCallback(() => {
-    if (!showPoster) return;
+    if (!showPoster || isHidingRef.current) return;
+    isHidingRef.current = true;
     Animated.parallel([
       Animated.timing(posterOpacity, {
         toValue: 0,
@@ -77,8 +79,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         duration: 400,
         useNativeDriver: true,
       }),
-    ]).start(({ finished }) => {
-      if (finished) setShowPoster(false);
+    ]).start(() => {
+      setShowPoster(false);
     });
   }, [posterOpacity, playerOpacity, showPoster]);
 

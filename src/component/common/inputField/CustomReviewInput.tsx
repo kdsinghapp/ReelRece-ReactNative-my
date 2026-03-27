@@ -8,7 +8,6 @@ import {
   StyleSheet,
   TextInputProps,
 } from "react-native";
- 
 
 interface CustomReviewInputProps extends TextInputProps {
   text: string;
@@ -18,9 +17,9 @@ interface CustomReviewInputProps extends TextInputProps {
 
 export default function CustomReviewInput({
   style,
-    text, setText,
-    placeholderTextColor,
-    
+  text, setText,
+  placeholderTextColor,
+
   ...props
 
 }: CustomReviewInputProps) {
@@ -33,18 +32,16 @@ export default function CustomReviewInput({
   return (
     <View style={styles.wrapper}>
       <View
-         style={[
+        style={[
           styles.container,
           {
             borderColor: showBorder ? Color.primary : "transparent",
-       
           },
           style,
         ]}
       >
         <TextInput
-        allowFontScaling={false}
-        // allowFontScaling={false}
+          allowFontScaling={false}
           ref={inputRef}
           placeholderTextColor={Color.textGray}
           onFocus={() => setIsFocused(true)}
@@ -74,9 +71,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    marginTop:3,
-    alignItems:'center',
-    justifyContent:'center',
+    marginTop: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
     fontFamily: font.PoppinsRegular,
     lineHeight: 18,
     color: Color.whiteText,

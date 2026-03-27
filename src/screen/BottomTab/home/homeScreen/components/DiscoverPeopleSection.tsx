@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
-import ScreenNameEnum from '@routes/screenName.enum';
 import SuggestedFriendCard from '@components/common/SuggestedFriendCard/SuggestedFriendCard';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';

@@ -105,7 +105,8 @@ import {
   Pressable,
   StyleSheet,
   TouchableWithoutFeedback,
-  Animated
+  Animated,
+  ActivityIndicator
 } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -117,9 +118,10 @@ type Props = {
   onConfirm: () => void;
   title: string;
   details: string;
+  isLoading?: boolean;
 };
 
-const LogoutModal = ({ visible, onCancel, onConfirm, title, details }: Props) => {
+const LogoutModal = ({ visible, onCancel, onConfirm, title, details, isLoading = false }: Props) => {
   const slideAnim = useRef(new Animated.Value(-300)).current; // Negative value for left side
 
   useEffect(() => {
@@ -145,7 +147,7 @@ const LogoutModal = ({ visible, onCancel, onConfirm, title, details }: Props) =>
       visible={visible}
       onRequestClose={onCancel}
     >
-      <TouchableWithoutFeedback onPress={onCancel}>
+      <TouchableWithoutFeedback onPress={!isLoading ? onCancel : undefined}>
         <View style={styles.modalContainer}>
           <TouchableWithoutFeedback>
             <Animated.View
@@ -159,13 +161,17 @@ const LogoutModal = ({ visible, onCancel, onConfirm, title, details }: Props) =>
               <Text style={styles.logoutHeading}>{title}</Text>
               <Text style={styles.title}>{details}</Text>
               <View style={styles.buttonRow}>
-                <Pressable onPress={onCancel}>
+                <Pressable onPress={onCancel} disabled={isLoading}>
                   <Text style={styles.cancelText}>       
                                                                         {t("home.cancel")}
                   </Text>
                 </Pressable>
-                <Pressable onPress={onConfirm}>
-                  <Text style={styles.logoutText}>{title}</Text>
+                <Pressable onPress={onConfirm} disabled={isLoading}>
+                  {isLoading ? (
+                    <ActivityIndicator color={Color.red} size="small" />
+                  ) : (
+                    <Text style={styles.logoutText}>{title}</Text>
+                  )}
                 </Pressable>
               </View>
             </Animated.View>

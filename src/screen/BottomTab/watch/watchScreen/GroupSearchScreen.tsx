@@ -19,7 +19,6 @@ const GroupSearchScreen = () => {
         value={searchText}
         onChangeText={setSearchText}
       />
- 
       <WatchGroupCom groups={filteredGroups} />
     </View>
   );

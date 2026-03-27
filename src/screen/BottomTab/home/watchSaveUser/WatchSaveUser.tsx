@@ -119,13 +119,26 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
   }, [username, token]);
 
 
-  const renderMovie = useCallback(({ item }) => {
+  const renderMovie = useCallback(({ item, index }: { item: any; index: number }) => {
     // setIsSaved(item?.is_bookmarked ?? false)
     return (
       <>
         <View style={styles.movieCard}>
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }} >
-            <TouchableOpacity onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen)}>
+            <TouchableOpacity onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+              imdb_idData: item?.imdb_id,
+              token: token,
+              movieList: movies || [],
+              initialIndex: index >= 0 ? index : 0,
+              source: 'watchSaveUser',
+              filterGenreString: '',
+              platformFilterString: '',
+              selectedSimpleFilter: '1',
+              selectedSortId: null,
+              contentSelect: null,
+              currentPage: 1,
+              totalPages: 1,
+            })}>
               {/* <Image source={{ uri: item.cover_image_url }} style={styles.poster} /> */}
 
               <FastImage

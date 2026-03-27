@@ -180,6 +180,7 @@ const CompareModals = ({
           }}
           comparisonMovies={Array.isArray(comparisonMovies) ? (comparisonMovies as MovieForComparison[]) : []}
           hasComparisonsAvailable={hasComparisonsAvailable}
+          initialPreference={userPreference.preference}
         />
       )}
       {/* 

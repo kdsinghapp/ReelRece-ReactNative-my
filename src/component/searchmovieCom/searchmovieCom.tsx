@@ -38,8 +38,8 @@ const SearchMovieCom = ({
   currentPage = 1,
   totalPages = 1,
 }) => {
- 
-   const compareHook = useCompareComponent(token);
+
+  const compareHook = useCompareComponent(token);
 
   const formattedQuery = movieData.length === 0 ? searchQuery : '';
   const onEndReachedInFlight = useRef(false);
@@ -121,12 +121,8 @@ const SearchMovieCom = ({
 
         <TouchableOpacity style={styles.info} onPress={() => {
           handleNavigation(item?.imdb_id, token, index);
-
-
         }} >
           <TouchableOpacity style={styles.titleContainer} >
-
-
             <CustomText
               size={16}
               color={Color.whiteText}

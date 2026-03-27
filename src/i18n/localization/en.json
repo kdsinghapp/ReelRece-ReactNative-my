@@ -4,7 +4,7 @@
     "ranked": "ranked",
     "watch": "Watch",
     "watchNow": "Watch Now",
-     "notification": "Notification",
+    "notification": "Notification",
     "watchonNetflix": "Watch on Netflix app",
     "firstMovie": "first movie!",
     "unlockedRecScore1": "Awesome! You've unlocked",
@@ -202,14 +202,16 @@
     "moviedescription": "Movie Description",
     "mute": "Mute",
     "unmute": "Unmute",
-    "whereToWatch": "Where to Watch"
+    "whereToWatch": "Where to Watch",
+    "watchNow": "Watch Now",
+    "howDoYouFeel": "How do you feel about this one?"
   },
   "home": {
     "invite": "Invite Friends",
     "CreateGroup": "Create Group",
     "deselectall": "Deselect All",
     "delete": "Delete",
-    "areyou":"Are you sure you want to delete this group?",
+    "areyou": "Are you sure you want to delete this group?",
     "cancel": "Cancel",
     "selectAll": "Select All",
     "notificationon": "Notification On",

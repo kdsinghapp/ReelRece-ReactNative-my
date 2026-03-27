@@ -1,7 +1,7 @@
 import { Color } from "@theme/color";
 import font from "@theme/font";
 import { Platform, StyleSheet } from "react-native";
- export const WatchStyle = StyleSheet.create({
+export const WatchStyle = StyleSheet.create({
   mincontainer: {
     flex: 1,
     backgroundColor: Color.background,
@@ -9,7 +9,7 @@ import { Platform, StyleSheet } from "react-native";
   container: {
     flex: 1,
     backgroundColor: Color.background,
-   },
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -66,13 +66,13 @@ import { Platform, StyleSheet } from "react-native";
     width: 20,
   },
   groupsContainer: {
-    flex: 1, 
+    flex: 1,
     marginTop: 20,
   },
   modalOverlay: {
     position: 'absolute',
     top: 0,
-  bottom: Platform.OS === 'ios' ? 60 : 11,
+    bottom: Platform.OS === 'ios' ? 60 : 11,
     left: 10,
     right: 5,
     backgroundColor: 'rgba(0,0,0,0.6)',
@@ -95,7 +95,7 @@ import { Platform, StyleSheet } from "react-native";
     backgroundColor: Color.grey,
     paddingVertical: 16,
     borderRadius: 10,
-   },
+  },
   modalContainer: {
     flexDirection: 'row',
     paddingVertical: 6,
@@ -157,4 +157,21 @@ import { Platform, StyleSheet } from "react-native";
   bottomActionText: {
     alignSelf: 'center'
   },
+  badgeContainer: {
+    position: 'absolute',
+    right: -25,
+    top: 0,
+    backgroundColor: Color.red,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: Color.whiteText,
+    fontSize: 10,
+    fontFamily: font.PoppinsBold,
+  }
 });

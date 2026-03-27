@@ -61,6 +61,7 @@ interface FeedbackModalProps {
   comparisonMovies?: MovieForComparison[];
   isOnboarding?: boolean;
   hasComparisonsAvailable?: (pref: 'love' | 'like' | 'dislike') => boolean;
+  initialPreference?: 'love' | 'like' | 'dislike' | null;
 }
 
 
@@ -88,6 +89,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   comparisonMovies = [],
   isOnboarding = false,
   hasComparisonsAvailable,
+  initialPreference,
 }) => {
   const screenWidth = Dimensions.get('window').width;
   const modalContentAnim = useRef(new Animated.Value(-screenWidth)).current;
@@ -193,13 +195,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
 
-
       if (Platform.OS == "ios") {
         setModalMarginTop(-133);
       } else {
         setModalMarginTop(10);
       }
-
 
     });
     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
@@ -212,8 +212,15 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   }, []);
   useEffect(() => {
     if (visible) {
-      setSelectedOption(null);
-      setShowFeedback(false);
+      if (initialPreference) {
+        setPreference(initialPreference);
+        setSelectedOption(initialPreference === 'love' ? 'lovedIt' : initialPreference === 'like' ? 'okay' : 'notLike');
+        setShowFeedback(true);
+      } else {
+        setSelectedOption(null);
+        setPreference(null);
+        setShowFeedback(false);
+      }
       setlovedImge(false);
       setItsokImge(false);
       setNotLike(false);

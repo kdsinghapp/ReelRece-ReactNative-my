@@ -209,6 +209,8 @@ export interface User {
   avatar?: string;
   avatar_url?: string;
   is_following?: boolean;
+  is_mutual?: boolean;
+  invitation_accepted?: boolean;
   followers_count?: number;
   following_count?: number;
 }

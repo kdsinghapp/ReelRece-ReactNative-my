@@ -17,6 +17,7 @@ interface members {
   following?: boolean,
   name?: string,
   username?: string,
+  invitation_accepted?: boolean,
 }
 
 interface GroupMembersModalProps {
@@ -97,7 +98,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
         <View style={styles.overlay}>
           <KeyboardAvoidingView
             style={styles.keyboardAvoid}
-            behavior={Platform.OS === "ios" ? 'padding' : 'undefined'}
+            behavior={Platform.OS === "ios" ? 'padding' : undefined}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 15}
           >
 
@@ -198,7 +199,7 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                                   {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
 
                                   <FastImage
-                                    style={styles.avatar}
+                                    style={[styles.avatar, item.invitation_accepted === false && { opacity: 0.5 }]}
                                     source={{
                                       uri: `${BASE_IMAGE_URL}${item?.avatar}`,
                                       priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
@@ -210,7 +211,14 @@ const GroupMembersModal: React.FC<GroupMembersModalProps> = ({ visible,
                                 </View>
                               </TouchableOpacity>
 
-                              <Text style={styles.memberName}>{item?.name ? item?.name : item?.username}</Text>
+                              <View style={{ flex: 1 }}>
+                                <Text style={[styles.memberName, { flex: 0 }]}>{item?.name ? item?.name : item?.username}</Text>
+                                {item.invitation_accepted === false && (
+                                  <Text style={{ color: Color.placeHolder, fontSize: 11, fontFamily: font.PoppinsRegular, marginTop: -2 }}>
+                                    Invited
+                                  </Text>
+                                )}
+                              </View>
 
 
 

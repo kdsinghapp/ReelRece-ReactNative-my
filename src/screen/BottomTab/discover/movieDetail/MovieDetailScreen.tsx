@@ -62,11 +62,11 @@ const MovieDetailScreen = () => {
   const route = useRoute();
   const [watchModalLoad, setWatchModalLoad] = useState(null);
 
-  const { 
-    imdb_idData, 
-    token, 
-    movieList = [], 
-    initialIndex = 0, 
+  const {
+    imdb_idData,
+    token,
+    movieList = [],
+    initialIndex = 0,
     source = null,
     filterGenreString,
     platformFilterString,
@@ -86,7 +86,7 @@ const MovieDetailScreen = () => {
   }, [currentFeedIndex]);
   const [feedPage, setFeedPage] = useState(currentPage);
   const [feedTotalPages, setFeedTotalPages] = useState(totalPages);
-  
+
   // Discover & Search Pagination recreator
   const fetchNextFeedPage = async () => {
     if ((source !== 'discover' && source !== 'search') || feedPage >= feedTotalPages || loadingMore) return;
@@ -99,7 +99,7 @@ const MovieDetailScreen = () => {
         if (selectedSimpleFilter === '1') baseEndpoint = '/recommend-movies?sort_by=rec_score';
         else if (selectedSimpleFilter === '2') baseEndpoint = '/trending';
         else if (selectedSimpleFilter === '5') baseEndpoint = '/bookmarks';
-        
+
         const urlStarts = baseEndpoint.includes('?')
           ? `${baseEndpoint}&country=US&page=${feedPage + 1}`
           : `${baseEndpoint}?country=US&page=${feedPage + 1}`;
@@ -109,7 +109,7 @@ const MovieDetailScreen = () => {
         if (platformFilterString) url += `&platforms=${platformFilterString}`;
         if (selectedSortId) url += `&sort_by=${selectedSortId}`;
         if (contentSelect) url += `&media_type=${contentSelect}`;
-        
+
         const result = await Trending_without_Filter({ token, url });
         results = result?.results || [];
       } else if (source === 'search' && searchQuery) {
@@ -118,8 +118,8 @@ const MovieDetailScreen = () => {
       }
 
       if (results.length > 0) {
-         setLocalMovieList(prev => [...prev, ...results]);
-         setFeedPage(feedPage + 1);
+        setLocalMovieList(prev => [...prev, ...results]);
+        setFeedPage(feedPage + 1);
       }
     } catch (e) {
     } finally {
@@ -142,7 +142,8 @@ const MovieDetailScreen = () => {
   );
   const videoHeight = useMemo(() => windowHeight / 3.9, [windowHeight]);
   const primaryButtonWidth = useMemo(() => windowWidth * 0.58, [windowWidth]);
-  const recommendationRowHeight = useMemo(() => windowHeight * 0.21, [windowHeight]);
+  // const recommendationRowHeight = useMemo(() => windowHeight * 0.26, [windowHeight]);
+  const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.20 : windowHeight * 0.26, [windowHeight]);
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [watchNow, setWatchNow] = useState(false);
@@ -169,7 +170,7 @@ const MovieDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const saveBookMark_Ref = useRef(false)
   const [modalMovieId, setModalMovieId] = useState(null);
-  const [titleLines, setTitleLines] = useState(1);
+  const [titleLinesMap, setTitleLinesMap] = useState<Record<number, number>>({});
   const dispatch = useDispatch()
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
@@ -185,6 +186,7 @@ const MovieDetailScreen = () => {
   const [videoMountKey, setVideoMountKey] = useState(0);
   const [isVideoTransitioning, setIsVideoTransitioning] = useState(false);
   const [appInForeground, setAppInForeground] = useState(true);
+
 
   const outerScrollEnableds = useRef(true);
 
@@ -395,13 +397,13 @@ const MovieDetailScreen = () => {
 
       // Sequential navigation from source feed
       const targetIndex = direction === 'next' ? currentFeedIndexRef.current + 1 : currentFeedIndexRef.current - 1;
-      
+
       if (targetIndex >= 0 && targetIndex < localMovieList.length) {
         const nextMovieItem = localMovieList[targetIndex];
         const imdbIdToFetch = nextMovieItem?.imdb_id || nextMovieItem?.movie?.imdb_id;
         const meta = await getMovieMetadata(token, imdbIdToFetch);
         if (!meta) return;
-        
+
         setMovieData((prev) => {
           if (direction === 'next') {
             return [prev[0], prev[1], meta];
@@ -412,13 +414,13 @@ const MovieDetailScreen = () => {
       } else {
         // Upper or lower bounds reached
         setMovieData((prev) => {
-           if (direction === 'next') return [prev[0], prev[1], null];
-           return [null, prev[1], prev[2]];
+          if (direction === 'next') return [prev[0], prev[1], null];
+          return [null, prev[1], prev[2]];
         });
 
         // Trigger pagination load if hitting the edge
         if (direction === 'next' && targetIndex >= localMovieList.length) {
-           fetchNextFeedPage();
+          fetchNextFeedPage();
         }
       }
     } catch (_) {
@@ -449,7 +451,7 @@ const MovieDetailScreen = () => {
         setVideoMountKey((k) => k + 1);
         setIsVideoTransitioning(true);
         setMovieData([null, nextMovie, null]);
-        
+
         setCurrentFeedIndex(prev => prev + 1); // increment array position
 
         flatListRef.current?.scrollToIndex({ index: 1, animated: false });
@@ -501,7 +503,7 @@ const MovieDetailScreen = () => {
 
       // Edge scenario failsafes
       if (newIndex === 0 || newIndex === 2) {
-          isResettingRef.current = false;
+        isResettingRef.current = false;
       }
     }
   }, [currentIndex, movieData, currentSeedId, currentFeedIndex, ITEM_HEIGHT, preloadNextMovie]);
@@ -625,8 +627,23 @@ const MovieDetailScreen = () => {
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
   }, []);
- 
-  const compareHook = useCompareComponent(token);
+
+  const compareHook = useCompareComponent(token, {
+    onRatingSuccess: () => {
+      setMovieData((prev) => {
+        const next = [...prev];
+        const item = next[currentIndex];
+        if (item && typeof item === 'object') {
+          next[currentIndex] = {
+            ...item,
+            has_rated: true,
+            preference: compareHook.userPreference.preference
+          };
+        }
+        return next;
+      });
+    }
+  });
   const isFeedbackModal = compareHook.isFeedbackVisible;
   const isComparisonVisible = compareHook.isComparisonVisible;
 
@@ -799,6 +816,7 @@ const MovieDetailScreen = () => {
   // Render movie item
   const renderMovieDetail = useCallback(
     ({ item, index }) => {
+      console.log("item", item)
       if (item) {
       }
       if (!item) {
@@ -905,10 +923,10 @@ const MovieDetailScreen = () => {
                 color={Color.whiteText}
                 style={styles.title}
                 font={font.PoppinsBold}
-                numberOfLines={2}
+                numberOfLines={1}
                 onTextLayout={(e) => {
                   const lines = e.nativeEvent.lines.length;
-                  setTitleLines(lines);
+                  setTitleLinesMap(prev => ({ ...prev, [index]: lines }));
                 }}
 
               >
@@ -1063,32 +1081,66 @@ const MovieDetailScreen = () => {
               </View>
               {item && item?.description && item?.description.trim() !== "" ?
                 (
-                  <View style={{ flexDirection: 'row', height: recommendationRowHeight, marginTop: 2 }}>
-
-                    <View style={{ flexDirection: 'row', height: recommendationRowHeight, marginTop: 10 }}>
-
-                      <ScrollView
-                        nestedScrollEnabled={false}
-                        showsVerticalScrollIndicator={false}
-                        bounces={true}
-                      >
-                        <Text style={[styles.description, {
-                          marginBottom: 0
-                        }]}>
-                          {item?.description || "No description available"} {"\n"} {"\n"} {"\n"}
+                  <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
+                    <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 10 }}>
+                      <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
+                        <Text style={[styles.description, { marginBottom: 0 }]}>
+                          {item?.description || "No description available"}
                         </Text>
-                        <LinearGradient
-                          colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']}
-                          start={{ x: 0.5, y: 0 }}
-                          end={{ x: 0.5, y: 1 }}
-                          style={styles.gradient}
-                        />
-                        <LinearGradient
-                          colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']}
-                          start={{ x: 0.5, y: 0 }}
-                          end={{ x: 0.5, y: 1 }}
-                          style={styles.gradient}
-                        />
+
+                        {item?.media_type && (
+                          <Text style={styles.descriptionLabel}>
+                            Media Type: <Text style={styles.descriptionValue}>{item.media_type}</Text>
+                          </Text>
+                        )}
+
+                        {item?.languages_spoken && (
+                          <Text style={styles.descriptionLabel}>
+                            Language: <Text style={styles.descriptionValue}>{item.languages_spoken}</Text>
+                          </Text>
+                        )}
+
+
+                        {item?.director && (
+                          <Text style={styles.descriptionLabel}>
+                            Director(s): <Text style={styles.descriptionValue}>{item.director}</Text>
+                          </Text>
+                        )}
+
+                        {item?.cast && item.cast.length > 0 && (
+                          <Text style={styles.descriptionLabel}>
+                            Stars: <Text style={styles.descriptionValue}>{item.cast.join(', ')}</Text>
+                          </Text>
+                        )}
+
+                        {item?.genres && item.genres.length > 0 && (
+                          <Text style={styles.descriptionLabel}>
+                            Genre: <Text style={styles.descriptionValue}>{item.genres.join(', ')}</Text>
+                          </Text>
+                        )}
+
+                        {item?.subgenres && item.subgenres.length > 0 && (
+                          <Text style={styles.descriptionLabel}>
+                            Subgenres: <Text style={styles.descriptionValue}>{(item.subgenres as string[]).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')}</Text>
+                          </Text>
+                        )}
+
+                        {item?.release_date && (
+                          <Text style={styles.descriptionLabel}>
+                            Release Date: <Text style={styles.descriptionValue}>{item.release_date}</Text>
+                          </Text>
+                        )}
+
+                        {item?.runtime && (
+                          <Text style={styles.descriptionLabel}>
+                            Runtime: <Text style={styles.descriptionValue}>{formatRuntime(item.runtime)}</Text>
+                          </Text>
+                        )}
+
+
+                        <View style={{ height: 40 }} />
+                        <LinearGradient colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient} />
+                        <LinearGradient colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient} />
                       </ScrollView>
                     </View>
                   </View>
@@ -1157,79 +1209,147 @@ const MovieDetailScreen = () => {
               )}
             </View>
             <View style={{
-              justifyContent: 'space-between',
-              paddingBottom: 80,
-              flex: 1
+              paddingBottom: 0,
             }}>
-              <View style={{
-                flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10,
-
-                marginTop: 7
-              }}>
-                <TouchableOpacity
-                  style={styles.watchNowContainer}
-                  onPress={() => setWatchNow(true)}
-                >
-                  <Image style={styles.watchNowImg} source={imageIndex.puased} resizeMode='contain' />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.watchNowContainer, {
-                    backgroundColor: Color.primary, width: primaryButtonWidth,
-                  }]}
-                  onPress={() => {
-                    handleRankingPress({
-                      imdb_id: item?.imdb_id,
-                      title: item?.title,
-                      release_year: item?.release_year,
-                      cover_image_url: item?.cover_image_url || '',
-                    });
-                    setPaused(true)
-                  }}
-                >
-                  <Image style={[styles.watchNowImg, { marginRight: 5, height: 20, width: 20 }]} source={imageIndex.ranking} resizeMode='contain' />
-                  <CustomText
-                    size={14}
-                    color={Color.whiteText}
-                    style={styles.watchNowText}
-                    font={font.PoppinsBold}
-                  >
-                    {(t("movieDetail.rankNow"))}
-                  </CustomText>
-                </TouchableOpacity>
-              </View>
-
               <View style={styles.footerNav}>
                 <TouchableOpacity
-                  onPress={() => {
-                    setEpisVisible(true);
+                  onPress={() => setWatchNow(true)}
+                  style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
+                >
+                  <Text style={styles.linkText} >{t("movieDetail.watchNow") || "Watch Now"}</Text>
+                  {/* <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='contain' /> */}
+                </TouchableOpacity>
 
-                  }}
+                <TouchableOpacity
+                  onPress={() => setEpisVisible(true)}
                   style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
                 >
                   <Text style={styles.linkText} >{t("movieDetail.episodes")}</Text>
-                  <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='cover' />
+                  {/* <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='cover' /> */}
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  // onPress={() => setMorelikeModal(true)}
                   onPress={openMoreModal}
                   style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
                 >
                   <Text style={styles.linkText} >{t("movieDetail.morelike")}</Text>
-                  <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='contain' />
+                  {/* <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='contain' /> */}
                 </TouchableOpacity>
               </View>
 
-              <View style={{ marginBottom: 20, paddingHorizontal: 16 }}>
+              {/* Immediately Clickable Rating Options */}
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#1A1A1A',
+                paddingTop: 14,
+                paddingBottom: Platform.OS === 'ios' ? 65 : 14,
+                paddingHorizontal: 16,
+                marginTop: 12,
+              }}>
+                <View style={{ flex: 1 }}>
+                  <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}>
+                    {t("movieDetail.howDoYouFeel") || "How do you feel about this one?"}
+                  </CustomText>
+                  <View style={{ width: '90%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, alignSelf: 'center' }} />
+                </View>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  {/* Loved it */}
+                  <TouchableOpacity
+                    style={{ alignItems: 'center', minWidth: 60 }}
+                    onPress={() => {
+                      if (item) {
+                        compareHook.openFeedbackModal(item, 'love');
+                      }
+                    }}
+                  >
+                    <Image
+                      source={item?.preference === 'love' ? imageIndex.acrtivePlay : imageIndex.stopPlay}
+                      style={{
+                        height: 24, width: 24,
+                        //  tintColor: item?.preference === 'love' ? undefined : Color.lightGrayText
+                      }}
+                      resizeMode="contain"
+                    />
+                    <CustomText
+                      size={12}
+                      color={item?.preference === 'love' ? Color.whiteText : Color.subText}
+                      font={item?.preference === 'love' ? font.PoppinsMedium : font.PoppinsRegular}
+                      style={{ marginTop: 4 }}
+                    >
+                      {t('modal.loveIt')}
+                    </CustomText>
+                  </TouchableOpacity>
+ 
+                  {/* It Was Okay */}
+                  <TouchableOpacity
+                    style={{ alignItems: 'center', minWidth: 60 }}
+                    onPress={() => {
+                      if (item) {
+                        compareHook.openFeedbackModal(item, 'like');
+                      }
+                    }}
+                  >
+                    <Image
+                      source={item?.preference === 'like' ? imageIndex.modalitWasPoster : imageIndex.play}
+                      style={{
+                        height: 24, width: 24,
+                        // tintColor: item?.preference === 'like' ? undefined : Color.lightGrayText 
+                      }}
+                      resizeMode="contain"
+                    />
+                    <CustomText
+                      size={12}
+                      color={item?.preference === 'like' ? Color.whiteText : Color.subText}
+                      font={item?.preference === 'like' ? font.PoppinsMedium : font.PoppinsRegular}
+                      style={{ marginTop: 4 }}
+                    >
+                      {t('modal.itWasOkay')}
+                    </CustomText>
+                  </TouchableOpacity>
+ 
+                  {/* Didn't Like It */}
+                  <TouchableOpacity
+                    style={{ alignItems: 'center', minWidth: 60 }}
+                    onPress={() => {
+                      if (item) {
+                        compareHook.openFeedbackModal(item, 'dislike');
+                      }
+                    }}
+                  >
+                    <Image
+                      source={item?.preference === 'dislike' ? imageIndex.redCloseActive : imageIndex.redClose}
+                      style={{
+                        height: 24, width: 24,
+                        // tintColor: item?.preference === 'dislike' ? undefined : Color.lightGrayText 
+                      }}
+                      resizeMode="contain"
+                    />
+                    <CustomText
+                      size={12}
+                      color={item?.preference === 'dislike' ? Color.whiteText : Color.subText}
+                      font={item?.preference === 'dislike' ? font.PoppinsMedium : font.PoppinsRegular}
+                      style={{ marginTop: 4 }}
+                    >
+                      {t('modal.didntLikeIt')}
+                    </CustomText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {Platform.OS == 'ios' &&
+                <View style={{ marginBottom: 20, paddingHorizontal: 16 }}>
 
 
-                {/* <ProgressBar
+                  {/* <ProgressBar
                   progress={progress}
                   onSeek={handleSeek}
                   onSeekStart={() => setIsSeeking(true)}
                   onSeekEnd={() => setIsSeeking(false)}
                 /> */}
 
-              </View>
+                </View>
+              }
             </View>
           </View>
 
@@ -1307,7 +1427,7 @@ const MovieDetailScreen = () => {
   }
 
   return (
-    <SafeAreaView edges={!isOnline ? ['bottom'] : ['top', 'bottom']} style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={movieData}
@@ -1329,6 +1449,8 @@ const MovieDetailScreen = () => {
         removeClippedSubviews={Platform.OS === 'android'}
         nestedScrollEnabled={Platform.OS === 'android'}
       />
+
+
 
       <ScoreIntroModal
         visible={showFirstModal}

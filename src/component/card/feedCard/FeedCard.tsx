@@ -130,7 +130,7 @@ const FeedCard = ({
       currentPage: 1,
       totalPages: 1,
     });
-  }, [navigation]);
+  }, [navigation, feedData]);
 
   // Clear video buffer when component unmounts
   useEffect(() => {
@@ -193,8 +193,8 @@ const FeedCard = ({
 
 
   const navigateOnPoster = useCallback(() => {
-    navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdb_id, token });
-  }, [navigation, imdb_id, token]);
+    handleNavigation(imdb_id, token);
+  }, [handleNavigation, imdb_id, token]);
 
   const item = useMemo(() => ({ username }), [username]);
   const onHeaderTitlePress = useCallback(() => handleNavigation(imdb_id, token), [handleNavigation, imdb_id, token]);

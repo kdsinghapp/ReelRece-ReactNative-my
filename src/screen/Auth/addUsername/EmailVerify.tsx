@@ -4,16 +4,16 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  
+
   TextInput,
   ScrollView,
   Keyboard,
   Dimensions,
 } from 'react-native';
 import styles from './style';
- import { useNavigation, useRoute } from '@react-navigation/native';
- import { Color } from '@theme/color';
- import useVerifyResetPassword from './UseVerifyResetPassword';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Color } from '@theme/color';
+import useVerifyResetPassword from './UseVerifyResetPassword';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
 import ButtonCustom from '@components/common/button/ButtonCustom';
@@ -24,6 +24,7 @@ import imageIndex from '@assets/imageIndex';
 import { CustomStatusBar } from '@components/index';
 import useSignup from '@screens/Auth/signup/useSignup';
 import { t } from 'i18next';
+import { SuccessMessageCustom } from '@components/index';
 
 const EmailVerify = () => {
   const isOnline = useNetworkStatus();
@@ -38,9 +39,9 @@ const EmailVerify = () => {
     loading,
     toastMessage,
     toastMessColorGreen,
-  } = purpose === 'reset_password'
-      ? useVerifyResetPassword()
-      : useSignup();
+  } = (purpose === 'reset_password'
+    ? useVerifyResetPassword()
+    : useSignup()) as any;
 
   // const route = useRoute();
   // const { email, password } = route.params || {};
@@ -49,6 +50,8 @@ const EmailVerify = () => {
   const [code, setCode] = useState(['', '', '', '']);
   const inputRefs = useRef([]);
   const [focusedIndex, setFocusedIndex] = useState(null); // to track which input is focused
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
 
   const navigating = useNavigation()
@@ -84,13 +87,21 @@ const EmailVerify = () => {
     }
   };
 
- const resendOtp = async ()=> {
-  setCode(['', '', '', ''])
-  try {
-const response  = await sendOTPToEmail_GET(email)
-   } catch (error) {
-   }
- };
+  const resendOtp = async () => {
+    if (resendLoading) return;
+    setCode(['', '', '', '']);
+    try {
+      setResendLoading(true);
+      const response = await sendOTPToEmail_GET(email);
+      if (response.success) {
+        setResendSuccess(true);
+        setTimeout(() => setResendSuccess(false), 3000);
+      }
+    } catch (error) {
+    } finally {
+      setResendLoading(false);
+    }
+  };
   useEffect(() => {
     // Dismiss keyboard when all 4 digits are filled
     if (code.every(digit => digit !== '')) {
@@ -98,15 +109,15 @@ const response  = await sendOTPToEmail_GET(email)
     }
   }, [code]);
   return (
-    <SafeAreaView  edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: 'black' }}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: 'black' }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* <AuthBack /> */}
 
         <View style={[styles.mainView, { justifyContent: 'center', }]}>
           <TouchableOpacity onPress={() => navigating.goBack()} >
-          <Image source={imageIndex.backArrow} style={styles.backIcon} />
-        </TouchableOpacity>
+            <Image source={imageIndex.backArrow} style={styles.backIcon} />
+          </TouchableOpacity>
           {/* Logo & App Name */}
           <View style={styles.logoContainer}>
             <Image
@@ -114,15 +125,15 @@ const response  = await sendOTPToEmail_GET(email)
               style={styles.imgLogo}
               resizeMode="contain"
             />
-                      <Image
-                        source={imageIndex.reelRecs}
-                        style={{
-                      height: 18,
-              width: 95,
-              marginTop: 6,
-              resizeMode: 'contain', // important for proper image fit
-                        }}  
-                      />
+            <Image
+              source={imageIndex.reelRecs}
+              style={{
+                height: 18,
+                width: 95,
+                marginTop: 6,
+                resizeMode: 'contain', // important for proper image fit
+              }}
+            />
           </View>
 
 
@@ -211,7 +222,12 @@ const response  = await sendOTPToEmail_GET(email)
             buttonStyle={styles.verifyButton}
           />
           {/* Resend Code */}
-          <TouchableOpacity style={{marginTop:30}}  activeOpacity={1} onPress={()=> resendOtp()} >
+          <TouchableOpacity
+            style={{ marginTop: 30 }}
+            activeOpacity={0.7}
+            onPress={() => resendOtp()}
+            disabled={resendLoading}
+          >
             <CustomText
               size={16}
               color={Color.whiteText}
@@ -221,18 +237,22 @@ const response  = await sendOTPToEmail_GET(email)
               Didn’t receive the code?
               <CustomText
                 size={16}
-                color={Color.primary}
+                color={resendLoading ? Color.textGray : Color.primary}
                 style={styles.resendLink}
                 font={font.PoppinsRegular}
-              > {t("common.resend")}
-
+              > {resendLoading ? " Sending..." : t("common.resend")}
               </CustomText>
             </CustomText>
-
-
           </TouchableOpacity>
         </View>
       </ScrollView>
+      {resendSuccess && (
+        <SuccessMessageCustom
+          textColor={Color.whiteText}
+          color={Color.green}
+          message="We’ve sent a new verification code to your inbox. Please check!"
+        />
+      )}
       {/* {toastMess && (
               <SuccessMessageCustom
                 textColor={Color.whiteText}

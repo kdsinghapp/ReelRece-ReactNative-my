@@ -228,7 +228,6 @@ const FeedCardHome = ({
     }
   }, [videoUri, videoIndex]);
 
-
   const navigateOnPoster = (imdb_id: string, token: string) => {
     const movieIndex = Array.isArray(feedData) ? feedData.findIndex((m: any) => m?.movie?.imdb_id === imdb_id) : -1;
     navigation.navigate(ScreenNameEnum.MovieDetailScreen, {

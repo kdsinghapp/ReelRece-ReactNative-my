@@ -376,11 +376,21 @@ const WatchWithFriend = () => {
     groupValue?: number,
     popularityPenalty?: number
   ) => {
-    const hasFilters = (selectedUsers && selectedUsers.length > 0) || (groupValue && groupValue > 0) || (popularityPenalty !== undefined && popularityPenalty !== 0.5);
+    const hasUsers = selectedUsers && selectedUsers.length > 0;
+    const hasGroup = groupValue && groupValue > 0;
+    const hasPenalty = popularityPenalty !== undefined && popularityPenalty !== 0.5;
+    const hasFilters = hasUsers || hasGroup || hasPenalty;
+
     try {
-      const response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers, popularityPenalty);
+      let response;
+      if (hasPenalty && !hasUsers && !hasGroup) {
+        response = await getGroupRecommendedMovies(token, groupId, popularityPenalty);
+      } else {
+        response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers, popularityPenalty);
+      }
+
       if (hasFilters && response?.results?.length > 0) {
-        setGroupRecommend(response.results);
+        setGroupRecommend(response?.results || response);
         setActiveIndex(0);
       } else {
         setGroupRecommend(groupRecommendCopyData);
@@ -596,8 +606,13 @@ const WatchWithFriend = () => {
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: imdbId, token: token })
-          }
+          onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+            imdb_idData: imdbId,
+            token,
+            movieList: displayMovies,
+            initialIndex: activeIndex,
+            source: 'watchplus',
+          })}
         >
           <Text numberOfLines={1} style={[styles.title, {
             bottom: 20,
@@ -617,8 +632,8 @@ const WatchWithFriend = () => {
 
           }}
           font={font.PoppinsRegular}
-          numberOfLines={1}      
-          ellipsizeMode="tail" 
+          numberOfLines={1}
+          ellipsizeMode="tail"
         >
           {movie?.release_year} • {convertRuntime(movie?.runtime)} • {movie?.genres?.join(", ")}
         </CustomText>
@@ -629,7 +644,7 @@ const WatchWithFriend = () => {
             // marginBottom:22
           }]}
           onPress={() => groupScoreModalFunc({ imdb_id: imdbId, score: movie?.rec_score })}
-        > 
+        >
           <RankingWithInfo
             score={movie?.rec_score ?? '?'}
             title={t("discover.groupScore")}
@@ -639,21 +654,20 @@ const WatchWithFriend = () => {
             {t("discover.groupScore")}
           </CustomText>
         </TouchableOpacity>
-
-        <View
+<View
           pointerEvents="box-none"
           style={{
             bottom: 18.5,
           }}
         >
-
+ 
           <DescriptionWithReadMore
             description={movie?.description}
             wordNo={80}
-                descriptionStyle={{ textAlign: "center" }}
+            descriptionStyle={{ textAlign: "center" }}
             viewmoreStyle={{ textAlign: "center" }}
           />
-        </View> 
+        </View>
         <Pressable
           onPress={() => watchModalFunc({ imdb_id: imdbId })}
           style={({ pressed }) => [
@@ -670,7 +684,7 @@ const WatchWithFriend = () => {
               bottom: Platform.OS === 'ios' ? 0 : 5,
               opacity: pressed ? 0.8 : 1,
             },
-          ]} 
+          ]}
           delayLongPress={200}
         >
           <Image source={imageIndex.puased} style={styles.watchNowImg}
@@ -699,13 +713,17 @@ const WatchWithFriend = () => {
       if (!movie) return null;
 
       const inputRange = [
-        (index - 1) * ITEM_SIZE,
+        (index - 0.5) * ITEM_SIZE,
         index * ITEM_SIZE,
-        (index + 1) * ITEM_SIZE,
+        (index + 0.5) * ITEM_SIZE,
       ];
 
       const scale = scrollX.interpolate({
-        inputRange,
+        inputRange: [
+          (index - 1) * ITEM_SIZE,
+          index * ITEM_SIZE,
+          (index + 1) * ITEM_SIZE,
+        ],
         outputRange: [1, 1.12, 1],
         extrapolate: "clamp",
       });
@@ -729,7 +747,13 @@ const WatchWithFriend = () => {
         >
           <TouchableOpacity
 
-            onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, { imdb_idData: movie?.imdb_id, token: token })
+            onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
+              imdb_idData: movie?.imdb_id,
+              token: token,
+              movieList: displayMovies,
+              initialIndex: index,
+              source: 'watchplus',
+            })
             }
 
           >
@@ -976,9 +1000,11 @@ const WatchWithFriend = () => {
             ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            snapToInterval={ITEM_SIZE}
-            pagingEnabled
-            decelerationRate={0.8}
+            snapToOffsets={displayMovies.map((_, i) => i * ITEM_SIZE)}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            disableIntervalMomentum={true}
+            pagingEnabled={false}
             //       contentContainerStyle={{
             //         paddingHorizontal: (width - ITEM_WIDTH) / 2,
             //         alignItems: "center",
@@ -989,7 +1015,7 @@ const WatchWithFriend = () => {
 
             //       }}
             contentContainerStyle={{
-              paddingHorizontal: (width - ITEM_WIDTH) / 2,
+              paddingHorizontal: (width - ITEM_SIZE) / 2,
               alignItems: "center",
               // paddingBottom: insets.bottom + 355,
               // height: height * 0.38,
@@ -1000,6 +1026,7 @@ const WatchWithFriend = () => {
 
             onScroll={onScroll}
             onMomentumScrollEnd={handleScrollEnd}
+            onScrollEndDrag={handleScrollEnd} // Added to catch slow gestures
             scrollEventThrottle={16}
           >
             {movieCard}
@@ -1113,8 +1140,8 @@ const WatchWithFriend = () => {
           // group={group}
           groupId={groupId}
           token={token}
-          filterFunc={(selectedUsers, groupValue) =>
-            filterGroupMovie(token, groupId, selectedUsers, groupValue)
+          filterFunc={(selectedUsers, groupValue, popularityValue) =>
+            filterGroupMovie(token, groupId, selectedUsers, groupValue, popularityValue)
           }
           onClose={() => setModalVisible(false)}
           setTotalFilterApply={setTotalFilterApply}

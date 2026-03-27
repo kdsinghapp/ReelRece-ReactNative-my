@@ -17,6 +17,7 @@ interface members {
   following?: boolean,
   name?: string,
   username?: string,
+  invitation_accepted?: boolean,
 }
 
 interface WatchGroupMemberModal1 {
@@ -186,7 +187,7 @@ const filteredMembers = members?.filter(member =>
                               {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
 
                                <FastImage
-          style={styles.avatar}
+          style={[styles.avatar, item.invitation_accepted === false && { opacity: 0.5 }]}
           source={{
            uri: `${BASE_IMAGE_URL}${item?.avatar}`,
             priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
@@ -197,7 +198,14 @@ const filteredMembers = members?.filter(member =>
                               {item?.online && <View style={styles.onlineIndicator} />}
                             </View>
                           </TouchableOpacity>
-                          <Text style={styles.memberName}>{item?.name  ?  item?.name : item?.username}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[styles.memberName, { flex: 0 }]}>{item?.name ? item?.name : item?.username}</Text>
+                            {item.invitation_accepted === false && (
+                              <Text style={{ color: Color.placeHolder, fontSize: 11, fontFamily: font.PoppinsRegular, marginTop: -2 }}>
+                                Invited
+                              </Text>
+                            )}
+                          </View>
                           <TouchableOpacity
                             onPress={() => toggleFollow(item?.username)}
                             disabled={loadingUsername !== null} // ✅ disable only during API

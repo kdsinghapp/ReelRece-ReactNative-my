@@ -20,6 +20,7 @@ import ProfilePhotoCom from '@components/common/ProfilePhotoCom/ProfilePhotoCom'
 import { getPendingGroupInvites, respondToGroupInvitation } from '@redux/Api/NotificationApi';
 import { RootState } from '@redux/store';
  import { Color } from '@theme/color';
+import font from '@theme/font';
 import { appNotification } from '@redux/Api/authService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -44,57 +45,58 @@ type FeedItem = {
   groupId?: string;
 };
 
-const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string }) => {
+const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose: () => void; bgColor?: string }) => {
   const token = useSelector((state: RootState) => state.auth.token);
   const navigation = useNavigation();
   const [pendingInvites, setPendingInvites] = useState<FeedItem[]>([]);
   const [isLoading, setIsloading] = useState(false);
-  const [isNonNotification, setIsNonNotification] = useState(false);
+  const [invitationCount, setInvitationCount] = useState(0);
 
   // Combine both
   const combinedFeed: FeedItem[] = pendingInvites;
+  const isNonNotification = combinedFeed.length === 0;
 
   // API Call
   useEffect(() => {
-    const fetchInvites = async () => {
+    const fetchInvites = async (activeToken: string) => {
       try {
-        setIsloading(true)
-        const data = await getPendingGroupInvites(token);
-        const formatted: FeedItem[] = data?.results?.map((invite, index) => ({
-          id: invite.group_id.group_id || `invite-${index}`,
-          groupId: invite.group_id.group_id,  // ✅ Required for API call
-          name: invite.invited_by.name,
-          avatar: `${BASE_IMAGE_URL}${invite.invited_by.avatar}`,
-          action: 'invited',
-          movie: invite.group_id.name,
-          timeAgo: 'Just now',
-          online: false,
-        })) || [];
-         let emptyData = formatted.length
-
-        setIsNonNotification(formatted.length <= 0);
-        setPendingInvites(formatted);
+        setIsloading(true);
+        const res = await getPendingGroupInvites(activeToken);
+        if (res.success && res.data) {
+          const formatted: FeedItem[] = res.data.results?.map((invite: any, index: number) => ({
+            id: invite.group_id.group_id || `invite-${index}`,
+            groupId: invite.group_id.group_id,  // ✅ Required for API call
+            name: invite.invited_by.name,
+            avatar: `${BASE_IMAGE_URL}${invite.invited_by.avatar}`,
+            action: 'invited',
+            movie: invite.group_id.name,
+            timeAgo: 'Just now',
+            online: false,
+          })) || [];
+          setPendingInvites(formatted);
+          setInvitationCount(formatted.length);
+        }
       } catch (error) {
        } finally {
-        setIsloading(false)
+        setIsloading(false);
       }
     };
 
     if (token) {
-      fetchInvites();
+      fetchInvites(token);
     }
   }, [token]);
 
   useEffect(() => {
-    const appNotification_call = async () => {
+    const appNotification_call = async (activeToken: string) => {
       try {
-        await appNotification(token);
+        await appNotification(activeToken);
       } catch (error) {
        }
     };
 
     if (token) {
-      appNotification_call();
+      appNotification_call(token);
     }
   }, [token]);
 
@@ -102,21 +104,31 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
   // Single Feed Card
   const FeedCard = ({ item  }: { item: FeedItem }) => {
     const handleAccept = async () => {
-      if (!item.groupId) return;
+      if (!item.groupId || !token) return;
       try {
         const res = await respondToGroupInvitation(token, item.groupId, true);
-         // ✅ Safe array filter
-        setPendingInvites((prev) => (prev || []).filter(i => i?.groupId !== item.groupId));
+        if (res.success) {
+          setPendingInvites((prev) => {
+            const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
+            setInvitationCount(updated.length);
+            return updated;
+          });
+        }
       } catch (err) {
        }
     };
 
     const handleDecline = async () => {
-      if (!item.groupId) return;
+      if (!item.groupId || !token) return;
       try {
         const res = await respondToGroupInvitation(token, item.groupId, false);
-         // ✅ Safe array filter  
-        setPendingInvites((prev) => (prev || []).filter(i => i?.groupId !== item.groupId));
+        if (res.success) {
+          setPendingInvites((prev) => {
+            const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
+            setInvitationCount(updated.length);
+            return updated;
+          });
+        }
       } catch (err) {
        }
     };
@@ -132,7 +144,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
       <View style={styles.cardContainer}>
         <View style={styles.card}>
           {typeof item.avatar === 'string' ? (
-            <ProfilePhotoCom imageUri={item.avatar} />
+            <ProfilePhotoCom imageUri={item.avatar} item={item} />
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={item.avatar} style={styles.avatar} />
@@ -141,7 +153,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
           )}
           <TouchableOpacity
             style={styles.content}
-            onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen)}
+            onPress={() => {}}
           >
             <View style={styles.row}>
               <Text style={styles.name}>{item?.name}</Text>
@@ -152,7 +164,7 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
             <Text style={styles.movie}>{item?.movie}</Text>
             <Text style={styles.time}>{item?.timeAgo}</Text>
           </TouchableOpacity>
-          <RankingCard ranked={item?.rating} />
+          {(item?.rating !== undefined) && <RankingCard ranked={item?.rating} />}
         </View>
         {item.action === 'invited' && (
           <View style={styles.buttonGroup}>
@@ -195,6 +207,28 @@ const Notification = ({ visible, onClose, bgColor }: boolean | { bgColor: string
           </View>
           <View style={styles.titleCenter}>
             <Text style={styles.title}>{(t("home.notification"))}</Text>
+            {invitationCount > 0 && (
+              <View style={{
+                position: 'absolute',
+                right: -25,
+                top: 0,
+                backgroundColor: Color.red,
+                borderRadius: 10,
+                minWidth: 20,
+                height: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 4,
+              }}>
+                <Text style={{
+                  color: Color.whiteText,
+                  fontSize: 10,
+                  fontFamily: font.PoppinsBold,
+                }}>
+                  {invitationCount > 9 ? '9+' : invitationCount}
+                </Text>
+              </View>
+            )}
           </View>
           <View style={styles.headerSide} />
         </View>

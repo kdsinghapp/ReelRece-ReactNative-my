@@ -154,12 +154,17 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     midRef.current = midVal;
   }, []);
 
-  const openFeedbackModal = useCallback((movie: string | object) => {
+  const openFeedbackModal = useCallback((movie: string | object, pref?: 'love' | 'like' | 'dislike') => {
     setSelectionHistory([]);
     setComparisonMovies([]);
     setCurrentComparisonIndex(0);
     setSelectedMovie(movie);
     setSelectedMovieId(movie?.imdb_id ?? null);
+    if (pref) {
+      setUserPreference({ preference: pref });
+    } else {
+      setUserPreference({ preference: null });
+    }
     setFeedbackVisible(true);
     prefetchComparisonByPreference(movie?.imdb_id ?? null);
   }, [setFeedbackVisible, setSelectedMovie, setSelectedMovieId, prefetchComparisonByPreference]);
@@ -246,6 +251,46 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
       })();
     },
     [fetchComparisonMovies, applyComparisonList, selectedMovie, token]
+  );
+
+  const startDirectRating = useCallback(
+    (movie: any, pref: 'love' | 'like' | 'dislike') => {
+      setSelectedMovie(movie);
+      const imdbId = movie?.imdb_id;
+      setSelectedMovieId(imdbId);
+      setUserPreference({ preference: pref });
+      prefetchComparisonByPreference(imdbId);
+
+      setComparisonVisible(true);
+      setFeedbackVisible(false);
+
+      (async () => {
+        try {
+          const list = await fetchComparisonMovies(pref, imdbId);
+          if (list.length === 0) {
+            setComparisonVisible(false);
+            if (imdbId) {
+              try {
+                await performCalculateRating({
+                  imdb_id: imdbId,
+                  preference: pref,
+                });
+                setCurrentStep((s) => {
+                  const next = s + 1;
+                  if (next === 1 || next === STEPPER_VALUE) shouldShowStepModalRef.current = true;
+                  return next;
+                });
+              } catch (error) {
+                handleCloseRating();
+              }
+            }
+          }
+        } catch (_) {
+          setFeedbackVisible(false);
+        }
+      })();
+    },
+    [fetchComparisonMovies, prefetchComparisonByPreference, token, performCalculateRating, handleCloseRating]
   );
 
   const handleSkipSetFirst = async () => {
@@ -641,6 +686,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     setComparisonVisible,
     // Actions
     handleFeedbackSubmit,
+    startDirectRating,
     handleSelectFirst,
     handleSelectSecond,
     handleNextComparison,
