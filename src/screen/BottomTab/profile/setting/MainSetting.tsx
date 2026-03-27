@@ -20,6 +20,8 @@ import { clearResponseCache } from "@redux/Api/responseCache";
 import { clearMovieCache } from "@redux/feature/movieCacheSlice/MovieCacheManager";
 import { RootStackParamList } from "@navigators/type";
 import { useNetworkStatus } from "@hooks/useNetworkStatus";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
+// import { LoginManager } from "react-native-fbsdk-next";
 
 type MenuItem = {
   id: string;
@@ -44,6 +46,7 @@ const MainSetting = () => {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastIsGreen, setToastIsGreen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // ✅ i18n menu
   const menuData: MenuItem[] = useMemo(
@@ -115,7 +118,7 @@ const MainSetting = () => {
   }, [toastTrue]);
 
   const handleLogoutConfirm = useCallback(async () => {
-    setLogoutModalVisible(false);
+    setIsLoggingOut(true);
 
     const authToken = token;
     dispatch(logout());
@@ -124,6 +127,19 @@ const MainSetting = () => {
       if (authToken) {
         await logoutApi(authToken);
       }
+      
+      try {
+        // await GoogleSignin.signOut();
+      } catch (error) {
+        console.log("Google sign out error", error);
+      }
+      
+      try {
+        // LoginManager.logOut();
+      } catch (error) {
+        console.log("Facebook sign out error", error);
+      }
+
     } finally {
       await TokenService.clearToken();
       await persistor.purge();
@@ -147,6 +163,8 @@ const MainSetting = () => {
         index: 0,
         routes: [{ name: ScreenNameEnum.LoginScreen }],
       });
+      setIsLoggingOut(false);
+      setLogoutModalVisible(false);
     }
   }, [token, dispatch, navigation]);
 
@@ -218,6 +236,7 @@ const isOnline = useNetworkStatus();
         visible={logoutModalVisible}
         onCancel={handleCloseLogoutModal}
         onConfirm={handleLogoutConfirm}
+        isLoading={isLoggingOut}
       />
     </SafeAreaView>
   );

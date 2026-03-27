@@ -654,20 +654,7 @@ const WatchWithFriend = () => {
             {t("discover.groupScore")}
           </CustomText>
         </TouchableOpacity>
-<View
-          pointerEvents="box-none"
-          style={{
-            bottom: 18.5,
-          }}
-        >
- 
-          <DescriptionWithReadMore
-            description={movie?.description}
-            wordNo={80}
-            descriptionStyle={{ textAlign: "center" }}
-            viewmoreStyle={{ textAlign: "center" }}
-          />
-        </View>
+
         <Pressable
           onPress={() => watchModalFunc({ imdb_id: imdbId })}
           style={({ pressed }) => [
