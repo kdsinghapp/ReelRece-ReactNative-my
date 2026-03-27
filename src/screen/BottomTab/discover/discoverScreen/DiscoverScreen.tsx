@@ -145,7 +145,10 @@ const DiscoverScreen = () => {
       let url = urlStarts;
 
       if (filterGenreString) url += `&genres=${filterGenreString}`;
-      if (platformFilterString) url += `&platforms=${platformFilterString}`;
+      if (platformFilterString) {
+        url += `&platforms=${platformFilterString}`;
+        url += `&watch_type=subscription`;
+      }
 
       const sortParam = getSortParam(selectedSortId ?? null);
       if (sortParam) url += `&sort_by=${sortParam}`;

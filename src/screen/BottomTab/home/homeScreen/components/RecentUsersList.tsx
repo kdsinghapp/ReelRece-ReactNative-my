@@ -16,6 +16,7 @@ type Props = {
 
 const RecentUsersList = React.memo(
   ({ users, onUserPress }: Props) => (
+    console.log("users",users),
     <FlatList
       data={users}
       horizontal
@@ -25,6 +26,8 @@ const RecentUsersList = React.memo(
       initialNumToRender={7}
       maxToRenderPerBatch={6}
       renderItem={({ item }) => {
+
+        console.log("item ------ ",item)
         const avatarSource = item?.avatar
           ? {
               uri: `${BASE_IMAGE_URL}${item.avatar}`,

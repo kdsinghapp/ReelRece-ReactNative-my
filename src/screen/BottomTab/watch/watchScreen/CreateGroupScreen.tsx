@@ -108,7 +108,7 @@ const CreateGroupScreen = () => {
         ? selectedMembers.map(member => member?.username || member?.id || member?.name).filter(Boolean)
         : []; // ✅ FIXED
       // const memberUsernames = selectedMembers.map(member => member.id);
-      const response = await createGroup(token, finalGroupName, memberUsernames);
+      const response = await createGroup(token || '', finalGroupName, memberUsernames);
       const data = response?.data as { message?: string; messaged?: string } | undefined;
       const createdGroupId = (data?.message ?? data?.messaged)?.split(' ')[0]?.trim();
       setGroup_Id(createdGroupId);
@@ -118,15 +118,17 @@ const CreateGroupScreen = () => {
       setTimeout(() => {
         navigation.goBack();
       }, 300);
-    } catch (error: string | object) {
+    } catch (error: any) {
       setLoader(false)
 
 
       if (error.response && error.response.status === 409) {
         setLoader(false)
-        const errorMsg = error.response.data.error;
         const existingGroupName = error.response.data.existing_group_name;
-        showToast(`${errorMsg} Group name: ${existingGroupName}`, false);
+        const message = existingGroupName
+          ? `Group already exists: '${existingGroupName}'. Check your pending invites to accept the group invitation.`
+          : "Group already exists. Check your pending invites to accept the group invitation.";
+        showToast(message, false);
       } else {
         setLoader(false)
 
@@ -164,8 +166,8 @@ const CreateGroupScreen = () => {
         // ✅ Fetch members
         let members = [];
         try {
-          const memberData = await getGroupMembers(token, groupId);
-          members = memberData?.results || [];
+          const memberData = await getGroupMembers(token || '', groupId || '');
+          members = (memberData as any)?.members || (memberData as any)?.results || [];
         } catch (err) {
         }
         const finalGroup = {

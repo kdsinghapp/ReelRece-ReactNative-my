@@ -83,7 +83,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
     // setthinkModal(true);
     try {
       const response = await getMembersScores(token, groupId, imdb_id)
-    
+
       const filteredResults = response?.results?.filter(member => member?.preference !== undefined);
       if (filteredResults) {
         setMembers(filteredResults)
@@ -180,7 +180,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                         <View style={styles.avatarContainer}>
                           {/* <Image source={{ uri: `${BASE_IMAGE_URL}${currentUser?.avatar}` }} style={styles.avatar} /> */}
                           <TouchableOpacity
-                             onPress={() => {
+                            onPress={() => {
                               onClose()
                               navigation.navigate(ScreenNameEnum.OtherProfile, { item: currentUser })
                             }}
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 11,
     top: -1,
-       alignItems: 'center',
+    alignItems: 'center',
     justifyContent: 'center'
     // borderWidth: 2.5,
     // borderColor: Color.background,

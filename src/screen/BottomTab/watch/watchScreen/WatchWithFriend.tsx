@@ -654,7 +654,20 @@ const WatchWithFriend = () => {
             {t("discover.groupScore")}
           </CustomText>
         </TouchableOpacity>
+        <View
+          pointerEvents="box-none"
+          style={{
+            bottom: 18.5,
+          }}
+        >
 
+          <DescriptionWithReadMore
+            description={movie?.description}
+            wordNo={80}
+            descriptionStyle={{ textAlign: "center" }}
+            viewmoreStyle={{ textAlign: "center" }}
+          />
+        </View>
         <Pressable
           onPress={() => watchModalFunc({ imdb_id: imdbId })}
           style={({ pressed }) => [
@@ -733,7 +746,6 @@ const WatchWithFriend = () => {
           style={[styles.cardContainer, { transform: [{ scale }] }]}
         >
           <TouchableOpacity
-
             onPress={() => navigation.navigate(ScreenNameEnum.MovieDetailScreen, {
               imdb_idData: movie?.imdb_id,
               token: token,
@@ -742,7 +754,6 @@ const WatchWithFriend = () => {
               source: 'watchplus',
             })
             }
-
           >
             <FastImage
               source={{

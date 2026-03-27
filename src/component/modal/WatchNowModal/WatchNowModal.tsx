@@ -21,7 +21,7 @@ import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 const filterOptions = [
-  { id: 1, option: 'All' },
+//   { id: 1, option: 'All' },
   { id: 2, option: 'Subscription' },
   { id: 3, option: 'Rent' },
   { id: 4, option: 'Buy' },
@@ -59,7 +59,7 @@ const WatchNowModal = ({
   setWatchModalLoad,
   country = 'US',
 }: WatchNowModalProps) => {
-  const [selectedSortOption, setSelectedSortOption] = useState('All');
+  const [selectedSortOption, setSelectedSortOption] = useState('Subscription');
   const [platforms, setPlatforms] = useState<WatchPlatformItem[]>([]);
   const [selectFilterOp, setSelectFilterOp] = useState('');
 

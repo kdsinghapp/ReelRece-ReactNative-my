@@ -72,22 +72,20 @@ const ProfileCard = ({
                     }}
                     style={styles.profileImage}
                     resizeMode={FastImage.resizeMode.cover}
-                    onLoadStart={() => setImageLoading(true)}
-                    onLoadEnd={() => setImageLoading(false)}
-                    onError={() => setImageLoading(false)}
+                    onLoadStart={() => setImageLoading?.(true)}
+                    onLoadEnd={() => setImageLoading?.(false)}
+                    onError={() => setImageLoading?.(false)}
                 />
 
             </ShimmerPlaceholder>
-            {/* {!butt && ( */}
             <View style={{ alignItems: 'center', marginTop: 10 }}>
                 {username && (
                     <Text allowFontScaling={false} style={styles.usernameText}>@{username}</Text>
                 )}
-                {bio ? (
+                {!butt && bio ? (
                     <Text allowFontScaling={false} style={styles.bioTextTop}>{bio}</Text>
                 ) : null}
             </View>
-            {/* )} */}
 
             <View style={styles.statsContainer}>
                 <TouchableOpacity style={styles.statBox}

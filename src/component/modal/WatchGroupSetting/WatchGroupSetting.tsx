@@ -49,7 +49,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
   const [toastMess, setToastMess] = useState(false)
   const [toastMessColorGreen, setToastMessGreen] = useState(true)
- 
+
 
   const toggleNotification = () => {
     setNotificationEnabled(prev => !prev);
@@ -226,7 +226,7 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
 
         <EditNameModal
           modalVisible={editNameModal}
-          fieldLabel= {t("common.changeGroup")} 
+          fieldLabel={t("common.changeGroup")}
           initialValue={group_name}
           setGroup_name={setGroup_name}
           setModalVisible={setEditNameModal}
@@ -250,9 +250,10 @@ const GroupSettingModal = ({ visible, onClose, group, groupId, token, group_name
           groupMembers={group1?.results || group?.members}
           onClose={() => {
             // onClose()
-          setGroupMember(false) }}
+            setGroupMember(false)
+          }}
           token={token}
-          heading= {t("home.groupMembers")}   />
+          heading={t("home.groupMembers")} />
         <AddFriendModal
           visible={addFriendModal}
           token={token}
