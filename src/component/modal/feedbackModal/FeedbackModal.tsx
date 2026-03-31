@@ -565,10 +565,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   </CustomText>
                 </View>
               </Animated.View>
-              {!isOnboarding && (
+              {!isOnboarding && showFeedback && (
                 <Animated.View style={[{ width: Dimensions.get('window').width * 0.95, marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
                   <TouchableOpacity style={styles.reviewConatainer}>
-                    <CustomReviewInput placeholder={t('modal.writeReview')} text={text} setText={setText} />
+                    <CustomReviewInput placeholder={t('modal.writeReview')} text={text} setText={setText} autoFocus={true} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => nextPress()}>
                     <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>

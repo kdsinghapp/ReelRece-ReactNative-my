@@ -18,13 +18,13 @@ export const GroupListItem = ({
   setIsSettingsMode
 
 }) => {
+  console.log(group, 'this is groups ')
   const navigation = useNavigation();
-  
 
   const handlePress = useCallback(async () => {
     if (isMultiSelectMode) {
-        }
-   
+    }
+
 
     else if (!navigationOff) {
       await AsyncStorage.setItem('selected_group', JSON.stringify(group)); // ✅ Store
@@ -45,7 +45,7 @@ export const GroupListItem = ({
 
   }, [isMultiSelectMode, group, selectedGroupIds]);
 
- 
+
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 92,
     borderRadius: 20,
-  }, 
+  },
   userImage: {
     width: 50,
     height: 50,

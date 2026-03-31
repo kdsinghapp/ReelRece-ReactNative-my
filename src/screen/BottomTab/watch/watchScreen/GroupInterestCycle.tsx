@@ -18,7 +18,7 @@ const GroupInterestCycle = ({ group,
       const membersExceptCreator = group?.members?.filter(
         (m) => creator && (m.username !== creator.username && m.username !== creator)
       ) || [];
-      
+
       const creatorName = creator?.name || creator?.username || 'Owner';
       const memberCount = membersExceptCreator.length;
       let addedText = '';
@@ -41,67 +41,36 @@ const GroupInterestCycle = ({ group,
           userInterest: {
             action: addedText === 'created the group' ? '' : 'added',
             actionTime: null,
-            movieName: addedText === 'created the group' ? 'created the group' : `${addedText} to the group`,
+            movieName: addedText === 'created the group' ? 'created the group' : `${addedText} `,
           },
         },
       ];
     }
 
-    const processed = [];
-    const groupCreationActivity = group.activities.find(a => a.preference === 'created_group');
+    const processed: any[] = [];
+    // Sort activities by date descending (latest first) to ensure chronological display
+    const sortedActivities = [...group.activities].sort((a, b) => {
+      const dateA = moment(a.pref_record_date, ['YYYY-MM-DDTHH:mm:ssZ', 'DD MMM YYYY', 'YYYY-MM-DD']).valueOf();
+      const dateB = moment(b.pref_record_date, ['YYYY-MM-DDTHH:mm:ssZ', 'DD MMM YYYY', 'YYYY-MM-DD']).valueOf();
+      return (dateB || 0) - (dateA || 0);
+    });
 
-    if (groupCreationActivity) {
-      const creatorName = groupCreationActivity.user?.name || groupCreationActivity.user?.username || 'Owner';
-      
-      processed.push({
-        userName: creatorName,
-        avatar: groupCreationActivity.user?.avatar || '/avatar/default.jpg',
-        preference: 'created_group',
-        userInterest: {
-          action: 'created the group',
-          actionTime: groupCreationActivity?.pref_record_date || null,
-          movieName: '', 
-        }
-      });
-
-      const creatorAdded = group.activities.filter(a => a.preference === 'added' && a.user?.username === groupCreationActivity.user?.username);
-      if (creatorAdded.length > 0) {
-        const addedMembers = creatorAdded.map(a => a.another_user?.name || a.another_user?.username || 'Someone').filter(Boolean);
-        let formattedMembers = '';
-        
-        if (addedMembers.length === 1) {
-          formattedMembers = addedMembers[0];
-        } else if (addedMembers.length === 2) {
-          formattedMembers = `${addedMembers[0]} & ${addedMembers[1]}`;
-        } else if (addedMembers.length > 2) {
-          formattedMembers = `${addedMembers.slice(0, -1).join(', ')} & ${addedMembers[addedMembers.length - 1]}`;
-        }
-
-        processed.push({
-          userName: creatorName,
-          avatar: groupCreationActivity.user?.avatar || '/avatar/default.jpg',
-          preference: 'added',
-          userInterest: {
-            action: 'added',
-            actionTime: creatorAdded[0]?.pref_record_date || null,
-            movieName: `${formattedMembers} to the group`,
-          }
-        });
-      }
-    }
-
-    group.activities.forEach((activity) => {
-      if (activity.preference === 'created_group') return;
-      if (activity.preference === 'added' && groupCreationActivity && activity.user?.username === groupCreationActivity.user?.username) return;
-
+    sortedActivities.forEach((activity) => {
       const member = group?.members?.find(
         (mem) => mem?.username === activity.user?.username
       );
 
+      const performerName = member?.name || activity.user?.name || activity.user?.username || 'User';
+      const performerAvatar = member?.avatar || activity.user?.avatar || '/avatar/default.jpg';
+
       let action = '';
       let movieName = '';
+      let actionTime = activity?.pref_record_date || null;
 
-      if (activity.preference === 'like') {
+      if (activity.preference === 'created_group') {
+        action = 'created the group';
+        movieName = '';
+      } else if (activity.preference === 'like') {
         action = 'liked';
         movieName = activity.movie?.title || 'a movie';
       } else if (activity.preference === 'dislike') {
@@ -109,17 +78,17 @@ const GroupInterestCycle = ({ group,
         movieName = activity.movie?.title || 'a movie';
       } else if (activity.preference === 'added') {
         action = 'added';
-        movieName = `${activity.another_user?.name || activity.another_user?.username || 'someone'} to the group`;
+        movieName = activity.another_user?.name || activity.another_user?.username || 'someone';
       }
 
       processed.push({
-        userName: member?.name || activity.user?.username || 'Unknown User',
-        avatar: member?.avatar || '/avatar/default.jpg',
+        userName: performerName,
+        avatar: performerAvatar,
         preference: activity.preference,
         userInterest: {
           action: action,
-          actionTime: activity?.pref_record_date || null,
-          movieName: movieName,
+          actionTime: actionTime,
+          movieName: movieName ? `${movieName} ` : '',
         },
       });
     });
@@ -161,9 +130,9 @@ const GroupInterestCycle = ({ group,
     const isRelative = typeof timeValue === 'string' && /(min|sec|hour|yesterday|ago)/i.test(timeValue);
     if (isRelative) return timeValue;
 
-    let past = moment(timeValue, ['YYYY-MM-DDTHH:mm:ssZ', 'DD MMM YYYY'], true);
-    if (!past.isValid()) past = moment(timeValue, 'DD MMM YYYY');
-    if (!past.isValid()) return ''; 
+    let past = moment(timeValue, ['YYYY-MM-DDTHH:mm:ssZ', 'DD MMM YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY'], false);
+    if (!past.isValid()) past = moment(timeValue);
+    if (!past.isValid()) return '';
 
     const now = moment();
     const diffInSeconds = now.diff(past, 'seconds');
@@ -177,7 +146,7 @@ const GroupInterestCycle = ({ group,
     if (diffInDays === 1) return 'Yesterday';
     if (diffInDays < 7) return `${diffInDays} days ago`;
 
-    return past.format('DD MMM'); 
+    return past.format('DD MMM');
   };
 
   return (
@@ -190,7 +159,7 @@ const GroupInterestCycle = ({ group,
           font={font.PoppinsBold}
           numberOfLines={1}
         >
-          {group?.groupName} 
+          {group?.groupName}
         </CustomText>
         {isMultiSelectMode && (
           <TouchableOpacity
@@ -238,7 +207,7 @@ const GroupInterestCycle = ({ group,
               source={{ uri: `${BASE_IMAGE_URL}${user.avatar}` }}
               style={{ height: 20, width: 20, borderRadius: 10, marginRight: 6 }}
             />
-            
+
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, maxWidth: '90%', marginTop: 2.5 }}>
               <Text
                 allowFontScaling={false}
@@ -282,7 +251,7 @@ const GroupInterestCycle = ({ group,
               </CustomText>
             </View>
           </View>
-          
+
           <View style={{ alignSelf: 'flex-end' }}>
             <CustomText
               size={10}

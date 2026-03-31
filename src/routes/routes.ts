@@ -1,4 +1,4 @@
- import imageIndex from "@assets/imageIndex";
+import imageIndex from "@assets/imageIndex";
 import DiscoverTab from "@navigators/DiscoverTab";
 import FeedTab from "@navigators/FeedTab";
 import ProfileTab from "@navigators/ProfileTab";
@@ -28,64 +28,64 @@ import ScreenNameEnum from "@routes/screenName.enum";
 
 // Pre-computed route arrays for stable references (avoids re-renders)
 const REGISTRATION_ROUTE = [
-      { name: ScreenNameEnum.WELCOME, Component: Welcome },
-       { name: ScreenNameEnum.LoginScreen, Component: Login },
-       { name: ScreenNameEnum.SignUpScreen, Component: Signup },
-       { name: ScreenNameEnum.AddName, Component: AddName },
-       { name: ScreenNameEnum.PasswordReset, Component: PasswordReset },
-       { name: ScreenNameEnum.AddUsername, Component: AddUsername },
-      { name: ScreenNameEnum.TabNavigator, Component: TabNavigator },
-      { name: ScreenNameEnum.EmailVerify, Component: EmailVerify },
-      { name: ScreenNameEnum.NewPassword, Component: NewPassword },
-      { name: ScreenNameEnum.Notification, Component: Notification},
-      { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
-      { name: ScreenNameEnum.CreateGroupScreen, Component: CreateGroupScreen },
-      { name: ScreenNameEnum.WatchScreen, Component: WatchScreen },
-      { name: ScreenNameEnum.StreamService, Component: StreamService },
-      { name: ScreenNameEnum.OnboardingScreen, Component: OnboardingScreen },
-      { name: ScreenNameEnum.OnboardingScreen2, Component: OnboardingStepTwo },
-      
+  { name: ScreenNameEnum.WELCOME, Component: Welcome },
+  { name: ScreenNameEnum.LoginScreen, Component: Login },
+  { name: ScreenNameEnum.SignUpScreen, Component: Signup },
+  { name: ScreenNameEnum.AddName, Component: AddName },
+  { name: ScreenNameEnum.PasswordReset, Component: PasswordReset },
+  { name: ScreenNameEnum.AddUsername, Component: AddUsername },
+  { name: ScreenNameEnum.TabNavigator, Component: TabNavigator },
+  { name: ScreenNameEnum.EmailVerify, Component: EmailVerify },
+  { name: ScreenNameEnum.NewPassword, Component: NewPassword },
+  { name: ScreenNameEnum.Notification, Component: Notification },
+  { name: ScreenNameEnum.WoodsScreen, Component: WoodsScreen },
+  { name: ScreenNameEnum.CreateGroupScreen, Component: CreateGroupScreen },
+  { name: ScreenNameEnum.WatchScreen, Component: WatchScreen },
+  { name: ScreenNameEnum.StreamService, Component: StreamService },
+  { name: ScreenNameEnum.OnboardingScreen, Component: OnboardingScreen },
+  { name: ScreenNameEnum.OnboardingScreen2, Component: OnboardingStepTwo },
+
   // { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
 ];
 
 const BOTTOMTAB_ROUTE = [
-      {
-        name: ScreenNameEnum.FeedTab,
-        Component: FeedTab,
-        label: "Feed",
-        logo: imageIndex.home,
-        logo1: imageIndex.homeActive,
-      },
-      {
-        name: ScreenNameEnum.DiscoverTab,
-        Component: DiscoverTab,
-        label: "Discover",
-        logo: imageIndex.discover,
-        logo1: imageIndex.discoverActive,
-      },
-      {
-        name: ScreenNameEnum.RankingTab,
-        Component: RankingTab,
-        label: "Ranking",
-        logo: imageIndex.rankingTab,
-        logo1: imageIndex.rankingActive,
-      },
-     
-      {
-        name: ScreenNameEnum.WatchTab,
-        Component: WatchTab,
-        label: "Watch+",
-        logo: imageIndex.usersGroup,
-        logo1: imageIndex.usersGroupActive,
-      },
-      {
-        name: ScreenNameEnum.ProfileTab,
-        Component: ProfileTab,
-        label: "Profile",
-        logo: imageIndex.UserProfile,
-        logo1: imageIndex.profileActive,
-    },
-  ];
+  {
+    name: ScreenNameEnum.FeedTab,
+    Component: FeedTab,
+    label: "Feed",
+    logo: imageIndex.home,
+    logo1: imageIndex.homeActive,
+  },
+  {
+    name: ScreenNameEnum.DiscoverTab,
+    Component: DiscoverTab,
+    label: "Discover",
+    logo: imageIndex.discover,
+    logo1: imageIndex.discoverActive,
+  },
+  {
+    name: ScreenNameEnum.RankingTab,
+    Component: RankingTab,
+    label: "Ranking",
+    logo: imageIndex.rankingTab,
+    logo1: imageIndex.rankingActive,
+  },
+
+  {
+    name: ScreenNameEnum.WatchTab,
+    Component: WatchTab,
+    label: "Watch+",
+    logo: imageIndex.usersGroup,
+    logo1: imageIndex.usersGroupActive,
+  },
+  {
+    name: ScreenNameEnum.ProfileTab,
+    Component: ProfileTab,
+    label: "Profile",
+    logo: imageIndex.UserProfile,
+    logo1: imageIndex.profileActive,
+  },
+];
 
 const _routes = () => ({
   REGISTRATION_ROUTE,

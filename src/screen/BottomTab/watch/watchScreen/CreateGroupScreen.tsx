@@ -50,8 +50,7 @@ const CreateGroupScreen = () => {
             .filter((name: any): name is string => typeof name === 'string' && name.trim().length > 0);
           setExistingGroupNames(names);
         }
-      } catch (error) {
-        console.error("Error fetching existing groups:", error);
+      } catch (error) { 
       }
     };
     fetchExistingGroups();

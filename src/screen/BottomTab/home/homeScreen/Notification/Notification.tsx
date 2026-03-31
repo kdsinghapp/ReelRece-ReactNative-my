@@ -45,7 +45,7 @@ type FeedItem = {
   groupId?: string;
 };
 
-const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose: () => void; bgColor?: string }) => {
+const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: boolean; onClose: () => void; bgColor?: string; onInteraction?: () => void }) => {
   const token = useSelector((state: RootState) => state.auth.token);
   const navigation = useNavigation();
   const [pendingInvites, setPendingInvites] = useState<FeedItem[]>([]);
@@ -63,9 +63,9 @@ const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose
         setIsloading(true);
         const res = await getPendingGroupInvites(activeToken);
         if (res.success && res.data) {
-          const formatted: FeedItem[] = res.data.results?.map((invite: any, index: number) => ({
+          const formatted: FeedItem[] = (res.data as any).results?.map((invite: any, index: number) => ({
             id: invite.group_id.group_id || `invite-${index}`,
-            groupId: invite.group_id.group_id,  // ✅ Required for API call
+            groupId: invite.group_id.group_id,
             name: invite.invited_by.name,
             avatar: `${BASE_IMAGE_URL}${invite.invited_by.avatar}`,
             action: 'invited',
@@ -77,61 +77,66 @@ const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose
           setInvitationCount(formatted.length);
         }
       } catch (error) {
-       } finally {
+      } finally {
         setIsloading(false);
       }
     };
 
-    if (token) {
+    if (token && visible) {
       fetchInvites(token);
     }
-  }, [token]);
+  }, [token, visible]);
 
   useEffect(() => {
     const appNotification_call = async (activeToken: string) => {
       try {
         await appNotification(activeToken);
       } catch (error) {
-       }
+      }
     };
 
-    if (token) {
+    if (token && visible) {
       appNotification_call(token);
     }
-  }, [token]);
+  }, [token, visible]);
 
 
-  // Single Feed Card
-  const FeedCard = ({ item  }: { item: FeedItem }) => {
-    const handleAccept = async () => {
-      if (!item.groupId || !token) return;
-      try {
-        const res = await respondToGroupInvitation(token, item.groupId, true);
-        if (res.success) {
-          setPendingInvites((prev) => {
-            const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
-            setInvitationCount(updated.length);
-            return updated;
-          });
-        }
-      } catch (err) {
-       }
-    };
+  const handleAccept = async (item: FeedItem) => {
+    if (!item.groupId || !token) return;
+    try {
+      const res = await respondToGroupInvitation(token, item.groupId, true);
+      if (res.success) {
+        setPendingInvites((prev) => {
+          const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
+          const newCount = updated.length;
+          setInvitationCount(newCount);
+          return updated;
+        });
+        if (onInteraction) onInteraction();
+      }
+    } catch (err) {
+    }
+  };
 
-    const handleDecline = async () => {
-      if (!item.groupId || !token) return;
-      try {
-        const res = await respondToGroupInvitation(token, item.groupId, false);
-        if (res.success) {
-          setPendingInvites((prev) => {
-            const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
-            setInvitationCount(updated.length);
-            return updated;
-          });
-        }
-      } catch (err) {
-       }
-    };
+  const handleDecline = async (item: FeedItem) => {
+    if (!item.groupId || !token) return;
+    try {
+      const res = await respondToGroupInvitation(token, item.groupId, false);
+      if (res.success) {
+        setPendingInvites((prev) => {
+          const updated = (prev || []).filter(i => i?.groupId !== item.groupId);
+          const newCount = updated.length;
+          setInvitationCount(newCount);
+          return updated;
+        });
+        if (onInteraction) onInteraction();
+      }
+    } catch (err) {
+    }
+  };
+
+  // Single Feed Card component
+  const FeedCard = ({ item }: { item: FeedItem }) => {
     if (isLoading) {
       return (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -153,7 +158,7 @@ const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose
           )}
           <TouchableOpacity
             style={styles.content}
-            onPress={() => {}}
+            onPress={() => { }}
           >
             <View style={styles.row}>
               <Text style={styles.name}>{item?.name}</Text>
@@ -168,10 +173,10 @@ const Notification = ({ visible, onClose, bgColor }: { visible: boolean; onClose
         </View>
         {item.action === 'invited' && (
           <View style={styles.buttonGroup}>
-            <TouchableOpacity style={styles.accept} onPress={handleAccept}>
+            <TouchableOpacity style={styles.accept} onPress={() => handleAccept(item)}>
               <Text style={styles.buttonText}>{(t("home.accept"))}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.decline} onPress={handleDecline}>
+            <TouchableOpacity style={styles.decline} onPress={() => handleDecline(item)}>
               <Text style={styles.buttonText}>{(t("home.decline"))}</Text>
             </TouchableOpacity>
           </View>

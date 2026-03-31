@@ -58,7 +58,7 @@ const WatchScreen = () => {
   const { getAllGroupReference } = route?.params || {};   // first come from groupsettingmodal
   const navigation = useNavigation();
   const [notificationModal, setNotificationModal] = useState(false);
-  const { hasPendingInvites, pendingCount } = usePendingInvitesCount(token);
+  const { hasPendingInvites, pendingCount, refreshCount } = usePendingInvitesCount(token);
   const [isSettingsMode, setIsSettingsMode] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -480,7 +480,7 @@ const WatchScreen = () => {
 
 
 
-  const HeaderSection = memo(({ isSettingsMode, goToSearchScreen, setNotificationModal, hasPending }: any) => {
+  const HeaderSection = memo(({ isSettingsMode, goToSearchScreen, setNotificationModal, hasPending, pendingCount }: any) => {
     return (
       <View style={WatchStyle.header}>
         <View style={WatchStyle.headerLeft}>
@@ -500,11 +500,11 @@ const WatchScreen = () => {
               source={imageIndex.normalNotification}
               style={WatchStyle.notificationIcon}
             />
-            {/* {hasPending && (
+            {hasPending && (
               <View style={WatchStyle.badgeContainer}>
                 <CustomText style={WatchStyle.badgeText}>{pendingCount > 9 ? '9+' : pendingCount}</CustomText>
               </View>
-            )} */}
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={goToSearchScreen}
@@ -557,6 +557,7 @@ const WatchScreen = () => {
           goToSearchScreen={goToSearchScreen}
           setNotificationModal={setNotificationModal}
           hasPending={hasPendingInvites}
+          pendingCount={pendingCount}
         />
         <View style={WatchStyle.groupsContainer}>
           <FlatList
@@ -725,6 +726,10 @@ const WatchScreen = () => {
       <Notification
         visible={notificationModal}
         onClose={() => setNotificationModal(false)}
+        onInteraction={() => {
+          refreshCount();
+          fetchGroups();
+        }}
         bgColor={false}
       />
 

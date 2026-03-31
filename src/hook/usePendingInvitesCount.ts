@@ -6,29 +6,24 @@ export const usePendingInvitesCount = (token: string | null) => {
   const [hasPendingInvites, setHasPendingInvites] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
+  const refreshCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await getPendingInvitations(token);
+      const invitations = res?.results || res || [];
+      const count = invitations.length;
+      setPendingCount(count);
+      setHasPendingInvites(count > 0);
+    } catch (e) {
+      // ignore error
+    }
+  }, [token]);
+
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-      const fetchCount = async () => {
-        if (!token) return;
-        try {
-          const res = await getPendingInvitations(token);
-          if (isActive) {
-            const invitations = res?.results || res || [];
-            const count = invitations.length;
-            setPendingCount(count);
-            setHasPendingInvites(count > 0);
-          }
-        } catch (e) {
-          // ignore error
-        }
-      };
-      
-      fetchCount();
-      
-      return () => { isActive = false; };
-    }, [token])
+      refreshCount();
+    }, [refreshCount])
   );
 
-  return { hasPendingInvites, pendingCount };
+  return { hasPendingInvites, pendingCount, refreshCount };
 };

@@ -52,7 +52,7 @@ const App = () => {
   );
   const isMuted = false;
   const { navigation, setIsVisible } = useHome();
-  const { hasPendingInvites, pendingCount } = usePendingInvitesCount(token);
+  const { hasPendingInvites, pendingCount, refreshCount } = usePendingInvitesCount(token);
 
   const {
     feedData,
@@ -634,6 +634,7 @@ const App = () => {
       <Notification
         visible={notificationModal}
         onClose={handleCloseNotification}
+        onInteraction={refreshCount}
         bgColor={false}
       />
     </SafeAreaView>

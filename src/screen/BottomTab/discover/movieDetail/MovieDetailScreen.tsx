@@ -816,7 +816,6 @@ const MovieDetailScreen = () => {
   // Render movie item
   const renderMovieDetail = useCallback(
     ({ item, index }) => {
-      console.log("item", item)
       if (item) {
       }
       if (!item) {

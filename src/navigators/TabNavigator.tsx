@@ -87,10 +87,10 @@ const getTabBarStyle = useCallback(
         ? 0
         : Platform.OS === "android"
         ? 58
-        : 88,
+        : 58,
       overflow: "hidden",
       paddingTop: 3,
-      paddingBottom: Platform.OS === "android" ? 12 : 20,
+      paddingBottom: Platform.OS === "android" ? 12 : 14,
       backgroundColor: shouldTransparent ? "transparent" : Color.background,
       position:
         shouldTransparent || shouldAbsolute ? "absolute" : "relative",

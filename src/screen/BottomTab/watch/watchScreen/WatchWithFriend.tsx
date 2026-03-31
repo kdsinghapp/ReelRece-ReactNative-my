@@ -615,9 +615,8 @@ const WatchWithFriend = () => {
           })}
         >
           <Text numberOfLines={1} style={[styles.title, {
-            bottom: 20,
+            marginTop: 0,
             lineHeight: 31
-
           }]}>
             {movie?.title}
           </Text>
@@ -627,9 +626,7 @@ const WatchWithFriend = () => {
           color={Color.lightGrayText}
           style={{
             textAlign: "center",
-            marginVertical: 6,
-            bottom: 22,
-
+            marginVertical: 4,
           }}
           font={font.PoppinsRegular}
           numberOfLines={1}
@@ -640,8 +637,7 @@ const WatchWithFriend = () => {
 
         <TouchableOpacity
           style={[styles.groupScoreContainer, {
-            bottom: 22,
-            // marginBottom:22
+            marginTop: 0,
           }]}
           onPress={() => groupScoreModalFunc({ imdb_id: imdbId, score: movie?.rec_score })}
         >
@@ -657,7 +653,7 @@ const WatchWithFriend = () => {
         <View
           pointerEvents="box-none"
           style={{
-            bottom: 18.5,
+            marginTop: 0,
           }}
         >
 
@@ -666,6 +662,7 @@ const WatchWithFriend = () => {
             wordNo={80}
             descriptionStyle={{ textAlign: "center" }}
             viewmoreStyle={{ textAlign: "center" }}
+            maxHeight={height * 0.20}
           />
         </View>
         <Pressable
@@ -680,8 +677,7 @@ const WatchWithFriend = () => {
               alignItems: 'center',
               width: width * 0.4,
               borderRadius: 10,
-              marginTop: Platform.OS === 'ios' ? -10 : 5,
-              bottom: Platform.OS === 'ios' ? 0 : 5,
+              marginTop: 15,
               opacity: pressed ? 0.8 : 1,
             },
           ]}
@@ -762,8 +758,7 @@ const WatchWithFriend = () => {
                 cache: FastImage.cacheControl.immutable,
               }}
               style={[styles.poster, {
-                bottom: 22.5,
-                marginTop: Platform.OS == "ios" ? 12.6 : 0
+                marginTop: 0
               }]}
               resizeMode={FastImage.resizeMode.cover}
             />
@@ -934,7 +929,7 @@ const WatchWithFriend = () => {
 
         {/* Search and Filter */}
         <View style={[styles.searchFilterContainer, {
-          bottom: 6
+          marginTop: 0
         }]}>
           <View style={styles.searchContainer}>
             <Image source={imageIndex.search} style={styles.searchImg} />
@@ -998,10 +993,11 @@ const WatchWithFriend = () => {
             ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
+            snapToInterval={Platform.OS === 'android' ? ITEM_SIZE : undefined}
             snapToOffsets={displayMovies.map((_, i) => i * ITEM_SIZE)}
             snapToAlignment="start"
             decelerationRate="fast"
-            disableIntervalMomentum={true}
+            disableIntervalMomentum={Platform.OS === 'ios'}
             pagingEnabled={false}
             //       contentContainerStyle={{
             //         paddingHorizontal: (width - ITEM_WIDTH) / 2,
@@ -1014,12 +1010,8 @@ const WatchWithFriend = () => {
             //       }}
             contentContainerStyle={{
               paddingHorizontal: (width - ITEM_SIZE) / 2,
-              alignItems: "center",
-              // paddingBottom: insets.bottom + 355,
-              // height: height * 0.38,
-              ...(Platform.OS === 'ios'
-                ? { paddingBottom: insets.bottom + 355 }
-                : { height: height * 0.38 }),
+              paddingTop: 40,
+              paddingBottom: Platform.OS == "ios" ? 350 : 60,
             }}
 
             onScroll={onScroll}
@@ -1265,7 +1257,7 @@ const styles = StyleSheet.create({
     width: ITEM_WIDTH,
     marginHorizontal: SPACING / 2,
     position: 'relative',
-    height: ITEM_WIDTH * 1.5,
+    height: ITEM_WIDTH * 2.6, // Increased to accommodate metadata/buttons
     marginLeft: 4
   },
   poster: {
@@ -1288,7 +1280,7 @@ const styles = StyleSheet.create({
   thumpCard: {
     flexDirection: 'row',
     alignSelf: 'center',
-    bottom: 25
+    marginTop: 10
   },
   thumpContainer: {
     alignItems: 'center',

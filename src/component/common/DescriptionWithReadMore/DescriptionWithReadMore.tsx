@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   Text,
   StyleSheet,
   View,
   TextStyle,
+  Dimensions,
 } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -11,30 +12,27 @@ import { ScrollView } from 'react-native-gesture-handler';
 import CustomText from '../CustomText/CustomText';
 import { t } from 'i18next';
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 interface Props {
   description: string;
-  onViewMore: () => void;
+  onViewMore?: () => void;
   descriptionStyle?: TextStyle;
   titleLines?: number;
-  /** Font size in pixels. Default 14. */
   fontSize?: number;
-  /** Line height in pixels. Defaults to fontSize * 1.43 if omitted. */
   lineHeight?: number;
+  /** Custom max height. If omitted, uses 12% of screen height. */
+  maxHeight?: number;
 }
 
 export const DescriptionWithReadMore: React.FC<Props> = ({
   description,
   descriptionStyle,
-  titleLines = 1,
   fontSize = 12.81,
   lineHeight: lineHeightProp,
+  maxHeight,
 }) => {
   const lineHeight = lineHeightProp ?? Math.round(fontSize * 1.43);
-  const [wordLimit, setWordLimit] = useState(titleLines === 1 ? 145 : 90);
-
-  useEffect(() => {
-    setWordLimit(titleLines === 1 ? 145 : 90);
-  }, [titleLines]);
 
   const cleanAndFormatText = (str: string): string => {
     if (!str) return '';
@@ -44,31 +42,39 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
       .trim();
   };
 
-  const trimmedText = useMemo(() => {
-    const cleaned = cleanAndFormatText(description);
-    if (cleaned.length <= wordLimit) return cleaned;
-    return cleaned.slice(0, wordLimit).trim();
-  }, [description, wordLimit]);
-
   const textStyle: TextStyle[] = [
     styles.baseText,
     { fontSize, lineHeight },
     ...(descriptionStyle ? [descriptionStyle] : []),
   ];
 
+  const dynamicMaxHeight = maxHeight ?? SCREEN_HEIGHT * 0.12;
+
   if (!description?.trim()) {
     return (
-      <Text style={textStyle}>
-        {t("emptyState.nodata")}
-      </Text>
+      <View style={[styles.container, { maxHeight: dynamicMaxHeight, justifyContent: 'center' }]}>
+        <CustomText
+          size={fontSize}
+          color={Color.lightGrayText}
+          style={{ textAlign: 'center' }}
+        >
+          {t("emptyState.nodata")}
+        </CustomText>
+      </View>
     );
   }
 
+  const cleanedDescription = useMemo(() => cleanAndFormatText(description), [description]);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { maxHeight: dynamicMaxHeight }]}>
       <ScrollView
-        nestedScrollEnabled
+        nestedScrollEnabled={true}
         showsVerticalScrollIndicator={true}
+        horizontal={false}
+        directionalLockEnabled={true}
+        failOffsetX={[-8, 8]}
+        activeOffsetY={[-5, 5]}
       >
         <CustomText
           size={fontSize}
@@ -76,7 +82,7 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
           style={textStyle}
           font={font.PoppinsRegular}
         >
-          {description}
+          {cleanedDescription}
         </CustomText>
       </ScrollView>
     </View>
@@ -84,7 +90,10 @@ export const DescriptionWithReadMore: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    width: '100%',
+    paddingHorizontal: 10,
+  },
   baseText: {
     color: Color.whiteText,
     fontFamily: font.PoppinsRegular,

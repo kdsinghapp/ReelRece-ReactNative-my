@@ -323,8 +323,7 @@ const RankingScreen = () => {
         dispatch(fetchRankingRatedMovies()).unwrap(),
         dispatch(fetchRankingSuggestionMovies(1)).unwrap(),
       ]);
-    } catch (error) {
-      console.error('Refresh failed:', error);
+    } catch (error) { 
     } finally {
       setRefreshing(false);
     }

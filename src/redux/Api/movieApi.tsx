@@ -372,8 +372,7 @@ export const getRankingSuggestionMovie = async (token: string, page = 1) => {
         Authorization: `Token ${token}`
       },
       // params: { page }
-    })
-    console.log("response.data", response.data)
+    }) 
     return response.data
   } catch (error) {
     throw error;
