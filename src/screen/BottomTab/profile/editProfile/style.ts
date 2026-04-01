@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     label: {
       color: Color.whiteText,
       fontSize: 14,
-      fontFamily:font.PoppinsBold,
+      fontFamily:font.PoppinsMedium,
     },
     fieldContainer: {
       flexDirection: 'row',
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
       
     },
     editIcon: {
-      height:15,
-      width:15,
+      height:16,
+      width:16,
       resizeMode:'contain',
     },
   });

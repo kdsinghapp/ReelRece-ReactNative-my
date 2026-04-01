@@ -9,8 +9,19 @@ import imageIndex from '@assets/imageIndex';
 import styles from '../style';
 import { t } from 'i18next';
 
+interface MovieItem {
+  title?: string;
+  release_year?: number;
+  runtime?: number;
+  genres?: string[];
+  rec_score?: number;
+  friends_rec_score?: number | null;
+  n_comments?: number;
+  description?: string;
+}
+
 interface MovieInfoSectionProps {
-  item?: object | null;
+  item?: MovieItem | null;
   formatRuntime?: (runtime: number) => string;
   onTitleLayout?: (e: object | null) => void;
   onCommentPress?: () => void;
@@ -59,7 +70,7 @@ const MovieInfoSection = ({
               </CustomText>
             )}
 
-            {formatRuntime(item?.runtime) && (
+            {item?.runtime && formatRuntime && formatRuntime(item?.runtime) && (
               <CustomText
                 size={12}
                 color={Color.lightGrayText}

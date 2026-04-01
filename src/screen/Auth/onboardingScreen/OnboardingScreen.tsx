@@ -52,9 +52,6 @@ const posterHeight = 170;
 const posterGap = 12;
 const horizontalGap = 14;
 
-/* ----------------------------------
-   FLOATING COLUMN COMPONENT
------------------------------------*/
 const FloatingColumn = ({
   posters,
   columnIndex,

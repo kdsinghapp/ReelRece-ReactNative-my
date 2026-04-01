@@ -101,17 +101,23 @@ lineHeight:16,
   },
   accept: {
     backgroundColor: Color.primary,
-    paddingVertical: 9,
+    // paddingVertical: 9,
     paddingHorizontal: 20,
     borderRadius: 8,
     marginRight: 18,
+    height:40,
+    justifyContent:'center',
+    alignItems:'center'
+
   },
   decline: {
     borderWidth: 1,
-    borderColor: '#fff',
-    paddingVertical: 9,
+    borderColor: '#fff', 
     paddingHorizontal: 20,
     borderRadius: 8,
+    height:40,
+    justifyContent:'center',
+    alignItems:'center'
   },
   buttonText: {
     color: Color.lightGrayText,

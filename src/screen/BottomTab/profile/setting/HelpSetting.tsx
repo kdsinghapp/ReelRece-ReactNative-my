@@ -194,8 +194,8 @@ const styles = StyleSheet.create({
     tintColor: Color.lightGrayText,
   },
   headingText: {
-    fontSize: 16,
-    fontFamily: font.PoppinsBold,
+    fontSize: 14,
+    fontFamily: font.PoppinsSemiBold,
     color: Color.whiteText,
     marginBottom: 8,
     lineHeight: 20,

@@ -29,6 +29,7 @@ import EditNameModal from './modal/editNameModal/EditNameModal';
 import GenreModal from './modal/genreModal/GenreModal';
 import WatchModal from './modal/watchModal/WatchModal';
 import MoreSheetModal from './modal/moreSheetModal/MoreSheetModal';
+import CountryModal from './modal/countryModal/CountryModal';
 
 // ===========================
 // Exports
@@ -63,4 +64,5 @@ export {
   GenreModal,
   WatchModal,
   MoreSheetModal,
+  CountryModal,
 };

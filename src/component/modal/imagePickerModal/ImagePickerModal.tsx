@@ -79,7 +79,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                 <Image source={imageIndex.gallery} style={{
                                     height: 120,
                                     width: 120,
-                                    resizeMode: "contain"
+                                    resizeMode: "contain",
                                 }} />
                             </TouchableOpacity>
                         </View>
@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
         marginTop: 13
     },
     headerText: {
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 16,
+       fontFamily: 'PoppinsSemiBold',
         color: Color.whiteText,
     },
     closeText: {

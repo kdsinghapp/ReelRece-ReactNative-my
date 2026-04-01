@@ -403,11 +403,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 16,
         color: 'white',
         textAlign: 'center',
         flex: 1,
-        fontFamily: font.PoppinsBold
+        fontFamily: font.PoppinsSemiBold
     },
     closeIcon: {
         width: 18,
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         color: Color.whiteText,
-        fontFamily: font.PoppinsBold,
+        fontFamily: font.PoppinsMedium,
         lineHeight: 50,
     },
     userItem: {
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     },
     userName: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 12,
         fontFamily: font.PoppinsMedium
     },
     userNameInactive: {

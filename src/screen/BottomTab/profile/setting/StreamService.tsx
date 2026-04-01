@@ -12,8 +12,11 @@ import FastImage from 'react-native-fast-image'
 import ButtonCustom from '@components/common/button/ButtonCustom'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import imageIndex from '@assets/imageIndex'
-import { CustomStatusBar, HeaderCustom } from '@components/index'
+import { CustomStatusBar, HeaderCustom, CountryModal } from '@components/index'
 import { t } from 'i18next'
+import { COUNTRY_CODES } from '@utils/countryCodes'
+import { setSelectedCountry } from '@redux/feature/authSlice'
+import { useDispatch } from 'react-redux'
 import NetInfo from '@react-native-community/netinfo';
 import { useNetworkStatus } from '@hooks/useNetworkStatus'
 
@@ -23,7 +26,10 @@ const screenWidth = Dimensions.get('window').width;
 const imageSize = screenWidth / numColumns - 25;
 
 const StreamService = () => {
+  const dispatch = useDispatch();
   const token = useSelector((state: RootState) => state.auth.token);
+  const selectedCountry = useSelector((state: RootState) => state.auth.selectedCountry) || 'US' ;
+  const [isCountryModalVisible, setIsCountryModalVisible] = useState(false);
   const route = useRoute();
   const { fromSignUp } = route?.params || {};
   const navigation = useNavigation()
@@ -87,7 +93,7 @@ const StreamService = () => {
 
       const resp = await getUniquePlatforms({
         token,
-        country: 'US',
+        country: selectedCountry,
         query,
         page: pageToLoad,
         signal,
@@ -131,7 +137,7 @@ const StreamService = () => {
     });
 
     return () => controller.abort();
-  }, [token, debouncedSearch]);
+  }, [token, debouncedSearch, selectedCountry]);
 
   useEffect(() => {
 
@@ -402,16 +408,22 @@ const StreamService = () => {
               />
               <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
               <View style={styles.serviceCountComntainer}>
-                <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
-                  <Text style={{
-                    color: "#CDCDCD"
-                  }}>
-                    {getFilteredData()?.length}
-
-                    {" "}Services,{" "}
+                <TouchableOpacity 
+                   activeOpacity={0.7}
+                   onPress={() => setIsCountryModalVisible(true)}
+                   style={{ alignItems: 'center' }}
+                >
+                  <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
+                    <Text style={{
+                      color: "#CDCDCD"
+                    }}>
+                      Services {selectedPlatforms?.length || "0"} {(t("discover.selected"))} • {COUNTRY_CODES[selectedCountry] || selectedCountry}
+                    </Text>
                   </Text>
-                  {selectedPlatforms?.length || "0"} <Text style={styles.serviceSelectText}>{(t("discover.selected"))}</Text>
-                </Text>
+                  <Text style={{ color: Color.primary, fontSize: 11, fontFamily: font.PoppinsMedium, marginTop: -2 }}>
+                    Tap to change country
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {selectedPlatforms.length > 0 ? (
@@ -553,6 +565,12 @@ const StreamService = () => {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+      <CountryModal
+        isVisible={isCountryModalVisible}
+        onClose={() => setIsCountryModalVisible(false)}
+        selectedCountry={selectedCountry}
+        onSelect={(code) => dispatch(setSelectedCountry(code))}
+      />
     </SafeAreaView>
   )
 };

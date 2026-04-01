@@ -297,7 +297,6 @@ const App = () => {
     }, [token, dispatch, trendingData.length, recommendData.length])
   );
 
-  // Save index
   useEffect(() => {
     const saveIndex = async () => {
       let indexForVideo = currentVisibleIndex - 1;

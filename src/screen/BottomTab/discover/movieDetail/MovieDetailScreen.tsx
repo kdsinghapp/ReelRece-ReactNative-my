@@ -61,6 +61,7 @@ const MovieDetailScreen = () => {
   } = useMovie();
   const route = useRoute();
   const [watchModalLoad, setWatchModalLoad] = useState(null);
+  const selectedCountry = useSelector((state: RootState) => state.auth.selectedCountry) || 'US';
 
   const {
     imdb_idData,
@@ -100,9 +101,9 @@ const MovieDetailScreen = () => {
         else if (selectedSimpleFilter === '2') baseEndpoint = '/trending';
         else if (selectedSimpleFilter === '5') baseEndpoint = '/bookmarks';
 
-        const urlStarts = baseEndpoint.includes('?')
-          ? `${baseEndpoint}&country=US&page=${feedPage + 1}`
-          : `${baseEndpoint}?country=US&page=${feedPage + 1}`;
+        const urlStarts = baseEndpoint.includes('?') 
+          ? `${baseEndpoint}&country=${selectedCountry}&page=${feedPage + 1}`
+          : `${baseEndpoint}?country=${selectedCountry}&page=${feedPage + 1}`;
 
         let url = urlStarts;
         if (filterGenreString) url += `&genres=${filterGenreString}`;
@@ -141,7 +142,6 @@ const MovieDetailScreen = () => {
     [windowHeight, insets.bottom, insets.top]
   );
   const videoHeight = useMemo(() => windowHeight / 3.9, [windowHeight]);
-  const primaryButtonWidth = useMemo(() => windowWidth * 0.58, [windowWidth]);
   // const recommendationRowHeight = useMemo(() => windowHeight * 0.26, [windowHeight]);
   const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.20 : windowHeight * 0.26, [windowHeight]);
   const [showFirstModal, setShowFirstModal] = useState(false);
@@ -186,7 +186,6 @@ const MovieDetailScreen = () => {
   const [videoMountKey, setVideoMountKey] = useState(0);
   const [isVideoTransitioning, setIsVideoTransitioning] = useState(false);
   const [appInForeground, setAppInForeground] = useState(true);
-
 
   const outerScrollEnableds = useRef(true);
 
@@ -281,8 +280,7 @@ const MovieDetailScreen = () => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const [meta, matching] = await Promise.all([
-          // getMovieMetadata(token, imdb_idData),
+        const [meta, matching] = await Promise.all([ 
           getMovieMetadata(token, imdb_idData),
           getMatchingMovies(token, imdb_idData)
         ]);
@@ -413,21 +411,28 @@ const MovieDetailScreen = () => {
         });
       } else {
         // Upper or lower bounds reached
-        setMovieData((prev) => {
-          if (direction === 'next') return [prev[0], prev[1], null];
-          return [null, prev[1], prev[2]];
-        });
-
-        // Trigger pagination load if hitting the edge
-        if (direction === 'next' && targetIndex >= localMovieList.length) {
-          fetchNextFeedPage();
+        if (direction === 'next') {
+          // First try to paginate if possible
+          if ((source === 'discover' || source === 'search') && feedPage < feedTotalPages) {
+            fetchNextFeedPage();
+          } else {
+            // Fallback to matching movies (AI recommendations) when list ends
+            const meta = await fetchNextMovieFromQueue(movieData[1]?.imdb_id || currentSeedId);
+            if (meta) {
+              setMovieData((prev) => [prev[0], prev[1], meta]);
+            } else {
+              setMovieData((prev) => [prev[0], prev[1], null]);
+            }
+          }
+        } else {
+          setMovieData((prev) => [null, prev[1], prev[2]]);
         }
       }
     } catch (_) {
     } finally {
       preloadInProgressRef.current = false;
     }
-  }, [token, currentSeedId, currentFeedIndex, localMovieList, source]);
+  }, [token, currentSeedId, currentFeedIndex, localMovieList, source, movieData, feedPage, feedTotalPages]);
 
   useEffect(() => {
     if (loading || !movieData[1] || isResettingRef.current) return;
@@ -1280,7 +1285,7 @@ const MovieDetailScreen = () => {
                       {t('modal.loveIt')}
                     </CustomText>
                   </TouchableOpacity>
- 
+
                   {/* It Was Okay */}
                   <TouchableOpacity
                     style={{ alignItems: 'center', minWidth: 60 }}
@@ -1307,7 +1312,7 @@ const MovieDetailScreen = () => {
                       {t('modal.itWasOkay')}
                     </CustomText>
                   </TouchableOpacity>
- 
+
                   {/* Didn't Like It */}
                   <TouchableOpacity
                     style={{ alignItems: 'center', minWidth: 60 }}
@@ -1517,7 +1522,6 @@ const MovieDetailScreen = () => {
       />
 
       {thinkModal &&
-
         <CommentModal
           visible={thinkModal}
           onClose={() => {

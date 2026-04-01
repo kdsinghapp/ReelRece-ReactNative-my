@@ -646,7 +646,7 @@ const WatchWithFriend = () => {
             title={t("discover.groupScore")}
             description={t("discover.recscoredes")}
           />
-          <CustomText size={14} color={Color.whiteText} font={font.PoppinsBold} style={{ marginLeft: 3 }}>
+          <CustomText size={14} color={Color.whiteText} font={font.PoppinsMedium} style={{ marginLeft: 3 }}>
             {t("discover.groupScore")}
           </CustomText>
         </TouchableOpacity>
@@ -689,7 +689,7 @@ const WatchWithFriend = () => {
           <CustomText
             size={14}
             color={Color.whiteText}
-            font={font.PoppinsBold}
+            font={font.PoppinsSemiBold}
           >
             Watch Now
           </CustomText>
@@ -831,7 +831,7 @@ const WatchWithFriend = () => {
             size={16}
             color={Color.whiteText}
             style={styles.groupTitle}
-            font={font.PoppinsBold}
+            font={font.PoppinsSemiBold}
             numberOfLines={1}
           >
             {/* {cleanGroupName} */}
@@ -1011,6 +1011,7 @@ const WatchWithFriend = () => {
             contentContainerStyle={{
               paddingHorizontal: (width - ITEM_SIZE) / 2,
               paddingTop: 40,
+              // paddingBottom: 60,
               paddingBottom: Platform.OS == "ios" ? 350 : 60,
             }}
 
@@ -1285,11 +1286,11 @@ const styles = StyleSheet.create({
   thumpContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
+    borderRadius: 18,
     borderWidth: 1.2,
     borderColor: Color.whiteText,
-    height: 33,
-    width: 33,
+    height: 36,
+    width: 36,
     marginRight: 12,
     backgroundColor: Color.grey,
   },
@@ -1300,7 +1301,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     fontSize: 24,
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     color: Color.whiteText,
 
   },

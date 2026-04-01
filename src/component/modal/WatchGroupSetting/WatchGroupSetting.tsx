@@ -375,8 +375,8 @@ const styles = StyleSheet.create({
   },
   groupName: {
     color: Color.whiteText,
-    fontSize: 18,
-    fontFamily: font.PoppinsBold,
+    fontSize: 16,
+    fontFamily: font.PoppinsSemiBold,
     lineHeight: 24,
     textAlign: 'center',
   },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   optionText: {
     marginLeft: 12,
     marginRight: 33,
-    fontSize: 16,
+    fontSize: 14,
     color: '#fff',
     fontFamily: font.PoppinsMedium,
     textAlign: "center"
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     // alignSelf: 'center',
     textAlign: 'center',
     fontSize: 16,
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     color: Color.whiteText,
     lineHeight: 20,
     flex: 1,

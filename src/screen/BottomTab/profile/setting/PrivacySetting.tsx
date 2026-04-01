@@ -1,4 +1,4 @@
-import {  StyleSheet,  Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import { Color } from '@theme/color';
 import { useNavigation } from '@react-navigation/native';
@@ -13,13 +13,13 @@ import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 const PrivacySetting = () => {
   const navigation = useNavigation();
- 
+
   const { flagValue: isPrivateAccount, handleToggle: handlePriveToggle } = useToggleFlag("is_private");
   const { flagValue: optOutDataSharing, handleToggle: handleOptOutDataToggle } = useToggleFlag("opt_out_third_party_data_sharing");
   const { flagValue: requireGroupApproval, handleToggle: handleGroupApprovalToggle } = useToggleFlag("group_add_approval_required");
-const isOnline = useNetworkStatus();
+  const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <CustomStatusBar />
       <HeaderCustom
         title={t("setting.menu.privacy")}

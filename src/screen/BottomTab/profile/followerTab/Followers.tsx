@@ -365,11 +365,11 @@ const styles = StyleSheet.create({
 
   tabText: { color: Color.placeHolder, fontSize: 14, fontFamily: font.PoppinsMedium },
 
-  tabTextActive: { color: Color.whiteText, fontFamily: font.PoppinsBold, fontSize: 14, },
+  tabTextActive: { color: Color.whiteText, fontFamily: font.PoppinsSemiBold, fontSize: 14, },
   tabUnderline: { height: 2.2, backgroundColor: Color.primary, width: '60%', marginTop: 4, },
   userRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   avatarContainer: { position: 'relative', marginRight: 12 },
-  userName: { flex: 1, color: Color.whiteText, fontSize: 14, fontFamily: font.PoppinsMedium },
+  userName: { flex: 1, color: Color.whiteText, fontSize: 13, fontFamily: font.PoppinsMedium },
   followprimary: {
     paddingHorizontal: 16,
     paddingVertical: 6,
@@ -387,15 +387,15 @@ const styles = StyleSheet.create({
   },
   followText: {
     color: Color.whiteText,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 16,
-    fontFamily: font.PoppinsBold
+    fontFamily: font.PoppinsSemiBold
   },
   followingText: {
     color: Color.whiteText,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 16,
-    fontFamily: font.PoppinsMedium,
+    fontFamily: font.PoppinsSemiBold,
   },
   marginH15: {
     marginHorizontal: 15

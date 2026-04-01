@@ -19,9 +19,7 @@ const WatchModal: React.FC<CustomModalProps> = ({source, isVisible, onCancel, on
         <Image source={source} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}> 
            {t("common.watchonNetflix")}
-          
-          </Text>
-  
+        </Text>
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
             <Text style={styles.cancelText}>{t("common.cancel")}</Text>

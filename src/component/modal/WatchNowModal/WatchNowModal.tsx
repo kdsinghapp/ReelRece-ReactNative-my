@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   headingTitle: {
     color: Color.primary,
     fontSize: 16,
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     flex: 1,
     textAlign: 'center',
   },
@@ -364,6 +364,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#767676',
+    paddingBottom: 20,
   },
   filterButton: {
     paddingHorizontal: 14,
@@ -402,8 +405,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   platformLogo: {
-    height: 35,
-    width: 35,
+    height: 40,
+    width: 40,
     marginRight: 12,
     borderRadius: 6,
   },
@@ -422,25 +425,29 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 16,
-    fontFamily: font.PoppinsMedium,
+    fontFamily: font.PoppinsSemiBold,
   },
 
   action: {
     color: Color.whiteText,
     flex: 1,
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: font.PoppinsRegular,
   },
   watchBtn: {
     backgroundColor: Color.graybackGround,
-    paddingVertical: 8,
+    // paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
+    height:40,
+    alignItems:'center',
+    justifyContent:'center'
   },
   watchBtnText: {
     color: Color.whiteText,
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: font.PoppinsSemiBold,
+    // fontWeight: '600',
   },
   genreButton: {
     alignItems: 'center',

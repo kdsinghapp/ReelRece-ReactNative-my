@@ -10,6 +10,7 @@ interface AuthState {
   token: string | null;
   userGetData: UserProfile | null;
   logout: boolean | null;
+  selectedCountry: string;
 }
 
 interface GetSuccessPayload {
@@ -23,7 +24,8 @@ const initialState: AuthState = {
   userData: null,
   token: null,
   userGetData: null,
-  logout:null,
+  logout: null,
+  selectedCountry: 'US',
 };
 
 const AuthSlice = createSlice({
@@ -65,7 +67,10 @@ const AuthSlice = createSlice({
     clearUserProfile: (state) => {
       state.userGetData = null;
     },
+    setSelectedCountry: (state, action: PayloadAction<string>) => {
+      state.selectedCountry = action.payload;
+    },
   }
   });
-export const { loginSuccess, logout, setUserProfile , clearUserProfile ,updateUserProfileField, } = AuthSlice.actions;
+export const { loginSuccess, logout, setUserProfile , clearUserProfile ,updateUserProfileField, setSelectedCountry } = AuthSlice.actions;
 export default AuthSlice.reducer;

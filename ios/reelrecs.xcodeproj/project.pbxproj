@@ -360,7 +360,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9X9W7CM639;
+				DEVELOPMENT_TEAM = YK4V89Z262;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = reelrecs/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -374,7 +374,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.johanDop145;
+				PRODUCT_BUNDLE_IDENTIFIER = com.KMMPRPE;
 				PRODUCT_NAME = reelrecs;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "reelrecs-Bridging-Header.h";
@@ -393,7 +393,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9X9W7CM639;
+				DEVELOPMENT_TEAM = YK4V89Z262;
 				INFOPLIST_FILE = reelrecs/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -406,7 +406,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.johanDop145;
+				PRODUCT_BUNDLE_IDENTIFIER = com.KMMPRPE;
 				PRODUCT_NAME = reelrecs;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "reelrecs-Bridging-Header.h";
@@ -484,10 +484,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				PRODUCT_NAME = reelrecs;
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
@@ -557,10 +554,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				PRODUCT_NAME = reelrecs;
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;

@@ -89,7 +89,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
         }}
       />
 
-      {/* Progress fill */}
       <Animated.View
         style={{
           position: 'absolute',

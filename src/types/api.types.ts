@@ -46,6 +46,7 @@ export interface UserProfile {
   // Additional fields that might be returned
   created_at?: string;
   updated_at?: string;
+  country?: string;
 }
 
 export interface AuthState {
