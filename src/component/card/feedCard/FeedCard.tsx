@@ -230,6 +230,8 @@ const FeedCard = ({
     }
   }, []);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <View style={styles.feedCard}>
       <View style={styles.feedHeader}>
@@ -289,21 +291,39 @@ const FeedCard = ({
       </View>
 
       {(comment ?? '').trim() !== '' && (
-        <CustomText
-          size={14}
-          color={Color.whiteText}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setIsExpanded(!isExpanded)}
           style={styles.feedComment}
-          font={font.PoppinsBold}
-        >  {t("common.comment",)} :
+        >
           <CustomText
             size={14}
             color={Color.whiteText}
-            style={styles.commentMargin}
-            font={font.PoppinsRegular}
-          >{comment}</CustomText>
-        </CustomText>
-
+            font={font.PoppinsBold}
+            style={{ lineHeight: 20 }}
+          >
+            {t("common.comment")} :
+            <CustomText
+              size={14}
+              color={Color.whiteText}
+              font={font.PoppinsRegular}
+              numberOfLines={isExpanded ? undefined : 3}
+            >
+              {' '}{comment}
+            </CustomText>
+            {!isExpanded && comment.length > 100 && (
+              <CustomText
+                size={14}
+                color={Color.lightPrimary}
+                font={font.PoppinsBold}
+              >
+                {' '}{t("common.seeMore")}
+              </CustomText>
+            )}
+          </CustomText>
+        </TouchableOpacity>
       )}
+
       {/* Video / Poster */}
       <TouchableOpacity onPress={handleTogglePause}>
         <View style={styles.videoWrapper}>

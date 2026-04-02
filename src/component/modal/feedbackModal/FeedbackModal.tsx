@@ -12,6 +12,7 @@ import {
   Keyboard,
   Easing,
   Platform,
+  TextInput,
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
@@ -115,6 +116,23 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [comparisonSelected, setComparisonSelected] = useState<'first' | 'second' | null>(null);
   const [leftMovie, setLeftMovie] = useState<MovieForComparison | undefined>(firstMovie);
   const [rightMovie, setRightMovie] = useState<MovieForComparison | undefined>(secondMovie);
+  const reviewInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (showFeedback && visible && reviewInputRef.current) {
+      const timer = setTimeout(() => {
+        reviewInputRef.current?.focus();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showFeedback, visible]);
+
+  useEffect(() => {
+    if (!visible) {
+      reviewInputRef.current?.blur();
+      Keyboard.dismiss();
+    }
+  }, [visible]);
 
   const runRightCardSlideIn = useCallback(() => {
     rightCardAnim.setValue(screenWidth * 0.55);
@@ -568,7 +586,13 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
               {!isOnboarding && showFeedback && (
                 <Animated.View style={[{ width: Dimensions.get('window').width * 0.95, marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
                   <TouchableOpacity style={styles.reviewConatainer}>
-                    <CustomReviewInput placeholder={t('modal.writeReview')} text={text} setText={setText} autoFocus={true} />
+                    <CustomReviewInput
+                      key={visible ? 'active' : 'inactive'}
+                      ref={reviewInputRef}
+                      placeholder={t('modal.writeReview')}
+                      text={text}
+                      setText={setText}
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => nextPress()}>
                     <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>

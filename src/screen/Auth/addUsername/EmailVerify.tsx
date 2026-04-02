@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View,
-  Text,
+  View, 
   Image,
   TouchableOpacity,
-
   TextInput,
   ScrollView,
   Keyboard,
@@ -52,7 +50,6 @@ const EmailVerify = () => {
   const [focusedIndex, setFocusedIndex] = useState(null); // to track which input is focused
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
-
 
   const navigating = useNavigation()
 
@@ -135,10 +132,7 @@ const EmailVerify = () => {
               }}
             />
           </View>
-
-
-
-          {/* Headings */}
+     
 
           <CustomText
 
@@ -160,10 +154,6 @@ const EmailVerify = () => {
             {t("login.enterCode")}
 
           </CustomText>
-
-
-
-
 
           <CustomText
 

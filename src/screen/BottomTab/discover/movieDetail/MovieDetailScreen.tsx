@@ -101,7 +101,7 @@ const MovieDetailScreen = () => {
         else if (selectedSimpleFilter === '2') baseEndpoint = '/trending';
         else if (selectedSimpleFilter === '5') baseEndpoint = '/bookmarks';
 
-        const urlStarts = baseEndpoint.includes('?') 
+        const urlStarts = baseEndpoint.includes('?')
           ? `${baseEndpoint}&country=${selectedCountry}&page=${feedPage + 1}`
           : `${baseEndpoint}?country=${selectedCountry}&page=${feedPage + 1}`;
 
@@ -280,7 +280,7 @@ const MovieDetailScreen = () => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const [meta, matching] = await Promise.all([ 
+        const [meta, matching] = await Promise.all([
           getMovieMetadata(token, imdb_idData),
           getMatchingMovies(token, imdb_idData)
         ]);
@@ -1166,48 +1166,56 @@ const MovieDetailScreen = () => {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.whereToWatchScroll}
                   >
-                    {item.platforms.map((platform: StreamingPlatform, idx: number) => {
-                      const hasLink = platform?.watch_link && String(platform.watch_link).trim();
-                      return (
-                        <TouchableOpacity
-                          key={`${platform.platform_name}-${idx}`}
-                          style={[styles.whereToWatchCard, !hasLink && styles.whereToWatchCardDisabled]}
-                          onPress={() => hasLink && Linking.openURL(platform.watch_link!)}
-                          disabled={!hasLink}
-                          activeOpacity={hasLink ? 0.7 : 1}
-                        >
-                          {platform.logo_url ? (
-                            <Image
-                              source={{ uri: platform.logo_url }}
-                              style={styles.whereToWatchLogo}
-                              resizeMode="contain"
-                            />
-                          ) : (
-                            <View style={styles.whereToWatchLogoPlaceholder}>
-                              <Text style={styles.whereToWatchLogoPlaceholderText} numberOfLines={1}>
-                                {(platform.platform_name || '?').slice(0, 2)}
-                              </Text>
-                            </View>
-                          )}
-                          <CustomText
-                            size={12}
-                            color={Color.whiteText}
-                            numberOfLines={1}
-                            style={styles.whereToWatchName}
-                            font={font.PoppinsMedium}
+                    {item.platforms
+                      .filter((p: any) => {
+                        const name = String(p?.platform_name || '');
+                        const isNumeric = /^\d+$/.test(name);
+                        const isUnknown = name.includes('_Unknown') || name.toLowerCase() === 'unknown';
+                        const isNotSet = name.toUpperCase() === 'NOT_SET';
+                        return name && !isNumeric && !isUnknown && !isNotSet;
+                      })
+                      .map((platform: StreamingPlatform, idx: number) => {
+                        const hasLink = platform?.watch_link && String(platform.watch_link).trim();
+                        return (
+                          <TouchableOpacity
+                            key={`${platform.platform_name}-${idx}`}
+                            style={[styles.whereToWatchCard, !hasLink && styles.whereToWatchCardDisabled]}
+                            onPress={() => hasLink && Linking.openURL(platform.watch_link!)}
+                            disabled={!hasLink}
+                            activeOpacity={hasLink ? 0.7 : 1}
                           >
-                            {platform.platform_name || 'Unknown'}
-                          </CustomText>
-                          {platform.watch_type && (
-                            <View style={styles.whereToWatchBadge}>
-                              <Text style={styles.whereToWatchBadgeText} numberOfLines={1}>
-                                {platform.watch_type}
-                              </Text>
-                            </View>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
+                            {platform.logo_url ? (
+                              <Image
+                                source={{ uri: platform.logo_url }}
+                                style={styles.whereToWatchLogo}
+                                resizeMode="contain"
+                              />
+                            ) : (
+                              <View style={styles.whereToWatchLogoPlaceholder}>
+                                <Text style={styles.whereToWatchLogoPlaceholderText} numberOfLines={1}>
+                                  {(platform.platform_name || '?').slice(0, 2)}
+                                </Text>
+                              </View>
+                            )}
+                            <CustomText
+                              size={12}
+                              color={Color.whiteText}
+                              numberOfLines={1}
+                              style={styles.whereToWatchName}
+                              font={font.PoppinsMedium}
+                            >
+                              {platform.platform_name || 'Unknown'}
+                            </CustomText>
+                            {platform.watch_type && (
+                              <View style={styles.whereToWatchBadge}>
+                                <Text style={styles.whereToWatchBadgeText} numberOfLines={1}>
+                                  {platform.watch_type}
+                                </Text>
+                              </View>
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
                   </ScrollView>
                 </View>
               )}
@@ -1507,6 +1515,7 @@ const MovieDetailScreen = () => {
         onClose={closeWatchNowModal}
         token={token}
         watchNow={watchNow}
+        country={selectedCountry}
         selectedImdbId={movieData[currentIndex]?.imdb_id ?? imdb_idData}
         watchModalLoad={watchModalLoad}
         setWatchModalLoad={setWatchModalLoad}

@@ -28,7 +28,7 @@ const imageSize = screenWidth / numColumns - 25;
 const StreamService = () => {
   const dispatch = useDispatch();
   const token = useSelector((state: RootState) => state.auth.token);
-  const selectedCountry = useSelector((state: RootState) => state.auth.selectedCountry) || 'US' ;
+  const selectedCountry = useSelector((state: RootState) => state.auth.selectedCountry) || 'US';
   const [isCountryModalVisible, setIsCountryModalVisible] = useState(false);
   const route = useRoute();
   const { fromSignUp } = route?.params || {};
@@ -44,7 +44,7 @@ const StreamService = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);  // pull to refresh
   const isFetchingRef = useRef(false);                      // prevent duplicate requests
   const onEndReachedCalledDuringMomentum = useRef(true);    // avoid multiple onEndReached
-  const [platformData, setPlatformData] = useState<object | string | null | number[]>([]); // current loaded items
+  const [platformData, setPlatformData] = useState<any[]>([]); // current loaded items
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1)
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -99,10 +99,24 @@ const StreamService = () => {
         signal,
       });
       const results =
-        (resp?.results || []).map((item) => ({
-          ...item,
-          image_url: fixImageUrl(item?.image_url),
-        })) ?? [];
+        (resp?.results || [])
+          .filter((item: any) => {
+            const name = String(item?.supported_platform || '');
+            const isNumeric = /^\d+$/.test(name);
+            const isUnknown = name.includes('_Unknown') || name.toLowerCase() === 'unknown';
+            const isNotSet = name.toUpperCase() === 'NOT_SET';
+            return name && !isNumeric && !isUnknown && !isNotSet;
+          })
+          .map((item: any) => ({
+            ...item,
+            image_url: fixImageUrl(item?.image_url),
+          }))
+          .filter((item: any, index: number, self: any[]) =>
+            index === self.findIndex((p: any) =>
+              String(p?.supported_platform || '').toLowerCase() ===
+              String(item?.supported_platform || '').toLowerCase()
+            )
+          ) ?? [];
 
       setPlatformData((prev) =>
         pageToLoad === 1 ? results : [...prev, ...results]
@@ -339,9 +353,11 @@ const StreamService = () => {
             resizeMode={FastImage.resizeMode.contain}
           />
         ) : (
-          <Text style={styles.placeholderText}>
-            {platformDisplayName.slice(0, 2).toUpperCase()}
-          </Text>
+          <View style={[styles.image, isSelected && styles.imageActive, { justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={styles.placeholderText}>
+              {platformDisplayName.slice(0, 2).toUpperCase()}
+            </Text>
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -408,10 +424,10 @@ const StreamService = () => {
               />
               <Text style={styles.selectText} >{(t("home.selectyour"))}</Text>
               <View style={styles.serviceCountComntainer}>
-                <TouchableOpacity 
-                   activeOpacity={0.7}
-                   onPress={() => setIsCountryModalVisible(true)}
-                   style={{ alignItems: 'center' }}
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setIsCountryModalVisible(true)}
+                  style={{ alignItems: 'center' }}
                 >
                   <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
                     <Text style={{

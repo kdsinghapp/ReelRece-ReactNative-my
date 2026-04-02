@@ -126,9 +126,15 @@ const GroupInterestCycle = ({ group,
   }, [currentIndex, user]);
 
   const getTimeAgo = (timeValue) => {
+    console.log(timeValue, 'timeValue')
     if (!timeValue) return '';
-    const isRelative = typeof timeValue === 'string' && /(min|sec|hour|yesterday|ago)/i.test(timeValue);
-    if (isRelative) return timeValue;
+    if (typeof timeValue === 'string' && timeValue.includes('ago')) {
+      return timeValue
+        .replace(/(\d+)\s*mins?\s*ago/i, '$1m ago')
+        .replace(/(\d+)\s*secs?\s*ago/i, '$1s ago')
+        .replace(/(\d+)\s*hours?\s*ago/i, '$1h ago')
+        .replace(/(\d+)\s*days?\s*ago/i, '$1d ago');
+    }
 
     let past = moment(timeValue, ['YYYY-MM-DDTHH:mm:ssZ', 'DD MMM YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY'], false);
     if (!past.isValid()) past = moment(timeValue);
@@ -140,11 +146,10 @@ const GroupInterestCycle = ({ group,
     const diffInHours = now.diff(past, 'hours');
     const diffInDays = now.diff(past, 'days');
 
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}  min ago`;
-    if (diffInHours < 24) return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays} days ago`;
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInDays < 7) return `${diffInDays}d ago`;
 
     return past.format('DD MMM');
   };

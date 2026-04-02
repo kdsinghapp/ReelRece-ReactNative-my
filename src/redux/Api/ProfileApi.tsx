@@ -55,6 +55,8 @@ export const getMoviePlatforms = async ({
       }
     }
 
+    console.log(params, 'this is params')
+
     const response = await axiosInstance.get('/platforms', {
       headers: {
         Authorization: `Token ${token}`,

@@ -17,7 +17,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import imageIndex from '@assets/imageIndex';
 import { COUNTRY_CODES } from '@utils/countryCodes';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 
 const { height } = Dimensions.get('window');
 
@@ -66,127 +66,128 @@ const CountryModal: React.FC<CountryModalProps> = ({ isVisible, onClose, onSelec
     <Modal
       visible={isVisible}
       animationType="slide"
-      transparent
+      transparent={false}
       statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={onClose}
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
         >
-          <TouchableWithoutFeedback>
-            <View style={[
-              styles.bottomSheet,
-              {
-                paddingBottom: Platform.OS === 'ios' ? insets.bottom + 10 : insets.bottom + 20,
-                maxHeight: Platform.OS === 'ios' ? height * 0.8 : height * 0.8
-              }
-            ]}>
-              <View style={styles.header}>
-                <Text style={styles.title}>Select Country</Text>
-                <TouchableOpacity onPress={onClose}>
-                  <Image source={imageIndex.closeWhite} style={styles.closeIcon} resizeMode="contain" />
-                </TouchableOpacity>
-              </View>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={onClose} style={styles.backButton}>
+              <Image source={imageIndex.backArrow} style={styles.backIcon} resizeMode="contain" />
+            </TouchableOpacity>
+            <Text style={styles.title}>Select Country</Text>
+            <View style={{ width: 40 }} />
+          </View>
 
-              <View style={styles.searchContainer}>
-                <Image source={imageIndex.search} style={styles.searchImg} resizeMode="contain" />
-                <TextInput
-                  placeholder="Search country..."
-                  placeholderTextColor={Color.whiteText}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  style={styles.searchInput}
-                  returnKeyType="search"
-                  autoCorrect={false}
-                />
-              </View>
+          <View style={styles.searchContainer}>
+            <Image source={imageIndex.search} style={styles.searchImg} resizeMode="contain" />
+            <TextInput
+              placeholder="Search country..."
+              placeholderTextColor="#888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput}
+              returnKeyType="search"
+              autoCorrect={false}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Image source={imageIndex.closeWhite} style={styles.clearIcon} resizeMode="contain" />
+              </TouchableOpacity>
+            )}
+          </View>
 
-              <FlatList
-                data={filteredCountries}
-                keyExtractor={(item) => item.code}
-                renderItem={renderItem}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.listContent}
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+          <FlatList
+            data={filteredCountries}
+            keyExtractor={(item) => item.code}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  bottomSheet: {
-    backgroundColor: Color.grey,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 20,
-    maxHeight: height * 0.8,
-    minHeight: height * 0.5,
+    backgroundColor: Color.background,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  title: {
-    fontSize: 20,
-    fontFamily: font.PoppinsBold,
-    color: Color.whiteText,
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
   },
-  closeIcon: {
+  backIcon: {
     width: 20,
     height: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontFamily: font.PoppinsBold,
+    color: Color.whiteText,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A2A2A',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   searchImg: {
     width: 18,
     height: 18,
     marginRight: 10,
+    tintColor: '#888',
   },
   searchInput: {
     flex: 1,
-    height: 45,
+    height: 48,
     color: Color.whiteText,
     fontFamily: font.PoppinsMedium,
+    fontSize: 14,
+  },
+  clearIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#888',
   },
   listContent: {
+    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   countryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#333',
+    borderBottomColor: '#222',
   },
   selectedCountryItem: {
-    // backgroundColor: '#333',
+    // Optional highlight
   },
   countryName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: font.PoppinsMedium,
     color: Color.whiteText,
   },

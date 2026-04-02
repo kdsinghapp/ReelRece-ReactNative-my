@@ -38,6 +38,7 @@ const PlatformRow = React.memo(({ item, isSelected, onToggle }: { item: Platform
 
 const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selectedPlatforms, setSelectedPlatforms }: PlatformModalsProps) => {
     const token = useSelector((state: RootState) => state.auth.token);
+    const [filterMode, setFilterMode] = useState<'popular' | 'more'>('popular');
     const [toastMess, setToastMess] = useState(false);
     const [toastMessColorGreen, setToastMessGreen] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -65,9 +66,20 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
         }
     }, [token, setSelectedPlatforms]);
 
+    const filteredPlatforms = useMemo(() => {
+        let result = [...platformsData];
+        if (filterMode === 'popular') {
+            result = result.filter(p => (p as any).popular === true);
+        } else {
+            // More mode: sort popular to top
+            result.sort((a, b) => ((a as any).popular === (b as any).popular ? 0 : (a as any).popular ? -1 : 1));
+        }
+        return result;
+    }, [platformsData, filterMode]);
+
     const selectAll = useCallback(() => {
-        setSelectedPlatforms(platformsData.map((platform: PlatformItem) => platform.supported_platform));
-    }, [platformsData, setSelectedPlatforms]);
+        setSelectedPlatforms(filteredPlatforms.map((platform: PlatformItem) => platform.supported_platform));
+    }, [filteredPlatforms, setSelectedPlatforms]);
 
     const selectedServices = useMemo(() => {
         return selectedPlatforms?.filter((id: string) => {
@@ -99,6 +111,40 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                     {(t("discover.platform"))}
 
                 </CustomText>
+                {/* Popular Toggle */}
+                <View style={styles.dataSelectContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.mostPopularContainer,
+                            filterMode === 'popular' && { backgroundColor: Color.primary }
+                        ]}
+                        onPress={() => setFilterMode('popular')}
+                    >
+                        <CustomText
+                            size={12}
+                            color={Color.whiteText}
+                            style={[styles.mostPopularText, { fontFamily: filterMode === 'popular' ? font.PoppinsBold : font.PoppinsRegular }]}
+                        >
+                            {t("setting.streaming.mostPopular")}
+                        </CustomText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.mostPopularContainer,
+                            filterMode === 'more' && { backgroundColor: Color.primary }
+                        ]}
+                        onPress={() => setFilterMode('more')}
+                    >
+                        <CustomText
+                            size={12}
+                            color={Color.whiteText}
+                            style={[styles.mostPopularText, { fontFamily: filterMode === 'more' ? font.PoppinsBold : font.PoppinsRegular }]}
+                        >
+                            {t("setting.streaming.allPlatforms")}
+                        </CustomText>
+                    </TouchableOpacity>
+                </View>
+
                 {/* Counters */}
                 <View style={styles.countersContainer}>
 
@@ -126,7 +172,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                 <TouchableOpacity onPress={selectAll} style={styles.selectAllButton}>
 
                     <CustomText
-                        size={16}
+                        size={14}
                         color={Color.whiteText}
                         style={styles.selectAllText}
                         font={font.PoppinsMedium}
@@ -141,7 +187,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                         <ActivityIndicator color={Color.primary} size="small" />
                     ) : (
                         <FlatList
-                            data={platformsData}
+                            data={filteredPlatforms}
                             keyExtractor={keyExtractor}
                             renderItem={renderItem}
                             extraData={selectedPlatforms}
@@ -280,6 +326,27 @@ const styles = StyleSheet.create({
         height: 40,
         marginRight: 12,
         borderRadius: 10,
+    },
+    dataSelectContainer: {
+        marginVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    mostPopularContainer: {
+        width: '38%',
+        height: 36,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Color.grey,
+        borderRadius: 18,
+        marginHorizontal: 8,
+    },
+    mostPopularText: {
+        fontSize: 12,
+        lineHeight: 14,
+        fontFamily: font.PoppinsRegular,
+        color: Color.whiteText
     },
     modalItemText: {
         width: '77%',

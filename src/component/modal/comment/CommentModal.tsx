@@ -65,6 +65,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
   const [loadingMore, setLoadingMore] = useState(false); // For lazy loading indicator
   const PAGE_SIZE = 20; // batch size per API call
   const [commmetLoad, setCommmetLoad] = useState<boolean>(false);
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
 
   // const [commetText, setCommentText] = useState('')
 
@@ -118,6 +119,9 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     }
   }, [visible, imdb_id]);
 
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedComments(prev => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
 
   const fetchComments = async (nextPage = 1) => {
@@ -362,12 +366,20 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
             />
           </TouchableOpacity>
 
-          <Text numberOfLines={4} style={styles.message}>
-            {item?.comment}
-            {item.comment.length > 110 && (
-              <Text style={styles.seeMore}>{t("common.seeMore")}</Text>
-            )}
-          </Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => toggleExpand(item.id)}
+          >
+            <Text
+              numberOfLines={expandedComments[item.id] ? undefined : 4}
+              style={styles.message}
+            >
+              {item?.comment}
+              {!expandedComments[item.id] && item.comment.length > 110 && (
+                <Text style={styles.seeMore}> {t("common.seeMore")}</Text>
+              )}
+            </Text>
+          </TouchableOpacity>
           <View style={styles.divider} />
         </View>
       );

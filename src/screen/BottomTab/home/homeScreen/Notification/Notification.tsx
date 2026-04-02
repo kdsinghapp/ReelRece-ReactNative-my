@@ -70,7 +70,7 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
             avatar: `${BASE_IMAGE_URL}${invite.invited_by.avatar}`,
             action: 'invited',
             movie: invite.group_id.name,
-            timeAgo: 'Just now',
+            timeAgo: timeAgo(invite.invited_at),
             online: false,
           })) || [];
           setPendingInvites(formatted);
@@ -99,6 +99,28 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
       appNotification_call(token);
     }
   }, [token, visible]);
+
+  const timeAgo = (timeValue: string): string => {
+    if (!timeValue) return 'Just now';
+    if (typeof timeValue === 'string' && timeValue.includes('ago')) {
+      return timeValue
+        .replace(/(\d+)\s*mins?\s*ago/i, '$1m ago')
+        .replace(/(\d+)\s*secs?\s*ago/i, '$1s ago')
+        .replace(/(\d+)\s*hours?\s*ago/i, '$1h ago')
+        .replace(/(\d+)\s*days?\s*ago/i, '$1d ago');
+    }
+
+    const now = new Date();
+    const past = new Date(timeValue);
+    const diff = Math.floor((now.getTime() - past.getTime()) / 1000); // in seconds
+
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+
+    return past.toLocaleDateString();
+  };
 
 
   const handleAccept = async (item: FeedItem) => {

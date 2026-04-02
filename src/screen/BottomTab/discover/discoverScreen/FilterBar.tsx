@@ -15,6 +15,8 @@ import { Color } from '@theme/color';
 import PlatformModals from './PlatformModals';
 import { getUniqueGenres } from '@redux/Api/movieApi';
 import { getUniquePlatforms } from '@redux/Api/SettingApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '@redux/store';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
 import { GenreModal } from '@components/index';
@@ -30,6 +32,7 @@ const FilterBar = ({ isSelectList,
   token, }: boolean | string | object | number | null) => {
   const [selectedGenres, setSelectedGenres] = useState([]);  // main genre state
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const selectedCountry = useSelector((state: RootState) => state?.auth?.selectedCountry) || 'US';
   const [genreModalVisible, setGenreModalVisible] = useState(false);
   const [platformModalVisible, setPlatformModalVisible] = useState(false);
   const [plateFromItemName, setPlateFromItemName] = useState(false);
@@ -153,18 +156,33 @@ const FilterBar = ({ isSelectList,
       try {
         const data = await getUniquePlatforms({
           token,
+          country: selectedCountry,
           signal: controller.signal,
         });
 
         if (!isActive) return;
 
-        const platforms = (data?.results || []).map(p => {
-          const fixedUrl = fixImageUrl(p?.image_url || '');
-          return {
-            ...p,
-            icon: fixedUrl
-          };
-        });
+        const platforms = (data?.results || [])
+          .filter((p: any) => {
+            const name = String(p?.supported_platform || '');
+            const isNumeric = /^\d+$/.test(name);
+            const isUnknown = name.includes('_Unknown') || name.toLowerCase() === 'unknown';
+            const isNotSet = name.toUpperCase() === 'NOT_SET';
+            return name && !isNumeric && !isUnknown && !isNotSet;
+          })
+          .map((p: any) => {
+            const fixedUrl = fixImageUrl(p?.image_url || '');
+            return {
+              ...p,
+              icon: fixedUrl
+            };
+          })
+          .filter((item: any, index: number, self: any[]) =>
+            index === self.findIndex((p: any) =>
+              String(p?.supported_platform || '').toLowerCase() ===
+              String(item?.supported_platform || '').toLowerCase()
+            )
+          );
 
         setPlatformsData(platforms);
       } catch (error) {
@@ -181,7 +199,6 @@ const FilterBar = ({ isSelectList,
       controller.abort();
     };
   }, [platformModalVisible, token]);
-
 
   const fixImageUrl = (imageUrl: string): string => {
     try {
@@ -200,7 +217,6 @@ const FilterBar = ({ isSelectList,
 
   const renderItem = ({ item }) => {
     const selected = isSelected(item);
-
     const selectedPlatformItems = platformsData.filter((p) =>
       selectedPlatforms.includes(p.supported_platform)
     );

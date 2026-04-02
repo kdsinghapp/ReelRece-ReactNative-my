@@ -122,7 +122,8 @@ const BackgroundImage = memo(({ imageUri }) => {
 const WatchWithFriend = () => {
   const isOnline = useNetworkStatus();
   const route = useRoute()
-  const token = useSelector((state: RootState) => state?.auth?.token);
+   const token = useSelector((state: RootState) => state?.auth?.token);
+  const selectedCountry = useSelector((state: RootState) => state?.auth?.selectedCountry) || 'US';
   const navigation = useNavigation();
   const { groupProps: passedGroupProps, type, groupId, maxActivitiescnt } = route?.params || {};
   const [group, setGroup] = useState(passedGroupProps);
@@ -1042,6 +1043,7 @@ const WatchWithFriend = () => {
             visible={watchNow}
             token={token}
             watchNow={watchNow}
+            country={selectedCountry}
             selectedImdbId={selectedImdbId}
             watchModalLoad={watchModalLoad}
             setWatchModalLoad={setWatchModalLoad}

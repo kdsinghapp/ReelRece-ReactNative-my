@@ -54,7 +54,7 @@ const Welcome = () => {
 
   const goToInitialScreen = () => {
     if (userProfile?.email_id && valid) {
-      if (ratedCount < 5) {
+      if (ratedCount < 6) {
         navigation.replace(ScreenNameEnum.OnboardingScreen);
       } else {
         navigation.replace(ScreenNameEnum.TabNavigator, {

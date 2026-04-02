@@ -21,7 +21,7 @@ import { getMoviePlatforms } from '@redux/Api/ProfileApi';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from 'i18next';
 const filterOptions = [
-//   { id: 1, option: 'All' },
+  //   { id: 1, option: 'All' },
   { id: 2, option: 'Subscription' },
   { id: 3, option: 'Rent' },
   { id: 4, option: 'Buy' },
@@ -62,6 +62,7 @@ const WatchNowModal = ({
   const [selectedSortOption, setSelectedSortOption] = useState('Subscription');
   const [platforms, setPlatforms] = useState<WatchPlatformItem[]>([]);
   const [selectFilterOp, setSelectFilterOp] = useState('');
+  const [filterMode, setFilterMode] = useState<'popular' | 'more'>('popular');
 
   const fetchData = async () => {
     if (!selectedImdbId) return;
@@ -81,7 +82,16 @@ const WatchNowModal = ({
         (raw as { platforms?: unknown[] })?.platforms ??
         [];
 
-      setPlatforms(Array.isArray(list) ? (list as WatchPlatformItem[]) : []);
+      const filteredList = (Array.isArray(list) ? (list as WatchPlatformItem[]) : [])
+        .filter((p: any) => {
+          const name = String(p?.supported_platform || p?.display_name || '');
+          const isNumeric = /^\d+$/.test(name);
+          const isUnknown = name.includes('_Unknown') || name.toLowerCase() === 'unknown';
+          const isNotSet = name.toUpperCase() === 'NOT_SET';
+          return name && !isNumeric && !isUnknown && !isNotSet;
+        });
+
+      setPlatforms(filteredList);
     } catch (error) {
       setPlatforms([]);
     } finally {
@@ -128,15 +138,28 @@ const WatchNowModal = ({
         return normalized === selectedSortOption;
       });
 
-  const filteredPlatforms = filteredByType.filter(
-    (item, index, self) =>
-      index ===
-      self.findIndex(
-        (p) =>
-          (p?.supported_platform ?? '').toLowerCase() ===
-          (item?.supported_platform ?? '').toLowerCase()
-      )
-  );
+  const filteredPlatforms = filteredByType
+    .filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (p) =>
+            (p?.supported_platform ?? '').toLowerCase() ===
+            (item?.supported_platform ?? '').toLowerCase()
+        )
+    )
+    .filter((p) => {
+      if (filterMode === 'popular') {
+        return (p as any).popular === true;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (filterMode === 'more') {
+        return ((a as any).popular === (b as any).popular ? 0 : (a as any).popular ? -1 : 1);
+      }
+      return 0;
+    });
 
   const openDeeplink = async (item: WatchPlatformItem) => {
     const url =
@@ -250,6 +273,28 @@ const WatchNowModal = ({
               </TouchableOpacity>
             </View>
 
+            {/* Popular Toggle */}
+            <View style={styles.dataSelectContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.mostPopularContainer,
+                  filterMode === 'popular' && { backgroundColor: Color.primary }
+                ]}
+                onPress={() => setFilterMode('popular')}
+              >
+                <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'popular' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.mostPopular")}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.mostPopularContainer,
+                  filterMode === 'more' && { backgroundColor: Color.primary }
+                ]}
+                onPress={() => setFilterMode('more')}
+              >
+                <Text style={[styles.mostPopularText, { fontFamily: filterMode === 'more' ? font.PoppinsBold : font.PoppinsRegular }]}>{t("setting.streaming.allPlatforms")}</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Top Filters */}
             <View style={styles.filterRow}>
               {filterOptions.map((item) => (
@@ -266,7 +311,6 @@ const WatchNowModal = ({
                     setSelectedSortOption(item.option);
                     setSelectFilterOp(apiWatchType);
                   }}
-
                 >
                   <Text
                     style={[
@@ -360,6 +404,27 @@ const styles = StyleSheet.create({
     height: 22,
     width: 22,
   },
+  dataSelectContainer: {
+    marginVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mostPopularContainer: {
+    width: '38%',
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Color.grey,
+    borderRadius: 18,
+    marginHorizontal: 8,
+  },
+  mostPopularText: {
+    fontSize: 12,
+    lineHeight: 14,
+    fontFamily: font.PoppinsRegular,
+    color: Color.whiteText
+  },
   filterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -439,9 +504,9 @@ const styles = StyleSheet.create({
     // paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
-    height:40,
-    alignItems:'center',
-    justifyContent:'center'
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   watchBtnText: {
     color: Color.whiteText,
