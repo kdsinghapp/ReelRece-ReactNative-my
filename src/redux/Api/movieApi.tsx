@@ -203,10 +203,11 @@ export const homeDiscoverApi = async (token: string, url: string) => {
 }
 
 // without pagination
-export const getAllRatedMovies = async (token: string) => {
+export const getAllRatedMovies = async (token: string, page = 1) => {
   try {
     const response = await axiosInstance.get(`/ranked-movies`, {
-      headers: { Authorization: `Token ${token}` }
+      headers: { Authorization: `Token ${token}` },
+      params: { page }
     });
     return response.data;
   } catch (error) {
@@ -215,7 +216,7 @@ export const getAllRatedMovies = async (token: string) => {
 };
 
 // without pagination
-export const getAllRated_with_preference = async (token: string, preference: string) => {
+export const getAllRated_with_preference = async (token: string, preference: string, page = 1) => {
   try {
     // Validate preference
     const preferenceValidation = validateString(preference, {
@@ -230,7 +231,7 @@ export const getAllRated_with_preference = async (token: string, preference: str
 
     const response = await axiosInstance.get('/ranked-movies', {
       headers: { Authorization: `Token ${token}` },
-      params: createSafeParams({ preference: preferenceValidation.sanitized }),
+      params: createSafeParams({ preference: preferenceValidation.sanitized, page }),
     });
     return response.data;
   } catch (error) {
@@ -321,8 +322,6 @@ export const getMovieMetadata = async (token: string, imdb_id: string): Promise<
       headers: { Authorization: `Token ${token}` },
       params: createSafeParams({ imdb_id: imdbIdValidation.sanitized }),
     });
-
-
     return response.data;
   } catch (error) {
     throw error;
@@ -366,13 +365,12 @@ export const getEpisodesBySeason = async (token: string, imdb_id: string, season
 
 export const getRankingSuggestionMovie = async (token: string, page = 1) => {
   try {
-    // page = 2
     const response = await axiosInstance.get(`/suggest-movies`, {
       headers: {
         Authorization: `Token ${token}`
       },
-      // params: { page }
-    }) 
+      params: { page }
+    })
     return response.data
   } catch (error) {
     throw error;
@@ -393,7 +391,6 @@ export const recordTrailerInteraction = async (
         },
       },
     );
-
     return response.data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };

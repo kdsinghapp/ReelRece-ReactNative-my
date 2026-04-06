@@ -15,7 +15,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
-import { BASE_IMAGE_URL } from '@redux/Api/axiosInstance';
+import { BASE_IMAGE_URL } from '@config/api.config';
 import { RootState } from '@redux/store';
 import { useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
@@ -42,20 +42,25 @@ interface Props {
 }
 
 const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, headaing, groupActivity, ranking_react }) => {
-   const navigation = useNavigation();
-    const { token, userGetData } = useSelector((state: RootState) => state.auth);
-    const isUserName_Login = useSelector((state: RootState) => state.auth.userGetData?.username);
-     const email_da_data = useSelector((state: RootState) => state.auth.userGetData);
-   
-   const renderItem = ({ item }: { item }) => {
-     return (
+  const navigation = useNavigation();
+  const { token, userGetData } = useSelector((state: RootState) => state.auth);
+  const isUserName_Login = useSelector((state: RootState) => state.auth.userGetData?.username);
+  const email_da_data = useSelector((state: RootState) => state.auth.userGetData);
+  const [expandedReviews, setExpandedReviews] = React.useState<Record<string, boolean>>({});
+
+  const toggleExpand = React.useCallback((id: string | number) => {
+    setExpandedReviews(prev => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    return (
       <View style={[
         styles.modalContent,
         {
           // backgroundColor: type === "react" ? "transparent" : Color.modalBg,
           backgroundColor: type === "react" ? "transparent" : Color.modalBg,
-          minHeight:64,
-          maxHeight:64,
+          minHeight: 64,
+          maxHeight: 64,
           // flex: 3,
 
         }
@@ -64,29 +69,29 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
           style={styles.row}
           onPress={() => {
             onClose();
-            navigation.navigate(ScreenNameEnum.OtherProfile ,{item:item});
+            navigation.navigate(ScreenNameEnum.OtherProfile, { item: item });
           }}
         >
           <TouchableOpacity style={styles.avatarContainer}>
 
             {/* <Image source={{ uri: `${BASE_IMAGE_URL}${type === 'review' ? item?.user?.avatar : item?.avatar}` }} style={styles.avatar} /> */}
-              <FastImage
-          style={styles.avatar}
-          source={{
-            uri: `${BASE_IMAGE_URL}${type === 'review' ? item?.user?.avatar : item?.avatar}`,
-            priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
-            cache: FastImage.cacheControl.web // 👈 Cache permanently
-          }}
-          resizeMode={FastImage.resizeMode.cover}
-        />
+            <FastImage
+              style={styles.avatar}
+              source={{
+                uri: `${BASE_IMAGE_URL}${type === 'review' ? item?.user?.avatar : item?.avatar}`,
+                priority: FastImage.priority.low, // 👈 Low priority (since profile image small)
+                cache: FastImage.cacheControl.web // 👈 Cache permanently
+              }}
+              resizeMode={FastImage.resizeMode.cover}
+            />
             {type === "react" &&
-              <View style={[styles.onlineIndicator, { backgroundColor:  item?.preference ? (item?.preference == "like" ? Color.green : Color.red ) : Color.TransperantColor}]} >
-                {item?.preference ?  (item?.preference == "like" ?
+              <View style={[styles.onlineIndicator, { backgroundColor: item?.preference ? (item?.preference == "like" ? Color.green : Color.red) : Color.TransperantColor }]} >
+                {item?.preference ? (item?.preference == "like" ?
                   <Image source={imageIndex?.like} style={styles.thumpstyle} /> :
-                  <Image source={imageIndex?.disLike} style={styles.thumpstyle} />):
+                  <Image source={imageIndex?.disLike} style={styles.thumpstyle} />) :
                   null
                 };
-  
+
               </View>}
           </TouchableOpacity>
 
@@ -104,28 +109,38 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
             {type === 'review' && <Text style={styles.date}>{item?.created_date}</Text>}
           </View>
           <View style={[styles.ratingBadge]}>
-               <RankingWithInfo
-      score={item?.rec_score}
-      title={ item?.username == isUserName_Login ?  "Rec Score" : "Friend Score"}
-      description={item?.username == isUserName_Login ?
-        "This score shows the rating from your friend for this title."
-      
-          : "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-         
-      }
-    />
+            <RankingWithInfo
+              score={item?.rec_score}
+              title={item?.username == isUserName_Login ? "Rec Score" : "Friend Score"}
+              description={item?.username == isUserName_Login ?
+                "This score shows the rating from your friend for this title."
+
+                : "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+
+              }
+            />
             {/* <RankingCard ranked={item?.rec_score} /> */}
           </View>
         </TouchableOpacity>
 
         {type === 'review' && (
-          <Text numberOfLines={4} style={styles.message}>
-            {item?.comment}{' '}
-            {item.comment.length > 100 && (
-              <Text style={styles.seeMore}>See more</Text>
-            )}
-
-          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => toggleExpand(item.id || index)}
+          >
+            <Text style={styles.message}>
+              {expandedReviews[item.id || index]
+                ? item?.comment
+                : item?.comment?.length > 120
+                  ? item.comment.substring(0, 115)
+                  : item?.comment}
+              {item?.comment && item.comment.length > 120 && (
+                <Text style={{ color: Color.primary, fontFamily: font.PoppinsBold }}>
+                  {expandedReviews[item.id || index] ? ' ' + t("common.seeLess") : '... ' + t("common.seeMore")}
+                </Text>
+              )}
+            </Text>
+          </TouchableOpacity>
         )}
 
         {type === "review" && <View style={styles.divider} />}
@@ -135,70 +150,70 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose} >
       <TouchableOpacity style={styles.overlay} onPress={() => onClose()}>
-        <TouchableWithoutFeedback onPress={() => {}}>
+        <TouchableWithoutFeedback onPress={() => { }}>
 
-        <View style={[styles.modalContent, { backgroundColor: type === "react" ? Color.modalTransperant : Color.modalBg }]}   >
-          <View style={styles.header}>
-            <Text style={styles.headerText}></Text>
-            <Text style={styles.headerText}>
-              {headaing}
-            </Text>
-            <TouchableOpacity onPress={() => onClose()}>
-              <Image
-                source={imageIndex.closeimg}
-                style={{ height: 24, width: 24 }}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </View>
+          <View style={[styles.modalContent, { backgroundColor: type === "react" ? Color.modalTransperant : Color.modalBg }]}   >
+            <View style={styles.header}>
+              <Text style={styles.headerText}></Text>
+              <Text style={styles.headerText}>
+                {headaing}
+              </Text>
+              <TouchableOpacity onPress={() => onClose()}>
+                <Image
+                  source={imageIndex.closeimg}
+                  style={{ height: 24, width: 24 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
 
-          {type === "react" &&
-            <TouchableOpacity style={styles.rankingContainer}  >
-              {/* <RankingCard ranked={ranking_react} /> */}
-              
+            {type === "react" &&
+              <TouchableOpacity style={styles.rankingContainer}  >
+                {/* <RankingCard ranked={ranking_react} /> */}
+
                 <RankingWithInfo
-      score={ranking_react}
-      title={"Friend Score"}
-      description={
-         t("discover.frienddes") 
-          // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-        //  "This score shows the rating from your friend for this title."
-      }
-    />
-              <Text style={{ fontSize: 12, color: Color.whiteText, fontFamily: font.PoppinsBold, marginLeft: 12, }} >{t("discover.groupScore")}</Text>
-            </TouchableOpacity>
-          }
+                  score={ranking_react}
+                  title={"Friend Score"}
+                  description={
+                    t("discover.frienddes")
+                    // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
+                    //  "This score shows the rating from your friend for this title."
+                  }
+                />
+                <Text style={{ fontSize: 12, color: Color.whiteText, fontFamily: font.PoppinsBold, marginLeft: 12, }} >{t("discover.groupScore")}</Text>
+              </TouchableOpacity>
+            }
 
 
-          {type === "react" && (
-            <View style={{
-              borderBottomWidth: 1, borderBottomColor: Color.whiteText,
-              marginTop: 10, marginBottom: 6,
-            }} />
-          )}
+            {type === "react" && (
+              <View style={{
+                borderBottomWidth: 1, borderBottomColor: Color.whiteText,
+                marginTop: 10, marginBottom: 6,
+              }} />
+            )}
 
-          {reviews?.length === 0 && (
-            <Text style={styles.emptyText}>
-              {t("emptyState.videoyet")}
-          
-            </Text>
-          )}
+            {reviews?.length === 0 && (
+              <Text style={styles.emptyText}>
+                {t("emptyState.videoyet")}
 
-          <FlatList
-            data={reviews}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContent}
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}
-            windowSize={7}
-            removeClippedSubviews
+              </Text>
+            )}
 
-          />
+            <FlatList
+              data={reviews}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.listContent}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={7}
+              extraData={expandedReviews}
+              removeClippedSubviews
+            />
 
 
 
-        </View>
+          </View>
         </TouchableWithoutFeedback>
 
         {/* <View style={[ styles.closeBtnContainer, { backgroundColor: type === "react" ? Color.modalTransperant : Color.modalBg }]} >
@@ -229,8 +244,8 @@ const styles = StyleSheet.create({
     // borderRadius: 16,
     padding: 16,
     // flex: 2,
-     maxHeight:Dimensions.get('window').height * 0.66,
-    minHeight:Dimensions.get('window').height * 0.66,
+    maxHeight: Dimensions.get('window').height * 0.66,
+    minHeight: Dimensions.get('window').height * 0.66,
   },
   header: {
     flexDirection: 'row',
@@ -240,8 +255,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     // fontWeight: '700',
-    fontFamily:font.PoppinsBold,
-    lineHeight:22,
+    fontFamily: font.PoppinsBold,
+    lineHeight: 22,
     color: Color.whiteText,
   },
   reviewContainer: {

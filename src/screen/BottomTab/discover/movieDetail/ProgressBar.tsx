@@ -55,7 +55,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       onSeekStart?.();
       handleSeek(evt.nativeEvent.locationX);
     },
-
     onPanResponderMove: (evt, gestureState) => {
       containerRef.current.measure((x, y, width, height, pageX, pageY) => {
         const relativeX = gestureState.moveX - pageX;
@@ -100,7 +99,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
           width: progressAnim,
         }}
       />
-
     </View>
   );
 };

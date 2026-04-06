@@ -12,7 +12,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginRight: 4,
-    height: 30, borderRadius: 30
+    height: 30,
+    borderRadius: 30
   },
 
   logo: { fontSize: 22, color: Color.whiteText, fontWeight: '600', marginLeft: 10 },

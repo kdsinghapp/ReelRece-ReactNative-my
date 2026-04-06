@@ -380,13 +380,13 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   searchResdultTtile: {
-    fontFamily: font.PoppinsBold,
-    fontSize: 16,
+    fontFamily: font.PoppinsSemiBold,
+    fontSize: 14,
     color: Color.whiteText,
   },
   searchtTtile: {
-    fontFamily: font.PoppinsBold,
-    fontSize: 16,
+    fontFamily: font.PoppinsSemiBold,
+    fontSize: 14,
     color: Color.primary,
   },
   paginationBar: {

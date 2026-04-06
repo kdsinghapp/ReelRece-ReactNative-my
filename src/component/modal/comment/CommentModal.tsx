@@ -25,10 +25,10 @@ import { TextInput } from 'react-native-gesture-handler';
 import { getCommentsByMovie, postComment } from '@redux/Api/commentService';
 import FastImage from 'react-native-fast-image';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
-import { BASE_IMAGE_URL } from '@config/api.config'; 
+import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 import ShimmerReviewItem from '@components/common/ShimmerReviewItem/ShimmerReviewItem';
- interface Props {
+interface Props {
   visible: boolean;
   onClose: () => void;
   reviews: string[];
@@ -367,16 +367,19 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
           </TouchableOpacity>
 
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => toggleExpand(item.id)}
+            activeOpacity={0.8}
+            onPress={() => toggleExpand(item.id || index)}
           >
-            <Text
-              numberOfLines={expandedComments[item.id] ? undefined : 4}
-              style={styles.message}
-            >
-              {item?.comment}
-              {!expandedComments[item.id] && item.comment.length > 110 && (
-                <Text style={styles.seeMore}> {t("common.seeMore")}</Text>
+            <Text style={styles.message}>
+              {expandedComments[item.id || index]
+                ? item?.comment
+                : item?.comment?.length > 120
+                  ? item.comment.substring(0, 115)
+                  : item?.comment}
+              {item?.comment && item.comment.length > 120 && (
+                <Text style={{ color: Color.primary, fontFamily: font.PoppinsBold }}>
+                  {expandedComments[item.id || index] ? ' ' + t("common.seeLess") : '... ' + t("common.seeMore")}
+                </Text>
               )}
             </Text>
           </TouchableOpacity>
@@ -384,7 +387,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
         </View>
       );
     },
-    [imdb_id, comments, userData?.username]
+    [imdb_id, comments, userData?.username, expandedComments, toggleExpand]
   );
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
@@ -443,8 +446,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                       ListFooterComponent={
                         loadingMore ? <ActivityIndicator color={Color.primary} /> : null
                       }
+                      extraData={expandedComments}
                       removeClippedSubviews
-
                     />
                   )}
                 <View style={styles.inputContainer}>
@@ -567,7 +570,7 @@ const styles = StyleSheet.create({
   },
   message: {
     color: Color.whiteText,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 18,
     marginTop: 10,
     fontFamily: font.PoppinsRegular,
@@ -637,8 +640,8 @@ const styles = StyleSheet.create({
   },
 
   postImage: {
-    height: 20,
-    width: 20,
+    height: 18,
+    width: 18,
     resizeMode: 'contain',
   }
 });

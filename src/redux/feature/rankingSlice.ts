@@ -5,6 +5,8 @@ import { RootState } from '@redux/store';
 
 export interface RankingState {
   ratedMovies: Movie[];
+  ratedPage: number;
+  ratedHasMore: boolean;
   suggestionMovies: Movie[];
   suggestionPage: number;
   suggestionHasMore: boolean;
@@ -15,6 +17,8 @@ export interface RankingState {
 
 const initialState: RankingState = {
   ratedMovies: [],
+  ratedPage: 1,
+  ratedHasMore: true,
   suggestionMovies: [],
   suggestionPage: 1,
   suggestionHasMore: true,
@@ -25,18 +29,20 @@ const initialState: RankingState = {
 
 /** Fetch ranked movies; can be prefetched from Welcome for smooth Ranking tab load. */
 export const fetchRankingRatedMovies = createAsyncThunk<
-  Movie[],
-  { silent?: boolean } | undefined,
+  { results: Movie[]; page: number; totalPages: number },
+  { page?: number; silent?: boolean } | undefined,
   { state: RootState; rejectValue: string }
 >(
   'ranking/fetchRatedMovies',
-  async (_opts, { getState, rejectWithValue }) => {
+  async (opts, { getState, rejectWithValue }) => {
+    const page = opts?.page || 1;
     const token = getState().auth?.token;
     if (!token) return rejectWithValue('No token');
     try {
-      const res = await getAllRatedMovies(token);
-      const list = Array.isArray(res?.results) ? res.results : [];
-      return list;
+      const res = await getAllRatedMovies(token, page);
+      const results = Array.isArray(res?.results) ? res.results : [];
+      const totalPages = Number(res?.total_pages ?? 1);
+      return { results, page, totalPages };
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to fetch rated movies';
       return rejectWithValue(msg);
@@ -75,6 +81,11 @@ const rankingSlice = createSlice({
       state.suggestionPage = 1;
       state.suggestionHasMore = true;
     },
+    resetRatedPagination(state) {
+      state.ratedMovies = [];
+      state.ratedPage = 1;
+      state.ratedHasMore = true;
+    },
     clearRankingError(state) {
       state.error = null;
     },
@@ -110,7 +121,19 @@ const rankingSlice = createSlice({
       })
       .addCase(fetchRankingRatedMovies.fulfilled, (state, action) => {
         state.loadingRated = false;
-        state.ratedMovies = action.payload ?? [];
+        const { results, page, totalPages } = action.payload;
+        if (page === 1) {
+          state.ratedMovies = results ?? [];
+          state.ratedPage = 1;
+        } else {
+          const existingIds = new Set(state.ratedMovies.map((m: Movie) => m?.imdb_id));
+          const newResults = (results ?? []).filter(
+            (m: Movie) => m?.imdb_id && !existingIds.has(m.imdb_id)
+          );
+          state.ratedMovies = [...state.ratedMovies, ...newResults];
+          state.ratedPage = page;
+        }
+        state.ratedHasMore = totalPages > 0 && state.ratedPage < totalPages;
       })
       .addCase(fetchRankingRatedMovies.rejected, (state, action) => {
         state.loadingRated = false;
@@ -147,6 +170,7 @@ const rankingSlice = createSlice({
 
 export const {
   resetSuggestionPagination,
+  resetRatedPagination,
   clearRankingError,
   reorderRatedMovies,
   updateRatedMovieScores,

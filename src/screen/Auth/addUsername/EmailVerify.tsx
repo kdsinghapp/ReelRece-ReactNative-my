@@ -68,7 +68,6 @@ const EmailVerify = () => {
   const handleChange = (text, index) => {
     // Only allow change if all previous boxes are filled
     const allPreviousFilled = code.slice(0, index).every(digit => digit !== '');
-
     if (allPreviousFilled || index === 0) {
       const newCode = [...code];
       newCode[index] = text;

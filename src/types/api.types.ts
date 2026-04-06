@@ -95,6 +95,9 @@ export interface Movie {
   cast?: string[];
   trailer_url?: string;
   content_type?: 'movie' | 'series' | 'episode';
+  description?: string;
+  release_date?: string;
+  media_type?: string;
   
   // Additional metadata
   is_bookmarked?: boolean;
@@ -112,6 +115,10 @@ export interface MovieMetadata extends Movie {
   matching_movies?: Movie[];
   episodes?: Episode[];
   seasons?: Season[];
+  friends_rec_score?: number | null;
+  n_comments?: number;
+  languages_spoken?: string;
+  subgenres?: string[];
 }
 
 export interface Episode {

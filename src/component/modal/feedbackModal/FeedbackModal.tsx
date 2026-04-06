@@ -529,7 +529,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           >
             <View style={[styles.modalContent, { marginTop: 0 }]}>
               <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
-                <CustomText size={20} color={Color.whiteText} style={styles.heading} font={font.PoppinsBold}>
+                <CustomText size={16} color={Color.whiteText} style={styles.heading} font={font.PoppinsSemiBold}>
                   {t('modal.howWasIt')}
                 </CustomText>
               </Animated.View>
@@ -562,7 +562,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   <TouchableOpacity onPress={handleLovedIt}>
                     <Image source={selectedOption === 'lovedIt' ? imageIndex.acrtivePlay : imageIndex.stopPlay} resizeMode="contain" style={styles.icon} />
                   </TouchableOpacity>
-                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsBold : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
                     {t('modal.loveIt')}
                   </CustomText>
                 </View>
@@ -570,7 +570,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   <TouchableOpacity onPress={handleOkay}>
                     <Image source={selectedOption === 'okay' ? imageIndex.modalitWasPoster : imageIndex.play} resizeMode="contain" style={styles.icon} />
                   </TouchableOpacity>
-                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsBold : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
                     {t('modal.itWasOkay')}
                   </CustomText>
                 </View>
@@ -578,7 +578,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   <TouchableOpacity onPress={handleDidntLike}>
                     <Image source={selectedOption === 'notLike' ? imageIndex.redCloseActive : imageIndex.redClose} resizeMode="contain" style={styles.icon} />
                   </TouchableOpacity>
-                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsBold : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                  <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
                     {t('modal.didntLikeIt')}
                   </CustomText>
                 </View>
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: Color.whiteText,
-    fontSize: 22,
+    fontSize: 16,
     marginBottom: 12,
   },
   poster: {
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   icon: { height: 40, width: 40 },
   reviewConatainer: {
     width: '100%',
-    height: 50,
+    minHeight: 50,
     borderRadius: 10,
     // backgroundColor: Color.darkGrey,
     paddingHorizontal: 10,

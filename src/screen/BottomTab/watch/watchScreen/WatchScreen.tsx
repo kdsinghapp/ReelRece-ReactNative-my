@@ -485,10 +485,10 @@ const WatchScreen = () => {
       <View style={WatchStyle.header}>
         <View style={WatchStyle.headerLeft}>
           <CustomText
-            size={20}
+            size={18}
             color={Color.placeHolder}
             style={[WatchStyle.logo,]}
-            font={font.PoppinsBold}
+            font={font.PoppinsSemiBold}
           >
             {(t("home.watchtogether"))}
           </CustomText>

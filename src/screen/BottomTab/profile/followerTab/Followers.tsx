@@ -389,13 +389,13 @@ const styles = StyleSheet.create({
     color: Color.whiteText,
     fontSize: 13,
     lineHeight: 16,
-    fontFamily: font.PoppinsSemiBold
+    fontFamily: font.PoppinsMedium
   },
   followingText: {
     color: Color.whiteText,
     fontSize: 13,
     lineHeight: 16,
-    fontFamily: font.PoppinsSemiBold,
+    fontFamily: font.PoppinsMedium,
   },
   marginH15: {
     marginHorizontal: 15

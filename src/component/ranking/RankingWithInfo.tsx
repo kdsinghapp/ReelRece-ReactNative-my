@@ -129,14 +129,14 @@ const styles = StyleSheet.create({
   },
   tooltipTitle: {
     color: Color.whiteText,
-    fontSize: 16,
-    fontFamily: font.PoppinsBold,
+    fontSize: 14,
+    fontFamily: font.PoppinsSemiBold,
     marginBottom: 4,
     textAlign: "center",
   },
   tooltipDescription: {
     color: Color.whiteText,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: font.PoppinsRegular,
     lineHeight: 18,
     textAlign: "center",

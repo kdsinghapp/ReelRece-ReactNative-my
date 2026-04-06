@@ -59,6 +59,7 @@ const DiscoverScreen = () => {
 
   const route = useRoute();
   const token = useSelector((state: RootState) => state?.auth?.token);
+  const selectedCountry = useSelector((state: RootState) => state?.auth?.selectedCountry) || 'US';
 
   const { isSelectList } = route?.params || {};
 
@@ -139,8 +140,8 @@ const DiscoverScreen = () => {
 
       // if baseEndpoint already has ?, then use &
       const urlStarts = baseEndpoint.includes('?')
-        ? `${baseEndpoint}&country=US&page=${page}`
-        : `${baseEndpoint}?country=US&page=${page}`;
+        ? `${baseEndpoint}&country=${selectedCountry}&page=${page}`
+        : `${baseEndpoint}?country=${selectedCountry}&page=${page}`;
 
       let url = urlStarts;
 
@@ -164,6 +165,7 @@ const DiscoverScreen = () => {
       platformFilterString,
       selectedSortId,
       contentSelect,
+      selectedCountry,
       getSortParam,
       getMediaTypeParam,
     ]

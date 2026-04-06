@@ -25,10 +25,10 @@ export const WatchStyle = StyleSheet.create({
     flexDirection: "row"
   },
   logo: {
-    fontSize: 20,
+    fontSize: 18,
     color: Color.whiteText,
     // fontWeight: '600'
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     lineHeight: 28,
   },
   notificationIcon: {

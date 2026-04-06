@@ -63,11 +63,8 @@ export const sessionData = [
     session: "Session 3",
 
   },
- 
 
 ]
-
-
 
 const EpisodesModal: React.FC<Props> = ({
   visible,
@@ -215,7 +212,7 @@ const EpisodesModal: React.FC<Props> = ({
                 size={16}
                 color={Color.whiteText}
                 style={styles.headerText}
-                font={font.PoppinsBold}
+                font={font.PoppinsSemiBold}
               >
                 Episodes
               </CustomText>

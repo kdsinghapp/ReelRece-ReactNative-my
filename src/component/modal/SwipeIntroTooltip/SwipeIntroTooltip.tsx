@@ -16,6 +16,7 @@ import font from '@theme/font';
 import imageIndex from '@assets/imageIndex';
 
 const SWIPE_TOOLTIP_STORAGE_KEY = 'hasSeenSwipeTooltip';
+const IS_NEW_USER_KEY = 'is_new_user';
 
 const HAND_BOUNCE_DISTANCE = 12;
 const HAND_ANIM_DURATION = 1200;
@@ -42,6 +43,14 @@ const SwipeIntroTooltip = ({
   const handAnim = useRef(new Animated.Value(0)).current;
   const bottomPadding = BOTTOM_TAB_HEIGHT + insets.bottom + GAP_ABOVE_TAB_BAR;
   const contentWidth = Math.min(width * 0.92, 340);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => {
+      onClose();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [visible, onClose]);
 
   useEffect(() => {
     if (!visible) return;
@@ -136,4 +145,4 @@ const styles = StyleSheet.create({
 });
 
 export default SwipeIntroTooltip;
-export { SWIPE_TOOLTIP_STORAGE_KEY };
+export { SWIPE_TOOLTIP_STORAGE_KEY, IS_NEW_USER_KEY };

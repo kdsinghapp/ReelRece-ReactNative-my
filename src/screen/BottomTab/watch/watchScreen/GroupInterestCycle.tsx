@@ -158,10 +158,10 @@ const GroupInterestCycle = ({ group,
     <View style={styles.groupInfo}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }} >
         <CustomText
-          size={15}
+          size={14}
           color={Color.whiteText}
           style={[styles.groupName, { marginBottom: interest ? 5 : 30 }]}
-          font={font.PoppinsBold}
+          font={font.PoppinsSemiBold}
           numberOfLines={1}
         >
           {group?.groupName}

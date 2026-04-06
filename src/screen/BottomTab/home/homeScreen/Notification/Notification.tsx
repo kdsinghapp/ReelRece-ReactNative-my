@@ -199,7 +199,7 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
               <Text style={styles.buttonText}>{(t("home.accept"))}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.decline} onPress={() => handleDecline(item)}>
-              <Text style={styles.buttonText}>{(t("home.decline"))}</Text>
+              <Text style={{...styles.buttonText, fontFamily:font.PoppinsMedium}}>{(t("home.decline"))}</Text>
             </TouchableOpacity>
           </View>
         )}

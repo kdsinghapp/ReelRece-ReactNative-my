@@ -6,7 +6,7 @@ interface CustomTextProps extends TextProps {
   children: React.ReactNode;
   font?: string;
   size?: number;
-  color?: string;           // text color
+  color?: string;
   lineHeight?: number;
   letterSpacing?: number;
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
@@ -16,7 +16,7 @@ interface CustomTextProps extends TextProps {
 
 const CustomText: React.FC<CustomTextProps> = ({
   children,
-  font , // default font
+  font ,
   size = 14,
   color = Color.whiteText,
   lineHeight,

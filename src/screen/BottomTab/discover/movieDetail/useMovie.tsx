@@ -17,5 +17,4 @@ const useMovie = () => {
     thinkModal, setthinkModal
   };
 };
-
 export default useMovie;

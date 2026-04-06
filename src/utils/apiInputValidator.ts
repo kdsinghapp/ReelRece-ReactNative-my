@@ -309,7 +309,7 @@ export const sanitizeUrlParam = (param: unknown): string => {
  * Creates safe query params object for axios
  * This is the PREFERRED way to pass query parameters
  */
-export const createSafeParams = (params: Record<string, string | object>): Record<string, string | number> => {
+export const createSafeParams = (params: Record<string, string | number | object>): Record<string, string | number> => {
   const safeParams: Record<string, string | number> = {};
 
   for (const [key, value] of Object.entries(params)) {

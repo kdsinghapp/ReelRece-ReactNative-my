@@ -21,7 +21,7 @@ import font from '@theme/font';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
-import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
+import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY, IS_NEW_USER_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
 import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction, Trending_without_Filter, searchMovies } from '@redux/Api/movieApi';
 import { getMatchingMovies } from '@redux/Api/ProfileApi';
@@ -43,10 +43,17 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import imageIndex from '@assets/imageIndex';
 import MovieDetailsShimmer from '@components/MovieDetailsShimmer/MovieDetailsShimmer';
 import { t } from 'i18next';
-import type { Platform as StreamingPlatform } from '../../../../types/api.types';
+import type { Platform as StreamingPlatform, MovieMetadata } from '../../../../types/api.types';
+
 const CommentModal = React.lazy(() =>
   import('@components/modal/comment/CommentModal')
 );
+
+interface ExtendedMovieMetadata extends MovieMetadata {
+  has_rated?: boolean;
+  preference?: string;
+  n_comments?: number;
+}
 
 
 const MovieDetailScreen = () => {
@@ -60,7 +67,7 @@ const MovieDetailScreen = () => {
     thinkModal, setthinkModal
   } = useMovie();
   const route = useRoute();
-  const [watchModalLoad, setWatchModalLoad] = useState(null);
+  const [watchModalLoad, setWatchModalLoad] = useState<string | null>(null);
   const selectedCountry = useSelector((state: RootState) => state.auth.selectedCountry) || 'US';
 
   const {
@@ -77,7 +84,7 @@ const MovieDetailScreen = () => {
     currentPage = 1,
     totalPages = 1,
     searchQuery = '',
-  } = route?.params || {};
+  } = (route?.params as any) || {};
 
   const [currentFeedIndex, setCurrentFeedIndex] = useState(initialIndex);
   const [localMovieList, setLocalMovieList] = useState(movieList);
@@ -107,7 +114,10 @@ const MovieDetailScreen = () => {
 
         let url = urlStarts;
         if (filterGenreString) url += `&genres=${filterGenreString}`;
-        if (platformFilterString) url += `&platforms=${platformFilterString}`;
+        if (platformFilterString) {
+          url += `&platforms=${platformFilterString}`;
+          url += `&watch_type=subscription`;
+        }
         if (selectedSortId) url += `&sort_by=${selectedSortId}`;
         if (contentSelect) url += `&media_type=${contentSelect}`;
 
@@ -130,9 +140,9 @@ const MovieDetailScreen = () => {
   const { toggleBookmark: toggleBookmarkHook } = useBookmarks(token);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPosition, setSeekPosition] = useState(0);
-  const [movieData, setMovieData] = useState([null, null, null]);
+  const [movieData, setMovieData] = useState<any[]>([null, null, null]);
   const [loading, setLoading] = useState(true);
-  const flatListRef = useRef(null);
+  const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(1); // Start at the middle item
   const insets = useSafeAreaInsets();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
@@ -169,7 +179,7 @@ const MovieDetailScreen = () => {
   const isResettingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const saveBookMark_Ref = useRef(false)
-  const [modalMovieId, setModalMovieId] = useState(null);
+  const [modalMovieId, setModalMovieId] = useState<string | null>(null);
   const [titleLinesMap, setTitleLinesMap] = useState<Record<number, number>>({});
   const dispatch = useDispatch()
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
@@ -226,9 +236,24 @@ const MovieDetailScreen = () => {
   useEffect(() => {
     if (swipeTooltipCheckDone.current || loading || !movieData?.[currentIndex]) return;
     swipeTooltipCheckDone.current = true;
-    AsyncStorage.getItem(SWIPE_TOOLTIP_STORAGE_KEY).then((seen) => {
-      if (seen !== 'true') setShowSwipeTooltip(true);
-    });
+
+    const checkSwipeTooltip = async () => {
+      try {
+        const [seen, isNewUser] = await Promise.all([
+          AsyncStorage.getItem(SWIPE_TOOLTIP_STORAGE_KEY),
+          AsyncStorage.getItem(IS_NEW_USER_KEY)
+        ]);
+
+        // Only show if it's a new signup AND they haven't seen it yet
+        if (isNewUser === 'true' && seen !== 'true') {
+          setShowSwipeTooltip(true);
+        }
+      } catch (err) {
+        // Log or handle error
+      }
+    };
+
+    checkSwipeTooltip();
   }, [loading, movieData, currentIndex]);
 
   const handleToggleBookmark = useCallback(async (imdb_id) => {
@@ -330,14 +355,6 @@ const MovieDetailScreen = () => {
     setMorelikeModal(true);
   }, [movieData, currentIndex]);
   const [videoDuration, setVideoDuration] = useState(0);
-  const onLoad = useCallback((data: object | string) => {
-    setVideoDuration(data.duration || 0);
-    Animated.timing(posterOpacity, {
-      toValue: 0,
-      duration: 2000,
-      useNativeDriver: true,
-    }).start();
-  }, [currentIndex]);
 
 
   const fetchNextMovieFromQueue = async (prevImdb) => {
@@ -549,7 +566,6 @@ const MovieDetailScreen = () => {
         title: ep?.episode_name || ep?.title || `Episode ${index + 1}`,
         duration: ep?.runtime ? `${ep.runtime} min` : 'Unknown',
       }));
-
       setEpisodes(formattedEpisodes);
     } catch (error) {
       setEpisodes([]);
@@ -703,12 +719,16 @@ const MovieDetailScreen = () => {
   const onVideoProgress = useCallback((data: { currentTime: number; duration: number; progress: number }) => {
     // Only update if not currently seeking
     if (!isSeeking) {
-      setCurrentTime(data.currentTime);
-      setDuration(data.duration);
-      setProgress(data.progress);
+      // Throttle state updates: only once per second or if significant
+      const shouldUpdateState = Math.abs(data.currentTime - currentTime) >= 1;
 
+      if (shouldUpdateState) {
+        setCurrentTime(data.currentTime);
+        setDuration(data.duration);
+        setProgress(data.progress);
+      }
 
-      // Track trailer progress
+      // Track trailer progress (kept as is for tracking accuracy)
       if (!isVideoPaused && movieData[currentIndex]) {
         trailerTracker.onProgress({
           currentTime: data.currentTime,
@@ -716,9 +736,8 @@ const MovieDetailScreen = () => {
           trailer_url: movieData[currentIndex].trailer_url,
         });
       }
-    } else {
     }
-  }, [isVideoPaused, currentIndex, isSeeking]);
+  }, [isVideoPaused, currentIndex, isSeeking, currentTime]);
 
 
   const handlerShowMuteImg = useCallback(() => {
@@ -782,8 +801,7 @@ const MovieDetailScreen = () => {
   }, []);
 
   useEffect(() => {
-    const isModalOpen = thinkModal
-    // const isModalOpen =  thinkModal || isFeedbackModal;
+    const isModalOpen = thinkModal || isFeedbackModal || isComparisonVisible || episVisible || MorelikeModal || InfoModal || watchNow;
 
     if (isModalOpen) {
       // Modal opened - pause video
@@ -794,7 +812,7 @@ const MovieDetailScreen = () => {
       prevModalState.current = false;
       setPaused(false);
     }
-  }, [isFeedbackModal, thinkModal]);
+  }, [thinkModal, isFeedbackModal, isComparisonVisible, episVisible, MorelikeModal, InfoModal, watchNow]);
 
   const itemContainerStyle = useMemo(
     () => ({ height: ITEM_HEIGHT, flexDirection: 'column' as const, paddingTop: 6 }),
@@ -1083,14 +1101,16 @@ const MovieDetailScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              {item && item?.description && item?.description.trim() !== "" ?
+              {item ?
                 (
                   <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
                     <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 10 }}>
                       <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
-                        <Text style={[styles.description, { marginBottom: 0 }]}>
-                          {item?.description || "No description available"}
-                        </Text>
+                        {(item?.plot || item?.description) && (
+                          <Text style={[styles.description, { marginBottom: 0 }]}>
+                            {item?.plot || item?.description}
+                          </Text>
+                        )}
 
                         {item?.media_type && (
                           <Text style={styles.descriptionLabel}>
@@ -1143,7 +1163,6 @@ const MovieDetailScreen = () => {
 
 
                         <View style={{ height: 40 }} />
-                        <LinearGradient colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient} />
                         <LinearGradient colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient} />
                       </ScrollView>
                     </View>
@@ -1379,7 +1398,6 @@ const MovieDetailScreen = () => {
       isSeeking,
       bookmarkMap,
       seekPosition,
-      currentTime,
       paused,
       isFeedbackModal,
       thinkModal,
@@ -1461,9 +1479,6 @@ const MovieDetailScreen = () => {
         removeClippedSubviews={Platform.OS === 'android'}
         nestedScrollEnabled={Platform.OS === 'android'}
       />
-
-
-
       <ScoreIntroModal
         visible={showFirstModal}
         onClose={closeScoreModals}

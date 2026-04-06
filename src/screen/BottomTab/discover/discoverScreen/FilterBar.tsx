@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
+  View, 
   FlatList,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  Image,
-
-  Alert,
+  Image, 
 } from 'react-native';
 import { filters } from './DisCoverData';
 import { Color } from '@theme/color';
@@ -20,8 +16,6 @@ import { RootState } from '@redux/store';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
 import { GenreModal } from '@components/index';
-
-
 
 const FilterBar = ({ isSelectList,
   setFilterGenreString,
@@ -36,8 +30,7 @@ const FilterBar = ({ isSelectList,
   const [genreModalVisible, setGenreModalVisible] = useState(false);
   const [platformModalVisible, setPlatformModalVisible] = useState(false);
   const [plateFromItemName, setPlateFromItemName] = useState(false);
-  const [tempPlatforms, setTempPlatforms] = useState([]);
-  // const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [tempPlatforms, setTempPlatforms] = useState([]); 
   const [platformsData, setPlatformsData] = useState([]);
 
   const [tempGenres, setTempGenres] = useState([]);             // modal internal state
