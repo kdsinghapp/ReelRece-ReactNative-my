@@ -175,4 +175,13 @@ export const styles = StyleSheet.create({
     height: 35,
     width: 30,
   },
+  seeMoreContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 40,
+    paddingBottom: 2,
+  },
 });

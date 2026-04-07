@@ -13,7 +13,10 @@ import {
   TouchableNativeFeedback,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  LayoutChangeEvent
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import CustomText from '@components/common/CustomText/CustomText';
 import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
@@ -66,6 +69,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
   const PAGE_SIZE = 20; // batch size per API call
   const [commmetLoad, setCommmetLoad] = useState<boolean>(false);
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [truncatedComments, setTruncatedComments] = useState<Record<string, boolean>>({});
 
   // const [commetText, setCommentText] = useState('')
 
@@ -367,27 +371,60 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
           </TouchableOpacity>
 
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.9}
+            style={{ position: 'relative' }}
             onPress={() => toggleExpand(item.id || index)}
           >
-            <Text style={styles.message}>
-              {expandedComments[item.id || index]
-                ? item?.comment
-                : item?.comment?.length > 120
-                  ? item.comment.substring(0, 115)
-                  : item?.comment}
-              {item?.comment && item.comment.length > 120 && (
-                <Text style={{ color: Color.primary, fontFamily: font.PoppinsBold }}>
-                  {expandedComments[item.id || index] ? ' ' + t("common.seeLess") : '... ' + t("common.seeMore")}
-                </Text>
-              )}
-            </Text>
+            <CustomText
+              size={13}
+              color={Color.whiteText}
+              font={font.PoppinsRegular}
+              style={{ lineHeight: 18, marginTop: 10 }}
+              numberOfLines={expandedComments[item.id || index] ? undefined : 10}
+              onTextLayout={(e) => {
+                if (e.nativeEvent.lines.length > 10 && !expandedComments[item.id || index]) {
+                  setTruncatedComments(prev => ({ ...prev, [item.id || index]: true }));
+                }
+              }}
+            >
+              {item?.comment}
+            </CustomText>
+
+            {!expandedComments[item.id || index] && (truncatedComments[item.id || index] || (item?.comment?.length ?? 0) > 300) && (
+              <LinearGradient
+                colors={['transparent', Color.modalBg, Color.modalBg]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0.35, y: 0 }}
+                style={styles.seeMoreContainer}
+              >
+                <CustomText
+                  size={13}
+                  color={Color.primary}
+                  font={font.PoppinsBold}
+                >
+                  ...{t("common.seeMore")}
+                </CustomText>
+              </LinearGradient>
+            )}
           </TouchableOpacity>
+
+          {expandedComments[item.id || index] && (truncatedComments[item.id || index] || (item?.comment?.length ?? 0) > 300) && (
+            <TouchableOpacity onPress={() => toggleExpand(item.id || index)}>
+              <CustomText
+                size={13}
+                color={Color.primary}
+                font={font.PoppinsBold}
+                style={{ marginTop: 2 }}
+              >
+                {t("common.seeLess")}
+              </CustomText>
+            </TouchableOpacity>
+          )}
           <View style={styles.divider} />
         </View>
       );
     },
-    [imdb_id, comments, userData?.username, expandedComments, toggleExpand]
+    [imdb_id, comments, userData?.username, expandedComments, truncatedComments, toggleExpand]
   );
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
@@ -446,7 +483,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                       ListFooterComponent={
                         loadingMore ? <ActivityIndicator color={Color.primary} /> : null
                       }
-                      extraData={expandedComments}
+                      extraData={{ expandedComments, truncatedComments }}
                       removeClippedSubviews
                     />
                   )}
@@ -643,7 +680,16 @@ const styles = StyleSheet.create({
     height: 18,
     width: 18,
     resizeMode: 'contain',
-  }
+  },
+  seeMoreContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 40,
+    paddingBottom: 2,
+  },
 });
 
 

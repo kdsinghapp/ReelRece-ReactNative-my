@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     minHeight: 50,
-    maxHeight: 110, // Approximately 5-6 lines
+    maxHeight: 200, // Approximately 10-12 lines
     backgroundColor: Color.grey,
     borderRadius: 10,
     borderWidth: 1, // border dikhane ke liye zaroori

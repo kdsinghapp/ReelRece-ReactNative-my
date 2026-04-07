@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   Animated,
   NativeModules,
-  Platform
+  Platform,
+  LayoutChangeEvent
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Video from 'react-native-video';
 import imageIndex from '@assets/imageIndex';
@@ -231,6 +233,13 @@ const FeedCard = ({
   }, []);
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showSeeMore, setShowSeeMore] = useState(false);
+
+  const onTextLayout = useCallback((e: any) => {
+    if (e.nativeEvent.lines.length > 10 && !isExpanded) {
+      setShowSeeMore(true);
+    }
+  }, [isExpanded]);
 
   return (
     <View style={styles.feedCard}>
@@ -291,37 +300,61 @@ const FeedCard = ({
       </View>
 
       {(comment ?? '').trim() !== '' && (
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => setIsExpanded(!isExpanded)}
-          style={styles.feedComment}
-        >
-          <CustomText
-            size={14}
-            color={Color.whiteText}
-            font={font.PoppinsBold}
-            style={{ lineHeight: 20 }}
+        <View style={styles.feedComment}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={{ position: 'relative' }}
+            onPress={() => setIsExpanded(!isExpanded)}
           >
-            {t("common.comment")} :
             <CustomText
               size={14}
               color={Color.whiteText}
-              font={font.PoppinsRegular}
-              numberOfLines={isExpanded ? undefined : 3}
+              font={font.PoppinsBold}
+              style={{ lineHeight: 20 }}
+              numberOfLines={isExpanded ? undefined : 10}
+              onTextLayout={onTextLayout}
             >
-              {' '}{comment}
+              {t("common.comment")} :
+              <CustomText
+                size={14}
+                color={Color.whiteText}
+                font={font.PoppinsRegular}
+              >
+                {' '}{comment}
+              </CustomText>
             </CustomText>
-            {!isExpanded && comment.length > 100 && (
+
+            {!isExpanded && showSeeMore && (
+              <LinearGradient
+                colors={['transparent', Color.background, Color.background]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0.35, y: 0 }}
+                style={styles.seeMoreContainer}
+              >
+                <CustomText
+                  size={14}
+                  color={Color.lightPrimary}
+                  font={font.PoppinsBold}
+                >
+                  ...{t("common.seeMore")}
+                </CustomText>
+              </LinearGradient>
+            )}
+          </TouchableOpacity>
+
+          {isExpanded && showSeeMore && (
+            <TouchableOpacity onPress={() => setIsExpanded(false)}>
               <CustomText
                 size={14}
                 color={Color.lightPrimary}
                 font={font.PoppinsBold}
+                style={{ marginTop: 2 }}
               >
-                {' '}{t("common.seeMore")}
+                {t("common.seeLess")}
               </CustomText>
-            )}
-          </CustomText>
-        </TouchableOpacity>
+            </TouchableOpacity>
+          )}
+        </View>
       )}
 
       {/* Video / Poster */}
