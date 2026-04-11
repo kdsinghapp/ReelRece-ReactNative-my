@@ -25,10 +25,11 @@ import { Button } from '@components/index';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { fetchRankingRatedMovies, fetchRankingSuggestionMovies } from '@redux/feature/rankingSlice';
-import { searchMovies, deleteRatedMovie } from '@redux/Api/movieApi';
+import { searchMovies, deleteRatedMovie, getHubMovies, thumbsDownMovie, getThumbsDownMovies } from '@redux/Api/movieApi';
 import { RootState, AppDispatch } from '@redux/store';
 import RankingWithInfo from '../../../component/ranking/RankingWithInfo';
 import { Movie } from '../../../types/api.types';
+import DislikeStep from './DislikeStep';
 import imageIndex from '@assets/imageIndex';
 import { t } from 'i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -113,7 +114,7 @@ const gridItemWidth = totalGridWidth / GRID_COLS;
 const gridItemHeight = gridItemWidth * 1.45;
 
 const OnboardingScreen = () => {
-  const [currentPhase, setCurrentPhase] = useState<'slides' | 'rating'>('slides');
+  const [currentPhase, setCurrentPhase] = useState<'slides' | 'rating' | 'dislike'>('slides');
   const [currentSlide, setCurrentSlide] = useState(0);
 
   /* Slides Animation States */
@@ -168,7 +169,7 @@ const OnboardingScreen = () => {
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (token && currentPhase === 'rating') {
+    if (token && (currentPhase === 'rating' || currentPhase === 'dislike')) {
       dispatch(fetchRankingRatedMovies());
       dispatch(fetchRankingSuggestionMovies(1));
     }
@@ -294,12 +295,17 @@ const OnboardingScreen = () => {
     }
   };
 
-  const displayMovies = searchQuery.trim() ? searchResults : suggestionMoviesFromRedux;
+  // Filter out movies with no poster image before rendering
+  const displayMovies = (searchQuery.trim() ? searchResults : suggestionMoviesFromRedux)
+    .filter((m: Movie) => m?.cover_image_url || (m as any)?.movie?.cover_image_url);
 
   const renderGridItem = ({ item }: { item: Movie }) => {
     const isRated = ratedMovieFromRedux?.some((m: Movie) => m.imdb_id === item.imdb_id);
     const posterUrl = item?.cover_image_url || (item as any)?.movie?.cover_image_url;
-    const hasScore = item?.rec_score !== undefined && item?.rec_score !== null;
+    
+    // Safety check - though filtered, double check posterUrl
+    if (!posterUrl) return null;
+
     return (
       <TouchableOpacity
         style={[
@@ -310,26 +316,11 @@ const OnboardingScreen = () => {
         onPress={() => !isRated && openFeedbackModal(item)}
         disabled={isRated}
       >
-        {posterUrl ? (
-          <FastImage
-            source={{ uri: posterUrl, priority: FastImage.priority.high }}
-            style={styles.gridPoster}
-            resizeMode={FastImage.resizeMode.stretch}
-          />
-        ) : (
-          <View style={[styles.gridPoster, { backgroundColor: '#1a1a1a', justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={{ color: '#fff', fontSize: 12 }}>No Image</Text>
-          </View>
-        )}
-        {/* {hasScore && ( */}
-        {/* <TouchableOpacity style={styles.rankingOverlay}>
-          <RankingWithInfo
-            score={item.rec_score}
-            title={t("discover.recscore")}
-            description={t("discover.moviedes")}
-          />
-        </TouchableOpacity> */}
-        {/* )} */}
+        <FastImage
+          source={{ uri: posterUrl, priority: FastImage.priority.high }}
+          style={styles.gridPoster}
+          resizeMode={FastImage.resizeMode.stretch}
+        />
       </TouchableOpacity>
     );
   };
@@ -391,6 +382,15 @@ const OnboardingScreen = () => {
           </Animated.View>
         </View>
       </View>
+    );
+  }
+
+  if (currentPhase === 'dislike') {
+    return (
+      <DislikeStep
+        onNext={goToInitialScreen}
+        token={token || ''}
+      />
     );
   }
 
@@ -490,7 +490,7 @@ const OnboardingScreen = () => {
               styles.bottomButton,
               isContinueEnabled ? styles.buttonEnabled : styles.buttonDisabled,
             ]}
-            onPress={isContinueEnabled ? goToInitialScreen : () => { }}
+            onPress={isContinueEnabled ? () => setCurrentPhase('dislike') : () => { }}
             activeOpacity={0.8}
           >
             <Image
@@ -745,5 +745,67 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     tintColor: '#FFF',
+  },
+  /* Dislike Screen Styles */
+  dislikeContainer: {
+    flex: 1,
+    paddingHorizontal: HORIZONTAL_PADDING,
+  },
+  dislikeHeader: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  dislikeLogo: {
+    width: 50,
+    height: 50,
+    marginBottom: 15,
+  },
+  dislikeTitle: {
+    color: '#FFF',
+    fontSize: 22,
+    fontFamily: font.PoppinsBold,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  dislikeSubtitle: {
+    color: '#A0A0A0',
+    fontSize: 14,
+    fontFamily: font.PoppinsRegular,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  inlineDislikeIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#A0A0A0',
+  },
+  dislikeGridItem: {
+    width: gridItemWidth,
+    height: gridItemHeight,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: GRID_GAP,
+  },
+  dislikeIconBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  dislikeIconBadgeActive: {
+    backgroundColor: 'rgba(255,59,48,0.2)',
+    borderColor: '#FF3B30',
+  },
+  dislikeSmallIcon: {
+    width: 14,
+    height: 14,
   },
 });

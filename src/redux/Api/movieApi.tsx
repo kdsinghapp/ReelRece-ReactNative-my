@@ -42,8 +42,14 @@ interface TrendingParams {
 }
 
 /** Normalize any list API response to PaginatedResponse<Movie> so both trending and suggest-movies use the same shape. */
-function normalizePaginatedMovies(data: Record<string, unknown> | null | undefined): PaginatedResponse<Movie> {
+function normalizePaginatedMovies(data: any): PaginatedResponse<Movie> {
+  if (Array.isArray(data)) {
+    return { results: data, total_pages: 1, current_page: 1 };
+  }
   const raw = data ?? {};
+  if (Array.isArray(raw.data)) {
+    return { results: raw.data, total_pages: 1, current_page: 1 };
+  }
   const inner = raw.data && typeof raw.data === 'object' && raw.data !== null ? (raw.data as Record<string, unknown>) : raw;
   const list =
     inner.results ?? inner.movies ?? inner.movie ?? raw.results ?? raw.movies ?? raw.movie ?? [];
@@ -448,6 +454,42 @@ export const deleteRatedMovie = async (
     });
     return response.data;
   } catch (error: unknown) {
+    throw error;
+  }
+};
+export const getHubMovies = async (token: string): Promise<Movie[]> => {
+  try {
+    const response = await axiosInstance.get('/hub-movies', {
+      headers: { Authorization: `Token ${token}` },
+    });
+    // Assuming /hub-movies returns a results array or similar, normalize it
+    const normalized = normalizePaginatedMovies(response.data);
+    return normalized.results;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const thumbsDownMovie = async (token: string, imdbId: string): Promise<{ success: boolean }> => {
+  try {
+    const response = await axiosInstance.post('/thumbs-down-movie', 
+      { imdb_id: imdbId },
+      { headers: { Authorization: `Token ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getThumbsDownMovies = async (token: string): Promise<Movie[]> => {
+  try {
+    const response = await axiosInstance.get('/thumbs-down-movies', {
+      headers: { Authorization: `Token ${token}` },
+    });
+    const normalized = normalizePaginatedMovies(response.data);
+    return normalized.results;
+  } catch (error) {
     throw error;
   }
 };

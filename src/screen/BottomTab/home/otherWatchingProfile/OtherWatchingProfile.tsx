@@ -33,14 +33,14 @@ const OtherWatchingProfile = () => {
 
   const route = useRoute();
   const { title, datamovie, username, imageUri, token, disableBottomSheet = false, my_profile = false, user_name } = route?.params
-  
+
   const navigation = useNavigation();
   const { isBookmarked, toggleBookmark } = useBookmarks(token);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [movies, setMovies] = useState([])
 
-   const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
 
@@ -99,12 +99,12 @@ const OtherWatchingProfile = () => {
 
         response = await getHistoryApi(token, user_name || username, pageToLoad);
       } else if (my_profile) {
-        
+
         setLoading(false);
         response = await getRatedMovies(token, pageToLoad);
       } else {
-          setLoading(false);
-          response = await getOtherUserRatedMovies(token, user_name || username, pageToLoad);
+        setLoading(false);
+        response = await getOtherUserRatedMovies(token, user_name || username, pageToLoad);
       }
 
       const next = response?.next !== null;
@@ -162,14 +162,10 @@ const OtherWatchingProfile = () => {
     }
   };
 
-
-
-
   const compareHook = useCompareComponent(token);
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
-
 
   const handleNavigation = (imdb_id: string, token: string) => {
     const index = Array.isArray(movies) ? movies.findIndex(m => m?.imdb_id === imdb_id) : -1;
@@ -210,7 +206,6 @@ const OtherWatchingProfile = () => {
         <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.info}>
           <View style={{ flexDirection: "row", }}>
             <Text numberOfLines={2} style={[styles.title]}>{item?.title}</Text>
-
 
           </View>
           <Text style={styles.year}>{item?.release_year}</Text>
@@ -283,7 +278,7 @@ const OtherWatchingProfile = () => {
       </View>
     )
   }, [token, handleToggleLovedImage, lovedImageMap, isSaved, movies]);
-const isOnline = useNetworkStatus();
+  const isOnline = useNetworkStatus();
   return (
     <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />

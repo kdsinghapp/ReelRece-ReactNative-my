@@ -5,20 +5,20 @@ import font from '@theme/font';
 import FastImage from 'react-native-fast-image';
 
 const ProfileOther = ({ imageSource, label, onPress, imgStyle, imageSource2 }: { imageSource: string; label: string; onPress: () => void; imgStyle?: object; imageSource2?: string }) => {
-   return (
+  return (
     <View style={styles.container} >
       {imageSource2 ? (
         <View style={styles.imageWrapper}>
           {/* Background Image (Right) */}
           <TouchableOpacity onPress={onPress} >
             {/* <Image source={{ uri : imageSource2}} style={[styles.image]} /> */}
-            <FastImage 
-            source={{
-              uri : imageSource2,
-              priority:FastImage.priority.low,
-              cache:FastImage.cacheControl.web
-            }}
-            style={[styles.image]}
+            <FastImage
+              source={{
+                uri: imageSource2,
+                priority: FastImage.priority.low,
+                cache: FastImage.cacheControl.web
+              }}
+              style={[styles.image]}
             />
           </TouchableOpacity>
 
@@ -32,13 +32,13 @@ const ProfileOther = ({ imageSource, label, onPress, imgStyle, imageSource2 }: {
               ]}
             /> */}
 
-                <FastImage 
-            source={{
-             uri: imageSource,
-              priority:FastImage.priority.low,
-              cache:FastImage.cacheControl.web
-            }}
-       style={[
+            <FastImage
+              source={{
+                uri: imageSource,
+                priority: FastImage.priority.low,
+                cache: FastImage.cacheControl.web
+              }}
+              style={[
                 styles.image,
                 imgStyle,
               ]}
@@ -48,18 +48,18 @@ const ProfileOther = ({ imageSource, label, onPress, imgStyle, imageSource2 }: {
       ) : (
         <TouchableOpacity onPress={onPress}>
           {/* <Image source={{ uri: imageSource }} style={[styles.image, imgStyle]} /> */}
-           <FastImage 
+          <FastImage
             source={{
-             uri: imageSource,
-              priority:FastImage.priority.low,
-              cache:FastImage.cacheControl.immutable,
+              uri: imageSource,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.web,
             }}
-      style={[styles.image, imgStyle]} 
-            />
+            style={[styles.image, imgStyle]}
+          />
         </TouchableOpacity>
       )}
 
-      <Text   allowFontScaling={false} style={styles.label}>{label}</Text>
+      <Text allowFontScaling={false} style={styles.label}>{label}</Text>
     </View>
   );
 };
@@ -70,11 +70,9 @@ const styles = StyleSheet.create({
 
   },
   image: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-     // marginRight:-20
-
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   label: {
     color: Color.whiteText,

@@ -18,7 +18,6 @@ export const GroupListItem = ({
   setIsSettingsMode
 
 }) => {
-  console.log(group, 'this is groups ')
   const navigation = useNavigation();
 
   const handlePress = useCallback(async () => {

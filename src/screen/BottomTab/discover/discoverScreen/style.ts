@@ -118,6 +118,20 @@ const styles = StyleSheet.create({
   sortByValueText: {
     alignSelf: 'center',
   },
-  noMoreMovie: { fontSize: 16, color: Color.grey200, fontFamily: font.PoppinsMedium, marginTop: 20, marginBottom: 40, }
+  noMoreMovie: { fontSize: 16, color: Color.grey200, fontFamily: font.PoppinsMedium, marginTop: 20, marginBottom: 40, },
+  thumbsDownButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 6,
+    zIndex: 10,
+  },
+  thumbsDownIcon: {
+    width: 20,
+    height: 20,
+    tintColor: Color.whiteText,
+  },
 });
 export default styles;

@@ -54,9 +54,6 @@ export const getMoviePlatforms = async ({
         params.watch_type = watchTypeValidation.sanitized;
       }
     }
-
-    console.log(params, 'this is params')
-
     const response = await axiosInstance.get('/platforms', {
       headers: {
         Authorization: `Token ${token}`,

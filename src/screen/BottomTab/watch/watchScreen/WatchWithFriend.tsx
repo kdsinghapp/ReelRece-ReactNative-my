@@ -104,7 +104,7 @@ const BackgroundImage = memo(({ imageUri }) => {
             source={{
               uri: currentImage,
               priority: FastImage.priority.high,
-              cache: FastImage.cacheControl.immutable,
+              cache: FastImage.cacheControl.web,
             }}
             style={StyleSheet.absoluteFill}
             resizeMode={FastImage.resizeMode.cover}
@@ -122,7 +122,7 @@ const BackgroundImage = memo(({ imageUri }) => {
 const WatchWithFriend = () => {
   const isOnline = useNetworkStatus();
   const route = useRoute()
-   const token = useSelector((state: RootState) => state?.auth?.token);
+  const token = useSelector((state: RootState) => state?.auth?.token);
   const selectedCountry = useSelector((state: RootState) => state?.auth?.selectedCountry) || 'US';
   const navigation = useNavigation();
   const { groupProps: passedGroupProps, type, groupId, maxActivitiescnt } = route?.params || {};
@@ -387,7 +387,7 @@ const WatchWithFriend = () => {
       if (hasPenalty && !hasUsers && !hasGroup) {
         response = await getGroupRecommendedMovies(token, groupId, popularityPenalty);
       } else {
-        response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers, popularityPenalty);
+        response = await getFilteredGroupMovies(token, groupId, groupValue, selectedUsers);
       }
 
       if (hasFilters && response?.results?.length > 0) {
@@ -756,7 +756,7 @@ const WatchWithFriend = () => {
               source={{
                 uri: movie?.cover_image_url || '',
                 priority: FastImage.priority.high,
-                cache: FastImage.cacheControl.immutable,
+                cache: FastImage.cacheControl.web,
               }}
               style={[styles.poster, {
                 marginTop: 0
@@ -868,8 +868,8 @@ const WatchWithFriend = () => {
                   style={styles.memberAvatar}
                   source={{
                     uri: `${BASE_IMAGE_URL}${user.avatar}`,
-                    priority: FastImage.priority.low,
-                    cache: FastImage.cacheControl.immutable,
+                    priority: FastImage.priority.high,
+                    cache: FastImage.cacheControl.web,
                   }}
                 />
               ))
@@ -879,8 +879,8 @@ const WatchWithFriend = () => {
                   style={styles.memberAvatar}
                   source={{
                     uri: `${BASE_IMAGE_URL}${user.avatar}`,
-                    priority: FastImage.priority.low,
-                    cache: FastImage.cacheControl.immutable,
+                    priority: FastImage.priority.high,
+                    cache: FastImage.cacheControl.web,
                   }}
                 />
               ))}

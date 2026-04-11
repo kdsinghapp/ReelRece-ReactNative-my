@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     // alignSelf: 'center',
     textAlign: 'center',
     fontSize: 16,
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     color: Color.whiteText,
     lineHeight: 20,
     flex: 1,

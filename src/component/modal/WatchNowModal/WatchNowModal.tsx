@@ -61,7 +61,6 @@ const WatchNowModal = ({
 }: WatchNowModalProps) => {
   const [selectedSortOption, setSelectedSortOption] = useState('Subscription');
   const [platforms, setPlatforms] = useState<WatchPlatformItem[]>([]);
-  const [selectFilterOp, setSelectFilterOp] = useState('');
 
 
   const fetchData = async () => {
@@ -278,7 +277,6 @@ const WatchNowModal = ({
                     const apiWatchType = getWatchTypeLabel(item.option);
                     // setSelectFilterOp(getWatchTypeLabel(item.option))
                     setSelectedSortOption(item.option);
-                    setSelectFilterOp(apiWatchType);
                   }}
                 >
                   <Text

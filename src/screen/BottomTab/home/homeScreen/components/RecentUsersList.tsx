@@ -27,10 +27,10 @@ const RecentUsersList = React.memo(
       renderItem={({ item }) => {
         const avatarSource = item?.avatar
           ? {
-              uri: `${BASE_IMAGE_URL}${item.avatar}`,
-              priority: FastImage.priority.low,
-              cache: FastImage.cacheControl.immutable,
-            }
+            uri: `${BASE_IMAGE_URL}${item.avatar}`,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.web,
+          }
           : imageIndex.profileImg;
         return (
           <TouchableOpacity

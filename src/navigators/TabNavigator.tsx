@@ -11,7 +11,7 @@ import font from "@theme/font";
 import { Platform } from "react-native";
 
 const Tab = createBottomTabNavigator();
- 
+
 const TabIcon = React.memo(({ focused, logo, logo1, label }) => (
   <>
     <Image
@@ -62,8 +62,7 @@ export default function TabNavigator() {
       hideSub.remove();
     };
   }, []);
-
-  // Tab config
+ 
   const tabConfig = useMemo(
     () => ({
       hideTabBarOnRoutes: [ScreenNameEnum.WoodsScreen],
@@ -73,75 +72,75 @@ export default function TabNavigator() {
     []
   );
 
-const getTabBarStyle = useCallback(
-  (routeName: string) => {
-    const shouldHide = tabConfig?.hideTabBarOnRoutes?.includes(routeName);
-    const shouldTransparent = tabConfig.transparentTabBar.includes(routeName);
-    const shouldAbsolute = tabConfig.absolutePositionTabBar.includes(routeName);
+  const getTabBarStyle = useCallback(
+    (routeName: string) => {
+      const shouldHide = tabConfig?.hideTabBarOnRoutes?.includes(routeName);
+      const shouldTransparent = tabConfig.transparentTabBar.includes(routeName);
+      const shouldAbsolute = tabConfig.absolutePositionTabBar.includes(routeName);
 
-    const hidden = isKeyboardVisible || isMultiSelect || shouldHide;
+      const hidden = isKeyboardVisible || isMultiSelect || shouldHide;
 
-    return {
-      display: hidden ? "none" : "flex",
-      height: hidden
-        ? 0
-        : Platform.OS === "android"
-        ? 58
-        : 58,
-      overflow: "hidden",
-      paddingTop: 3,
-      paddingBottom: Platform.OS === "android" ? 12 : 15,
-      backgroundColor: shouldTransparent ? "transparent" : Color.background,
-      position:
-        shouldTransparent || shouldAbsolute ? "absolute" : "relative",
-      borderTopWidth: 0,
-      elevation: 0,
-    };
-  },
-  [isKeyboardVisible, isMultiSelect, tabConfig]
-);
+      return {
+        display: hidden ? "none" : "flex",
+        height: hidden
+          ? 0
+          : Platform.OS === "android"
+            ? 58
+            : 58,
+        overflow: "hidden",
+        paddingTop: 3,
+        paddingBottom: Platform.OS === "android" ? 12 : 15,
+        backgroundColor: shouldTransparent ? "transparent" : Color.background,
+        position:
+          shouldTransparent || shouldAbsolute ? "absolute" : "relative",
+        borderTopWidth: 0,
+        elevation: 0,
+      };
+    },
+    [isKeyboardVisible, isMultiSelect, tabConfig]
+  );
 
 
   const tabScreens = useMemo(() => _routes().BOTTOMTAB_ROUTE, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: Color.background }}>
-    <Tab.Navigator
-  initialRouteName={ScreenNameEnum.RankingTab}
-  lazy
-  detachInactiveScreens
-  screenOptions={{
-    headerShown: false,
-    tabBarShowLabel: false,
-    tabBarHideOnKeyboard: true,
-    animationEnabled: false,
-    sceneContainerStyle: { backgroundColor: Color.background },
-  }}
->
-  {tabScreens.map((screen) => (
-    <Tab.Screen
-      key={screen.name}
-      name={screen.name}
-      component={screen.Component}
-      options={({ route }) => {
-        const focusedRouteName =
-          getFocusedRouteNameFromRoute(route) ?? route.name;
+      <Tab.Navigator
+        initialRouteName={ScreenNameEnum.RankingTab}
+        lazy
+        detachInactiveScreens
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
+          animationEnabled: false,
+          sceneContainerStyle: { backgroundColor: Color.background },
+        }}
+      >
+        {tabScreens.map((screen) => (
+          <Tab.Screen
+            key={screen.name}
+            name={screen.name}
+            component={screen.Component}
+            options={({ route }) => {
+              const focusedRouteName =
+                getFocusedRouteNameFromRoute(route) ?? route.name;
 
-        return {
-          tabBarStyle: getTabBarStyle(focusedRouteName),
-          tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              logo={screen.logo}
-              logo1={screen.logo1}
-              label={screen.label}
-            />
-          ),
-        };
-      }}
-    />
-  ))}
-</Tab.Navigator>
+              return {
+                tabBarStyle: getTabBarStyle(focusedRouteName),
+                tabBarIcon: ({ focused }) => (
+                  <TabIcon
+                    focused={focused}
+                    logo={screen.logo}
+                    logo1={screen.logo1}
+                    label={screen.label}
+                  />
+                ),
+              };
+            }}
+          />
+        ))}
+      </Tab.Navigator>
 
     </View>
   );

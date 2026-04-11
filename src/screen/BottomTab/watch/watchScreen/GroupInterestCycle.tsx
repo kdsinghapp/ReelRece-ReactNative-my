@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import { Image } from 'react-native';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import moment from 'moment';
@@ -126,7 +128,6 @@ const GroupInterestCycle = ({ group,
   }, [currentIndex, user]);
 
   const getTimeAgo = (timeValue) => {
-    console.log(timeValue, 'timeValue')
     if (!timeValue) return '';
     if (typeof timeValue === 'string' && timeValue.includes('ago')) {
       return timeValue
@@ -208,8 +209,12 @@ const GroupInterestCycle = ({ group,
           }}
         >
           <View style={{ flexDirection: 'row', flex: 1, flexShrink: 1, alignItems: 'flex-start' }}>
-            <Image
-              source={{ uri: `${BASE_IMAGE_URL}${user.avatar}` }}
+            <FastImage
+              source={{
+                uri: `${BASE_IMAGE_URL}${user.avatar}`,
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.web,
+              }}
               style={{ height: 20, width: 20, borderRadius: 10, marginRight: 6 }}
             />
 

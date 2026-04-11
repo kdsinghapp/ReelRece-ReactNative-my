@@ -85,13 +85,6 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
       </Popover>
 
 
-
-      {/* {loading ? (
-  <ShimmerPlaceHolder
-    LinearGradient={LinearGradient}
-    style={styles.shimmerBox}
-  />
-) : ( */}
       <TouchableOpacity
         ref={touchableRef}
         onPress={handlePress}
@@ -123,8 +116,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     width: screenWidth - 24,
-    // marginHorizontal:16,
-    // maxWidth: screenWidth - 34, // Safe margin from edges
     alignSelf: "center",
   },
   tooltipTitle: {

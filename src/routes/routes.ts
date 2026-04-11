@@ -23,6 +23,7 @@ import StreamService from "@screens/BottomTab/profile/setting/StreamService";
 import WoodsScreen from "@screens/BottomTab/ranking/woodsScreen/WoodsScreen";
 import CreateGroupScreen from "@screens/BottomTab/watch/watchScreen/CreateGroupScreen";
 import WatchScreen from "@screens/BottomTab/watch/watchScreen/WatchScreen";
+import WatchWithFriend from "@screens/BottomTab/watch/watchScreen/WatchWithFriend";
 import ScreenNameEnum from "@routes/screenName.enum";
 
 
@@ -44,8 +45,7 @@ const REGISTRATION_ROUTE = [
   { name: ScreenNameEnum.StreamService, Component: StreamService },
   { name: ScreenNameEnum.OnboardingScreen, Component: OnboardingScreen },
   { name: ScreenNameEnum.OnboardingScreen2, Component: OnboardingStepTwo },
-
-  // { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
+  { name: ScreenNameEnum.WatchWithFriend, Component: WatchWithFriend },
 ];
 
 const BOTTOMTAB_ROUTE = [

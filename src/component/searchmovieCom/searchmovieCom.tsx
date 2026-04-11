@@ -82,6 +82,44 @@ const SearchMovieCom = ({
     compareHook.openFeedbackModal(movie);
   };
 
+  const handleThumbsDown = (item) => {
+    if (!item.imdb_id || !token) return;
+    const id = String(item.imdb_id);
+    const isAlreadyDisliked = dislikedIds.has(id);
+
+    if (isAlreadyDisliked) {
+      // Undo dislike
+      setDislikedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      deleteRatedMovie(token, id).catch(() => {
+        // Rollback only on hard error
+        setDislikedIds(prev => new Set(prev).add(id));
+      });
+    } else {
+      // Mark as disliked
+      setDislikedIds(prev => new Set(prev).add(id));
+      thumbsDownMovie(token, id).then(result => {
+        if (result) {
+          dispatch(removeMovieFromSuggestion(id));
+        } else {
+          setDislikedIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }
+      }).catch(() => {
+        setDislikedIds(prev => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      });
+    }
+  };
 
 
   const handleNavigation = (imdb_id: string, token: string, index: number) => {
@@ -170,17 +208,22 @@ const SearchMovieCom = ({
               />
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
-            style={styles.iconprimary}
-            onPress={() => toggleSave(item.imdb_id)}
-          >
-            <Image
-              source={item?.is_bookmarked ? imageIndex.save : imageIndex.saveMark}
-              style={{ height: 20, width: 20, marginTop: 8, }}
-              resizeMode='contain'
-              // tintColor={item.saved ? Color.primary : "rgba(255, 255, 255, 1)"}
-            />
-          </TouchableOpacity> */}
+            <TouchableOpacity
+              style={styles.iconprimary}
+              onPress={() => handleThumbsDown(item)}
+              activeOpacity={0.7}
+            >
+              <Image
+                source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.dislike1 : imageIndex.thumpDown}
+                style={{
+                  height: 20,
+                  width: 20,
+                  marginTop: 0,
+                  tintColor: dislikedIds.has(String(item.imdb_id)) ? Color.primary : Color.textGray
+                }}
+                resizeMode='contain'
+              />
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.iconprimary}
@@ -196,7 +239,7 @@ const SearchMovieCom = ({
         </View>
       </TouchableOpacity>
     );
-  }, [navigation, togglePlatform, setIsVisible, movieData, token, handleRankingPress, toggleSave]);
+  }, [navigation, togglePlatform, setIsVisible, movieData, token, handleRankingPress, toggleSave, handleThumbsDown, dislikedIds]);
 
   // List footer: only "no more" message (loading is shown by sticky footer so it's visible immediately)
   const renderListFooter = useCallback(() => {

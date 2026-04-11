@@ -78,7 +78,7 @@ const GenreModal = ({
                 size={16}
                 color={Color.whiteText}
                 style={styles.title}
-                font={font.PoppinsBold}
+                font={font.PoppinsSemiBold}
               >
                 {t("common.genres")}
 
@@ -111,7 +111,7 @@ const GenreModal = ({
 
                 <CustomText
                   size={14}
-                  color={Color.lightGrayText}
+                  color={Color.whiteText}
                   style={styles.buttonTxt}
                   font={font.PoppinsMedium}
                 >
@@ -194,10 +194,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     backgroundColor: Color.grey,
     alignItems: 'center',
-    paddingVertical: 14,
     justifyContent: 'center',
     marginVertical: 6,
     borderRadius: 8,
+    height: 40
   },
   genreText: {
     alignSelf: 'center',
@@ -246,18 +246,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 10,
+    height: 48,
   },
   cancelButton: {
     // borderColor:Color.whiteText,
     backgroundColor: Color.primary,
     width: '47%',
-    height: 50,
+    height: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 6,
     borderWidth: 1,
     marginLeft: 15
   },

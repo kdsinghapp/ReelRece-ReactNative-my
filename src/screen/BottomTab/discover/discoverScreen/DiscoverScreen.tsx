@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import { t } from 'i18next';
 
@@ -23,7 +24,7 @@ import font from '@theme/font';
 
 import imageIndex from '@assets/imageIndex';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
-import { Trending_without_Filter } from '@redux/Api/movieApi';
+import { Trending_without_Filter, thumbsDownMovie } from '@redux/Api/movieApi';
 import CustomText from '@components/common/CustomText/CustomText';
 
 import { RootState } from '@redux/store';
@@ -31,6 +32,7 @@ import SortbyModal from '@components/modal/SortbyModal/SortbyModal';
 import FilterBar from './FilterBar';
 import { CustomStatusBar } from '@components/index';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
+import { removeMovieFromSuggestion } from '@redux/feature/rankingSlice';
 
 type MovieItem = {
   imdb_id?: string;
@@ -72,6 +74,8 @@ const DiscoverScreen = () => {
       : '1';
   });
 
+  const dispatch = useDispatch();
+
   // Pagination states
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -79,6 +83,7 @@ const DiscoverScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [dislikedIds, setDislikedIds] = useState<Set<string>>(new Set());
 
   // Guards
   const isFetchingRef = useRef(false);
@@ -300,6 +305,48 @@ const DiscoverScreen = () => {
     return `discover-${index}`;
   }, []);
 
+  const handleThumbsDown = useCallback(
+    async (item: MovieItem) => {
+      if (!item.imdb_id || !token) return;
+      const id = String(item.imdb_id);
+      const isAlreadyDisliked = dislikedIds.has(id);
+  
+      if (isAlreadyDisliked) {
+        // Undo dislike
+        setDislikedIds(prev => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        deleteRatedMovie(token, id).catch(() => {
+          setDislikedIds(prev => new Set(prev).add(id));
+        });
+      } else {
+        // Mark as disliked
+        try {
+          setDislikedIds(prev => new Set(prev).add(id));
+          const result = await thumbsDownMovie(token, id);
+          if (result) {
+            dispatch(removeMovieFromSuggestion(id));
+          } else {
+            setDislikedIds(prev => {
+              const next = new Set(prev);
+              next.delete(id);
+              return next;
+            });
+          }
+        } catch (error) {
+          setDislikedIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }
+      }
+    },
+    [token, dislikedIds, dispatch]
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: MovieItem }) => {
       if (!item) return null;
@@ -322,6 +369,19 @@ const DiscoverScreen = () => {
             source={coverSource}
             resizeMode={FastImage.resizeMode.stretch}
           />
+          <TouchableOpacity
+            style={styles.thumbsDownButton}
+            onPress={() => handleThumbsDown(item)}
+            activeOpacity={0.7}
+          >
+            <Image 
+              source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.dislike1 : imageIndex.thumpDown} 
+              style={[
+                styles.thumbsDownIcon, 
+                dislikedIds.has(String(item.imdb_id)) && { tintColor: Color.primary }
+              ]} 
+            />
+          </TouchableOpacity>
           <View style={styles.rating}>
             <RankingWithInfo
               score={item?.rec_score}
@@ -332,7 +392,7 @@ const DiscoverScreen = () => {
         </TouchableOpacity>
       );
     },
-    [goToDetail]
+    [goToDetail, handleThumbsDown, dislikedIds]
   );
 
   const renderFooter = useCallback(() => {
@@ -361,8 +421,8 @@ const DiscoverScreen = () => {
   }, [loadingMore, hasMore, trending?.length, currentPage, totalPages]);
 
   const flatListExtraData = useMemo(
-    () => ({ loadingMore, hasMore }),
-    [loadingMore, hasMore]
+    () => ({ loadingMore, hasMore, dislikedIds }),
+    [loadingMore, hasMore, dislikedIds]
   );
 
   const renderEmpty = useCallback(() => {

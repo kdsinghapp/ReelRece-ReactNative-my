@@ -87,7 +87,7 @@ const MovieInfoSection = ({
               style={styles.subInfo}
               font={font.PoppinsRegular}
             >
-               {t("movieDetail.subtitle")} ,{' '}
+              {t("movieDetail.subtitle")} ,{' '}
             </CustomText>
 
             {item?.genres && item.genres.length > 0 && (
@@ -103,8 +103,8 @@ const MovieInfoSection = ({
         <TouchableOpacity style={styles.scoreBoxGreen} disabled={true}>
           <RankingWithInfo
             score={item?.rec_score}
-            title= {t("discover.recscore")}
-            description=  {t("discover.recscoredes")}/>
+            title={t("discover.recscore")}
+            description={t("discover.recscoredes")} />
           <TouchableOpacity disabled={true}>
             <CustomText
               size={14}
@@ -112,7 +112,7 @@ const MovieInfoSection = ({
               style={{ marginLeft: 6 }}
               font={font.PoppinsMedium}
             >
-            {t("discover.recscore")}
+              {t("discover.recscore")}
             </CustomText>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -121,14 +121,14 @@ const MovieInfoSection = ({
           <View style={{}}>
             <RankingWithInfo
               score={item?.friends_rec_score == null || Number(item?.friends_rec_score) < 0 ? '?' : Number(item.friends_rec_score)}
-              title= {t("discover.friendscore")} 
-            description={
-  item?.friends_rec_score === null ||
-  item?.friends_rec_score === -1 ||
-  item?.friends_rec_score === 0
-    ? t("discover.nofrienddes")
-    : t("discover.frienddes")
-}/>
+              title={t("discover.friendscore")}
+              description={
+                item?.friends_rec_score === null ||
+                  item?.friends_rec_score === -1 ||
+                  item?.friends_rec_score === 0
+                  ? t("discover.nofrienddes")
+                  : t("discover.frienddes")
+              } />
           </View>
 
           <CustomText
@@ -137,7 +137,7 @@ const MovieInfoSection = ({
             style={{ marginLeft: 6 }}
             font={font.PoppinsMedium}
           >
-          {item?.friends_rec_score != null && Number(item?.friends_rec_score) >= 0 ? item?.friends_rec_score : '?'}
+            {item?.friends_rec_score != null && Number(item?.friends_rec_score) >= 0 ? item?.friends_rec_score : '?'}
           </CustomText>
         </TouchableOpacity>
 
@@ -177,11 +177,10 @@ const MovieInfoSection = ({
               showsVerticalScrollIndicator={false}
               bounces={true}
             >
-            <Text style={[styles.description, { marginBottom: 0 }]}>
-  {item?.description || t("emptyState.nodescription")}
-  {"\n\n\n"}
-</Text>
-
+              <Text style={[styles.description, { marginBottom: 0 }]}>
+                {item?.description || t("emptyState.nodescription")}
+                {"\n\n\n"}
+              </Text>
 
               <LinearGradient
                 colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']}

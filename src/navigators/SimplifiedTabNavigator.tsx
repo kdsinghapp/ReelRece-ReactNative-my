@@ -22,8 +22,8 @@ const TabIcon = React.memo(({ focused, logo, logo1, label }: { focused: boolean;
     <Image
       source={focused ? logo1 : logo}
       style={{
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         resizeMode: "contain",
         tintColor: focused ? Color.primary : Color.lightGrayText,
       }}

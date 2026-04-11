@@ -9,10 +9,6 @@ import SelectFriendCom from '@components/common/SelectFriendCom/SelectFriendCom'
 import { t } from 'i18next';
 
 
-interface props {
-    type: boolean;
-    token: string;
-}
 const AddFriendModal = ({ visible, onClose, groupId, token, fetchGroups }) => {
     const [addmembers, setAddMembers] = useState<string[]>([])
     const handleAddMemberss = async (token, groupId, addmembers) => {
@@ -101,7 +97,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContainer: {
-        backgroundColor: 'rgba(37, 37, 37, 0.9)', 
+        backgroundColor: 'rgba(37, 37, 37, 0.9)',
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         maxHeight: Dimensions.get('window').height * 0.7,
@@ -120,8 +116,8 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontFamily: font.PoppinsBold
     },
-     
-    
+
+
     bottomButtonContainer: {
         // flex:1,
         backgroundColor: 'rgba(37, 37, 37, 0.9)',

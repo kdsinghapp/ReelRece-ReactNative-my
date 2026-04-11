@@ -6,10 +6,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Modal,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { Color } from '@theme/color';
 import imageIndex from '@assets/imageIndex';
@@ -17,7 +14,6 @@ import font from '@theme/font';
 import { t } from 'i18next';
 
 const CreateGroupName = ({
-  //   visible,
   groupName,
   setGroupName,
   onClose,
@@ -31,10 +27,8 @@ const CreateGroupName = ({
     (name: string) => name?.toLowerCase() === groupName?.trim()?.toLowerCase()
   );
 
-  // const [isFocused, setIsFocused] = useState(false);
   const content = (
-    <View style={styles.modalContent}>
-      {/* Group Name Input */}
+    <View style={styles.modalContent}> 
       <View style={[styles.inputContainer, isNameExists && { borderColor: Color.red, borderWidth: 1 }]}>
         <TextInput
           value={groupName}
@@ -46,22 +40,18 @@ const CreateGroupName = ({
           style={styles.groupInput}
           returnKeyType="done"
           keyboardAppearance="light"
-        />
-        {/* {groupName.length > 0 && ( */}
+        /> 
         <TouchableOpacity onPress={() => {
           setGroupName('')
         }
         }>
           <Image style={[styles.closeIcon, { tintColor: groupName?.length > 0 ? Color.whiteText : Color.placeHolder }]} source={imageIndex.closeimg} />
-        </TouchableOpacity>
-        {/* )} */}
+        </TouchableOpacity> 
       </View>
 
       {isNameExists && (
         <Text style={styles.errorText}>Group name already exists</Text>
       )}
-
-      {/* Buttons */}
       <View style={[styles.bottomButtonContainer, { marginTop: isNameExists ? 10 : 20 }]}>
         <TouchableOpacity style={styles.selectButton} onPress={onClose}>
           <Text style={[styles.buttonTxt, { fontFamily: font.PoppinsMedium }]}>{t("common.cancel")}</Text>
@@ -76,28 +66,13 @@ const CreateGroupName = ({
           }]}>{t("common.create")}</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Toast Message */}
-      {/* {toastMess && (
-        <View style={styles.toastContainer}>
-          <SuccessMessageCustom
-            textColor={Color.whiteText}
-            color="#a48b0d"
-            message="Please select at least a friend to create your group!"
-          />
-        </View>
-      )} */}
     </View>
   );
 
-
   return (
-
     content
-
   )
 };
-
 
 
 const styles = StyleSheet.create({
@@ -105,16 +80,12 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: Color.background,
     height: 160,
-    // padding: 20,
     paddingHorizontal: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingBottom: 30,
     bottom: 0,
     position: 'absolute',
-    // backgroundColor:'green',
-
-    // bottom:50,
   },
   inputContainer: {
     backgroundColor: '#1c1c1e',
@@ -152,7 +123,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: "47%",
-    height: 44
+    height: 48
 
   },
   cancelButton: {
@@ -163,18 +134,17 @@ const styles = StyleSheet.create({
     width: "47%",
     borderWidth: 1,
     marginLeft: 15,
-    height: 44.2
+    height: 48
   },
   buttonTxt: {
-    color: Color.lightGrayText,
+    color: Color.whiteText,
     fontFamily: font.PoppinsBold,
     fontSize: 14,
-    lineHeight: 18,      // ⬅️ helps vertical centering
+    lineHeight: 18,
     textAlign: 'center',
 
   },
   toastContainer: {
-    // marginTop: 10,
     bottom: 80,
     width: Dimensions.get('window').width * 1,
     alignSelf: 'center',

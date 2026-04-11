@@ -179,12 +179,12 @@ const CreateGroupScreen = () => {
 
         setGroupsData([finalGroup]);
  
-        setTimeout(() => {
-          navigation.navigate(ScreenNameEnum.WatchWithFriend as never, {
-            groupProps: finalGroup,
-            groupId: groupId, 
-          });
-        }, 1000);
+        // setTimeout(() => {
+        //   navigation.navigate(ScreenNameEnum.WatchWithFriend as never, {
+        //     groupProps: finalGroup,
+        //     groupId: groupId, 
+        //   });
+        // }, 1000);
       } catch (err) {
       } finally {
         setLoadingGroups(false);

@@ -141,8 +141,8 @@ const ProfileCard = ({
                             : {},
                     ]}
                     textStyle={{
-                        fontSize: 14,
-                        fontFamily: font.PoppinsBold,
+                        fontSize: 13,
+                        fontFamily: font.PoppinsMedium,
                         lineHeight: 18,
                         textAlign: 'center',
                     }}
@@ -219,11 +219,11 @@ const styles = StyleSheet.create({
     },
     statNumber: {
         fontSize: 14,
-        fontFamily: font.PoppinsBold,
+        fontFamily: font.PoppinsMedium,
         color: Color.whiteText
     },
     statLabel: {
-        fontSize: 14,
+        fontSize: 13,
         color: Color.textGray,
         fontFamily: font.PoppinsMedium,
 
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     },
     followButtonText: {
         color: Color.whiteText,
-        fontWeight: 'bold',
+       
     },
 });
 

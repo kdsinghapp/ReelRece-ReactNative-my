@@ -1275,7 +1275,7 @@ const MovieDetailScreen = () => {
                 alignItems: 'center',
                 backgroundColor: '#1A1A1A',
                 paddingTop: 14,
-                paddingBottom: Platform.OS === 'ios' ? 65 : 14,
+                paddingBottom: Platform.OS === 'ios' ? 20 : 14,
                 paddingHorizontal: 16,
                 marginTop: 12,
               }}>

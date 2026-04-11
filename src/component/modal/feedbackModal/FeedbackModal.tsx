@@ -102,7 +102,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [itsokImge, setItsokImge] = useState(false);
   const [notLike, setNotLike] = useState(false);
 
-  const [review, setReview] = useState<string>('');
   const [text, setText] = useState('');
   const [preference, setPreference] = useState<'love' | 'like' | 'dislike' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -118,6 +117,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [leftMovie, setLeftMovie] = useState<MovieForComparison | undefined>(firstMovie);
   const [rightMovie, setRightMovie] = useState<MovieForComparison | undefined>(secondMovie);
   const reviewInputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (showFeedback && visible && reviewInputRef.current) {
@@ -132,8 +132,21 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     if (!visible) {
       reviewInputRef.current?.blur();
       Keyboard.dismiss();
+    } else {
+      // Auto scroll when keyboard opens
+      const keyboardShowListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        () => {
+          if (showFeedback) {
+            setTimeout(() => {
+              scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+          }
+        }
+      );
+      return () => keyboardShowListener.remove();
     }
-  }, [visible]);
+  }, [visible, showFeedback]);
 
   const runRightCardSlideIn = useCallback(() => {
     rightCardAnim.setValue(screenWidth * 0.55);
@@ -262,8 +275,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }
   }, [visible, step]);
 
-
-
   // Loved it
   const handleLovedIt = () => {
     fileLogger.info('User selected: Love It');
@@ -391,227 +402,229 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? undefined : 0}
-        style={{ flex: 1 }}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.overlay}>
-            <TouchableOpacity
-              style={{ alignSelf: 'flex-end', right: 22, position: 'absolute', top: 55, zIndex: 777 }}
-              onPress={handleCloseRating}
-            >
-              <Image source={imageIndex.closeCircle} style={{ height: 24, width: 24, tintColor: Color.placeHolder, resizeMode: 'contain' }} />
-            </TouchableOpacity>
-
-            {/* Comparison Step */}
-            {leftMovie && (
-              <View
-                style={[
-                  styles.comparisonModalContent,
-                  !isComparison && styles.hiddenStep,
-                ]}
-                pointerEvents={isComparison ? 'auto' : 'none'}
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)' }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlay}>
+              <TouchableOpacity
+                style={{ alignSelf: 'flex-end', right: 22, position: 'absolute', top: 55, zIndex: 777 }}
+                onPress={handleCloseRating}
               >
-                <Animated.View style={{ transform: [{ translateX: comparisonHeadingAnim }] }}>
-                  <CustomText size={20} color={Color.placeHolder} style={styles.comparisonHeading} font={font.PoppinsBold}>
-                    Which do you prefer?
-                  </CustomText>
-                </Animated.View>
-                <View style={styles.moviesContainer}>
-                  <Animated.View style={[styles.movieCardComparison, { transform: [{ translateX: firstImageSlide }] }]} collapsable={false}>
-                    <TouchableOpacity
-                      disabled={!!comparisonSelected}
-                      onPress={() => {
-                        setComparisonSelected('first');
-                        setTimeout(() => slideAndResetImages(() => onSelectFirst?.()), 180);
-                      }}
-                    >
-                      <View>
-                        <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
-                          <Grayscale amount={comparisonSelected === 'second' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
-                            {leftPosterSource && (
-                              <FastImage
-                                style={[styles.comparisonPoster, { borderWidth: comparisonSelected === 'first' ? 2 : 0 }]}
-                                source={leftPosterSource}
-                                resizeMode={FastImage.resizeMode.stretch}
-                              />
-                            )}
-                          </Grayscale>
-                        </View>
-                        <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
-                          {leftMovie.title}
-                        </CustomText>
-                        <CustomText size={14} color={Color.placeHolder} style={styles.comparisonYear} font={font.PoppinsRegular}>
-                          {leftMovie.year}
-                        </CustomText>
-                      </View>
-                    </TouchableOpacity>
+                <Image source={imageIndex.closeCircle} style={{ height: 24, width: 24, tintColor: Color.placeHolder, resizeMode: 'contain' }} />
+              </TouchableOpacity>
+
+              {/* Comparison Step */}
+              {leftMovie && (
+                <View
+                  style={[
+                    styles.comparisonModalContent,
+                    !isComparison && styles.hiddenStep,
+                  ]}
+                  pointerEvents={isComparison ? 'auto' : 'none'}
+                >
+                  <Animated.View style={{ transform: [{ translateX: comparisonHeadingAnim }] }}>
+                    <CustomText size={20} color={Color.placeHolder} style={styles.comparisonHeading} font={font.PoppinsBold}>
+                      Which do you prefer?
+                    </CustomText>
                   </Animated.View>
-                  {rightMovie && (
-                    <Animated.View key="comparison-right-card" style={[styles.movieCardComparison, { transform: [{ translateX: rightCardAnim }] }]}>
+                  <View style={styles.moviesContainer}>
+                    <Animated.View style={[styles.movieCardComparison, { transform: [{ translateX: firstImageSlide }] }]} collapsable={false}>
                       <TouchableOpacity
                         disabled={!!comparisonSelected}
                         onPress={() => {
-                          setComparisonSelected('second');
-                          setTimeout(() => slideAndResetImages(() => onSelectSecond?.(rightMovie)), 180);
+                          setComparisonSelected('first');
+                          setTimeout(() => slideAndResetImages(() => onSelectFirst?.()), 180);
                         }}
                       >
                         <View>
-                          <View style={styles.posterWrapper}>
-                            <Grayscale amount={comparisonSelected === 'first' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
-                              <FastImage
-                                key={rightMovie.poster?.uri}
-                                style={[
-                                  styles.comparisonPoster,
-                                  { borderWidth: comparisonSelected === 'second' ? 1 : 0, borderColor: comparisonSelected === 'second' ? Color.primary : 'transparent' },
-                                ]}
-                                source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
-                                resizeMode={FastImage.resizeMode.contain}
-                                onLoad={() => {
-                                  if (!rightCardSlideInDoneRef.current) {
-                                    rightCardSlideInDoneRef.current = true;
-                                    runRightCardSlideIn();
-                                  }
-                                }}
-                              />
-                              {isOnboarding == false &&
-                                rightMovie.rating != null && (
-                                  <View style={styles.ratingBadge}>
-                                    <RankingWithInfo
-                                      score={Number(rightMovie.rating)}
-                                      title="Rec Score"
-                                      description={t('discover.recscoredes')}
-                                    />
-                                  </View>
-                                )}
+                          <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
+                            <Grayscale amount={comparisonSelected === 'second' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
+                              {leftPosterSource && (
+                                <FastImage
+                                  style={[styles.comparisonPoster, { borderWidth: comparisonSelected === 'first' ? 2 : 0 }]}
+                                  source={leftPosterSource}
+                                  resizeMode={FastImage.resizeMode.stretch}
+                                />
+                              )}
                             </Grayscale>
                           </View>
                           <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
-                            {rightMovie.title}
+                            {leftMovie.title}
                           </CustomText>
                           <CustomText size={14} color={Color.placeHolder} style={styles.comparisonYear} font={font.PoppinsRegular}>
-                            {rightMovie.year}
+                            {leftMovie.year}
                           </CustomText>
                         </View>
                       </TouchableOpacity>
                     </Animated.View>
-                  )}
-                </View>
-                <TouchableOpacity style={styles.skipButton} onPress={() => onSkipSelect?.()}>
-                  <CustomText size={14} color={Color.lightGrayText} style={styles.skipText} font={font.PoppinsMedium}>
-                    {t('profile.skip')}
-                  </CustomText>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* Feedback Step */}
-            <View
-              style={[
-                styles.modalContentWrapper,
-                isComparison && styles.hiddenStep,
-              ]}
-              pointerEvents={isComparison ? 'none' : 'auto'}
-            >
-              <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-              >
-                <View style={styles.modalContentInner}>
-                  <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
-                    <CustomText size={16} color={Color.whiteText} style={styles.heading} font={font.PoppinsSemiBold}>
-                      {t('modal.howWasIt')}
-                    </CustomText>
-                  </Animated.View>
-                  <Animated.View style={[styles.movieCard, { transform: [{ translateX: centerPosterSlideAnim }] }]}>
-                    <View>
-                      <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
-                        {poster?.uri ? (
-                          <FastImage
-                            source={{ uri: poster.uri, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
-                            style={styles.comparisonPoster}
-                            resizeMode={FastImage.resizeMode.stretch}
-                          />
-                        ) : null}
-                      </View>
-                      <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
-                        {movieTitle}
-                      </CustomText>
-                      <CustomText size={14} color={Color.placeHolder} style={styles.comparisonYear} font={font.PoppinsRegular}>
-                        {movieYear}
-                      </CustomText>
-                    </View>
-                  </Animated.View>
-                  {preferenceMsg && (
-                    <View>
-                      <Text style={styles.continueAlert}>{t('errorMessage.pickOneContinue')}</Text>
-                    </View>
-                  )}
-                  <Animated.View style={[styles.actionsContainer, { transform: [{ translateX: actionsContainerAnim }] }]}>
-                    <View style={styles.lovedIt}>
-                      <TouchableOpacity onPress={handleLovedIt}>
-                        <Image source={selectedOption === 'lovedIt' ? imageIndex.acrtivePlay : imageIndex.stopPlay} resizeMode="contain" style={styles.icon} />
-                      </TouchableOpacity>
-                      <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                        {t('modal.loveIt')}
-                      </CustomText>
-                    </View>
-                    <View style={styles.lovedIt}>
-                      <TouchableOpacity onPress={handleOkay}>
-                        <Image source={selectedOption === 'okay' ? imageIndex.modalitWasPoster : imageIndex.play} resizeMode="contain" style={styles.icon} />
-                      </TouchableOpacity>
-                      <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                        {t('modal.itWasOkay')}
-                      </CustomText>
-                    </View>
-                    <View style={styles.lovedIt}>
-                      <TouchableOpacity onPress={handleDidntLike}>
-                        <Image source={selectedOption === 'notLike' ? imageIndex.redCloseActive : imageIndex.redClose} resizeMode="contain" style={styles.icon} />
-                      </TouchableOpacity>
-                      <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                        {t('modal.didntLikeIt')}
-                      </CustomText>
-                    </View>
-                  </Animated.View>
-                  {!isOnboarding && showFeedback && (
-                    <Animated.View style={[{ width: '100%', marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
-                      <View style={styles.reviewConatainer}>
-                        <CustomReviewInput
-                          key={visible ? 'active' : 'inactive'}
-                          ref={reviewInputRef}
-                          placeholder={t('modal.writeReview')}
-                          text={text}
-                          setText={setText}
-                        />
-                      </View>
-                    </Animated.View>
-                  )}
-                </View>
-              </ScrollView>
-
-              {!isOnboarding && showFeedback && (
-                <Animated.View style={[{ width: '85%', marginBottom: 15, transform: [{ translateX: actionsContainerAnim }] }]}>
-                  <TouchableOpacity onPress={() => nextPress()}>
-                    <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>
-                      {t('common.next')}
+                    {rightMovie && (
+                      <Animated.View key="comparison-right-card" style={[styles.movieCardComparison, { transform: [{ translateX: rightCardAnim }] }]}>
+                        <TouchableOpacity
+                          disabled={!!comparisonSelected}
+                          onPress={() => {
+                            setComparisonSelected('second');
+                            setTimeout(() => slideAndResetImages(() => onSelectSecond?.(rightMovie)), 180);
+                          }}
+                        >
+                          <View>
+                            <View style={styles.posterWrapper}>
+                              <Grayscale amount={comparisonSelected === 'first' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
+                                <FastImage
+                                  key={rightMovie.poster?.uri}
+                                  style={[
+                                    styles.comparisonPoster,
+                                    { borderWidth: comparisonSelected === 'second' ? 1 : 0, borderColor: comparisonSelected === 'second' ? Color.primary : 'transparent' },
+                                  ]}
+                                  source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                                  resizeMode={FastImage.resizeMode.contain}
+                                  onLoad={() => {
+                                    if (!rightCardSlideInDoneRef.current) {
+                                      rightCardSlideInDoneRef.current = true;
+                                      runRightCardSlideIn();
+                                    }
+                                  }}
+                                />
+                                {isOnboarding == false &&
+                                  rightMovie.rating != null && (
+                                    <View style={styles.ratingBadge}>
+                                      <RankingWithInfo
+                                        score={Number(rightMovie.rating)}
+                                        title="Rec Score"
+                                        description={t('discover.recscoredes')}
+                                      />
+                                    </View>
+                                  )}
+                              </Grayscale>
+                            </View>
+                            <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
+                              {rightMovie.title}
+                            </CustomText>
+                            <CustomText size={14} color={Color.placeHolder} style={styles.comparisonYear} font={font.PoppinsRegular}>
+                              {rightMovie.year}
+                            </CustomText>
+                          </View>
+                        </TouchableOpacity>
+                      </Animated.View>
+                    )}
+                  </View>
+                  <TouchableOpacity style={styles.skipButton} onPress={() => onSkipSelect?.()}>
+                    <CustomText size={14} color={Color.lightGrayText} style={styles.skipText} font={font.PoppinsMedium}>
+                      {t('profile.skip')}
                     </CustomText>
                   </TouchableOpacity>
-                </Animated.View>
+                </View>
+              )}
+
+              {/* Feedback Step */}
+              <View
+                style={[
+                  styles.modalContentWrapper,
+                  isComparison && styles.hiddenStep,
+                ]}
+                pointerEvents={isComparison ? 'none' : 'auto'}
+              >
+                <ScrollView
+                  ref={scrollViewRef}
+                  contentContainerStyle={styles.scrollContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  onContentSizeChange={() => {
+                    if (showFeedback) {
+                      scrollViewRef.current?.scrollToEnd({ animated: true });
+                    }
+                  }}
+                >
+                  <View style={styles.modalContentInner}>
+                    <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
+                      <CustomText size={16} color={Color.whiteText} style={styles.heading} font={font.PoppinsSemiBold}>
+                        {t('modal.howWasIt')}
+                      </CustomText>
+                    </Animated.View>
+                    <Animated.View style={[styles.movieCard, { transform: [{ translateX: centerPosterSlideAnim }] }]}>
+                      <View>
+                        <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
+                          {poster?.uri ? (
+                            <FastImage
+                              source={{ uri: poster.uri, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                              style={styles.comparisonPoster}
+                              resizeMode={FastImage.resizeMode.stretch}
+                            />
+                          ) : null}
+                        </View>
+                        <CustomText size={16} color={Color.whiteText} style={styles.comparisonTitle} font={font.PoppinsMedium}>
+                          {movieTitle}
+                        </CustomText>
+                        <CustomText size={14} color={Color.placeHolder} style={styles.comparisonYear} font={font.PoppinsRegular}>
+                          {movieYear}
+                        </CustomText>
+                      </View>
+                    </Animated.View>
+                    {preferenceMsg && (
+                      <View>
+                        <Text style={styles.continueAlert}>{t('errorMessage.pickOneContinue')}</Text>
+                      </View>
+                    )}
+                    <Animated.View style={[styles.actionsContainer, { transform: [{ translateX: actionsContainerAnim }] }]}>
+                      <View style={styles.lovedIt}>
+                        <TouchableOpacity onPress={handleLovedIt}>
+                          <Image source={selectedOption === 'lovedIt' ? imageIndex.acrtivePlay : imageIndex.stopPlay} resizeMode="contain" style={styles.icon} />
+                        </TouchableOpacity>
+                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                          {t('modal.loveIt')}
+                        </CustomText>
+                      </View>
+                      <View style={styles.lovedIt}>
+                        <TouchableOpacity onPress={handleOkay}>
+                          <Image source={selectedOption === 'okay' ? imageIndex.modalitWasPoster : imageIndex.play} resizeMode="contain" style={styles.icon} />
+                        </TouchableOpacity>
+                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                          {t('modal.itWasOkay')}
+                        </CustomText>
+                      </View>
+                      <View style={styles.lovedIt}>
+                        <TouchableOpacity onPress={handleDidntLike}>
+                          <Image source={selectedOption === 'notLike' ? imageIndex.redCloseActive : imageIndex.redClose} resizeMode="contain" style={styles.icon} />
+                        </TouchableOpacity>
+                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
+                          {t('modal.didntLikeIt')}
+                        </CustomText>
+                      </View>
+                    </Animated.View>
+                    {!isOnboarding && showFeedback && (
+                      <Animated.View style={[{ width: '100%', marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
+                        <View style={styles.reviewConatainer}>
+                          <CustomReviewInput
+                            key={visible ? 'active' : 'inactive'}
+                            ref={reviewInputRef}
+                            placeholder={t('modal.writeReview')}
+                            text={text}
+                            setText={setText}
+                          />
+                        </View>
+                        <TouchableOpacity onPress={() => nextPress()} style={{ width: '100%' }}>
+                          <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>
+                            {t('common.next')}
+                          </CustomText>
+                        </TouchableOpacity>
+                      </Animated.View>
+                    )}
+                  </View>
+                </ScrollView>
+              </View>
+
+              {isComparison && (
+                <View style={styles.orContainer}>
+                  <Image source={imageIndex.orCircle} style={styles.orImage} resizeMode="contain" />
+                </View>
               )}
             </View>
-
-            {isComparison && (
-              <View style={styles.orContainer}>
-                <Image source={imageIndex.orCircle} style={styles.orImage} resizeMode="contain" />
-              </View>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
@@ -620,7 +633,6 @@ export default FeedbackModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -635,13 +647,12 @@ const styles = StyleSheet.create({
   modalContentWrapper: {
     alignItems: 'center',
     width: '100%',
-    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 20,
+    paddingBottom: 70,
     width: Dimensions.get('window').width,
   },
   modalContentInner: {

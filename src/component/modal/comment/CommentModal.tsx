@@ -353,10 +353,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
                 </Text>
               </TouchableOpacity>
-              {/* <Text style={styles.date}>{timeAgo(item?.created_date)}</Text> */}
               <Text style={styles.date}>{item?.date}</Text>
             </View>
-            {/* <RankingCard ranked={item?.rec_score} /> */}
             <RankingWithInfo
               score={item?.rec_score}
               title={scoreType === "Rec" ? "Rec Score" : "Friend Score"}

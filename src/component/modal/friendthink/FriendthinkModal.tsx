@@ -119,7 +119,6 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
 
               }
             />
-            {/* <RankingCard ranked={item?.rec_score} /> */}
           </View>
         </TouchableOpacity>
 
@@ -176,8 +175,6 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
                   title={"Friend Score"}
                   description={
                     t("discover.frienddes")
-                    // ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                    //  "This score shows the rating from your friend for this title."
                   }
                 />
                 <Text style={{ fontSize: 12, color: Color.whiteText, fontFamily: font.PoppinsBold, marginLeft: 12, }} >{t("discover.groupScore")}</Text>
@@ -215,15 +212,6 @@ const FriendthinkModal: React.FC<Props> = ({ visible, onClose, reviews, type, he
 
           </View>
         </TouchableWithoutFeedback>
-
-        {/* <View style={[ styles.closeBtnContainer, { backgroundColor: type === "react" ? Color.modalTransperant : Color.modalBg }]} >
-         <TouchableOpacity style={[styles.closeBtnBox,{ backgroundColor: type === "react" ? Color.modalTransperant : Color.modalBg } ]} onPress={onClose}>
-                        <Text style={styles.closeText}>Close</Text>
-                      </TouchableOpacity>
-        </View> */}
-
-
-
       </TouchableOpacity>
 
     </Modal>
@@ -236,14 +224,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
-    // paddingBottom:60,
   },
   modalContent: {
     backgroundColor: Color.modalTransperant,
     borderTopRightRadius: 16, borderTopLeftRadius: 16,
-    // borderRadius: 16,
     padding: 16,
-    // flex: 2,
     maxHeight: Dimensions.get('window').height * 0.66,
     minHeight: Dimensions.get('window').height * 0.66,
   },
@@ -254,7 +239,6 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    // fontWeight: '700',
     fontFamily: font.PoppinsBold,
     lineHeight: 22,
     color: Color.whiteText,
@@ -267,12 +251,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
-  // avatar: {
-  //   width: 60,
-  //   height: 60,
-  //   borderRadius: 60,
-  //   marginRight: 12,
-  // },
   info: {
     flex: 1,
   },

@@ -120,7 +120,6 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
 
 
   const renderMovie = useCallback(({ item, index }: { item: any; index: number }) => {
-    // setIsSaved(item?.is_bookmarked ?? false)
     return (
       <>
         <View style={styles.movieCard}>
@@ -196,7 +195,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
 
   // const { backnavigateTab, backnavigate } = route.params || {};
   return (
-    <SafeAreaView  edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
       <CustomStatusBar />
       <View style={styles.container}>
         <HeaderCustom

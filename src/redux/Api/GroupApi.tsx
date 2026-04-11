@@ -28,7 +28,7 @@ export const getAllFriends = async (token: string, page = 1, page_size = 20): Pr
       }),
     });
 
-    return response.data; // { results: [...], next: '...', previous: '...', count: n }
+    return response.data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
     throw error;
@@ -36,7 +36,6 @@ export const getAllFriends = async (token: string, page = 1, page_size = 20): Pr
 };
 
 
-/// 🔹 2. Search Friends (for group search input)
 export const searchFriends = async (token: string, query: string, page = 1, page_size = 20): Promise<PaginatedResponse<User>> => {
   try {
     // Validate inputs
@@ -421,8 +420,7 @@ export const getFilteredGroupMovies = async (
   token: string,
   groupId: string,
   n_members?: number,
-  members?: string[],
-  popularity_penalty?: number) => {
+  members?: string[]) => {
 
   try {
     // Validate inputs
@@ -455,9 +453,9 @@ export const getFilteredGroupMovies = async (
       }
     }
 
-    if (popularity_penalty !== undefined && popularity_penalty !== null) {
-      params.popularity_penalty = popularity_penalty;
-    }
+    // if (popularity_penalty !== undefined && popularity_penalty !== null) {
+    //   params.popularity_penalty = popularity_penalty;
+    // }
 
     const response = await axiosInstance.get('/group/filter-movies', {
       headers: {

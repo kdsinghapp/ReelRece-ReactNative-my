@@ -182,8 +182,8 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
                                                     ]}
                                                     source={{
                                                         uri: `${BASE_IMAGE_URL}${item?.avatar}`,
-                                                        priority: FastImage.priority.low,
-                                                        cache: FastImage.cacheControl.immutable,
+                                                        priority: FastImage.priority.high,
+                                                        cache: FastImage.cacheControl.web,
                                                     }}
                                                     resizeMode={FastImage.resizeMode.cover}
                                                 />
@@ -314,21 +314,34 @@ const GroupMovieModal = ({ visible, onClose, setTotalFilterApply, group, groupId
                             <View style={styles.sliderSection}>
                                 <Text style={[styles.groupValue, { fontSize: 12 }]}>0%</Text>
                                 <View style={styles.sliderWrapper}>
-                                    <View style={styles.sliderContainer}>
+                                    <View style={styles.sliderContainer} onLayout={handleSliderLayout}>
+                                        {/* Slider Component */}
+                                        {sliderWidth > 0 && (
+                                            <View
+                                                style={[
+                                                    styles.bubbleContainer,
+                                                    {
+                                                        left: popularityValue === 0 ? -12.5 : popularityValue === 100 ? sliderWidth - 38 : (popularityValue / 100 * (sliderWidth - THUMB_SIZE)) + (THUMB_SIZE / 2) - (BUBBLE_WIDTH / 2),
+                                                    }
+                                                ]}
+                                            >
+                                                <View style={styles.bubble}>
+                                                    <Text style={styles.bubbleText}>{popularityValue}%</Text>
+                                                </View>
+                                                <View style={styles.bubbleArrow} />
+                                            </View>
+                                        )}
                                         <Slider
                                             style={styles.slider}
                                             minimumValue={0}
                                             maximumValue={100}
-                                            step={1}
+                                            step={10}
                                             value={popularityValue}
                                             onValueChange={value => setPopularityValue(Math.round(value))}
                                             minimumTrackTintColor={Color.primary}
                                             maximumTrackTintColor="#ccc"
                                             thumbTintColor={Color.whiteText}
                                         />
-                                        <Text style={{ color: 'white', position: 'absolute', top: -14, alignSelf: 'center', fontFamily: font.PoppinsMedium, fontSize: 12 }}>
-                                            {popularityValue}%
-                                        </Text>
                                     </View>
                                 </View>
                                 <Text style={[styles.groupValue, { fontSize: 12 }]}>100%</Text>

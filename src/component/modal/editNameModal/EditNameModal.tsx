@@ -16,7 +16,7 @@ import {
   Keyboard
 } from 'react-native';
 import imageIndex from '@assets/imageIndex';
- import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import { checkUsernameAvailability } from '@redux/Api/authService';
 import { renameGroup } from '@redux/Api/GroupApi';
 import { G } from 'react-native-svg';
@@ -31,11 +31,11 @@ interface EditNameModalProps {
   fieldLabel?: string;
   fieldKey?: string;
   initialValue?: string;
-  type?:string;
-group_name?:string,
-groupId?:string;
-token:string;
-setGroup_name?: (name: string) => void;
+  type?: string;
+  group_name?: string,
+  groupId?: string;
+  token: string;
+  setGroup_name?: (name: string) => void;
 }
 
 const EditNameModal: React.FC<EditNameModalProps> = ({
@@ -54,59 +54,53 @@ const EditNameModal: React.FC<EditNameModalProps> = ({
 }) => {
   const [value, setValue] = useState(initialValue);
 
-React.useEffect(() => {
-  setValue(initialValue); 
-}, [initialValue]);
+  React.useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
 
-  // const handleSave = () => {
-  //   onSave(fieldKey, value);
-  //   setModalVisible(false);
-  // };
+  const handleSave = async () => {
+    const trimmedValue = value.trim();
+    const trimmedInitial = (initialValue ?? '').trim();
 
+    if (trimmedValue === '') return;
 
-const handleSave = async () => {
-  const trimmedValue = value.trim();
-  const trimmedInitial = (initialValue ?? '').trim();
-
-  if (trimmedValue === '') return;
-
-  if (trimmedValue === trimmedInitial) {
-    onClose();
-    return;
-  }
-
-  if (fieldKey === 'username') {
-    try {
-      const result = await checkUsernameAvailability(trimmedValue);
-      if (!result.success) {
-         return;
-      }
-
-      if (!result.available) {
-         return;
-      }
-    } catch (error) {
-       return;
+    if (trimmedValue === trimmedInitial) {
+      onClose();
+      return;
     }
-  }
 
-  // ✅ group_name API call
-  if (fieldKey === 'group_name' && groupId && group_name && trimmedValue !== group_name) {
-    try {
-     
-    const response =   await renameGroup(token, groupId, trimmedValue);
-         Alert.alert(response.status_code)
-      if (response) {
-        setGroup_name(trimmedValue)
-       }
-    } catch (error) {
-     }
-  }
+    if (fieldKey === 'username') {
+      try {
+        const result = await checkUsernameAvailability(trimmedValue);
+        if (!result.success) {
+          return;
+        }
 
-  onSave(fieldKey, trimmedValue)
-  onClose();
-};
+        if (!result.available) {
+          return;
+        }
+      } catch (error) {
+        return;
+      }
+    }
+
+    // ✅ group_name API call
+    if (fieldKey === 'group_name' && groupId && group_name && trimmedValue !== group_name) {
+      try {
+
+        const response = await renameGroup(token, groupId, trimmedValue);
+        Alert.alert(response.status_code)
+        if (response) {
+          setGroup_name(trimmedValue)
+        }
+      } catch (error) {
+      }
+    }
+
+    onSave(fieldKey, trimmedValue)
+    onClose();
+  };
   return (
     <Modal
       transparent
@@ -202,8 +196,8 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontFamily:font.PoppinsBold,
-    lineHeight:20,
+    fontFamily: font.PoppinsBold,
+    lineHeight: 20,
     // fontWeight: '700',
     color: Color.whiteText,
     textAlign: 'center',
@@ -220,7 +214,7 @@ const styles = StyleSheet.create({
     // flex:1,
     color: Color.whiteText,
     marginBottom: 24,
-     fontFamily:font.PoppinsRegular
+    fontFamily: font.PoppinsRegular
   },
   saveButton: {
     // marginHorizontal: 120,

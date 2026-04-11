@@ -43,8 +43,8 @@ const GroupAllAvatars = ({ group }: { group: { members: Array<{ avatar: string }
 
                 source={{
                     uri: `${BASE_IMAGE_URL}${avatarPath}`,
-                    cache: FastImage.cacheControl.immutable,
-                    priority: FastImage.priority.low
+                    priority: FastImage.priority.high,
+                    cache: FastImage.cacheControl.web,
                 }}
                 style={style}
                 resizeMode={FastImage.resizeMode.cover}

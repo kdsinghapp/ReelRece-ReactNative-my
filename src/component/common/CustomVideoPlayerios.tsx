@@ -10,12 +10,12 @@ import {
   Image,
   PanResponder,
   Alert,
-} from "react-native"; 
+} from "react-native";
 import Video from "react-native-video";
 import imageIndex from "@assets/imageIndex";
 import SvgImage from "@assets/svg/svgImage";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 interface Props {
   videoUrl: string;
@@ -43,35 +43,32 @@ const CustomVideoPlayer: React.FC<Props> = ({
   const [progressWidth, setProgressWidth] = useState(0);
   const [isPaused, setIsPaused] = useState(paused);
   const [isScrubbing, setIsScrubbing] = useState(false);
-  
-  // Track previous modal state to detect changes
+
   const prevModalOpenRef = useRef(isModalOpen);
 
-  // Refs for PanResponder
   const progressWidthRef = useRef(0);
   const durationRef = useRef(0);
   const isModalOpenRef = useRef<boolean>(false);
 
-  // Sync refs
-  useEffect(() => { 
-    progressWidthRef.current = progressWidth; 
+  useEffect(() => {
+    progressWidthRef.current = progressWidth;
   }, [progressWidth]);
-  
-  useEffect(() => { 
-    durationRef.current = duration; 
+
+  useEffect(() => {
+    durationRef.current = duration;
   }, [duration]);
-  
-  useEffect(() => { 
-    isModalOpenRef.current = isModalOpen; 
+
+  useEffect(() => {
+    isModalOpenRef.current = isModalOpen;
   }, [isModalOpen]);
 
   // Handle modal state changes
   useEffect(() => {
     // When modal closes, resume video if it was playing before modal opened
     if (prevModalOpenRef.current === true && isModalOpen === false) {
-       setIsPaused(false);
+      setIsPaused(false);
     }
-    
+
     // Update previous state
     prevModalOpenRef.current = isModalOpen;
   }, [isModalOpen]);
@@ -152,12 +149,12 @@ const CustomVideoPlayer: React.FC<Props> = ({
 
     const newPausedState = !isPaused;
     setIsPaused(newPausedState);
-    
+
     // Notify parent if needed
     if (onTogglePause) {
       onTogglePause();
     }
-    
+
     startAutoHide();
   };
 
@@ -234,7 +231,7 @@ const CustomVideoPlayer: React.FC<Props> = ({
         />
 
         {/* MUTE/UNMUTE BUTTON */}
-        {showControls  && (
+        {showControls && (
           <TouchableOpacity
             style={styles.muteButton}
             onPress={handleToggleMute}
@@ -246,14 +243,14 @@ const CustomVideoPlayer: React.FC<Props> = ({
             />
           </TouchableOpacity>
         )}
- {!showControls  && (
-          <TouchableOpacity activeOpacity={1} onPress={()=>handleContainerPress()} style={styles.overlay}>
-         
+        {!showControls && (
+          <TouchableOpacity activeOpacity={1} onPress={() => handleContainerPress()} style={styles.overlay}>
+
           </TouchableOpacity>
         )}
         {/* CONTROLS OVERLAY */}
-        {showControls  && (
-          <TouchableOpacity activeOpacity={1} onPress={()=>handleContainerPress()} style={styles.overlay}>
+        {showControls && (
+          <TouchableOpacity activeOpacity={1} onPress={() => handleContainerPress()} style={styles.overlay}>
             {/* CENTER CONTROLS */}
             <View style={styles.centerControls}>
               <TouchableOpacity onPress={() => seekBy(-5)}>

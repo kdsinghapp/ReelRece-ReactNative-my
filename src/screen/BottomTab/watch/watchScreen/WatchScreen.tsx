@@ -48,8 +48,8 @@ const WatchScreen = () => {
     if (avatar) {
       return {
         uri: `${BASE_IMAGE_URL}${avatar}`,
-        priority: FastImage.priority.low,
-        cache: FastImage.cacheControl.immutable,
+        priority: FastImage.priority.high,
+        cache: FastImage.cacheControl.web,
       };
     }
     return imageIndex.profileImg;
@@ -109,7 +109,9 @@ const WatchScreen = () => {
     try {
       if (token) {
         const res = await getUserProfile(token);
-        // setUserProfileDate(res);
+        if (res.avatar) {
+          res.avatar = `${res.avatar}${res.avatar.includes('?') ? '&' : '?'}t=${Date.now()}`;
+        }
         dispatch(setUserProfile({ userGetData: res }));
       }
     } catch (error) {
@@ -197,6 +199,7 @@ const WatchScreen = () => {
   );
   // Group selection handler
   const handleGroupSelect = useCallback((group) => {
+
     if (!group) return;
     if (isMultiSelectMode) {
       const isAlreadySelected = selectedGroupIds?.includes(group.groupId);
@@ -306,97 +309,6 @@ const WatchScreen = () => {
   );
 
 
-  const renderHeaderSection = useCallback(() => {
-    return (
-      <View style={WatchStyle.header}>
-        <View style={WatchStyle.headerLeft}>
-          <CustomText
-            size={20}
-            color={Color.placeHolder}
-            style={[WatchStyle.logo,]}
-            font={font.PoppinsBold}
-          >
-            {/* {
-            "Watch Together"
-          } */}
-            {/* {isSettingsMode ? 'Groups setting testing' : 'Watch Together'} */}
-          </CustomText>
-        </View>
-
-        <View style={WatchStyle.headerRight}>
-          <TouchableOpacity onPress={() => setNotificationModal(true)}>
-            <Image
-              source={imageIndex.normalNotification}
-              style={WatchStyle.notificationIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={goToSearchScreen}
-          >
-            <Image source={imageIndex.search} style={WatchStyle.searchIcon} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    )
-  }, [isSettingsMode])
-
-  // useEffect(() => {
-
-  //   if (isMultiSelectMode && !isSettingsMode) {
-  //     animateBottomBarOut();
-  //   }
-  // },[ isSettingsMode])
-
-  const renderUserActions = useCallback(() => {
-    return (
-      <View style={WatchStyle.onlineuserContainer}>
-        <TouchableOpacity
-          onPress={() => setIsSettingsMode(!isSettingsMode)}>
-
-          <FastImage
-            style={WatchStyle.userOnlineImg}
-            source={userAvatarSource}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={WatchStyle.invitBtnContianerr}
-          onPress={() => navigation.navigate(ScreenNameEnum.CreateGroupScreen)}
-        >
-          <Image source={imageIndex.invitIcon} style={WatchStyle.invitBtnIcon} />
-        </TouchableOpacity>
-      </View>
-    )
-  }, [isSettingsMode]);
-
-  const renderGroupList = useCallback(() => {
-    return (
-      <View style={WatchStyle.groupsContainer}>
-        <Suspense fallback={
-          <View>
-            {[1, 2, 3].map((i) => (
-              <ShimmerGroupItem key={i} />
-            ))}
-          </View>
-
-        }>
-
-          <WatchGroupCom
-            groups={groupsData}
-            isSettingsMode={isSettingsMode}
-            onGroupSelect={handleGroupSelect}
-            isMultiSelectMode={isMultiSelectMode}
-            selectedGroupIds={selectedGroupIds}
-            setSelectedGroup={setSelectedGroup}
-            setIsSettingsMode={setIsSettingsMode}
-          />
-
-        </Suspense>
-
-      </View>
-    )
-  }, [groupsData]);
-
   const renderBottomBar = () => {
     const selectedGroupId = selectedGroup?.groupId;
     const groupMuted = selectedGroup?.isMuted ?? false;
@@ -487,7 +399,7 @@ const WatchScreen = () => {
           <CustomText
             size={18}
             color={Color.placeHolder}
-            style={[WatchStyle.logo,]}
+            style={[WatchStyle.logo]}
             font={font.PoppinsSemiBold}
           >
             {(t("home.watchtogether"))}
@@ -544,13 +456,6 @@ const WatchScreen = () => {
       <CustomStatusBar translucent={true} />
 
       <View style={WatchStyle.container}>
-        {/* {renderHeaderSection()} */}
-
-        {/* {renderUserActions()} */}
-        {/* {renderGroupList()} */}
-        {/* {headerSection}
-        {userActions}
-          {groupList} */}
 
         <HeaderSection
           isSettingsMode={isSettingsMode}

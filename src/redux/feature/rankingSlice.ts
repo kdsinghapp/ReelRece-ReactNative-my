@@ -111,6 +111,9 @@ const rankingSlice = createSlice({
       list.splice(fromIndex, 0, moved);
       state.ratedMovies = list;
     },
+    removeMovieFromSuggestion(state, action: PayloadAction<string>) {
+      state.suggestionMovies = state.suggestionMovies.filter(m => m.imdb_id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -175,5 +178,6 @@ export const {
   reorderRatedMovies,
   updateRatedMovieScores,
   rollbackRatedMovieOrder,
+  removeMovieFromSuggestion,
 } = rankingSlice.actions;
 export default rankingSlice.reducer;

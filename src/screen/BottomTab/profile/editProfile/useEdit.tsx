@@ -5,7 +5,7 @@ import ImagePicker from "react-native-image-crop-picker";
 
 const useEdit = () => {
   const navigation = useNavigation();
-  const [imagePrfile, setImagePrfile] = useState<object | null>(null);
+  const [imageProfile, setImageProfile] = useState<object | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingKey, setEditingKey] = useState('');
@@ -20,10 +20,14 @@ const useEdit = () => {
       mediaType: 'photo',
     })
       .then((image: object) => {
-        setImagePrfile(image);
+        setImageProfile(image);
         setIsModalVisible(false);
       })
-      .catch(() => {});
+      .catch((error) => {
+        if (error.code !== 'E_PICKER_CANCELLED') {
+          Alert.alert('Error', 'Failed to pick image from gallery');
+        }
+      });
   }, []);
 
   const requestCameraPermission = async (): Promise<boolean> => {
@@ -61,16 +65,18 @@ const useEdit = () => {
         compressImageQuality: 0.4,
         mediaType: 'photo',
       });
-      setImagePrfile(image);
+      setImageProfile(image);
       setIsModalVisible(false);
-    } catch (_error) {
-      // user cancelled or error
+    } catch (error: any) {
+      if (error.code !== 'E_PICKER_CANCELLED') {
+        Alert.alert('Error', 'Failed to take photo');
+      }
     }
   }, []);
   return {
     navigation,
     takePhotoFromCamera,
-    imagePrfile, setImagePrfile,
+    imageProfile, setImageProfile,
     isModalVisible, setIsModalVisible,
     pickImageFromGallery,
     modalVisible, setModalVisible,

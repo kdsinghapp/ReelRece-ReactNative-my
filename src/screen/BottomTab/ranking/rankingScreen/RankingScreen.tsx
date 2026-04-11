@@ -42,6 +42,8 @@ import ButtonCustom from '@components/common/button/ButtonCustom';
 import { t } from 'i18next';
 import { RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import RankingTabs from './RankingTabs';
+import DislikedMoviesTab from './DislikedMoviesTab';
 
 const ITEM_HEIGHT = 180; // Adjust based on your movie card height
 
@@ -254,6 +256,7 @@ const RankingScreen = () => {
   const [displayMovies, setDisplayMovies] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingIds, setLoadingIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'ranking' | 'dislike'>('ranking');
   const ratedMovieRef = useRef(ratedMovie);
   useEffect(() => { ratedMovieRef.current = ratedMovie; }, [ratedMovie]);
 
@@ -922,16 +925,19 @@ const RankingScreen = () => {
   );
 
   const rankingListHeader = useCallback(() => (
-    <TouchableOpacity onPress={goToSearchScreen} activeOpacity={1}>
-      <View pointerEvents="none" style={{ marginBottom: 10 }}>
-        <SearchBarCustom
-          placeholder={(t("discover.searchmovies"))}
-          placeholderTextColor={Color.textGray}
-          editable={false}
-        />
-      </View>
-    </TouchableOpacity>
-  ), [goToSearchScreen]);
+    <View>
+      <TouchableOpacity onPress={goToSearchScreen} activeOpacity={1}>
+        <View pointerEvents="none" style={{ marginBottom: 0 }}>
+          <SearchBarCustom
+            placeholder={(t("discover.searchmovies"))}
+            placeholderTextColor={Color.textGray}
+            editable={false}
+          />
+        </View>
+      </TouchableOpacity>
+      <RankingTabs activeTab={activeTab} onTabPress={setActiveTab} />
+    </View>
+  ), [goToSearchScreen, activeTab, setActiveTab]);
 
   return (
     <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.maincontainer}>
@@ -944,31 +950,38 @@ const RankingScreen = () => {
             ))}
           </View>
         ) : (
-          <Animated.FlatList
-            ref={flatListRef}
-            data={combinedData}
-            renderItem={mainRenderItem}
-            keyExtractor={mainKeyExtractor}
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={10}
-            maxToRenderPerBatch={8}
-            updateCellsBatchingPeriod={50}
-            windowSize={5}
-            removeClippedSubviews={true}
-            onEndReachedThreshold={0.5}
-            onEndReached={loadMoreItems}
-            ListHeaderComponent={rankingListHeader}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                colors={[Color.primary]}
-                tintColor={Color.primary}
-                title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
-                titleColor={Color.grey700}
-              />
-            }
-          />
+          activeTab === 'ranking' ? (
+            <Animated.FlatList
+              ref={flatListRef}
+              data={combinedData}
+              renderItem={mainRenderItem}
+              keyExtractor={mainKeyExtractor}
+              showsVerticalScrollIndicator={false}
+              initialNumToRender={10}
+              maxToRenderPerBatch={8}
+              updateCellsBatchingPeriod={50}
+              windowSize={5}
+              removeClippedSubviews={true}
+              onEndReachedThreshold={0.5}
+              onEndReached={loadMoreItems}
+              ListHeaderComponent={rankingListHeader}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  colors={[Color.primary]}
+                  tintColor={Color.primary}
+                  title={isOnline ? "Pull to refresh" : "Offline - Pull when connected"}
+                  titleColor={Color.grey700}
+                />
+              }
+            />
+          ) : (
+            <View style={{ flex: 1 }}>
+              {rankingListHeader()}
+              <DislikedMoviesTab token={token || ''} />
+            </View>
+          )
         )}
       </View>
 

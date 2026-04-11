@@ -3,15 +3,15 @@ import {
   View, Text, Image, TouchableOpacity,
   ScrollView
 } from 'react-native';
- import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
+import StatusBarCustom from '@components/common/statusBar/StatusBarCustom';
 import styles from './style';
 import useEdit from './useEdit';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { getUserProfile, updateUserProfile } from '@redux/Api/authService';
 import { useRoute, RouteProp } from '@react-navigation/native';
- import LoadingModal from '@utils/Loader';
- import { updateUserProfileField } from '@redux/feature/authSlice';
+import LoadingModal from '@utils/Loader';
+import { updateUserProfileField } from '@redux/feature/authSlice';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
@@ -31,7 +31,7 @@ const EditProfile = () => {
   const {
     navigation,
     takePhotoFromCamera,
-    imagePrfile, setImagePrfile,
+    imageProfile, setImageProfile,
     isModalVisible, setIsModalVisible,
     modalVisible, setModalVisible,
     editingKey, setEditingKey,
@@ -44,7 +44,8 @@ const EditProfile = () => {
     refetchUserProfile,
     loading,
     uploading,
-    uploadProfileAvatar
+    uploadProfileAvatar,
+    getAgain
   } = useProfile();
 
   const [profileFields, setProfileFields] = useState({
@@ -53,13 +54,13 @@ const EditProfile = () => {
     pronouns: '',
     bio: ''
   });
-const dispatch = useDispatch();
-const profileData = useMemo(() => [
-  { key: 'name', label: 'Name', value: profileFields.name },
-  { key: 'username', label: 'Username', value: profileFields.username },
-  { key: 'pronouns', label: 'Pronouns', value: profileFields.pronouns },
-  { key: 'bio', label: 'Bio', value: profileFields.bio },
-], [profileFields]);
+  const dispatch = useDispatch();
+  const profileData = useMemo(() => [
+    { key: 'name', label: 'Name', value: profileFields.name },
+    { key: 'username', label: 'Username', value: profileFields.username },
+    { key: 'pronouns', label: 'Pronouns', value: profileFields.pronouns },
+    { key: 'bio', label: 'Bio', value: profileFields.bio },
+  ], [profileFields]);
 
 
   useEffect(() => {
@@ -67,13 +68,13 @@ const profileData = useMemo(() => [
       if (!token) return;
       try {
         const userData = await getUserProfile(token);
-         setProfileFields({
+        setProfileFields({
           name: userData.name || '',
           username: userData.username || '',
           pronouns: userData.pronouns || '',
           bio: userData.bio || '',
         });
-      } catch (error) {}
+      } catch (error) { }
     };
     getuserProfile();
   }, [token]);
@@ -109,13 +110,13 @@ const profileData = useMemo(() => [
 
   const handleCloseImagePicker = useCallback(() => setIsModalVisible(false), []);
 
-  const imagePath = (imagePrfile as { path?: string } | null)?.path;
+  const imagePath = (imageProfile as { path?: string } | null)?.path;
 
   useEffect(() => {
-    if (imagePath) {
-      uploadProfileAvatar(imagePrfile as { path: string }, () => setImagePrfile(null));
+    if (imagePath && imageProfile) {
+      uploadProfileAvatar(imageProfile as any, () => setImageProfile(null));
     }
-  }, [imagePrfile]);
+  }, [imageProfile, uploadProfileAvatar, imagePath]);
 
   const avatarUri = imagePath
     ? imagePath
@@ -127,12 +128,12 @@ const profileData = useMemo(() => [
     () =>
       avatarUri
         ? {
-            uri: avatarUri,
-            priority: FastImage.priority.low,
-            cache: FastImage.cacheControl.immutable,
-          }
+          uri: avatarUri,
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.web,
+        }
         : imageIndex.UserProfile,
-    [avatarUri]
+    [avatarUri, getAgain]
   );
 
   const scrollContentStyle = useMemo(() => ({ paddingBottom: 24 }), []);
@@ -143,7 +144,7 @@ const profileData = useMemo(() => [
   return (
     <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <StatusBarCustom />
-      <HeaderCustom title= {t("home.editprofile")}   backIcon={imageIndex.backArrow} />
+      <HeaderCustom title={t("home.editprofile")} backIcon={imageIndex.backArrow} />
       <View style={viewContainerStyle}>
         <ScrollView
           showsVerticalScrollIndicator={false}

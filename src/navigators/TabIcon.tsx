@@ -7,7 +7,7 @@ const TabIcon = React.memo(({ focused, logo, logo1, label }) => (
   <>
     <Image
       source={focused ? logo1 : logo}
-      style={{ width: 20, height: 20, resizeMode: "contain" }}
+      style={{ width: 24, height: 24, resizeMode: "contain" }}
     />
     {label && (
       <Text
