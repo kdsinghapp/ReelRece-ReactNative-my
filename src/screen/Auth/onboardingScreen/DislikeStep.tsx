@@ -127,10 +127,10 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
           ]}>
             <Image
-              source={isDisliked ? imageIndex.dislike1 : imageIndex.thumpDown}
+              source={isDisliked ? imageIndex.Dislikebutton1 : imageIndex.Dislikebutton}
               style={[
                 styles.dislikeSmallIcon,
-                isDisliked && { tintColor: 'white' }
+
               ]}
             />
           </View>
@@ -238,12 +238,12 @@ const styles = StyleSheet.create({
   },
   dislikeSubtitle: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: font.PoppinsRegular,
     textAlign: 'center',
   },
   dislikeSubtitles: {
-    color: '#A0A0A0',
+    color: '#767676',
     fontSize: 12,
     fontFamily: font.PoppinsRegular,
     textAlign: 'center',
@@ -299,8 +299,8 @@ const styles = StyleSheet.create({
     borderColor: '#FF3B30',
   },
   dislikeSmallIcon: {
-    width: 15,
-    height: 15,
+    width: 29,
+    height: 29,
   },
   dislikeListContent: {
     paddingHorizontal: 4,
@@ -334,5 +334,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontFamily: font.PoppinsBold,
     fontSize: 16,
+    color: "white"
   },
 });

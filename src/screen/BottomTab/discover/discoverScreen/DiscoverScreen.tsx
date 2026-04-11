@@ -310,7 +310,7 @@ const DiscoverScreen = () => {
       if (!item.imdb_id || !token) return;
       const id = String(item.imdb_id);
       const isAlreadyDisliked = dislikedIds.has(id);
-  
+
       if (isAlreadyDisliked) {
         // Undo dislike
         setDislikedIds(prev => {
@@ -369,25 +369,28 @@ const DiscoverScreen = () => {
             source={coverSource}
             resizeMode={FastImage.resizeMode.stretch}
           />
-          <TouchableOpacity
-            style={styles.thumbsDownButton}
-            onPress={() => handleThumbsDown(item)}
-            activeOpacity={0.7}
-          >
-            <Image 
-              source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.dislike1 : imageIndex.thumpDown} 
-              style={[
-                styles.thumbsDownIcon, 
-                dislikedIds.has(String(item.imdb_id)) && { tintColor: Color.primary }
-              ]} 
-            />
-          </TouchableOpacity>
+
           <View style={styles.rating}>
             <RankingWithInfo
               score={item?.rec_score}
               title={t('discover.recscore')}
               description={t('discover.recscoredes')}
             />
+            <TouchableOpacity
+              style={styles.thumbsDownButton}
+              onPress={() => handleThumbsDown(item)}
+              activeOpacity={0.7}
+            >
+
+
+              <Image
+                source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.dislike1 : imageIndex.thumpDown}
+                style={[
+                  styles.thumbsDownIcon,
+                  dislikedIds.has(String(item.imdb_id)) && { tintColor: Color.primary }
+                ]}
+              />
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       );

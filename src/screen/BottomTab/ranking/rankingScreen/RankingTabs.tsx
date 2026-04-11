@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: 2,
+    height: 2.5,
     backgroundColor: Color.whiteText,
   },
   bottomBorder: {

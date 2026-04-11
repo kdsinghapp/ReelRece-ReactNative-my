@@ -302,7 +302,7 @@ const OnboardingScreen = () => {
   const renderGridItem = ({ item }: { item: Movie }) => {
     const isRated = ratedMovieFromRedux?.some((m: Movie) => m.imdb_id === item.imdb_id);
     const posterUrl = item?.cover_image_url || (item as any)?.movie?.cover_image_url;
-    
+
     // Safety check - though filtered, double check posterUrl
     if (!posterUrl) return null;
 
@@ -550,8 +550,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    color: '#8C8C8C',
-    fontSize: 14,
+    color: '#CDCDCD',
+    fontSize: 13,
     marginTop: 4,
     fontFamily: font.PoppinsRegular,
     textAlign: 'center',
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00A8F5',
   },
   buttonDisabled: {
-    backgroundColor: '#2E2E2E',
+    backgroundColor: '#2D2D2E',
   },
   buttonIcon: {
     width: 18,
@@ -649,8 +649,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#FFF',
-    fontFamily: font.PoppinsBold,
-    fontSize: 16,
+    fontFamily: font.PoppinsMedium,
+    fontSize: 15,
   },
   buttonContent: {
     flexDirection: 'row',

@@ -5,6 +5,8 @@ export default {
   fb: require('./images/fb.png'),
   apple: require('./images/apple.png'),
   google: require('./images/google.png'),
+  Dislikebutton: require('./images/Dislikebutton.png'),
+  Dislikebutton1: require('./images/Dislikebutton1.png'),
   home: require('./images/home.png'),
   homeActive: require('./images/homeActive.png'),
   reelRecsHome: require('./images/reelRecsHome.png'),

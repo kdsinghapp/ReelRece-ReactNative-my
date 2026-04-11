@@ -146,14 +146,13 @@ const MovieDetailScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(1); // Start at the middle item
   const insets = useSafeAreaInsets();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
-  const BOTTOM_TAB_HEIGHT = 65;
+  const BOTTOM_TAB_HEIGHT = Platform.OS === 'ios' ? 85 : 75; // Increased for better clearance of the tab bar
   const ITEM_HEIGHT = useMemo(
-    () => windowHeight - BOTTOM_TAB_HEIGHT - insets.bottom - insets.top,
+    () => windowHeight - BOTTOM_TAB_HEIGHT - (Platform.OS === 'ios' ? insets.bottom : 0) - insets.top,
     [windowHeight, insets.bottom, insets.top]
   );
   const videoHeight = useMemo(() => windowHeight / 3.9, [windowHeight]);
-  // const recommendationRowHeight = useMemo(() => windowHeight * 0.26, [windowHeight]);
-  const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.20 : windowHeight * 0.26, [windowHeight]);
+  const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.22 : windowHeight * 0.28, [windowHeight]);
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [watchNow, setWatchNow] = useState(false);
@@ -1103,8 +1102,8 @@ const MovieDetailScreen = () => {
               </View>
               {item ?
                 (
-                  <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
-                    <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 10 }}>
+                  <View style={{ maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
+                    <View style={{ marginTop: 8 }}>
                       <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
                         {(item?.plot || item?.description) && (
                           <Text style={[styles.description, { marginBottom: 0 }]}>
@@ -1275,13 +1274,13 @@ const MovieDetailScreen = () => {
                 alignItems: 'center',
                 backgroundColor: '#1A1A1A',
                 paddingTop: 14,
-                paddingBottom: 14,
+                paddingBottom: Platform.OS === 'ios' ? (insets.bottom > 0 ? 12 : 24) : 16, // Dynamic padding for home indicator
                 paddingHorizontal: 16,
-                marginTop: 12,
+                marginTop: 8, // Added margin back for better separation
               }}>
                 <View style={{ flex: 1 }}>
-                  <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}>
-                    {t("movieDetail.howDoYouFeel") || "How do you feel about this one?"}
+                  <CustomText size={11} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}  >
+                    {t("movieDetail.howDoYouFeel") || ""}
                   </CustomText>
                   <View style={{ width: '90%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, alignSelf: 'center' }} />
                 </View>

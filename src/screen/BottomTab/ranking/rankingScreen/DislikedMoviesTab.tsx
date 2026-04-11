@@ -140,12 +140,12 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginBottom: 20,
     paddingHorizontal: 4,
+    marginTop: 6
   },
   description: {
-    color: '#A0A0A0',
-    fontSize: 13,
+    color: 'white',
+    fontSize: 12.3,
     fontFamily: font.PoppinsRegular,
-    lineHeight: 20,
   },
   listContent: {
     paddingBottom: 20,
@@ -170,14 +170,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    // backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 12,
     width: 24,
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    // borderWidth: 1,
+    // borderColor: 'rgba(255,255,255,0.3)',
   },
   badgeIcon: {
     width: 14,

@@ -19,7 +19,7 @@ import styles from './style';
 import ProfilePhotoCom from '@components/common/ProfilePhotoCom/ProfilePhotoCom';
 import { getPendingGroupInvites, respondToGroupInvitation } from '@redux/Api/NotificationApi';
 import { RootState } from '@redux/store';
- import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import font from '@theme/font';
 import { appNotification } from '@redux/Api/authService';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -199,7 +199,7 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
               <Text style={styles.buttonText}>{(t("home.accept"))}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.decline} onPress={() => handleDecline(item)}>
-              <Text style={{...styles.buttonText, fontFamily:font.PoppinsMedium}}>{(t("home.decline"))}</Text>
+              <Text style={{ ...styles.buttonText, fontFamily: font.PoppinsMedium }}>{(t("home.decline"))}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -224,8 +224,8 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
         ]}
       >
         <CustomStatusBar />
-        <View style={[styles.headerContainer,{
-          marginTop: Platform.OS === 'ios' ? 55 : 5
+        <View style={[styles.headerContainer, {
+          marginTop: Platform.OS === 'ios' ? 5 : 5
         }]}>
           <View style={styles.headerSide}>
             <TouchableOpacity onPress={onClose}>
