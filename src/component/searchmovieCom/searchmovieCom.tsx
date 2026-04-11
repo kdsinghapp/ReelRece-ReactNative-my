@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,19 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { Color } from '@theme/color';
 import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
 import { toggleBookmark } from '@redux/Api/ProfileApi';
+import { thumbsDownMovie, getThumbsDownMovies, deleteRatedMovie } from '@redux/Api/movieApi';
 import CustomText from '@components/common/CustomText/CustomText';
 import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
 import { t } from 'i18next';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
+import { removeMovieFromSuggestion } from '@redux/feature/rankingSlice';
 
 const SearchMovieCom = ({
   movieData = [],
@@ -39,7 +42,20 @@ const SearchMovieCom = ({
   totalPages = 1,
 }) => {
 
+  const dispatch = useDispatch();
   const compareHook = useCompareComponent(token);
+  const [dislikedIds, setDislikedIds] = useState<Set<string>>(new Set());
+
+  // Fetch initial dislikes
+  useEffect(() => {
+    if (token) {
+      getThumbsDownMovies(token).then(res => {
+        if (Array.isArray(res)) {
+          setDislikedIds(new Set(res.map(m => String(m.imdb_id))));
+        }
+      }).catch(() => { });
+    }
+  }, [token]);
 
   const formattedQuery = movieData.length === 0 ? searchQuery : '';
   const onEndReachedInFlight = useRef(false);

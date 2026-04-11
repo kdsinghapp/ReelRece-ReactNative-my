@@ -493,15 +493,23 @@ const OnboardingScreen = () => {
             onPress={isContinueEnabled ? () => setCurrentPhase('dislike') : () => { }}
             activeOpacity={0.8}
           >
-            <Image
-              source={imageIndex.ranking}
-              style={styles.buttonIcon}
-              resizeMode="contain"
-              tintColor={'#FFF'}
-            />
-            <Text style={styles.buttonText}>
-              {isContinueEnabled ? `Finished (${SLOT_COUNT}/${SLOT_COUNT})` : `Rated (${currentRatedCount}/${SLOT_COUNT})`}
-            </Text>
+            {isContinueEnabled ? (
+              <Text style={styles.buttonText}>
+                {t('common.finished')} ({SLOT_COUNT}/{SLOT_COUNT})
+              </Text>
+            ) : (
+              <View style={styles.buttonContent}>
+                <Image
+                  source={imageIndex.ranking}
+                  style={styles.buttonIcon}
+                  resizeMode="contain"
+                  tintColor={'#FFF'}
+                />
+                <Text style={styles.buttonText}>
+                  Rated ({currentRatedCount}/{SLOT_COUNT})
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -629,7 +637,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   buttonEnabled: {
-    backgroundColor: '#00BFFF',
+    backgroundColor: '#00A8F5',
   },
   buttonDisabled: {
     backgroundColor: '#2E2E2E',
@@ -643,6 +651,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontFamily: font.PoppinsBold,
     fontSize: 16,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   center: {
     flex: 1,

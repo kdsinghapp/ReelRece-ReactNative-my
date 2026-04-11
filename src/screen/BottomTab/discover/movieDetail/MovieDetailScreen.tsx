@@ -1275,7 +1275,7 @@ const MovieDetailScreen = () => {
                 alignItems: 'center',
                 backgroundColor: '#1A1A1A',
                 paddingTop: 14,
-                paddingBottom: Platform.OS === 'ios' ? 20 : 14,
+                paddingBottom: 14,
                 paddingHorizontal: 16,
                 marginTop: 12,
               }}>
@@ -1368,19 +1368,7 @@ const MovieDetailScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              {Platform.OS == 'ios' &&
-                <View style={{ marginBottom: 20, paddingHorizontal: 16 }}>
 
-
-                  {/* <ProgressBar
-                  progress={progress}
-                  onSeek={handleSeek}
-                  onSeekStart={() => setIsSeeking(true)}
-                  onSeekEnd={() => setIsSeeking(false)}
-                /> */}
-
-                </View>
-              }
             </View>
           </View>
 

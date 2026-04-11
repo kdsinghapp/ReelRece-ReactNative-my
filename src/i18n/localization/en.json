@@ -55,7 +55,8 @@
     "reviews": "Reviews",
     "unknown": "Unknown",
     "editField": "Edit Field",
-    "offline": "You're offline now."
+    "offline": "You're offline now.",
+    "finished": "Finished"
   },
   "welcome": {
     "title": "Find Great Shows and Movies in Seconds",

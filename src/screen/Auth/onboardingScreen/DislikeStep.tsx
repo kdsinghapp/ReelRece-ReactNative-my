@@ -45,14 +45,15 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
       try {
         const [hubMovies, existingDislikes] = await Promise.all([
           getHubMovies(token),
-          getThumbsDownMovies(token)
+          getThumbsDownMovies(token),
         ]);
-        // Filter out movies with no poster image
-        const filteredHubMovies = Array.isArray(hubMovies) 
-          ? hubMovies.filter((m: Movie) => !!m.cover_image_url).slice(0, 18)
+
+        // Take exactly 18 movies from hub
+        const moviesToDisplay = Array.isArray(hubMovies)
+          ? hubMovies.slice(0, 18)
           : [];
 
-        setMovies(filteredHubMovies);
+        setMovies(moviesToDisplay);
         setDislikedIds(new Set(existingDislikes.map(m => m.imdb_id)));
       } catch (error) {
         console.error("Failed to fetch dislike screen data:", error);
@@ -99,27 +100,41 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
   const renderItem = ({ item }: { item: Movie }) => {
     const isDisliked = dislikedIds.has(item.imdb_id);
+    const hasImage = !!item.cover_image_url;
+
     return (
       <TouchableOpacity
-        style={styles.dislikeGridItem}
-        onPress={() => toggleDislike(item)}
-        activeOpacity={0.9}
+        style={[styles.dislikeGridItem, !hasImage && styles.noImageItem]}
+        onPress={() => hasImage && toggleDislike(item)}
+        activeOpacity={hasImage ? 0.9 : 1}
+        disabled={!hasImage}
       >
-        <FastImage
-          source={{ uri: item.cover_image_url }}
-          style={styles.gridPoster}
-          resizeMode={FastImage.resizeMode.stretch}
-        />
-        <View style={[styles.dislikeIconBadge,
-          // isDisliked && styles.dislikeIconBadgeActive
-        ]}>
-          <Image
-            source={isDisliked ? imageIndex.dislike1 : imageIndex.thumpDown}
-            style={[styles.dislikeSmallIcon,
-              // { tintColor: isDisliked ? '#FF3B30' : '#FFF' }
-            ]}
+        {hasImage ? (
+          <FastImage
+            source={{ uri: item.cover_image_url }}
+            style={styles.gridPoster}
+            resizeMode={FastImage.resizeMode.stretch}
           />
-        </View>
+        ) : (
+          <View style={styles.noImagePlaceholder}>
+            <Text style={styles.noImageText}>No Image</Text>
+          </View>
+        )}
+
+        {hasImage && (
+          <View style={[
+            styles.dislikeIconBadge,
+
+          ]}>
+            <Image
+              source={isDisliked ? imageIndex.dislike1 : imageIndex.thumpDown}
+              style={[
+                styles.dislikeSmallIcon,
+                isDisliked && { tintColor: 'white' }
+              ]}
+            />
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -136,8 +151,8 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
     <SafeAreaView style={styles.root} edges={['top']}>
       <View style={styles.dislikeContainer}>
         <View style={styles.dislikeHeader}>
-          <TouchableOpacity 
-            style={styles.skipContainer} 
+          <TouchableOpacity
+            style={styles.skipContainer}
             onPress={onNext}
           >
             <Text style={styles.skipText}>Skip</Text>
@@ -145,9 +160,14 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
           <Image source={imageIndex.appLogo} style={styles.dislikeLogo} resizeMode="contain" />
           <Text style={styles.dislikeTitle}>Skip the stuff you’d never watch</Text>
-          <Text style={styles.dislikeSubtitle}>
-            If anything here isn't for you, tap <Image source={imageIndex.thumpDown} style={styles.inlineDislikeIcon} />.
-          </Text>
+          <View style={styles.subTextContainer}>
+            <Text style={styles.dislikeSubtitle}>
+              If anything here isn't for you, tap
+            </Text>
+            <Image source={imageIndex.thumpDown} style={[styles.inlineDislikeIcon, {
+              tintColor: "white"
+            }]} />
+          </View>
           <Text style={styles.dislikeSubtitles}>
             Dislikes sharpen your recommendations even more than likes do.
           </Text>
@@ -165,9 +185,10 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
         <View style={styles.dislikeBottomBtn}>
           <Button
-            title={t('login.next')}
+            title={"Next"}
             onPress={onNext}
             buttonStyle={styles.nextButtonBlue}
+            textStyle={styles.nextButtonText}
           />
         </View>
       </View>
@@ -203,17 +224,23 @@ const styles = StyleSheet.create({
   },
   dislikeTitle: {
     color: '#FFF',
-    fontSize: 16,
-    fontFamily: font.PoppinsSemiBold,
+    fontSize: 22,
+    fontFamily: font.PoppinsBold,
     textAlign: 'center',
-    // marginBottom: 8,
+    marginBottom: 8,
+  },
+  subTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginBottom: 4,
   },
   dislikeSubtitle: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: font.PoppinsRegular,
     textAlign: 'center',
-    lineHeight: 20,
   },
   dislikeSubtitles: {
     color: '#A0A0A0',
@@ -258,25 +285,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     right: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    // backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     width: 24,
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
+    // borderWidth: 1,
+    // borderColor: 'rgba(255,255,255,0.3)',
   },
   dislikeIconBadgeActive: {
     backgroundColor: 'rgba(255,59,48,0.2)',
     borderColor: '#FF3B30',
   },
   dislikeSmallIcon: {
-    width: 14,
-    height: 14,
+    width: 15,
+    height: 15,
   },
   dislikeListContent: {
-    paddingBottom: 100,
+    paddingHorizontal: 4,
+    paddingBottom: 120,
+  },
+  noImageItem: {
+    backgroundColor: '#1A1A1A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noImagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noImageText: {
+    color: '#666',
+    fontSize: 10,
+    fontFamily: font.PoppinsMedium,
   },
   dislikeBottomBtn: {
     position: 'absolute',
@@ -287,5 +329,10 @@ const styles = StyleSheet.create({
   nextButtonBlue: {
     backgroundColor: '#00A8F5',
     borderRadius: 8,
+    height: 54,
+  },
+  nextButtonText: {
+    fontFamily: font.PoppinsBold,
+    fontSize: 16,
   },
 });

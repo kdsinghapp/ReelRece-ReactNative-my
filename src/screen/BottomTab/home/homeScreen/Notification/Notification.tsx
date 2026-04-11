@@ -225,7 +225,8 @@ const Notification = ({ visible, onClose, bgColor, onInteraction }: { visible: b
       >
         <CustomStatusBar />
         <View style={[styles.headerContainer,{
-         }]}>
+          marginTop: Platform.OS === 'ios' ? 55 : 5
+        }]}>
           <View style={styles.headerSide}>
             <TouchableOpacity onPress={onClose}>
               <Image source={imageIndex.backArrow} style={styles.icon} resizeMode="contain" />
