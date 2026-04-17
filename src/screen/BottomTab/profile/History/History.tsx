@@ -9,8 +9,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
 import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { getRatedMovies } from '@redux/Api/movieApi';
@@ -81,7 +80,7 @@ const OtherWatchingProfile = () => {
   };
 
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
@@ -112,7 +111,6 @@ const OtherWatchingProfile = () => {
     return (
       <View style={[styles.movieCard, { paddingHorizontal: 0 }]} >
         <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} >
-          {/* <Image source={{ uri: item?.cover_image_url }} style={styles.poster} /> */}
           <FastImage
             style={styles.poster}
             source={{
@@ -127,9 +125,7 @@ const OtherWatchingProfile = () => {
         <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.info}>
           <View style={{ flexDirection: "row", }}>
             <Text numberOfLines={2} style={[styles.title]}>{item?.title}</Text>
-            {/* <Text  style={[styles.title]}>"ffgefrgdf gdf gdfg dfffeffffaffsdfsfff gdf g df gdfgdf g df</Text> */}
-
-
+             
           </View>
           <Text style={styles.year}>{item?.release_year}</Text>
 
@@ -252,7 +248,7 @@ const OtherWatchingProfile = () => {
           contentContainerStyle={{ paddingBottom: 70, marginHorizontal: 18, marginTop: 50 }}
         />
       </View>
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
       {!disableBottomSheet && (
         <BottomSheet
           visible={bottomModal}
@@ -262,7 +258,7 @@ const OtherWatchingProfile = () => {
           onSelect={(option) => option.action()}
         />
       )}
-      {/* <CompareModals token={token} useCompareHook={compareHook} /> */}
+      {/*  */}
     </SafeAreaView>
   );
 };

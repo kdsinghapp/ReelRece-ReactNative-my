@@ -11,6 +11,10 @@ import { loginSuccess } from '@redux/feature/authSlice';
 import { BackHandler } from 'react-native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { t } from 'i18next';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IS_NEW_USER_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
+
 const useSignup = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState('');
@@ -52,22 +56,26 @@ const useSignup = () => {
   const handlePassText = (value: string) => {
     setPassword(value);
     if (!value.trim()) {
-      setPasswordError(t('errorMessage.password'))
+      setPasswordError(t('errorMessage.password'));
     } else if (value.length < 6) {
-      setPasswordError(t('errorMessage.invalidPassword'))
+      setPasswordError(t('errorMessage.invalidPassword'));
     } else {
       setPasswordError('');
     }
   };
 
+  useEffect(() => {
+    if (confirmPassword && password !== confirmPassword) {
+      setConfirmPasswordError(t('errorMessage.passwordsmatch'));
+    } else if (confirmPassword && password === confirmPassword) {
+      setConfirmPasswordError('');
+    }
+  }, [password, confirmPassword]);
+
   const handleConfirmPassText = (value: string) => {
     setConfirmPassword(value);
     if (!value.trim()) {
-      setConfirmPasswordError(t('errorMessage.confirmpasswordrequired'))
-    } else if (value !== password) {
-      setConfirmPasswordError(t('errorMessage.passwordsmatch'))
-    } else {
-      setConfirmPasswordError('');
+      setConfirmPasswordError(t('errorMessage.confirmpasswordrequired'));
     }
   };
 
@@ -108,28 +116,32 @@ const useSignup = () => {
 
     // ✅ Step 1: Validate fields
     if (!trimmedEmail) {
-      setEmailError(t('errorMessage.email'))
+      setEmailError(t('errorMessage.email'));
+      Toast.show({ type: 'error', text1: t('errorMessage.email') });
       return;
     } else if (!emailRegex.test(trimmedEmail)) {
-      setEmailError(t('errorMessage.requiredemail'))
+      setEmailError(t('errorMessage.requiredemail'));
+      Toast.show({ type: 'error', text1: t('errorMessage.requiredemail') });
       return;
     }
 
     if (!trimmedPassword) {
-      setPasswordError(t('errorMessage.password_required'))
-
+      setPasswordError(t('errorMessage.password_required'));
+      Toast.show({ type: 'error', text1: t('errorMessage.password_required') });
       return;
     } else if (trimmedPassword.length < 6) {
-      setPasswordError(t('errorMessage.invalidPassword'))
+      setPasswordError(t('errorMessage.invalidPassword'));
+      Toast.show({ type: 'error', text1: t('errorMessage.invalidPassword') });
       return;
     }
 
     if (!confirmPassword.trim()) {
-      setConfirmPasswordError(t('errorMessage.confirmpasswordrequired'))
+      setConfirmPasswordError(t('errorMessage.confirmpasswordrequired'));
+      Toast.show({ type: 'error', text1: t('errorMessage.confirmpasswordrequired') });
       return;
-    } else if (confirmPassword !== trimmedPassword) {
-      setConfirmPasswordError(t('errorMessage.passwordsmatch'))
-
+    } else if (confirmPassword !== password) {
+      setConfirmPasswordError(t('errorMessage.passwordsmatch'));
+      Toast.show({ type: 'error', text1: t('errorMessage.passwordsmatch') });
       return;
     }
 
@@ -187,11 +199,15 @@ const useSignup = () => {
       }
       
       const result = await signupWithUsername(email, password, trimmedUsername);
-
+      
       if (!result?.success) {
         Toast.show({ type: 'error', text1: 'Username already exists' });
         return;
       }
+
+      // ✅ Flag this as a new signup for onboarding tooltips
+      await AsyncStorage.setItem(IS_NEW_USER_KEY, 'true');
+
       const tokenResponse = await loginUser_Api(email, password);
       const token = tokenResponse?.data;
       if (token) {

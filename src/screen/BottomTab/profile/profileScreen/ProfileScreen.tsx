@@ -48,8 +48,7 @@ const ProfileScreen = () => {
   const restoredRef = useRef(false);
   const {
     loading,
-    userProfile,
-    // userProfileDate,
+    userProfile, 
     getAgain,
     refetchUserProfile,
     setGetAgain
@@ -77,7 +76,7 @@ const ProfileScreen = () => {
   const [imageLoading, setImageLoading] = useState(true);
   // scroll
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [playIndex, setPlayIndex] = useState<number | null>(null); // this controls when to autoplay after 2 seconds
+  const [playIndex, setPlayIndex] = useState<number | null>(null); 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
   const lastPlayedIndexRef = useRef<number | null>(null);

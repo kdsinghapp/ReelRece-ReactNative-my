@@ -1,6 +1,7 @@
 export default {
   // welcome: require('./images/welcome.png'),
   appLogo: require('./images/appLogo.png'),
+  appLogowithName: require('./images/appLogowithName.png'),
   eyes: require('./images/eyes.png'),
   fb: require('./images/fb.png'),
   apple: require('./images/apple.png'),

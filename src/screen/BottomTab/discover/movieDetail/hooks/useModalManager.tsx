@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
-/**
- * Custom hook for managing all modal states in MovieDetailScreen
- */
+
 export const useModalManager = () => {
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);

@@ -19,8 +19,7 @@ import font from '@theme/font';
 import { toggleBookmark } from '@redux/Api/ProfileApi';
 import { thumbsDownMovie, getThumbsDownMovies, deleteRatedMovie } from '@redux/Api/movieApi';
 import CustomText from '@components/common/CustomText/CustomText';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../context/CompareContext';
 import { t } from 'i18next';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { removeMovieFromSuggestion } from '@redux/feature/rankingSlice';
@@ -43,7 +42,7 @@ const SearchMovieCom = ({
 }) => {
 
   const dispatch = useDispatch();
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const [dislikedIds, setDislikedIds] = useState<Set<string>>(new Set());
 
   // Fetch initial dislikes
@@ -320,7 +319,7 @@ const SearchMovieCom = ({
           </Text>
         </View>
       )}
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
     </View>
   );
 };

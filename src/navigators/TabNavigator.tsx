@@ -62,7 +62,7 @@ export default function TabNavigator() {
       hideSub.remove();
     };
   }, []);
- 
+
   const tabConfig = useMemo(
     () => ({
       hideTabBarOnRoutes: [ScreenNameEnum.WoodsScreen],
@@ -106,7 +106,7 @@ export default function TabNavigator() {
   return (
     <View style={{ flex: 1, backgroundColor: Color.background }}>
       <Tab.Navigator
-        initialRouteName={ScreenNameEnum.RankingTab}
+        initialRouteName={ScreenNameEnum.FeedTab}
         lazy
         detachInactiveScreens
         screenOptions={{

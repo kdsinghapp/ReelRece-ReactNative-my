@@ -5,8 +5,7 @@ import { useRoute } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
 import { getOtherUserBookmarks,   } from '@redux/Api/ProfileApi';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import { getCommonBookmarks } from '@redux/Api/movieApi';
 import FastImage from 'react-native-fast-image';
@@ -100,7 +99,7 @@ const OtherWantProfile = () => {
       { name: t("common.cancel"), action: () => setBottomModal(false) }
     ];
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
@@ -251,7 +250,7 @@ const isOnline = useNetworkStatus();
           onSelect={(option) => option.action()}
         />
       )}
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
     </SafeAreaView>
   );
 };

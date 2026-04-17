@@ -25,8 +25,7 @@ import { toggleMute } from '@redux/feature/videoAudioSlice';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
 import { invalid } from 'moment'
 import { styles } from './FeedCardstyle';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../context/CompareContext';
 import CustomText from '@components/common/CustomText/CustomText';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
@@ -140,7 +139,7 @@ const FeedCardHome = ({
     }
   }, [paused, invalid]);
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
@@ -306,6 +305,9 @@ const FeedCardHome = ({
           </TouchableOpacity>
         </View>
       )}
+
+
+
       <View style={styles.feedHeader}>
         <TouchableOpacity
           activeOpacity={1}
@@ -323,13 +325,15 @@ const FeedCardHome = ({
 
           />
         </TouchableOpacity>
+
+
+
+
         <TouchableOpacity
           activeOpacity={1}
-
           style={{ flex: 1, flexDirection: "row", alignItems: "center", }}
           onPress={() => {
-            handleNavigation(imdb_id, token);
-
+            handleNavigation(imdb_id, token)
           }}
         >
           <View style={{ flex: 1, paddingRight: 10 }}>
@@ -340,7 +344,7 @@ const FeedCardHome = ({
             >{user}
               <CustomText
                 size={13}
-                style={[styles.rankedText, {color: Color.subText}]}
+                style={[styles.rankedText, { color: Color.subText }]}
                 font={font.PoppinsRegular}
               >
                 {getActionLabel()}
@@ -357,7 +361,6 @@ const FeedCardHome = ({
               numberOfLines={2}
             >{title}</CustomText>
 
-            {/* <Text >Today</Text> */}
             <CustomText
               size={12}
               color={Color.textGray}
@@ -365,43 +368,40 @@ const FeedCardHome = ({
               font={font.PoppinsRegular}
             >{created_date}</CustomText>
           </View>
-          {/* FRIEND SCORE → ONLY WHEN RANK EXISTS */}
-          {hasRank && (
+          {/* {hasRank && (
             <TouchableOpacity
               activeOpacity={1}
-
-              style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
-
+              style={{ alignSelf: 'flex-start' }} 
+              onPress={() => {
+                setShowFirstModal(!showFirstModal)
+              }} 
+              >
               <RankingWithInfo
                 score={ranked}
                 title={scoreType === "Rec" ? "Rec Score" : t("discover.friendscore")}
                 description={
-                  scoreType === "Rec"
-                    ? t("discover.recscoredes")
-
-                    // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                    : t("discover.frienddes")
-                  // "This score shows the rating from your friend for this title."
+                  scoreType === "Rec"? t("discover.recscoredes") : t("discover.frienddes")
                 }
               />
             </TouchableOpacity>
-          )}
-
-          {/* <TouchableOpacity style={{ alignSelf: 'flex-start' }} onPress={() => setShowFirstModal(!showFirstModal)} >
-
-            <RankingWithInfo
-              score={ranked}
-              title={scoreType === "Rec" ? "Rec Score" : "Friend Score"}
-              description={
-                scoreType === "Rec"
-                  ? "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
-                  : "This score shows the rating from your friend for this title."
-              }
-            />
-          </TouchableOpacity> */}
+          )} */}
+          <RankingWithInfo
+            score={ranked}
+            title={scoreType === "Rec" ? "Rec Score" : t("discover.friendscore")}
+            description={
+              scoreType === "Rec" ? t("discover.recscoredes") : t("discover.frienddes")
+            }
+          />
 
         </TouchableOpacity>
+
+
+
+
       </View>
+
+
+
 
       {(comment ?? '').trim() !== '' && (
         <View style={styles.feedComment}>
@@ -606,14 +606,10 @@ const FeedCardHome = ({
         onClose={() => setShowFirstModal(false)}
         variant="second"
       />
-      <CompareModals token={token} useCompareHook={compareHook} />
     </View>
   );
 };
 
-
-
-// export default FeedCard;
 export default React.memo(FeedCardHome);
 
 

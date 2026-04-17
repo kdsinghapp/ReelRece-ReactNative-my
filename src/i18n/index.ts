@@ -10,14 +10,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "en",            // default
+    lng: "en", 
     fallbackLng: "en",
     interpolation: { escapeValue: false },
 
      returnNull: false,
     returnEmptyString: false,
-
-    // Optional: logs missing keys in dev
     saveMissing: __DEV__,
     missingKeyHandler: __DEV__
       ? (_lng, _ns, key) => console.log("[i18n missing key]", key)

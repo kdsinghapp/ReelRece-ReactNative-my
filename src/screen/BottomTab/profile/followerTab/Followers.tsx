@@ -236,8 +236,7 @@ const Followers = () => {
     if (!hasMore && activeUsers.length > 0) {
       return (
         <View style={{ paddingVertical: 16, alignItems: 'center' }}>
-          <Text style={{ color: Color.textGray }}>
-            {/* {t('discover.noMore') || 'No more'} */}
+          <Text style={{ color: Color.textGray }}> 
           </Text>
         </View>
       );
@@ -254,7 +253,6 @@ const Followers = () => {
 
       <TouchableOpacity
         style={[styles.followprimary, item.following && styles.followingprimary]}
-        // onPress={() => toggleFollow(item.id)}
         onPress={() => toggleFollow(item?.username)}
       >
         <Text style={[styles.followText, item?.following && styles.followingText]}>

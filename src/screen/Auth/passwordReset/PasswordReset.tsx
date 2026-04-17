@@ -50,20 +50,11 @@ export default function PasswordReset() {
           <View
             style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}
           >
-            <Image
-              source={imageIndex.appLogo}
-              style={styles.imgLogo}
-              resizeMode="contain"
+        <Image
+              source={imageIndex.appLogowithName}
+              style={styles.imgLogo} resizeMode='contain'
             />
-             <Image
-                         source={imageIndex.reelRecs}
-                         style={{
-                       height: 18,
-               width: 95,
-               marginTop: 6,
-               resizeMode: 'contain', // important for proper image fit
-                         }}  
-                       />
+           
             {/* <Text style={styles.txtHeading}>ReelRecs</Text> */}
           </View>
 

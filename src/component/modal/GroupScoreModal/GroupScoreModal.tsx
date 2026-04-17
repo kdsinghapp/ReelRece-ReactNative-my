@@ -7,9 +7,7 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import imageIndex from '@assets/imageIndex';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
-import { followUser, unfollowUser } from '@redux/Api/followService';
 import FastImage from 'react-native-fast-image';
-import RNFS from 'react-native-fs';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { t } from 'i18next';
@@ -38,8 +36,8 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
   const navigation = useNavigation();
   const [searchText, setSearchText] = useState('');
   const ProfileUserName = useSelector((state: RootState) => state.auth.userGetData?.username);
-  const [members, setMembers] = useState([]);
-  const [loadingUsername, setLoadingUsername] = useState<string | null>(null);
+  const [members, setMembers] = useState([]); 
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     // setMembers(groupMembers)
     getMembersScrocedata()
@@ -50,44 +48,17 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
   );
   const currentUser = filteredMembers?.find(member => member?.username === ProfileUserName);
   const otherUsers = filteredMembers?.filter(member => member?.username !== ProfileUserName);
-  const toggleFollow = async (username: string) => {
-    setLoadingUsername(username)
-    try {
 
-      const isFollowing = members.find(m => m?.username === username)?.following;
-
-      // API call
-      if (isFollowing) {
-        await unfollowUser(token, username);
-      } else {
-        await followUser(token, username);
-      }
-
-      // ui update
-      const updatedMembers = members.map(member =>
-        member.username === username
-          ? { ...member, following: !member.following }
-          : member
-      );
-
-      setMembers(updatedMembers);
-    } catch (err) {
-    } finally {
-      setLoadingUsername(null); // ✅ reset
-
-    }
-  };
   const getMembersScrocedata = async () => {
-    // const imdb_id = groupRecommend[activeIndex]?.imdb_id
-    //  setScoreMovieRank(movie_ranked)
-    // setthinkModal(true);
     try {
+      setLoading(true)
       const response = await getMembersScores(token, groupId, imdb_id)
 
-      const filteredResults = response?.results?.filter(member => member?.preference !== undefined);
+      const filteredResults = response?.results || [];
       if (filteredResults) {
         setMembers(filteredResults)
       }
+      setLoading(false)
     } catch (error) {
       throw error
     }
@@ -145,8 +116,6 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                   disabled
                 // onPress={() => groupScoreModalFunc({ imdb_id: imdbId })}
                 >
-                  {/* <Image source={imageIndex.puased} style={styles.watchNowImg} /> */}
-
                   <RankingWithInfo
                     score={groupScore}
                     title={t("discover.groupScore")}
@@ -157,24 +126,11 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                     {t("discover.groupScore")}
                   </CustomText>
                 </TouchableOpacity>
-                {/* <View style={styles.searchContaainer} >
-                  <Image source={imageIndex.search} resizeMode='contain' style={{ height: 20, width: 20, marginRight: 6, }} />
-                  <TextInput
-                    placeholder="Search members"
-                    placeholderTextColor={Color.placeHolder}
-                    style={styles.searchInput}
-                    value={searchText}
-                    onChangeText={setSearchText}
-                  />
-                  <TouchableOpacity onPress={() => setSearchText('')} >
-                    {searchText.length > 0 && <Image source={imageIndex.closeimg} resizeMode='contain' style={{ height: 18, width: 18, }} />}
 
-                  </TouchableOpacity>
-                </View> */}
                 <View style={{ height: 1, backgroundColor: '#fff', marginBottom: 15 }}></View>
                 <View style={styles.listContainer}>
 
-                  {currentUser && (
+                  {!loading && currentUser && (
                     <View style={styles.memberItem}>
                       <View style={{ marginRight: 12 }}>
                         <View style={styles.avatarContainer}>
@@ -212,12 +168,13 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                         score={currentUser?.rec_score ?? '?'}
                         title={t("discover.recscore")}
                         description={t("discover.recscoredes")}
-                      // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
                       />
                     </View>
                   )}
-
-                  {otherUsers?.length > 0 ? (
+                  {loading ? (
+                    <ActivityIndicator size="large" color={Color.primary} style={{ marginTop: 20 }} />
+                  ) : otherUsers?.length > 0 ? (
+                    // {otherUsers?.length > 0 ? (
                     <FlatList
                       data={otherUsers}
                       keyExtractor={(item) => item.username}
@@ -236,8 +193,7 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                             >
                               <View style={styles.avatarContainer}>
 
-                                {/* <Image source={{ uri: `${BASE_IMAGE_URL}${item.avatar}` }} style={styles.avatar} /> */}
-
+                              
                                 <FastImage
                                   style={styles.avatar}
                                   source={{
@@ -261,17 +217,12 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                               {item?.is_admin && <Text style={[styles.memberName, { color: 'grey' }]}>{"(Group Owner)"}</Text>
                               }
                             </View>
-
-
-
                             <RankingWithInfo
                               score={item?.rec_score ?? '?'}
                               title={t("discover.groupScore")}
                               description={t("discover.recscoredes")}
                             // "This score predicts how much you'll enjoy this movie/show, based on your ratings and our custom algorithm."
                             />
-
-
                           </View>
                         )
                       }}
@@ -289,8 +240,6 @@ const GroupScoreModal: React.FC<GroupScoreModalProps> = ({ visible,
                     </View>
                   )}
                 </View>
-
-
               </View>
             </View>
           </KeyboardAvoidingView>
@@ -463,13 +412,6 @@ const styles = StyleSheet.create({
 
     lineHeight: 16,
   },
-
-
-
-
-
-
-
 });
 
 export default GroupScoreModal;

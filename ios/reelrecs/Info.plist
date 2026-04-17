@@ -69,6 +69,34 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1001335650941-anfmlqsqkfhtvnemkmhus2juhna580g7</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1317073226529520</string>
+			</array>
+		</dict>
+	</array>
+	<key>FacebookAppID</key>
+	<string>1317073226529520</string>
+	<key>FacebookClientToken</key>
+	<string>1a69e6ca4a5083c5c8ec3551d7e2a814</string>
+	<key>FacebookDisplayName</key>
+	<string>ReelRecs</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to the camera to scan QR codes.</string>
 	<key>NSFileProviderDomainUsageDescription</key>

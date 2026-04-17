@@ -10,7 +10,7 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
- 
+
 import imageIndex from '@assets/imageIndex';
 import styles from './style';
 import ScreenNameEnum from '@routes/screenName.enum';
@@ -21,17 +21,13 @@ import HorizontalMovieList from '@components/common/HorizontalMovieList/Horizont
 import { getMatchingMovies, getRecentActiveUsers } from '@redux/Api/ProfileApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
- import useUserFeed from '@components/card/feedCard/useUserFeed';
+import useUserFeed from '@components/card/feedCard/useUserFeed';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
- import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
- import MemoFeedCard from '@components/card/feedCard/MemoFeedCard';
+import MemoFeedCard from '@components/card/feedCard/MemoFeedCard';
 import CustomText from '@components/common/CustomText/CustomText';
 import font from '@theme/font';
-import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
-import LinearGradient from 'react-native-linear-gradient';
-import FastImage from 'react-native-fast-image';
-import { homeDiscoverApi, Trending_without_Filter } from '@redux/Api/movieApi'; 
-import { SafeAreaView } from 'react-native-safe-area-context'; 
+import { homeDiscoverApi } from '@redux/Api/movieApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { ComparisonModal, CustomStatusBar } from '@components/index';
@@ -39,7 +35,7 @@ import { t } from 'i18next';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 
 const FixedHomeScreen = () => {
-  const token = useSelector((state: RootState) => state.auth.token); 
+  const token = useSelector((state: RootState) => state.auth.token);
   const autoPlayEnabled = useSelector(
     (state: RootState) => state.auth.userGetData?.autoplay_trailer ?? true
   );
@@ -66,10 +62,10 @@ const FixedHomeScreen = () => {
   const [trendingData, setTrendingData] = useState([]);
   const [recommendData, setRecommendData] = useState([]);
   const [bookmarkData, setBookmarkData] = useState([]);
-  const [hasScrolled, setHasScrolled] = useState(false); 
-  const [playIndex, setPlayIndex] = useState<number | null>(null); 
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [playIndex, setPlayIndex] = useState<number | null>(null);
   const [currentVisibleIndex, setCurrentVisibleIndex] = useState(0);
-  const [refreshing, setRefreshing] = useState(false); 
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(true);
   const [loadingBookmark, setLoadingBookmark] = useState(true);
@@ -85,7 +81,7 @@ const FixedHomeScreen = () => {
 
   const fetchInitialData = async () => {
     if (!token) {
-       Alert.alert('Debug', 'No token available');
+      Alert.alert('Debug', 'No token available');
       return;
     }
 
@@ -110,12 +106,12 @@ const FixedHomeScreen = () => {
         bookmarksCount: bookmarks?.results?.length || bookmarks?.movies?.length || 0,
       };
 
- 
- 
+
+
       // Log first item to see structure
       if (trending?.results?.[0]) {
-       } else if (trending?.movies?.[0]) {
-       }
+      } else if (trending?.movies?.[0]) {
+      }
 
       // FIXED: Use correct response structure based on actual API response
       // Check both .results and .movies properties
@@ -124,7 +120,7 @@ const FixedHomeScreen = () => {
       setRecommendData(recommend?.results || recommend?.movies || []);
       setBookmarkData(bookmarks?.results || bookmarks?.movies || []);
     } catch (error) {
-       // Show error in alert
+      // Show error in alert
       Alert.alert('API Error', `${error?.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
@@ -308,7 +304,7 @@ const FixedHomeScreen = () => {
       return (
         <View style={{ paddingVertical: 20, paddingBottom: 90 }}>
           <Text style={{ textAlign: "center", color: "gray" }}>
-                 {t("emptyState.nodata",)}
+            {t("emptyState.nodata",)}
           </Text>
         </View>
       );
@@ -316,7 +312,7 @@ const FixedHomeScreen = () => {
 
     return <FeedCardShimmer />;
   }, [loadingFeed, loadingMore, hasMore, feedData.length]);
- const isOnline = useNetworkStatus();
+  const isOnline = useNetworkStatus();
   return (
     <SafeAreaView style={styles.container} edges={isOnline ? ['left', 'right'] : []}>
       <CustomStatusBar />
@@ -334,7 +330,7 @@ const FixedHomeScreen = () => {
             style={styles.logo}
             font={font.PoppinsMedium}
           >
-               {t("login.appText",)}
+            {t("login.appText",)}
           </CustomText>
         </View>
 

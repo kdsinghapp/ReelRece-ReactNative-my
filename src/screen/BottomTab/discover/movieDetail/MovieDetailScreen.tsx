@@ -25,8 +25,7 @@ import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY, IS_NEW_USER_KEY } from '@
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
 import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction, Trending_without_Filter, searchMovies } from '@redux/Api/movieApi';
 import { getMatchingMovies } from '@redux/Api/ProfileApi';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import { useTrailerTracker } from '@hooks/useTrailerTracker';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -44,6 +43,8 @@ import imageIndex from '@assets/imageIndex';
 import MovieDetailsShimmer from '@components/MovieDetailsShimmer/MovieDetailsShimmer';
 import { t } from 'i18next';
 import type { Platform as StreamingPlatform, MovieMetadata } from '../../../../types/api.types';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
 
 const CommentModal = React.lazy(() =>
   import('@components/modal/comment/CommentModal')
@@ -146,13 +147,17 @@ const MovieDetailScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(1); // Start at the middle item
   const insets = useSafeAreaInsets();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
-  const BOTTOM_TAB_HEIGHT = Platform.OS === 'ios' ? 85 : 75; // Increased for better clearance of the tab bar
+  // const BOTTOM_TAB_HEIGHT = 65;
+  const BOTTOM_TAB_HEIGHT = useBottomTabBarHeight();
+  console.log(BOTTOM_TAB_HEIGHT, 'abc')
   const ITEM_HEIGHT = useMemo(
-    () => windowHeight - BOTTOM_TAB_HEIGHT - (Platform.OS === 'ios' ? insets.bottom : 0) - insets.top,
+    () => windowHeight - BOTTOM_TAB_HEIGHT - insets.top - (Platform.OS == "ios" ? insets.bottom + 40 : insets.bottom > 50 ? insets.bottom + 45 : insets.bottom + 10),
     [windowHeight, insets.bottom, insets.top]
   );
   const videoHeight = useMemo(() => windowHeight / 3.9, [windowHeight]);
-  const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.22 : windowHeight * 0.28, [windowHeight]);
+  // const recommendationRowHeight = useMemo(() => windowHeight * 0.26, [windowHeight]);
+  const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.22 : windowHeight * 0.28 - insets.bottom, [windowHeight]);
+
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [watchNow, setWatchNow] = useState(false);
@@ -181,6 +186,7 @@ const MovieDetailScreen = () => {
   const [modalMovieId, setModalMovieId] = useState<string | null>(null);
   const [titleLinesMap, setTitleLinesMap] = useState<Record<number, number>>({});
   const dispatch = useDispatch()
+  const compareHook = useCompareContext();
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -648,27 +654,28 @@ const MovieDetailScreen = () => {
     return `${minutes}m`;
   }, []);
 
-  const compareHook = useCompareComponent(token, {
-    onRatingSuccess: () => {
-      setMovieData((prev) => {
-        const next = [...prev];
-        const item = next[currentIndex];
-        if (item && typeof item === 'object') {
-          next[currentIndex] = {
-            ...item,
-            has_rated: true,
-            preference: compareHook.userPreference.preference
-          };
-        }
-        return next;
-      });
-    }
-  });
   const isFeedbackModal = compareHook.isFeedbackVisible;
   const isComparisonVisible = compareHook.isComparisonVisible;
 
   const handleRankingPress = (movie) => {
-    compareHook.openFeedbackModal(movie);
+    compareHook.openFeedbackModal(movie, undefined, {
+      onModalClose: () => {
+        if (movieData[currentIndex]) {
+          has_rated_ref.current = true;
+          setHasRatedForCommentModal(true);
+        }
+      },
+      onReviewAdded: (imdb_id) => {
+        setMovieData((prev) => {
+          const next = [...prev];
+          const idx = next.findIndex((m) => m?.imdb_id === imdb_id);
+          if (idx >= 0 && next[idx] && typeof next[idx] === 'object') {
+            next[idx] = { ...next[idx], n_comments: (next[idx].n_comments ?? 0) + 1 };
+          }
+          return next;
+        });
+      }
+    });
   };
 
   useEffect(() => {
@@ -838,8 +845,7 @@ const MovieDetailScreen = () => {
   // Render movie item
   const renderMovieDetail = useCallback(
     ({ item, index }) => {
-      if (item) {
-      }
+
       if (!item) {
         return renderShimmerEffect();
       }
@@ -1035,24 +1041,19 @@ const MovieDetailScreen = () => {
 
                 <TouchableOpacity style={[styles.scoreBoxGreen, {
                 }]}
-                  //  onPress={() => setShowSecondModal(true)}
-
                   disabled={true}
                 >
-                  {/* <RankingCard ranked={item?.friends_rec_score} /> */}
                   <View style={{}} >
 
                     <RankingWithInfo
                       score={item?.friends_rec_score == null || Number(item?.friends_rec_score) <= 0 ? 'N/A' : Number(item.friends_rec_score)}
                       title={t("discover.friendscore")}
-                      // description=
-                      // {t("discover.ratingscoreshows")}
                       description={
                         item?.friends_rec_score === null ||
                           item?.friends_rec_score === -1 ||
                           item?.friends_rec_score === 0
                           ? t("discover.nofrienddes")
-                          : t("discover.frienddes")
+                          : t("discover.frienddes1")
                       }
                     // "This score shows the rating from your friend for this title."
                     />
@@ -1071,9 +1072,7 @@ const MovieDetailScreen = () => {
                 <View style={styles.actionRow}>
                   <TouchableOpacity
                     style={{ flexDirection: "row", alignItems: "center", marginRight: 12 }}
-                    // onPress={showCommenRankingCheck}
                     onPress={() => setthinkModal(true)}
-                  // onPress={handleOpenCommentModal}
                   >
                     <Image source={imageIndex.mess} style={{ height: 20, width: 20 }} resizeMode='contain' />
                     {item?.n_comments > 0 && (
@@ -1102,8 +1101,8 @@ const MovieDetailScreen = () => {
               </View>
               {item ?
                 (
-                  <View style={{ maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
-                    <View style={{ marginTop: 8 }}>
+                  <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
+                    <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 10 }}>
                       <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
                         {(item?.plot || item?.description) && (
                           <Text style={[styles.description, { marginBottom: 0 }]}>
@@ -1274,13 +1273,13 @@ const MovieDetailScreen = () => {
                 alignItems: 'center',
                 backgroundColor: '#1A1A1A',
                 paddingTop: 14,
-                paddingBottom: Platform.OS === 'ios' ? (insets.bottom > 0 ? 12 : 24) : 16, // Dynamic padding for home indicator
+                paddingBottom: 14,
                 paddingHorizontal: 16,
-                marginTop: 8, // Added margin back for better separation
+                marginTop: 12,
               }}>
                 <View style={{ flex: 1 }}>
-                  <CustomText size={11} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}  >
-                    {t("movieDetail.howDoYouFeel") || ""}
+                  <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}>
+                    {t("movieDetail.howDoYouFeel") || "How do you feel about this one?"}
                   </CustomText>
                   <View style={{ width: '90%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, alignSelf: 'center' }} />
                 </View>
@@ -1563,27 +1562,6 @@ const MovieDetailScreen = () => {
           }}
         />
       }
-      <CompareModals
-        token={token}
-        useCompareHook={compareHook}
-        onModalClose={() => {
-          if (movieData[currentIndex]) {
-            has_rated_ref.current = true;
-            setHasRatedForCommentModal(true);
-            // setthinkModal(true);
-          }
-        }}
-        onReviewAdded={(imdb_id) => {
-          setMovieData((prev) => {
-            const next = [...prev];
-            const idx = next.findIndex((m) => m?.imdb_id === imdb_id);
-            if (idx >= 0 && next[idx] && typeof next[idx] === 'object') {
-              next[idx] = { ...next[idx], n_comments: (next[idx].n_comments ?? 0) + 1 };
-            }
-            return next;
-          });
-        }}
-      />
     </SafeAreaView>
   );
 };

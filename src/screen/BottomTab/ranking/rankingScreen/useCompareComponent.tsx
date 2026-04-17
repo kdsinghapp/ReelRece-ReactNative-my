@@ -23,9 +23,12 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
   const [isFeedbackVisible, setFeedbackVisible] = useState(false);
   const [isComparisonVisible, setComparisonVisible] = useState(false);
   const [isComparisonLoading, setComparisonLoading] = useState(false);
+  const [isOnboardingFlow, setIsOnboardingFlow] = useState(false);
   const [stepsModal, setStepsModal] = useState<boolean>(false); // kept for compatibility
   const [isStepsModalVisible, setStepsModalVisible] = useState(false);
   const dispatch = useDispatch();
+  const [onModalCloseCallback, setOnModalCloseCallback] = useState<(() => void) | null>(null);
+  const [onReviewAddedCallback, setOnReviewAddedCallback] = useState<((imdb_id: string) => void) | null>(null);
 
   // Steps & preference
   const [currentStep, setCurrentStep] = useState(0);
@@ -112,6 +115,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
   const resetComparisonData = useCallback(() => {
     setComparisonMovies([]);
     setCurrentComparisonIndex(0);
+    setIsOnboardingFlow(false);
   }, [isComparisonVisible, setComparisonVisible, setComparisonMovies, setCurrentComparisonIndex]);
 
   // Show step modal only when currentStep is 1 (first movie ranked) or STEPPER_VALUE (fifth movie ranked)
@@ -154,17 +158,29 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     midRef.current = midVal;
   }, []);
 
-  const openFeedbackModal = useCallback((movie: string | object, pref?: 'love' | 'like' | 'dislike') => {
+  const openFeedbackModal = useCallback((
+    movie: string | object,
+    pref?: 'love' | 'like' | 'dislike',
+    config?: { 
+      isOnboarding?: boolean,
+      onModalClose?: () => void,
+      onReviewAdded?: (imdb_id: string) => void
+    }
+  ) => {
     setSelectionHistory([]);
     setComparisonMovies([]);
     setCurrentComparisonIndex(0);
     setSelectedMovie(movie);
     setSelectedMovieId(movie?.imdb_id ?? null);
+    setIsOnboardingFlow(!!config?.isOnboarding);
     if (pref) {
       setUserPreference({ preference: pref });
     } else {
       setUserPreference({ preference: null });
     }
+    setOnModalCloseCallback(() => config?.onModalClose || null);
+    setOnReviewAddedCallback(() => config?.onReviewAdded || null);
+
     setFeedbackVisible(true);
     prefetchComparisonByPreference(movie?.imdb_id ?? null);
   }, [setFeedbackVisible, setSelectedMovie, setSelectedMovieId, prefetchComparisonByPreference]);
@@ -681,6 +697,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     isFeedbackVisible,
     isComparisonVisible,
     isComparisonLoading,
+    isOnboardingFlow,
     openFeedbackModal,
     setFeedbackVisible,
     setComparisonVisible,
@@ -700,5 +717,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
     setCurrentStep,
     refreshStepCount,
     handleCloseRating,   // close modal by cross
+    onModalCloseCallback,
+    onReviewAddedCallback,
   };
 };

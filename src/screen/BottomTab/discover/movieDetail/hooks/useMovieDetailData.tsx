@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getMovieMetadata } from '@redux/Api/movieApi';
 import { getMatchingMovies } from '@redux/Api/ProfileApi';
-
-/**
- * Custom hook for managing movie detail data fetching and queue
- */
+ 
 export const useMovieDetailData = (token: string, initialImdbId: string) => {
   const [movieData, setMovieData] = useState([null, null, null]);
   const [loading, setLoading] = useState(true);

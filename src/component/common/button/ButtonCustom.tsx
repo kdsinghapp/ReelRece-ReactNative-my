@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Color.whiteText,
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
     // marginVertical:12,
     fontFamily: font.PoppinsSemiBold,

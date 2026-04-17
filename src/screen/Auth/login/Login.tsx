@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
 import font from '@theme/font';
@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import LoadingModal from '@utils/Loader';
 import useLogin from './useLogin';
+import useSocialLogin from './useSocialLogin';
 import { t } from 'i18next';
 import { CustomStatusBar, InputFieldCustom, SuccessMessageCustom } from '@components/index';
 export default function Login() {
@@ -33,12 +34,17 @@ export default function Login() {
     toastMessColorGreen,
     toastMessage,
     email, password, emptyAlert } = useLogin()
-  
+  const { handleGoogleLogin, handleFacebookLogin, handleAppleLogin, socialLoading } = useSocialLogin()
+  // useEffect(() => {
+  //   if (validSuccess) {
+  //     navigation.navigate(ScreenNameEnum.TabNavigator)
+  //   }
+  // }, [validSuccess]);
   return (
     <SafeAreaView edges={isOnline ? ['top'] : []} style={style.mainViewLogin}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
-      {loading ? <LoadingModal /> : null}
+      {(loading || socialLoading) ? <LoadingModal /> : null}
       <ScrollView showsVerticalScrollIndicator={false} >
 
         <View
@@ -46,10 +52,10 @@ export default function Login() {
           <View style={styles.appLogoContainer}>
 
             <Image
-              source={imageIndex.appLogo}
+              source={imageIndex.appLogowithName}
               style={style.imgLogo} resizeMode='contain'
             />
-            <Image
+            {/* <Image
               source={imageIndex.reelRecs}
               style={{
                 height: 18,
@@ -57,7 +63,7 @@ export default function Login() {
                 marginTop: 6,
                 resizeMode: 'contain',
               }}
-            />
+            /> */}
 
           </View>
 
@@ -128,8 +134,7 @@ export default function Login() {
                 marginTop: 1,
               }}>
               <CustomText
-
-                size={14}
+                size={13}
                 color={Color.primary}
                 style={style.pass}
                 font={font.PoppinsRegular}
@@ -162,25 +167,21 @@ export default function Login() {
 
           </CustomText>
           <View style={styles.otherLoginContainer}>
-            <TouchableOpacity style={style.iconButton}>
+            <TouchableOpacity style={style.iconButton} onPress={handleFacebookLogin} disabled={socialLoading}>
               <Image
                 source={imageIndex.fb}
                 style={style.iconImage}
               />
             </TouchableOpacity>
 
-            {/* Button 2 */}
-            <TouchableOpacity style={style.iconButton}>
-
+            <TouchableOpacity style={style.iconButton} onPress={handleGoogleLogin} disabled={socialLoading}>
               <Image
                 source={imageIndex.google}
                 style={style.iconImage}
               />
             </TouchableOpacity>
 
-            {/* Button 3 */}
-            <TouchableOpacity style={style.iconButton}>
-
+            <TouchableOpacity style={style.iconButton} onPress={handleAppleLogin} disabled={socialLoading}>
               <Image
                 source={imageIndex.apple}
                 style={style.iconImage}
@@ -192,10 +193,10 @@ export default function Login() {
         <View
           style={style.titlView}>
           <CustomText
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={style.tite}
-            font={font.PoppinsBold}
+            font={font.PoppinsMedium}
           >
             {t("login.no_account",)}
           </CustomText>
@@ -205,11 +206,10 @@ export default function Login() {
               navigation.navigate(ScreenNameEnum.SignUpScreen)
             }}>
             <CustomText
-
-              size={16}
+              size={14}
               color={Color.primary}
               style={style.text}
-              font={font.PoppinsRegular}
+              font={font.PoppinsMedium}
             >
               {""} {t("login.sign_up",)}
             </CustomText>

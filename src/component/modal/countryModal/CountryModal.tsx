@@ -75,8 +75,12 @@ const CountryModal: React.FC<CountryModalProps> = ({ isVisible, onClose, onSelec
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.backButton}>
+          <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? 12 : 12 }]}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.backButton}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            >
               <Image source={imageIndex.backArrow} style={styles.backIcon} resizeMode="contain" />
             </TouchableOpacity>
             <Text style={styles.title}>Select Country</Text>

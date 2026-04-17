@@ -1,9 +1,3 @@
-/**
- * Enhanced Logger for React Native 0.77
- * - debug() only works in __DEV__ mode
- * - Sensitive data (passwords, tokens, secrets) are automatically filtered
- * - Production logs are minimal for security
- */
 
 type ConsoleMethods = {
   log: (...args: unknown[]) => void;
@@ -133,10 +127,6 @@ class Logger {
     this.logs.push({ level: 'error', message, timestamp: new Date(), data });
   }
 
-  /**
-   * Debug logs - ONLY works in __DEV__ mode
-   * Completely blocked in production builds
-   */
   static debug(message: string, data?: string | object) {
     // ⚠️ SECURITY: debug() is completely disabled in production
     if (!__DEV__) {
@@ -156,9 +146,7 @@ class Logger {
     this.logs = [];
   }
 
-  /**
-   * Check if debug logging is enabled (only in __DEV__)
-   */
+
   static isDebugEnabled(): boolean {
     return __DEV__;
   }

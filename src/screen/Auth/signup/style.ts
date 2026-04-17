@@ -6,10 +6,10 @@ import font from '@theme/font';
 const styles = StyleSheet.create({
   mainView: { flex: 1, backgroundColor: Color.background },
   text: {
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
 
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsMedium,
     color: Color.primary,
     // bottom: 2,
   },
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     // bottom: 5
   },
   imgLogo: {
-    height: 47.31, width: 40.76,
+    height: 71.04, width: 96,
     resizeMode: "contain"
   },
 
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   pass: {
     color: Color.primary,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 18,
     textAlign: "right"
   },
@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
     borderRadius: 10,
+    marginHorizontal:14
   },
   iconImage: {
     height: 24,
@@ -82,12 +83,12 @@ const styles = StyleSheet.create({
     // marginTop: 50,
   },
   tite: {
-    fontSize: 16, lineHeight: 20, color: Color.whiteText,
-    fontFamily: font.PoppinsSemiBold,
+    fontSize: 14, lineHeight: 20, color: Color.whiteText,
+    fontFamily: font.PoppinsMedium,
   },
   subTitle: { lineHeight: 20, marginTop: 36, fontSize: 16, color: Color.whiteText, textAlign: "center", fontFamily: font.PoppinsRegular },
   otherLoginContainer: {
-    marginVertical: 36, flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingHorizontal: 20
+    marginVertical: 36, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: 20
   },
 
 });

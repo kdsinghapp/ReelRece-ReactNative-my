@@ -24,8 +24,7 @@ import {
 import { fetchHomeRecommend } from '@redux/feature/homeSlice';
 import NormalMovieCard from '@components/common/NormalMovieCard/NormalMovieCard';
 import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
-import { useCompareComponent } from './useCompareComponent';
-import CompareModals from './CompareModals';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import font from '@theme/font';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -233,7 +232,7 @@ const RankingListItem = React.memo(
 
 const RankingScreen = () => {
   const token = useSelector((state: RootState) => state?.auth?.token);
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const { setCurrentStep, refreshStepCount } = compareHook;
   const route = useRoute()
   const navigation = useNavigation();
@@ -985,7 +984,7 @@ const RankingScreen = () => {
         )}
       </View>
 
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
       <SlideInTooltipModal
         visible={TooltipModal && firstRankIconPosition != null}
         onClose={handleCloseTooltip}

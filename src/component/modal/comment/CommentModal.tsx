@@ -107,6 +107,13 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     () => (reviews || []).map((r, i) => normalizeComment(r, i))
   );
 
+  const findCurrentUserComment = useCallback((items: any[] = []) => {
+    if (!userData?.username) return null;
+    return items.find((item: { user?: { username?: string } }) => (
+      item?.user?.username === userData.username
+    )) ?? null;
+  }, [userData?.username]);
+
   // sync when modal opens / reviews change
   useEffect(() => {
     if (visible && reviews && comments.length === 0) {
@@ -114,6 +121,25 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
       setComments((reviews || []).map((r, i) => normalizeComment(r, i)));
     }
   }, [visible, reviews]);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const normalizedReviews = (reviews || []).map((r, i) => normalizeComment(r, i));
+    const existingComment = findCurrentUserComment(comments) || findCurrentUserComment(normalizedReviews);
+
+    if (existingComment?.comment) {
+      setHasCommented(true);
+      setCommentText(existingComment.comment);
+      isMyCommnetCheck_Ref.current = true;
+      isMyCommnetRef.current = true;
+      return;
+    }
+
+    setHasCommented(false);
+    setCommentText('');
+    isMyCommnetCheck_Ref.current = false;
+  }, [visible, comments, reviews, findCurrentUserComment]);
 
   useEffect(() => {
     if (visible) {
@@ -161,11 +187,14 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
         if (myComment) {
           isMyCommnetCheck_Ref.current = true;
+          isMyCommnetRef.current = true;
           setHasCommented(true);        // UI ke liye
           setCommentText(myComment.comment); // agar edit karna ho to textInput me show ho
         } else {
           isMyCommnetCheck_Ref.current = false;
+          isMyCommnetRef.current = false;
           setHasCommented(false);
+          setCommentText('');
         }
       }
       // Check if there are more pages - null-safe access
@@ -179,7 +208,6 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     } finally {
       setCommmetLoad(false)
       setLoadingMore(false);
-      setCommentText('')
     }
   };
 

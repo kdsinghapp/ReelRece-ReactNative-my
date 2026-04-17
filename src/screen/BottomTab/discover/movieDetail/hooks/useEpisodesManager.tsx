@@ -1,9 +1,6 @@
 import { useState, useRef,   useCallback } from 'react';
 import { getEpisodes, getEpisodesBySeason } from '@redux/Api/movieApi';
-
-/**
- * Custom hook for managing TV show episodes
- */
+ 
 export const useEpisodesManager = (token: string) => {
   const [episodes, setEpisodes] = useState([]);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<number | null>(null);
@@ -11,8 +8,7 @@ export const useEpisodesManager = (token: string) => {
   const [episodesLoader, setEpisodesLoader] = useState(false);
   const hasFetchedRef = useRef(false);
 
-  // Fetch episodes for a movie/show
-  const getEpisodesData = useCallback(async (imdb_id: string) => {
+    const getEpisodesData = useCallback(async (imdb_id: string) => {
     if (!imdb_id) return;
 
     try {
@@ -36,8 +32,7 @@ export const useEpisodesManager = (token: string) => {
        setEpisodes([]);
     }
   }, [token]);
-
-  // Fetch all seasons
+ 
   const fetchAllSeasons = useCallback(async (imdb_id: string) => {
     if (!imdb_id) return;
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,8 +22,7 @@ import font from '@theme/font';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { SearchBarCustom } from '@components/index';
 import { Button } from '@components/index';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
+import { useCompareContext } from '../../../context/CompareContext';
 import { fetchRankingRatedMovies, fetchRankingSuggestionMovies } from '@redux/feature/rankingSlice';
 import { searchMovies, deleteRatedMovie, getHubMovies, thumbsDownMovie, getThumbsDownMovies } from '@redux/Api/movieApi';
 import { RootState, AppDispatch } from '@redux/store';
@@ -150,14 +149,8 @@ const OnboardingScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
 
-  const compareHook = useCompareComponent(token || '', {
-    onRatingSuccess: () => {
-      dispatch(fetchRankingRatedMovies());
-      // Also refresh suggestion movies to ensure we have full details
-      dispatch(fetchRankingSuggestionMovies(1));
-    }
-  });
-  const { openFeedbackModal, currentStep, refreshStepCount } = compareHook;
+  const compareHook = useCompareContext();
+  const { openFeedbackModal, currentStep, refreshStepCount, selectedMovie } = compareHook;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -167,6 +160,8 @@ const OnboardingScreen = () => {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousStepRef = useRef(currentStep);
+  const [optimisticRatedMovies, setOptimisticRatedMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
     if (token && (currentPhase === 'rating' || currentPhase === 'dislike')) {
@@ -174,6 +169,36 @@ const OnboardingScreen = () => {
       dispatch(fetchRankingSuggestionMovies(1));
     }
   }, [token, dispatch, currentPhase]);
+
+  useEffect(() => {
+    if (Array.isArray(ratedMovieFromRedux)) {
+      setOptimisticRatedMovies(prev => {
+        // If we have no local state, initialize with Redux state
+        if (prev.length === 0) return ratedMovieFromRedux;
+
+        // Keep local optimistic items only if they are NOT yet in the Redux state
+        // This prevents the 'lag' because as soon as an item is in Redux, it moves from 
+        // the optimistic list to the base list without being removed from the final merged display.
+        const pendingItems = prev.filter(m => !ratedMovieFromRedux.some(r => r.imdb_id === m.imdb_id));
+        
+        // We also want to make sure we include any NEW items that appeared in Redux but weren't in our prev
+        // Actually, ratedMovieFromRedux is already handled in mergedRatedMovies useMemo (line 289),
+        // so optimisticRatedMovies ONLY needs to hold the pending delta now.
+        return pendingItems;
+      });
+    }
+  }, [ratedMovieFromRedux]);
+
+  useEffect(() => {
+    if (currentStep > previousStepRef.current && selectedMovie?.imdb_id) {
+      setOptimisticRatedMovies(prev => {
+        const withoutCurrent = prev.filter(movie => movie.imdb_id !== selectedMovie.imdb_id);
+        return [selectedMovie as Movie, ...withoutCurrent];
+      });
+    }
+
+    previousStepRef.current = currentStep;
+  }, [currentStep, selectedMovie]);
 
   // Prevent back button on Android during onboarding
   useEffect(() => {
@@ -191,6 +216,18 @@ const OnboardingScreen = () => {
       dispatch(fetchRankingSuggestionMovies(1));
     }, 300);
   }, [dispatch]);
+
+  const isAnyModalVisible = compareHook.isFeedbackVisible || compareHook.isComparisonVisible;
+  const prevModalStateRef = useRef(false);
+
+  useEffect(() => {
+    if (isAnyModalVisible) {
+      prevModalStateRef.current = true;
+    } else if (prevModalStateRef.current && !isAnyModalVisible) {
+      prevModalStateRef.current = false;
+      handleModalClose();
+    }
+  }, [isAnyModalVisible, handleModalClose]);
 
   /* Slides animation implementation */
   useEffect(() => {
@@ -264,12 +301,23 @@ const OnboardingScreen = () => {
     });
   };
 
-  const currentRatedCount = Array.isArray(ratedMovieFromRedux) ? ratedMovieFromRedux.length : 0;
+  const mergedRatedMovies = useMemo(() => {
+    const merged = [...optimisticRatedMovies, ...(ratedMovieFromRedux || [])];
+    const seen = new Set<string>();
+
+    return merged.filter((movie: Movie) => {
+      if (!movie?.imdb_id || seen.has(movie.imdb_id)) return false;
+      seen.add(movie.imdb_id);
+      return true;
+    });
+  }, [optimisticRatedMovies, ratedMovieFromRedux]);
+
+  const currentRatedCount = mergedRatedMovies.length;
 
   // Slots Data: Look up detailed movie object to solve cover_image_url missing issues from rated API
   // Also ensure newly rated movies display immediately if they don't have full details yet
   const slots = Array(SLOT_COUNT).fill(null).map((_, i) => {
-    const ratedItem = ratedMovieFromRedux && ratedMovieFromRedux[i];
+    const ratedItem = mergedRatedMovies && mergedRatedMovies[i];
     if (!ratedItem) return null;
 
     // Try to find the full movie details from suggestion or search results
@@ -288,6 +336,7 @@ const OnboardingScreen = () => {
 
     try {
       await deleteRatedMovie(token, item.imdb_id);
+      setOptimisticRatedMovies(prev => prev.filter(movie => movie.imdb_id !== item.imdb_id));
       dispatch(fetchRankingRatedMovies());
       refreshStepCount();
     } catch (error) {
@@ -300,7 +349,7 @@ const OnboardingScreen = () => {
     .filter((m: Movie) => m?.cover_image_url || (m as any)?.movie?.cover_image_url);
 
   const renderGridItem = ({ item }: { item: Movie }) => {
-    const isRated = ratedMovieFromRedux?.some((m: Movie) => m.imdb_id === item.imdb_id);
+    const isRated = mergedRatedMovies?.some((m: Movie) => m.imdb_id === item.imdb_id);
     const posterUrl = item?.cover_image_url || (item as any)?.movie?.cover_image_url;
 
     // Safety check - though filtered, double check posterUrl
@@ -313,7 +362,7 @@ const OnboardingScreen = () => {
           isRated && styles.gridItemRated
         ]}
         activeOpacity={0.8}
-        onPress={() => !isRated && openFeedbackModal(item)}
+        onPress={() => !isRated && openFeedbackModal(item, undefined, { isOnboarding: true })}
         disabled={isRated}
       >
         <FastImage
@@ -514,12 +563,7 @@ const OnboardingScreen = () => {
         </View>
       </View>
 
-      <CompareModals
-        token={token || ''}
-        useCompareHook={compareHook}
-        onModalClose={handleModalClose}
-        isOnboarding={true}
-      />
+      
     </SafeAreaView>
   );
 };

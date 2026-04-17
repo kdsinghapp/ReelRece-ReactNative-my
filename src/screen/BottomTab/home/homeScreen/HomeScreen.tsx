@@ -18,17 +18,18 @@ import Notification from './Notification/Notification';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@redux/store';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AvatarShimmer from '@components/ShimmerCom/AvatarShimmer';
 import MemoFeedCardHome from '@components/card/feedCard/MemoFeedCardHome';
 import FeedCardShimmer from '@components/card/feedCard/FeedCardShimmer';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
+import ErrorBoundary from '@components/ErrorBoundary';
 import { BASE_IMAGE_URL } from '@config/api.config';
 import { t } from 'i18next';
 import NetInfo from '@react-native-community/netinfo';
 import { errorToast } from '@utils/customToast';
+import { fileLogger } from '@utils/FileLogger';
 import RecentUsersList from './components/RecentUsersList';
 import DiscoverPeopleSection from './components/DiscoverPeopleSection';
 import HomeHeader from './components/HomeHeader';
@@ -128,7 +129,7 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  const combinedData = useMemo(() => {
+  const combinedData = useMemo(() => { 
     return [
       { type: 'profileStatus' },
       { type: 'header' },
@@ -137,7 +138,7 @@ const App = () => {
     ];
   }, [feedData, loadingFeed]);
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
 
   // refs for scroll management
   const playIndexRef = useRef<number | null>(null);
@@ -378,53 +379,66 @@ const App = () => {
     navigation.navigate(ScreenNameEnum.Followers as never, { tabToOpen: 2, type: 'Suggested' } as never);
   }, [navigation]);
 
+  const logHomeRenderIssue = useCallback((scope: string, payload: Record<string, unknown>) => {
+    fileLogger.error(`[HomeScreen] ${scope}`, payload);
+  }, []);
+
   const MemoFeedCardRender = useCallback((item, index, avatarUri, posterUri) => {
     return (
-      <MemoFeedCardHome
-        avatar={{ uri: avatarUri }}
-        poster={{ uri: posterUri }}
-        activity={item?.activity}
-        key={item.movie?.imdb_id}
-        user={item.user?.name || item.user?.username}
-        username={item.user?.username}
-        title={item.movie?.title}
-        comment={item.comment}
-        release_year={item?.movie?.release_year?.toString()}
-        videoUri={item.movie?.trailer_url}
-        imdb_id={item.movie?.imdb_id}
-        isMuted={isMuted}
-        token={token}
-        rankPress={handleRankPress}
-        ranked={item?.rec_score}
-        created_date={item?.created_date}
-        shouldAutoPlay={autoPlayEnabled}
-        isVisible={index === currentVisibleIndex}
-        videoIndex={index}
-        scoreType='Friend Score'
-        shouldPlay={index - 1 === playIndex}
-        isPaused={index - 1 !== playIndex}
-        is_bookMark={item?.is_bookmarked}
-        screenName='Home__Screen'
-        feedData={feedData}
-        suggested={
-          item?.suggested === true ||
-          (Array.isArray(suggestedFriends) &&
-            suggestedFriends.some(
-              (f: { username?: string }) => f?.username === item?.user?.username
-            ))
-        }
-        onFollow={handleFollowSuggested}
-        isFollowing={item?.user?.is_following}
-      />
+      <ErrorBoundary
+        name={`HomeFeedCard:${item?.movie?.imdb_id ?? index}`}
+        fallback={null}
+      >
+        <MemoFeedCardHome
+          avatar={{ uri: avatarUri }}
+          poster={{ uri: posterUri }}
+          activity={item?.activity}
+          key={item.movie?.imdb_id}
+          user={item.user?.name || item.user?.username}
+          username={item.user?.username}
+          title={item.movie?.title}
+          comment={item.comment}
+          release_year={item?.movie?.release_year?.toString()}
+          videoUri={item.movie?.trailer_url}
+          imdb_id={item.movie?.imdb_id}
+          isMuted={isMuted}
+          token={token}
+          rankPress={handleRankPress}
+          ranked={item?.rec_score}
+          created_date={item?.created_date}
+          shouldAutoPlay={autoPlayEnabled}
+          isVisible={index === currentVisibleIndex}
+          videoIndex={index}
+          scoreType='Friend Score'
+          shouldPlay={index - 1 === playIndex}
+          isPaused={index - 1 !== playIndex}
+          is_bookMark={item?.is_bookmarked}
+          screenName='Home__Screen'
+          feedData={feedData}
+          suggested={
+            item?.suggested === true ||
+            (Array.isArray(suggestedFriends) &&
+              suggestedFriends.some(
+                (f: { username?: string }) => f?.username === item?.user?.username
+              ))
+          }
+          onFollow={handleFollowSuggested}
+          isFollowing={item?.user?.is_following}
+        />
+      </ErrorBoundary>
     );
-  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress, suggestedFriends, feedData]);
+  }, [playIndex, currentVisibleIndex, autoPlayEnabled, token, isMuted, handleRankPress, suggestedFriends, feedData, handleFollowSuggested]);
 
   const renderItem = useCallback(({ item, index }) => {
     if (item?.type === 'profileStatus') {
       if (userloading) {
         return <AvatarShimmer count={7} />;
       } else {
-        return <RecentUsersList users={recentUsers} onUserPress={handleUserPress} />;
+        return (
+          <ErrorBoundary name="HomeRecentUsers" fallback={null}>
+            <RecentUsersList users={recentUsers} onUserPress={handleUserPress} />
+          </ErrorBoundary>
+        );
       }
     }
 
@@ -433,32 +447,45 @@ const App = () => {
         ? `${bookmarkData.length}-${(bookmarkData[0] as { imdb_id?: string })?.imdb_id ?? ''}`
         : '0';
       return (
-        <HomeHeader
-          key={`header-${bookmarkKey}`}
-          trendingData={trendingData}
-          recommendData={recommendData}
-          bookmarkData={bookmarkData}
-          loadingTrending={loadingTrending}
-          loadingBookmark={loadingBookmark}
-          loadingRecs={loadingRecs}
-          onFeedReached={handleFeedReached}
-          trendingError={trendingError}
-          recommendError={recommendError}
-        />
+        <ErrorBoundary name="HomeHeader" fallback={null}>
+          <HomeHeader
+            key={`header-${bookmarkKey}`}
+            trendingData={trendingData}
+            recommendData={recommendData}
+            bookmarkData={bookmarkData}
+            loadingTrending={loadingTrending}
+            loadingBookmark={loadingBookmark}
+            loadingRecs={loadingRecs}
+            onFeedReached={handleFeedReached}
+            trendingError={trendingError}
+            recommendError={recommendError}
+          />
+        </ErrorBoundary>
       );
     }
 
     if (item?.type === 'discoverPeople') {
       return (
-        <DiscoverPeopleSection
-          users={suggestedFriends}
-          onFollow={handleFollowSuggested}
-          onSeeAll={handleSeeAllSuggested}
-        />
+        <ErrorBoundary name="HomeDiscoverPeople" fallback={null}>
+          <DiscoverPeopleSection
+            users={suggestedFriends}
+            onFollow={handleFollowSuggested}
+            onSeeAll={handleSeeAllSuggested}
+          />
+        </ErrorBoundary>
       );
     }
 
-    if (!item.movie || !item.user) return null;
+    if (!item.movie || !item.user) {
+      logHomeRenderIssue('InvalidFeedItem', {
+        index,
+        itemType: item?.type,
+        hasMovie: !!item?.movie,
+        hasUser: !!item?.user,
+        item,
+      });
+      return null;
+    }
 
     const avatarUri = `${BASE_IMAGE_URL}${item.user?.avatar}`;
     const posterUri = item.movie?.horizontal_poster_url;
@@ -480,6 +507,7 @@ const App = () => {
     handleFollowSuggested,
     handleFeedReached,
     handleSeeAllSuggested,
+    logHomeRenderIssue,
   ]);
 
 
@@ -629,7 +657,7 @@ const App = () => {
         }]).current}
       />
 
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
       <Notification
         visible={notificationModal}
         onClose={handleCloseNotification}

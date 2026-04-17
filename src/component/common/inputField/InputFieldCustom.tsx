@@ -69,7 +69,7 @@ export default function InputFieldCustom({ validSuccess = undefined, ...props })
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Image
                 source={showPassword ? imageIndex.eyes : imageIndex.view}
-                style={{ width: 24, height: 24 }}
+                style={{ width: 20, height: 20 }}
                 tintColor={'white'}
               />
             </TouchableOpacity>

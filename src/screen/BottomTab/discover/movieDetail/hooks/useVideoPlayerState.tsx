@@ -1,9 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Animated } from 'react-native';
 
-/**
- * Custom hook for managing video player state and controls
- */
+
 export const useVideoPlayerState = () => {
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [paused, setPaused] = useState(true);

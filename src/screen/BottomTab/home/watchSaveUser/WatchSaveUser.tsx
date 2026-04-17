@@ -10,8 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
 import FastImage from 'react-native-fast-image';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import { getCommonBookmarkOtherUser, getCommonBookmarks, getOtherUserRatedMovies } from '@redux/Api/movieApi';
 import { getHistoryApi } from '@redux/Api/ProfileApi';
@@ -64,7 +63,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
 
 
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
@@ -243,7 +242,7 @@ const WatchSaveUser = ({ disableBottomSheet = false }) => {
         onSelect={(option) => option.action()}
       // onSelect={(option) => setBottomModal(option)}
       />
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
     </SafeAreaView>
   );
 };

@@ -1,34 +1,34 @@
- import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { LogBox, NativeModules, Platform, Text, TextInput } from 'react-native';
 import 'react-native-gesture-handler';
- import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initializeLoggerConsoleBridge, setSuppressAllLogs } from '@utils/LoggerConsoleBridge';
 import AppNavigator from '@navigators/AppNavigator';
- 
+
 // ✅ STEP 1: Suppress only specific known warnings (keeps other dev warnings visible)
 // LogBox.ignoreLogs([
 //   'Warning: componentWillMount has been renamed',
 //   'Warning: componentWillReceiveProps has been renamed',
 // ]);
- LogBox.ignoreAllLogs(); 
+LogBox.ignoreAllLogs();
 
 // ✅ STEP 2: Suppress ALL console logs globally (including Metro/terminal output)
 // Set to true in production, false in development if you want to see logs
 if (!__DEV__) {
   setSuppressAllLogs(true);
 }
- 
+
 // ✅ STEP 3: Initialize the logger bridge (with suppression already configured)
 initializeLoggerConsoleBridge();
- 
+
 // Default props
 Text.defaultProps = Text.defaultProps || {};
 Text.defaultProps.allowFontScaling = false;
- 
+
 TextInput.defaultProps = TextInput.defaultProps || {};
 TextInput.defaultProps.allowFontScaling = false;
 TextInput.defaultProps.underlineColorAndroid = "transparent";
- 
+
 // ✅ QueryClient created ONCE outside component (singleton pattern)
 // This ensures caching behavior is preserved across re-renders
 const queryClient = new QueryClient({
@@ -45,9 +45,9 @@ const queryClient = new QueryClient({
     },
   },
 });
- 
+
 const App: FunctionComponent = () => {
- 
+
   // ✅ Cache trim effect - Android only, with graceful error handling
   useEffect(() => {
     const trimCacheOnAndroid = async () => {
@@ -55,22 +55,22 @@ const App: FunctionComponent = () => {
       if (Platform.OS !== 'android') {
         return;
       }
- 
+
       try {
         const { AndroidExoPlayerCache } = NativeModules;
-        
+
         // Check if module exists
         if (!AndroidExoPlayerCache?.trimCache) {
           if (__DEV__) {
-           }
+          }
           return;
         }
- 
+
         // Trim cache to 100MB
         await AndroidExoPlayerCache.trimCache(100 * 1024 * 1024);
-        
+
         if (__DEV__) {
-         }
+        }
       } catch (error) {
         // ✅ Graceful failure - don't crash the app
         if (__DEV__) {
@@ -79,15 +79,15 @@ const App: FunctionComponent = () => {
         // Silently fail in production - cache trim is not critical
       }
     };
- 
+
     trimCacheOnAndroid();
   }, []);
- 
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppNavigator />
     </QueryClientProvider>
   );
 }
- 
+
 export default App;

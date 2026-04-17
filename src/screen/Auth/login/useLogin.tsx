@@ -126,7 +126,7 @@ const useLogin = () => {
       } else {
         const errorMessage = response.error || 'Invalid Credentials';
         toastMessFunc({ message: errorMessage + ' ❌' });
-        setEmailError(t('errorMessage.invalidemailpassword'));
+        // setEmailError(t('errorMessage.invalidemailpassword'));
         setPasswordError(t('errorMessage.invalidemailpassword'));
       }
     } catch (error) {

@@ -52,6 +52,9 @@ const CompareModals = ({
     setStepsModalVisible,  
     handleCloseRating,
     hasComparisonsAvailable, // Add this
+    isOnboardingFlow,
+    onModalCloseCallback,
+    onReviewAddedCallback,
   } = useCompareHook;
   const dispatch = useDispatch();
   useEffect(() => {
@@ -72,8 +75,9 @@ const CompareModals = ({
     } else if (wasAnyModalOpen.current && !anyModalOpen) {
       wasAnyModalOpen.current = false;
       onModalClose?.();
+      onModalCloseCallback?.();
     }
-  }, [isFeedbackVisible, isComparisonVisible, isStepsModalVisible]);
+  }, [isFeedbackVisible, isComparisonVisible, isStepsModalVisible, onModalClose, onModalCloseCallback]);
   const [fetchStep1, setfetchStep] = useState<string | object>();
 
   const getCurrentStep = async () => {
@@ -113,7 +117,7 @@ const CompareModals = ({
         <FeedbackModal
           visible={isAnyModalVisible}
           step={step}
-          isOnboarding={isOnboarding}
+          isOnboarding={isOnboarding || isOnboardingFlow}
           onClose={() => {
             if (isComparisonStep) {
               handleCloseRating();
@@ -128,6 +132,7 @@ const CompareModals = ({
               setFeedbackVisible(false);
               resetComparisonData();
               onModalClose?.();
+              onModalCloseCallback?.();
             }
           }}
           setFeedbackVisible={setFeedbackVisible}
@@ -164,7 +169,10 @@ const CompareModals = ({
                 }
               : undefined
           }
-          onReviewAdded={onReviewAdded}
+          onReviewAdded={(imdb_id) => {
+            onReviewAdded?.(imdb_id);
+            onReviewAddedCallback?.(imdb_id);
+          }}
           onSelectFirst={handleSelectFirst}
           onSelectSecond={handleSelectSecond}
           onSkipSelect={handleSkipSetFirst}
@@ -210,4 +218,3 @@ const CompareModals = ({
 
 // export default ;
 export default React.memo(CompareModals);
-

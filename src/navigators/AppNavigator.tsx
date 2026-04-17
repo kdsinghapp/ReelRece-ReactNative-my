@@ -12,6 +12,7 @@ import { rootNavigationRef } from '@navigators/rootNavigationRef';
 import OfflineBanner from '@components/common/OfflineBanner/OfflineBanner';
 import "../.././src/i18n";
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { CompareProvider } from '../context/CompareContext';
 
 // Custom theme define karein
 const CustomTheme = {
@@ -58,12 +59,14 @@ const AppNavigator: React.FC = () => {
             style={{ flex: 1, backgroundColor: '#000000' }}
             edges={['bottom']}
           >
-              {!isConnected && <OfflineBanner />}
+            {!isConnected && <OfflineBanner />}
             <NavigationContainer
               ref={rootNavigationRef}
               theme={CustomTheme}
             >
-              <RegistrationRoutes />
+              <CompareProvider>
+                <RegistrationRoutes />
+              </CompareProvider>
               <Toast config={toastConfig} />
             </NavigationContainer>
           </SafeAreaView>

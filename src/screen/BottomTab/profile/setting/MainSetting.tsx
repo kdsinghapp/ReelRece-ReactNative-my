@@ -20,8 +20,8 @@ import { clearResponseCache } from "@redux/Api/responseCache";
 import { clearMovieCache } from "@redux/feature/movieCacheSlice/MovieCacheManager";
 import { RootStackParamList } from "@navigators/type";
 import { useNetworkStatus } from "@hooks/useNetworkStatus";
-// import { GoogleSignin } from "@react-native-google-signin/google-signin";
-// import { LoginManager } from "react-native-fbsdk-next";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { LoginManager } from "react-native-fbsdk-next";
 
 type MenuItem = {
   id: string;
@@ -127,17 +127,15 @@ const MainSetting = () => {
       if (authToken) {
         await logoutApi(authToken);
       }
-      
+
       try {
-        // await GoogleSignin.signOut();
+        await GoogleSignin.signOut();
       } catch (error) {
-        console.log("Google sign out error", error);
       }
-      
+
       try {
-        // LoginManager.logOut();
+        LoginManager.logOut();
       } catch (error) {
-        console.log("Facebook sign out error", error);
       }
 
     } finally {
@@ -157,7 +155,7 @@ const MainSetting = () => {
         'hasSeenTooltip',
         'tooltipShown',
       ];
-      await AsyncStorage.multiRemove(userSpecificKeys).catch(() => {});
+      await AsyncStorage.multiRemove(userSpecificKeys).catch(() => { });
 
       navigation.reset({
         index: 0,
@@ -200,9 +198,9 @@ const MainSetting = () => {
   const keyExtractor = useCallback((item: MenuItem) => item.id, []);
 
   const handleCloseLogoutModal = useCallback(() => setLogoutModalVisible(false), []);
-const isOnline = useNetworkStatus();
+  const isOnline = useNetworkStatus();
   return (
-    <SafeAreaView edges={isOnline ? ['top'] : []}  style={styles.container}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
       <StatusBarCustom />
 
       <HeaderCustom title={t("setting.header")} backIcon={imageIndex.backArrow} />
@@ -270,7 +268,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: Color.whiteText,
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: font.PoppinsMedium,
   },
   separator: {

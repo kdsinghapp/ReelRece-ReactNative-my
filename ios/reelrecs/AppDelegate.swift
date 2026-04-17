@@ -2,6 +2,7 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import FBSDKCoreKit
 
 @main
 class AppDelegate: RCTAppDelegate {
@@ -19,7 +20,12 @@ class AppDelegate: RCTAppDelegate {
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
-
+ override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+    if ApplicationDelegate.shared.application(app, open: url, options: options) {
+      return true
+    }
+    return super.application(app, open: url, options: options)
+  }
   override func bundleURL() -> URL? {
 #if DEBUG
     RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")

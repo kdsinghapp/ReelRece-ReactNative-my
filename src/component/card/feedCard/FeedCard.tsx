@@ -16,8 +16,7 @@ import imageIndex from '@assets/imageIndex';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { Color } from '@theme/color';
 import font from '@theme/font';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../context/CompareContext';
 import { useTrailerTracker } from '@hooks/useTrailerTracker';
 import { useBookmarks } from '@hooks/useBookmark';
 import FastImage from 'react-native-fast-image';
@@ -105,7 +104,7 @@ const FeedCard = ({
     }
   }, [paused, imdb_id]);
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = useCallback((movie: object) => {
     compareHook.openFeedbackModal(movie);
   }, [compareHook]);
@@ -457,7 +456,7 @@ const FeedCard = ({
         onClose={closeScoreModal}
         variant="second"
       />
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
     </View>
   );
 };

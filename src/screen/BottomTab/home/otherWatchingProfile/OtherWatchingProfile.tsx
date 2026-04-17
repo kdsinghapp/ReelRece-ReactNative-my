@@ -8,8 +8,7 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import styles from './style';
 import { Color } from '@theme/color';
 import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
-import CompareModals from '@screens/BottomTab/ranking/rankingScreen/CompareModals';
-import { useCompareComponent } from '@screens/BottomTab/ranking/rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { useDispatch } from 'react-redux';
@@ -162,7 +161,7 @@ const OtherWatchingProfile = () => {
     }
   };
 
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const handleRankingPress = (movie) => {
     compareHook.openFeedbackModal(movie);
   };
@@ -343,7 +342,7 @@ const OtherWatchingProfile = () => {
           }
         />
       </View>
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
       {!disableBottomSheet && (
         <BottomSheet
           visible={bottomModal}

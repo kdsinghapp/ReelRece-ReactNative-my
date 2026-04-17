@@ -18,9 +18,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import { CustomStatusBar } from '@components/index';
 import imageIndex from '@assets/imageIndex';
-import { useCompareComponent } from '../rankingScreen/useCompareComponent';
+import { useCompareContext } from '../../../../context/CompareContext';
 import GroupSearch from '@screens/BottomTab/watch/watchScreen/GroupSearch';
-import CompareModals from '../rankingScreen/CompareModals';
 import { t } from 'i18next';
 
 const SEARCH_DEBOUNCE_MS = 500;
@@ -120,7 +119,7 @@ const WoodsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const token = useSelector((state: RootState) => state?.auth?.token); // ✅ outside  condition
-  const compareHook = useCompareComponent(token);
+  const compareHook = useCompareContext();
   const insets = useSafeAreaInsets();
  
   const handleSearch = useCallback(
@@ -317,7 +316,7 @@ const WoodsScreen = () => {
         />
       )}
 
-      <CompareModals token={token} useCompareHook={compareHook} />
+      
     </SafeAreaView>
   );
 };
