@@ -125,7 +125,7 @@ const OtherWatchingProfile = () => {
         <TouchableOpacity activeOpacity={0.8} onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.info}>
           <View style={{ flexDirection: "row", }}>
             <Text numberOfLines={2} style={[styles.title]}>{item?.title}</Text>
-             
+
           </View>
           <Text style={styles.year}>{item?.release_year}</Text>
 
@@ -248,7 +248,7 @@ const OtherWatchingProfile = () => {
           contentContainerStyle={{ paddingBottom: 70, marginHorizontal: 18, marginTop: 50 }}
         />
       </View>
-      
+
       {!disableBottomSheet && (
         <BottomSheet
           visible={bottomModal}

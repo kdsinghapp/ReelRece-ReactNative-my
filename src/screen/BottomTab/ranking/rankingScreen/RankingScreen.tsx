@@ -984,7 +984,7 @@ const RankingScreen = () => {
         )}
       </View>
 
-      
+
       <SlideInTooltipModal
         visible={TooltipModal && firstRankIconPosition != null}
         onClose={handleCloseTooltip}

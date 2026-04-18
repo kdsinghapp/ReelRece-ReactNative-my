@@ -24,21 +24,20 @@ import { useNetworkStatus } from '@hooks/useNetworkStatus';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import SwipeIntroTooltip, { SWIPE_TOOLTIP_STORAGE_KEY, IS_NEW_USER_KEY } from '@components/modal/SwipeIntroTooltip/SwipeIntroTooltip';
 import WatchNowModal from '@components/modal/WatchNowModal/WatchNowModal';
-import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction, Trending_without_Filter, searchMovies } from '@redux/Api/movieApi';
+import { getEpisodes, getEpisodesBySeason, getMovieMetadata, recordTrailerInteraction, Trending_without_Filter, searchMovies, getRankingSuggestionMovie } from '@redux/Api/movieApi';
 import { getMatchingMovies } from '@redux/Api/ProfileApi';
 import { useCompareContext } from '../../../../context/CompareContext';
 import { useBookmarks } from '@hooks/useBookmark';
 import { useTrailerTracker } from '@hooks/useTrailerTracker';
 import CustomText from '@components/common/CustomText/CustomText';
 import LinearGradient from 'react-native-linear-gradient';
-import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { RootState } from '@redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleMute } from '@redux/feature/videoAudioSlice';
 import { fetchHomeBookmarks } from '@redux/feature/homeSlice';
 import VideoPlayer from '@utils/NewNativeView';
 import CustomVideoPlayer from '@components/common/CustomVideoPlayerios';
-import { CustomStatusBar, EpisodesModal, HeaderCustom, MoreSheetModal, MovieInfoModal } from '@components/index';
+import { RatingSection, FooterNav, MovieHeader, MovieDescriptionSection } from './components';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import imageIndex from '@assets/imageIndex';
 import MovieDetailsShimmer from '@components/MovieDetailsShimmer/MovieDetailsShimmer';
@@ -46,6 +45,8 @@ import { t } from 'i18next';
 import type { Platform as StreamingPlatform } from '../../../../types/api.types';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { sortByData, contentType as discoverContentType } from '../discoverScreen/DisCoverData';
+import RankingWithInfo from '@components/ranking/RankingWithInfo';
+import { EpisodesModal, MoreSheetModal } from '@components/index';
 
 const CommentModal = React.lazy(() =>
   import('@components/modal/comment/CommentModal')
@@ -130,6 +131,9 @@ const MovieDetailScreen = () => {
       } else if (source === 'search' && searchQuery) {
         const result = await searchMovies(searchQuery, token, feedPage + 1);
         results = result?.data?.results || [];
+      } else if (source === 'ranking') {
+        const result = await getRankingSuggestionMovie(token, feedPage + 1);
+        results = result?.results || [];
       }
 
       if (results.length > 0) {
@@ -142,21 +146,22 @@ const MovieDetailScreen = () => {
     }
   };
   const { toggleBookmark: toggleBookmarkHook } = useBookmarks(token);
-  const [isSeeking, setIsSeeking] = useState(false);
-  const [seekPosition, setSeekPosition] = useState(0);
   const [movieData, setMovieData] = useState<any[]>([null, null, null]);
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(1); // Start at the middle item
   const insets = useSafeAreaInsets();
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const { height: windowHeight } = useWindowDimensions();
   // const BOTTOM_TAB_HEIGHT = 65;
   const BOTTOM_TAB_HEIGHT = useBottomTabBarHeight();
   const ITEM_HEIGHT = useMemo(
     () => windowHeight - BOTTOM_TAB_HEIGHT - insets.top - (Platform.OS == "ios" ? insets.bottom + 40 : insets.bottom > 50 ? insets.bottom + 45 : insets.bottom + 10),
+    // () => windowHeight - BOTTOM_TAB_HEIGHT - insets.top - (Platform.OS === 'ios' ? insets.bottom + 20 : insets.bottom),
     [windowHeight, insets.bottom, insets.top, BOTTOM_TAB_HEIGHT]
   );
-  const videoHeight = useMemo(() => windowHeight / 3.5, [windowHeight]);
+
+  // () => windowHeight - BOTTOM_TAB_HEIGHT - insets.top - (Platform.OS == "ios" ? insets.bottom + 40 : insets.bottom > 50 ? insets.bottom + 45 : insets.bottom + 10),
+  const videoHeight = useMemo(() => windowHeight / 3.9, [windowHeight]);
   // const recommendationRowHeight = useMemo(() => windowHeight * 0.26, [windowHeight]);
   const recommendationRowHeight = useMemo(() => Platform.OS == "ios" ? windowHeight * 0.22 : windowHeight * 0.28 - insets.bottom, [windowHeight]);
 
@@ -183,7 +188,6 @@ const MovieDetailScreen = () => {
   const isInitialLoad = useRef(true);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const isResettingRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(true);
   const saveBookMark_Ref = useRef(false)
   const [modalMovieId, setModalMovieId] = useState<string | null>(null);
   const [titleLinesMap, setTitleLinesMap] = useState<Record<number, number>>({});
@@ -192,31 +196,14 @@ const MovieDetailScreen = () => {
   const isMuted = useSelector((state: RootState) => state.videoAudio.isMuted);
   const [isShowMuteIcon, setIsShowMuteIcon] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  // const [wholeContentHeight, setWholeContentHeight] = useState(1);
-  // const [visibleContentHeight, setVisibleContentHeight] = useState(0); 
   const has_rated_ref = useRef(false);
   const [hasRatedForCommentModal, setHasRatedForCommentModal] = useState(false);
-  const [commetText, setCommentText] = useState('')
   const [showSwipeTooltip, setShowSwipeTooltip] = useState(false);
   const swipeTooltipCheckDone = useRef(false);
   const [videoMountKey, setVideoMountKey] = useState(0);
-  const [isVideoTransitioning, setIsVideoTransitioning] = useState(false);
   const [appInForeground, setAppInForeground] = useState(true);
 
   const outerScrollEnableds = useRef(true);
-
-  // useEffect(() => {
-  //   if (wholeContentHeight > 0 && visibleContentHeight > 0) {
-  //     const ratio = visibleContentHeight / wholeContentHeight;
-  //     const clampedRatio = Math.min(1, ratio);
-  //     const minIndicatorHeight = 20;
-  //     const calcHeight = Math.max(
-  //       visibleContentHeight * clampedRatio,
-  //       Math.min(minIndicatorHeight, visibleContentHeight)
-  //     ); 
-  //   }
-  // }, [wholeContentHeight, visibleContentHeight, currentIndex, movieData]);
-
 
   const [bookmarkMap, setBookmarkMap] = useState<{ [k: string]: boolean }>({});
   const bookmarkMapRef = useRef(bookmarkMap);
@@ -324,9 +311,6 @@ const MovieDetailScreen = () => {
         setMatchingQueue(matching?.results || []);
         isInitialLoad.current = false;
 
-        // Load comments
-        // await sgetCommenst(token, imdb_idData, false);
-        setIsLoading(false)
       } catch (err) {
         isInitialLoad.current = false;
 
@@ -350,7 +334,6 @@ const MovieDetailScreen = () => {
     setPaused(!isPlaying);
   }, []);
 
-  const handleVideoSeek = useCallback((position: any) => { }, []);
 
   // more movie sheet
   const openMoreModal = useCallback(() => {
@@ -361,7 +344,6 @@ const MovieDetailScreen = () => {
   const fetchNextMovieFromQueue = async (prevImdb) => {
     try {
       setLoadingMore(true);
-      setIsLoading(true);
       let queue = [...matchingQueueRef.current];
       if (!queue.length) {
         const matching = await getMatchingMovies(token, prevImdb);
@@ -377,11 +359,9 @@ const MovieDetailScreen = () => {
 
       const meta = await getMovieMetadata(token, nextMovie?.imdb_id);
       saveBookMark_Ref.current = meta?.is_bookmarked;
-      setIsLoading(false);
       setSelectedMovie(meta?.imdb_id);
       return meta;
     } catch (error) {
-      setIsLoading(false);
       return null;
     } finally {
       setLoadingMore(false);
@@ -463,6 +443,10 @@ const MovieDetailScreen = () => {
     const newIndex = Math.round(offsetY / ITEM_HEIGHT);
 
     if (newIndex !== currentIndex && !isResettingRef.current) {
+      // FIX FOR ANDROID: Reset playback states immediately to stop background audio
+      setPaused(true);
+      setIsVideoPaused(true);
+
       if (newIndex === 2 && movieData[2]) {
         // Swiped down (Next)
         isResettingRef.current = true;
@@ -479,6 +463,7 @@ const MovieDetailScreen = () => {
         setCurrentFeedIndex(prev => prev + 1); // increment array position
 
         flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+
         setTimeout(() => {
           setCurrentIndex(1);
           isResettingRef.current = false;
@@ -514,6 +499,7 @@ const MovieDetailScreen = () => {
         setCurrentFeedIndex(prev => prev - 1); // decrement array position
 
         flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+
         setTimeout(() => {
           setCurrentIndex(1);
           isResettingRef.current = false;
@@ -641,6 +627,12 @@ const MovieDetailScreen = () => {
       setEpisodesLoder(false);
     }
   };
+  const handleRatingPress = useCallback((item: any, preference: 'love' | 'like' | 'dislike') => {
+    if (item) {
+      compareHook.openFeedbackModal(item, preference);
+    }
+  }, [compareHook]);
+
   // Format runtime (memoized to avoid new function reference in renderItem)
   const formatRuntime = useCallback((runtime: number | undefined) => {
     if (!runtime || isNaN(runtime)) return '';
@@ -677,7 +669,6 @@ const MovieDetailScreen = () => {
   useEffect(() => {
     if (movieData[currentIndex]) {
       setReviews([])
-      setCommentText('')
       const currentMovie = movieData[currentIndex];
       has_rated_ref.current = currentMovie?.has_rated ?? false;
       setHasRatedForCommentModal(!!currentMovie?.has_rated);
@@ -714,23 +705,19 @@ const MovieDetailScreen = () => {
 
   // Fix progress handler to properly handle seeking
   const onVideoProgress = useCallback((data: { currentTime: number; duration: number; progress: number }) => {
-    // Only update if not currently seeking
-    if (!isSeeking) {
-      // Update refs silently without triggering re-render
-      currentTimeRef.current = data.currentTime;
-      durationRef.current = data.duration;
-      progressRef.current = data.progress;
+    currentTimeRef.current = data.currentTime;
+    durationRef.current = data.duration;
+    progressRef.current = data.progress;
 
-      // Track trailer progress (kept as is for tracking accuracy)
-      if (!isVideoPaused && movieData[currentIndex]) {
-        trailerTracker.onProgress({
-          currentTime: data.currentTime,
-          imdb_id: movieData[currentIndex].imdb_id,
-          trailer_url: movieData[currentIndex].trailer_url,
-        });
-      }
+    // Track trailer progress (kept as is for tracking accuracy)
+    if (!isVideoPaused && movieData[currentIndex]) {
+      trailerTracker.onProgress({
+        currentTime: data.currentTime,
+        imdb_id: movieData[currentIndex].imdb_id,
+        trailer_url: movieData[currentIndex].trailer_url,
+      });
     }
-  }, [isVideoPaused, currentIndex, isSeeking]);
+  }, [isVideoPaused, currentIndex]);
 
 
   const handlerShowMuteImg = useCallback(() => {
@@ -835,12 +822,9 @@ const MovieDetailScreen = () => {
       return (
         <View style={itemContainerStyle}>
           {/* header */}
-          <CustomStatusBar />
-          <HeaderCustom
-            backIcon={imageIndex.backArrow}
-            rightIcon={imageIndex.search}
-            onRightPress={goToSearchScreen}
-            onBackPressW={goBack}
+          <MovieHeader
+            onBackPress={goBack}
+            onSearchPress={goToSearchScreen}
           />
           <View
           // style={contentTopStyle}
@@ -883,7 +867,7 @@ const MovieDetailScreen = () => {
                 )}
               </View>
             ) : <>
-              {index === currentIndex && !isVideoTransitioning && appInForeground && isScreenFocused && !!item?.trailer_url ? (
+              {index === currentIndex && appInForeground && isScreenFocused && !!item?.trailer_url && !isResettingRef.current ? (
                 <VideoPlayer
                   key={`video-android-${item?.imdb_id}-${videoMountKey}`}
                   source={{ uri: item.trailer_url }}
@@ -897,9 +881,7 @@ const MovieDetailScreen = () => {
                   onPlayPause={setPausedState}
                   onControllerVisibilityChange={setIsShowMuteIcon}
                   onProgress={onVideoProgress}
-                  seekTo={isSeeking ? seekPosition : undefined}
                   onLoad={handleVideoLoad}
-                  onSeek={handleVideoSeek}
                   ref={videoRef}
                 />
               ) : (
@@ -910,7 +892,6 @@ const MovieDetailScreen = () => {
                 />
               )}
             </>}
-            {/* Mute/Unmute: with controller on Android (onControllerVisibilityChange), and on iOS with timeout */}
             {index === currentIndex && isShowMuteIcon && (
               <TouchableOpacity
                 style={[
@@ -1089,74 +1070,13 @@ const MovieDetailScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              {item ?
-                (
-                  <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 2 }}>
-                    <View style={{ flexDirection: 'row', maxHeight: recommendationRowHeight - ((titleLinesMap[index] || 1) > 1 ? 25 : 0), marginTop: 10 }}>
-                      <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
-                        {(item?.plot || item?.description) && (
-                          <Text style={[styles.description, { marginBottom: 0 }]}>
-                            {item?.plot || item?.description}
-                          </Text>
-                        )}
-
-                        {item?.media_type && (
-                          <Text style={styles.descriptionLabel}>
-                            Media Type: <Text style={styles.descriptionValue}>{item.media_type}</Text>
-                          </Text>
-                        )}
-
-                        {item?.languages_spoken && (
-                          <Text style={styles.descriptionLabel}>
-                            Language: <Text style={styles.descriptionValue}>{item.languages_spoken}</Text>
-                          </Text>
-                        )}
-
-
-                        {item?.director && (
-                          <Text style={styles.descriptionLabel}>
-                            Director(s): <Text style={styles.descriptionValue}>{item.director}</Text>
-                          </Text>
-                        )}
-
-                        {item?.cast && item.cast.length > 0 && (
-                          <Text style={styles.descriptionLabel}>
-                            Stars: <Text style={styles.descriptionValue}>{item.cast.join(', ')}</Text>
-                          </Text>
-                        )}
-
-                        {item?.genres && item.genres.length > 0 && (
-                          <Text style={styles.descriptionLabel}>
-                            Genre: <Text style={styles.descriptionValue}>{item.genres.join(', ')}</Text>
-                          </Text>
-                        )}
-
-                        {item?.subgenres && item.subgenres.length > 0 && (
-                          <Text style={styles.descriptionLabel}>
-                            Subgenres: <Text style={styles.descriptionValue}>{(item.subgenres as string[]).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')}</Text>
-                          </Text>
-                        )}
-
-                        {item?.release_date && (
-                          <Text style={styles.descriptionLabel}>
-                            Release Date: <Text style={styles.descriptionValue}>{item.release_date}</Text>
-                          </Text>
-                        )}
-
-                        {item?.runtime && (
-                          <Text style={styles.descriptionLabel}>
-                            Runtime: <Text style={styles.descriptionValue}>{formatRuntime(item.runtime)}</Text>
-                          </Text>
-                        )}
-
-
-                        <View style={{ height: 40 }} />
-                        <LinearGradient colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.gradient} />
-                      </ScrollView>
-                    </View>
-                  </View>
-                ) :
-                <Text style={styles.description} >{t("emptyState.nodescription")}</Text>}
+              <MovieDescriptionSection
+                item={item}
+                recommendationRowHeight={recommendationRowHeight}
+                titleLines={titleLinesMap[index]}
+                formatRuntime={formatRuntime}
+                emptyStateText={t("emptyState.nodescription")}
+              />
 
               {item?.platforms && Array.isArray(item.platforms) && item.platforms.length > 0 && (
                 <View style={styles.whereToWatchSection}>
@@ -1230,128 +1150,16 @@ const MovieDetailScreen = () => {
             <View style={{
               paddingBottom: 0,
             }}>
-              <View style={styles.footerNav}>
-                <TouchableOpacity
-                  onPress={() => setWatchNow(true)}
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
-                >
-                  <Text style={styles.linkText} >{t("movieDetail.watchNow") || "Watch Now"}</Text>
-                </TouchableOpacity>
+              <FooterNav
+                onWatchNowPress={() => setWatchNow(true)}
+                onEpisodesPress={() => setEpisVisible(true)}
+                onMoreLikeThisPress={openMoreModal}
+              />
 
-                <TouchableOpacity
-                  onPress={() => setEpisVisible(true)}
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
-                >
-                  <Text style={styles.linkText} >{t("movieDetail.episodes")}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={openMoreModal}
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
-                >
-                  <Text style={styles.linkText} >{t("movieDetail.morelike")}</Text>
-                  {/* <Image source={imageIndex.rightArrow} style={styles.arrowIcon} resizeMode='contain' /> */}
-                </TouchableOpacity>
-              </View>
-
-              {/* Immediately Clickable Rating Options */}
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                backgroundColor: '#1A1A1A',
-                paddingTop: 14,
-                paddingBottom: 14,
-                paddingHorizontal: 16,
-                marginTop: 12,
-              }}>
-                <View style={{ flex: 1 }}>
-                  <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}>
-                    {t("movieDetail.howDoYouFeel") || "How do you feel about this one?"}
-                  </CustomText>
-                  <View style={{ width: '90%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, alignSelf: 'center' }} />
-                </View>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  {/* Loved it */}
-                  <TouchableOpacity
-                    style={{ alignItems: 'center', minWidth: 60 }}
-                    onPress={() => {
-                      if (item) {
-                        compareHook.openFeedbackModal(item, 'love');
-                      }
-                    }}
-                  >
-                    <Image
-                      source={item?.preference === 'love' ? imageIndex.acrtivePlay : imageIndex.stopPlay}
-                      style={{
-                        height: 24, width: 24,
-                        //  tintColor: item?.preference === 'love' ? undefined : Color.lightGrayText
-                      }}
-                      resizeMode="contain"
-                    />
-                    <CustomText
-                      size={12}
-                      color={item?.preference === 'love' ? Color.whiteText : Color.subText}
-                      font={item?.preference === 'love' ? font.PoppinsMedium : font.PoppinsRegular}
-                      style={{ marginTop: 4 }}
-                    >
-                      {t('modal.loveIt')}
-                    </CustomText>
-                  </TouchableOpacity>
-
-                  {/* It Was Okay */}
-                  <TouchableOpacity
-                    style={{ alignItems: 'center', minWidth: 60 }}
-                    onPress={() => {
-                      if (item) {
-                        compareHook.openFeedbackModal(item, 'like');
-                      }
-                    }}
-                  >
-                    <Image
-                      source={item?.preference === 'like' ? imageIndex.modalitWasPoster : imageIndex.play}
-                      style={{
-                        height: 24, width: 24,
-                      }}
-                      resizeMode="contain"
-                    />
-                    <CustomText
-                      size={12}
-                      color={item?.preference === 'like' ? Color.whiteText : Color.subText}
-                      font={item?.preference === 'like' ? font.PoppinsMedium : font.PoppinsRegular}
-                      style={{ marginTop: 4 }}
-                    >
-                      {t('modal.itWasOkay')}
-                    </CustomText>
-                  </TouchableOpacity>
-
-                  {/* Didn't Like It */}
-                  <TouchableOpacity
-                    style={{ alignItems: 'center', minWidth: 60 }}
-                    onPress={() => {
-                      if (item) {
-                        compareHook.openFeedbackModal(item, 'dislike');
-                      }
-                    }}
-                  >
-                    <Image
-                      source={item?.preference === 'dislike' ? imageIndex.redCloseActive : imageIndex.redClose}
-                      style={{
-                        height: 24, width: 24,
-                      }}
-                      resizeMode="contain"
-                    />
-                    <CustomText
-                      size={12}
-                      color={item?.preference === 'dislike' ? Color.whiteText : Color.subText}
-                      font={item?.preference === 'dislike' ? font.PoppinsMedium : font.PoppinsRegular}
-                      style={{ marginTop: 4 }}
-                    >
-                      {t('modal.didntLikeIt')}
-                    </CustomText>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <RatingSection
+                item={item}
+                onRatingPress={(preference) => handleRatingPress(item, preference)}
+              />
 
             </View>
           </View>
@@ -1364,9 +1172,7 @@ const MovieDetailScreen = () => {
       isVideoPaused,
       isMuted,
       isShowMuteIcon,
-      isSeeking,
       bookmarkMap,
-      seekPosition,
       paused,
       isFeedbackModal,
       thinkModal,
@@ -1377,7 +1183,6 @@ const MovieDetailScreen = () => {
       goBack,
       videoMountKey,
       isComparisonVisible,
-      isVideoTransitioning,
       appInForeground,
     ]
   );

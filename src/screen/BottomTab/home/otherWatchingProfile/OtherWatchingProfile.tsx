@@ -342,7 +342,7 @@ const OtherWatchingProfile = () => {
           }
         />
       </View>
-      
+
       {!disableBottomSheet && (
         <BottomSheet
           visible={bottomModal}
