@@ -2,6 +2,7 @@
 package com.reelrecs
 
 import android.util.Log
+import android.view.View
 import android.os.Handler
 import android.os.Looper
 import com.facebook.react.bridge.ReactApplicationContext
@@ -16,6 +17,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.media3.common.Player
+import androidx.media3.common.PlaybackException
 import androidx.media3.ui.AspectRatioFrameLayout
 
 @UnstableApi
@@ -104,9 +106,16 @@ class ExoPlayerViewManager(private val reactContext: ReactApplicationContext) :
                         isPlaying = isPlaying
                     ))
                     if (isPlaying) {
-        playerView?.showController()
-        playerView?.controllerShowTimeoutMs = 1000
-    }
+                        playerView?.showController()
+                        playerView?.controllerShowTimeoutMs = 1000
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    Log.e(TAG, "Player error: ${error.message}")
+                    val data = Arguments.createMap()
+                    data.putString("error", error.message ?: "Playback failed")
+                    handler.post { sendEvent("onVideoError", data) }
                 }
             })
 
@@ -119,7 +128,17 @@ class ExoPlayerViewManager(private val reactContext: ReactApplicationContext) :
             playerView?.setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
            // playerView?.controllerHideOnTouch = false // Touch pe hide disable
             playerView?.player = exoPlayer
-            
+
+            // Notify JS when controller is shown/hidden (e.g. for mute button visibility)
+            playerView?.setControllerVisibilityListener(object : PlayerView.ControllerVisibilityListener {
+                override fun onVisibilityChanged(visibility: Int) {
+                    val visible = (visibility == View.VISIBLE)
+                    val data = Arguments.createMap()
+                    data.putBoolean("visible", visible)
+                    handler.post { sendEvent("onControllerVisibilityChange", data) }
+                }
+            })
+
             // Initially controller show karo
             handler.postDelayed({
                 playerView?.showController()
@@ -157,7 +176,9 @@ class ExoPlayerViewManager(private val reactContext: ReactApplicationContext) :
             val dataSourceFactory = CacheDataSourceFactory(reactContext)
             val mediaItem = MediaItem.fromUri(uriString)
             
-            val mediaSource = if (uriString.endsWith(".m3u8")) {
+            // Treat as HLS if URL contains .m3u8 (handles video.m3u8?query=... style URLs)
+            val isHls = uriString.contains(".m3u8")
+            val mediaSource = if (isHls) {
                 androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(mediaItem)
             } else {

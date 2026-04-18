@@ -158,13 +158,13 @@ class AndroidExoPlayerCacheModule(reactContext: ReactApplicationContext) :
                 val cache = CacheDataSourceFactory.getCache(context)
                 val uri = Uri.parse(url)
                 
-                val httpsDataSourceFactory = DefaultHttpDataSource.Factory()
+                val httpDataSourceFactory = DefaultHttpDataSource.Factory()
                     .setConnectTimeoutMs(30000)
                     .setReadTimeoutMs(30000)
                 
                 val cacheDataSource = CacheDataSource.Factory()
                     .setCache(cache)
-                    .setUpstreamDataSourceFactory(httpsDataSourceFactory)
+                    .setUpstreamDataSourceFactory(httpDataSourceFactory)
                     .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
                     .createDataSource()
 

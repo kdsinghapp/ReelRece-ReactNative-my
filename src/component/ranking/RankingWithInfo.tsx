@@ -24,49 +24,49 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
   const [visible, setVisible] = useState(false);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const touchableRef = useRef(null);
+  const isProcessingPress = useRef(false);
 
+  const handlePress = (event: any) => {
+    // 1. Immediate lock (much faster than state) to prevent duplicate triggers
+    if (isProcessingPress.current || visible) return;
+    isProcessingPress.current = true;
 
-  const handlePress = (event: string) => {
-    const { pageY } = event.nativeEvent;
+    // 2. Clear the lock after a safe window to allow future legitimate taps
+    setTimeout(() => {
+      isProcessingPress.current = false;
+    }, 1000);
 
-    if (screenHeight - pageY < 225) {
-      setPlacement("top");
-    } else {
-      setPlacement("bottom");
-    };
-    setVisible(true);
+    // 3. Wait for the next frame before opening (user's "wait then load")
+    // This allows Android's layout/coords to settle
+    requestAnimationFrame(() => {
+      const pageY = event?.nativeEvent?.pageY;
+      if (pageY && screenHeight - pageY < 225) {
+        setPlacement("top");
+      } else {
+        setPlacement("bottom");
+      }
+      setVisible(true);
+    });
   };
   return (
     <View style={styles.container}>
-      {/* <Popover
-  isVisible={visible}
-  from={touchableRef}
-  onRequestClose={() => setVisible(false)}
-  placement={placement}
-  backgroundStyle={{ backgroundColor: "rgba(0,0,0,0)" }} // transparent backdrop
-  // popoverStyle={{ backgroundColor: Color.primary }}       // popover background
-   popoverStyle={{
-    backgroundColor: Color.primary,
-    borderWidth: 1,        // ✅ border visible
-    borderColor:  "rgba(0,0,0,0)", 
-    borderRadius: 8,       // ✅ rounded corners
-  }}
-  arrowStyle={{ borderTopColor: Color.primary }}          // arrow color (top arrow)
->
-
-        <View style={styles.tooltipBox}>
-          {title ? <Text style={styles.tooltipTitle}>{title}</Text> : null}
-          {description ? (
-            <Text style={styles.tooltipDescription}>{description}</Text>
-          ) : null}
-        </View>
-      </Popover> */}
+      <TouchableOpacity
+        ref={touchableRef}
+        onPress={handlePress}
+        activeOpacity={0.8}
+        disabled={visible} // Disable triggering while already active
+        style={[styles.cardWrapper, {
+        }]}
+      >
+        <RankingCard ranked={score ?? '?'} loading={loading} />
+      </TouchableOpacity>
 
       <Popover
         isVisible={visible}
         from={touchableRef}
         onRequestClose={() => setVisible(false)}
         placement={placement}
+        showInModal={true} // Using native modal mode is more stable on Android
         backgroundStyle={{ backgroundColor: "rgba(0,0,0,0)" }}
         popoverStyle={{
           backgroundColor: Color.primary,
@@ -83,20 +83,6 @@ const RankingWithInfo: React.FC<RankingWithInfoProps> = ({
           ) : null}
         </View>
       </Popover>
-
-
-      <TouchableOpacity
-        ref={touchableRef}
-        onPress={handlePress}
-        activeOpacity={0.8}
-        style={[styles.cardWrapper, {
-        }]}
-      >
-        <RankingCard ranked={score ?? '?'} loading={loading} />
-
-
-      </TouchableOpacity>
-
     </View>
   );
 };

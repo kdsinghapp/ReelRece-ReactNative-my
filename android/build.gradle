@@ -18,10 +18,10 @@ buildscript {
     // Enable support for Smooth Streaming with ExoPlayer
     useExoplayerSmoothStreaming = true
 
-    // Enable support for DASH (Dynamic Adaptive Streaming over http) with ExoPlayer
+    // Enable support for DASH (Dynamic Adaptive Streaming over HTTP) with ExoPlayer
     useExoplayerDash = true
 newArchEnabled=true
-    // Enable support for HLS (http Live Streaming) with ExoPlayer
+    // Enable support for HLS (HTTP Live Streaming) with ExoPlayer
     useExoplayerHls = true
     }
     repositories {
@@ -30,9 +30,6 @@ newArchEnabled=true
         maven { url 'https://jitpack.io' }
         
     }
-
-
-
 
     dependencies {
         classpath("com.android.tools.build:gradle")

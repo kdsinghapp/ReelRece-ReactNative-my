@@ -12,8 +12,9 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import { useNavigation } from '@react-navigation/native';
 import CreateGroupName from '@components/modal/GroupMemberModal/CreateGroupName';
 import SelectFriendCom from '@components/common/SelectFriendCom/SelectFriendCom';
-import { useSelector } from 'react-redux';
-import { RootState } from '@redux/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@redux/store';
+import { fetchWatchGroups } from '@redux/feature/watchSlice';
 import { createGroup, getAllGroups, getGroupActivities, getGroupMembers } from '@redux/Api/GroupApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useSignup from '@screens/Auth/signup/useSignup';
@@ -22,6 +23,7 @@ import { t } from 'i18next';
 import { useNetworkStatus } from '@hooks/useNetworkStatus';
 const CreateGroupScreen = () => {
   const { setToastMess, toastMess } = useSignup();
+  const dispatch = useDispatch<AppDispatch>();
   const token = useSelector((state: RootState) => state.auth.token);
   const currentUser = useSelector((state: RootState) => state.auth.userGetData);
   const navigation = useNavigation();
@@ -114,9 +116,9 @@ const CreateGroupScreen = () => {
       setGroup_api_create(true);
       setLoader(false)
       showToast("Group created successfully!", true);
-      setTimeout(() => {
-        navigation.goBack();
-      }, 300);
+      // Wait for the Redux refresh before navigating back
+      await dispatch(fetchWatchGroups()).unwrap();
+      navigation.goBack();
     } catch (error: any) {
       setLoader(false)
 

@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "613342758501",
-    "project_id": "reelrecs-5b73e",
-    "storage_bucket": "reelrecs-5b73e.firebasestorage.app"
+    "project_number": "1001335650941",
+    "project_id": "reelrecs-b7a36",
+    "storage_bucket": "reelrecs-b7a36.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:613342758501:android:0b4a375ac99ed27b71288c",
+        "mobilesdk_app_id": "1:1001335650941:android:87f9d638680d4c595ecf14",
         "android_client_info": {
           "package_name": "com.reelrecs"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1001335650941-92ge8ls1blniv5v6hlf0dce0ao28cgmm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reelrecs",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1001335650941-lonj4dper84hfndl6r2681r3d6op44k9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBkKOJkSaJt2pmN4muxBQoK-EMIkAlIcZ0"
+          "current_key": "AIzaSyAijHSfUQpVUOXI8jweOzfw70W7sQ_DpC4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1001335650941-lonj4dper84hfndl6r2681r3d6op44k9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1001335650941-anfmlqsqkfhtvnemkmhus2juhna580g7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.reelrecs2024.app"
+              }
+            }
+          ]
         }
       }
     }

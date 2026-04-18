@@ -58,7 +58,7 @@ const Welcome = () => {
         navigation.replace(ScreenNameEnum.OnboardingScreen);
       } else {
         navigation.replace(ScreenNameEnum.TabNavigator, {
-          screen: ScreenNameEnum.RankingTab,
+          screen: ScreenNameEnum.FeedTab,
         });
       }
     } else {

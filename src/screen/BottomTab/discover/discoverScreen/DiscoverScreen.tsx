@@ -138,30 +138,35 @@ const DiscoverScreen = () => {
     (page: number) => {
       let baseEndpoint = '';
 
-      // your endpoints
-      if (selectedSimpleFilter === '1') baseEndpoint = '/recommend-movies?sort_by=rec_score';
+      if (selectedSimpleFilter === '1') baseEndpoint = '/recommend-movies';
       else if (selectedSimpleFilter === '2') baseEndpoint = '/trending';
       else if (selectedSimpleFilter === '5') baseEndpoint = '/bookmarks';
 
-      // if baseEndpoint already has ?, then use &
-      const urlStarts = baseEndpoint.includes('?')
-        ? `${baseEndpoint}&country=${selectedCountry}&page=${page}`
-        : `${baseEndpoint}?country=${selectedCountry}&page=${page}`;
+      const queryParams: string[] = [];
+      queryParams.push(`country=${selectedCountry}`);
+      queryParams.push(`page=${page}`);
 
-      let url = urlStarts;
-
-      if (filterGenreString) url += `&genres=${filterGenreString}`;
+      if (filterGenreString) {
+        queryParams.push(`genres=${encodeURIComponent(filterGenreString)}`);
+      }
       if (platformFilterString) {
-        url += `&platforms=${platformFilterString}`;
-        url += `&watch_type=subscription`;
+        queryParams.push(`platforms=${encodeURIComponent(platformFilterString)}`);
+        queryParams.push(`watch_type=subscription`);
       }
 
       const sortParam = getSortParam(selectedSortId ?? null);
-      if (sortParam) url += `&sort_by=${sortParam}`;
+      if (sortParam) {
+        queryParams.push(`sort_by=${sortParam}`);
+      }
 
       const mediaTypeParam = getMediaTypeParam(contentSelect ?? null);
-      if (mediaTypeParam) url += `&media_type=${mediaTypeParam}`;
+      if (mediaTypeParam) {
+        queryParams.push(`media_type=${mediaTypeParam}`);
+      }
 
+      const queryString = queryParams.join('&');
+      const url = `${baseEndpoint}?${queryString}`;
+      console.log('Discover screen request URL:', url);
       return url;
     },
     [

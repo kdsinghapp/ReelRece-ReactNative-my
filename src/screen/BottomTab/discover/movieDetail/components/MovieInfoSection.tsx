@@ -18,6 +18,7 @@ interface MovieItem {
   friends_rec_score?: number | null;
   n_comments?: number;
   description?: string;
+  has_rated?: boolean;
 }
 
 interface MovieInfoSectionProps {
@@ -100,24 +101,24 @@ const MovieInfoSection = ({
       </View>
 
       <View style={[styles.scoreRow, { marginTop: 4.5 }]}>
-        <TouchableOpacity style={styles.scoreBoxGreen} disabled={true}>
+        <View style={styles.scoreBoxGreen}>
           <RankingWithInfo
             score={item?.rec_score}
-            title={t("discover.recscore")}
+            title={item?.has_rated ? t("discover.yourscore") : t("discover.recscore")}
             description={t("discover.recscoredes")} />
-          <TouchableOpacity disabled={true}>
+          <View>
             <CustomText
               size={14}
               color={Color.whiteText}
               style={{ marginLeft: 6 }}
               font={font.PoppinsMedium}
             >
-              {t("discover.recscore")}
+              {item?.has_rated ? t("discover.yourscore") : t("discover.recscore")}
             </CustomText>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </View>
+        </View>
 
-        <TouchableOpacity style={[styles.scoreBoxGreen, {}]} disabled={true}>
+        <View style={[styles.scoreBoxGreen, {}]}>
           <View style={{}}>
             <RankingWithInfo
               score={item?.friends_rec_score == null || Number(item?.friends_rec_score) < 0 ? '?' : Number(item.friends_rec_score)}
@@ -139,7 +140,7 @@ const MovieInfoSection = ({
           >
             {item?.friends_rec_score != null && Number(item?.friends_rec_score) >= 0 ? item?.friends_rec_score : '?'}
           </CustomText>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.actionRow}>
           <TouchableOpacity

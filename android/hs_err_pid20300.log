@@ -1658,7 +1658,7 @@ Dynamic libraries:
 0x00007ffc92180000 - 0x00007ffc921af000 	C:\WINDOWS\SYSTEM32\profapi.dll
 0x00007ffc59560000 - 0x00007ffc59578000 	C:\Program Files\Java\jdk-17\bin\zip.dll
 0x00007ffc65f50000 - 0x00007ffc65f69000 	C:\Program Files\Java\jdk-17\bin\net.dll
-0x00007ffc8c1c0000 - 0x00007ffc8c2de000 	C:\WINDOWS\SYSTEM32\WINhttp.dll
+0x00007ffc8c1c0000 - 0x00007ffc8c2de000 	C:\WINDOWS\SYSTEM32\WINHTTP.dll
 0x00007ffc915a0000 - 0x00007ffc9160a000 	C:\WINDOWS\system32\mswsock.dll
 0x00007ffc5d2b0000 - 0x00007ffc5d2c6000 	C:\Program Files\Java\jdk-17\bin\nio.dll
 0x00007ffc6de20000 - 0x00007ffc6de30000 	C:\Program Files\Java\jdk-17\bin\verify.dll

@@ -1677,7 +1677,7 @@ instanceKlass org/gradle/internal/work/DefaultAsyncWorkTracker$1
 instanceKlass org/gradle/internal/work/DefaultConditionalExecutionQueue$ExecutionRunner
 instanceKlass org/gradle/internal/work/AbstractConditionalExecution
 instanceKlass org/jetbrains/kotlin/gradle/report/BuildScanSettings
-instanceKlass org/jetbrains/kotlin/build/report/httpReportSettings
+instanceKlass org/jetbrains/kotlin/build/report/HttpReportSettings
 instanceKlass org/jetbrains/kotlin/build/report/FileReportSettings
 instanceKlass com/google/common/collect/ImmutableSet$SerializedForm
 instanceKlass org/jetbrains/kotlin/incremental/IncrementalModuleInfo
@@ -10755,39 +10755,39 @@ instanceKlass org/gradle/internal/resource/transfer/DefaultExternalResourceConne
 instanceKlass org/gradle/internal/resource/transfer/DefaultExternalResourceConnector$1
 instanceKlass org/gradle/internal/resource/transfer/DefaultExternalResourceConnector$ExternalResourceAccessStats
 instanceKlass org/gradle/internal/resource/transfer/DefaultExternalResourceConnector
-instanceKlass org/apache/http/httpEntityEnclosingRequest
-instanceKlass org/apache/http/httpEntity
-instanceKlass org/gradle/internal/resource/transport/http/httpResourceUploader
-instanceKlass org/gradle/internal/resource/transport/http/httpResourceLister
+instanceKlass org/apache/http/HttpEntityEnclosingRequest
+instanceKlass org/apache/http/HttpEntity
+instanceKlass org/gradle/internal/resource/transport/http/HttpResourceUploader
+instanceKlass org/gradle/internal/resource/transport/http/HttpResourceLister
 instanceKlass org/gradle/internal/resource/transfer/ExternalResourceReadResponse
 instanceKlass org/gradle/internal/resource/transfer/AbstractExternalResourceAccessor
-instanceKlass org/apache/http/protocol/httpContext
-instanceKlass org/apache/http/message/AbstracthttpMessage
-instanceKlass org/apache/http/client/methods/AbortablehttpRequest
-instanceKlass org/apache/http/client/methods/httpExecutionAware
+instanceKlass org/apache/http/protocol/HttpContext
+instanceKlass org/apache/http/message/AbstractHttpMessage
+instanceKlass org/apache/http/client/methods/AbortableHttpRequest
+instanceKlass org/apache/http/client/methods/HttpExecutionAware
 instanceKlass org/apache/http/client/methods/Configurable
-instanceKlass org/apache/http/client/methods/httpUriRequest
+instanceKlass org/apache/http/client/methods/HttpUriRequest
 instanceKlass org/slf4j/spi/LocationAwareLogger
 instanceKlass org/apache/commons/logging/impl/SLF4JLog
 instanceKlass org/apache/commons/logging/impl/SLF4JLocationAwareLog
 instanceKlass org/apache/commons/logging/Log
 instanceKlass org/apache/commons/logging/LogFactory
 instanceKlass org/apache/http/conn/ssl/DefaultHostnameVerifier
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings$Builder
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings$2$2
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings$Builder
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings$2$2
 instanceKlass javax/net/ssl/X509TrustManager
 instanceKlass javax/net/ssl/TrustManager
 instanceKlass com/google/common/base/Suppliers$MemoizingSupplier
 instanceKlass com/google/common/base/Suppliers$NonSerializableMemoizingSupplier
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings$2$1
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings$2
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings$1
-instanceKlass org/gradle/internal/resource/transport/http/httpTimeoutSettings
-instanceKlass org/gradle/internal/resource/transport/http/httpProxySettings
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings$2$1
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings$2
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings$1
+instanceKlass org/gradle/internal/resource/transport/http/HttpTimeoutSettings
+instanceKlass org/gradle/internal/resource/transport/http/HttpProxySettings
 instanceKlass javax/net/ssl/HostnameVerifier
-instanceKlass org/gradle/internal/resource/transport/http/DefaulthttpSettings
+instanceKlass org/gradle/internal/resource/transport/http/DefaultHttpSettings
 instanceKlass org/gradle/api/internal/artifacts/repositories/transport/RepositoryTransportFactory$DefaultResourceConnectorSpecification
-instanceKlass org/gradle/internal/verifier/httpRedirectVerifierFactory
+instanceKlass org/gradle/internal/verifier/HttpRedirectVerifierFactory
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/ivyresolve/ExternalModuleComponentResolverFactory$ParentModuleLookupResolver
 instanceKlass org/gradle/internal/resolve/result/BuildableArtifactFileResolveResult
 instanceKlass org/gradle/internal/resolve/result/BuildableTypedResolveResult
@@ -11772,9 +11772,9 @@ instanceKlass org/gradle/internal/resource/transport/sftp/LockableSftpClient
 instanceKlass org/gradle/internal/resource/transport/sftp/SftpClientFactory$SftpClientCreator
 instanceKlass org/gradle/internal/resource/transport/aws/s3/S3ConnectorFactory
 instanceKlass org/gradle/internal/resource/transport/gcp/gcs/GcsConnectorFactory
-instanceKlass org/gradle/internal/resource/transport/http/httpConnectorFactory
-instanceKlass org/gradle/internal/resource/transport/http/httpClientHelper
-instanceKlass org/gradle/internal/resource/transport/http/httpSettings
+instanceKlass org/gradle/internal/resource/transport/http/HttpConnectorFactory
+instanceKlass org/gradle/internal/resource/transport/http/HttpClientHelper
+instanceKlass org/gradle/internal/resource/transport/http/HttpSettings
 instanceKlass org/gradle/internal/resource/transport/http/DefaultSslContextFactory
 instanceKlass org/gradle/internal/resource/transport/file/FileConnectorFactory
 instanceKlass org/gradle/internal/metaobject/DynamicObjectUtil
@@ -13126,10 +13126,10 @@ instanceKlass org/gradle/internal/enterprise/impl/GradleEnterprisePluginAutoAppl
 instanceKlass org/gradle/plugin/use/internal/PluginRequestApplicator$PluginApplicationListener
 instanceKlass org/gradle/composite/internal/plugins/CompositeBuildPluginResolverContributor
 instanceKlass org/gradle/plugin/use/resolve/internal/PluginResolverContributor
-instanceKlass org/apache/http/httpRequest
-instanceKlass org/apache/http/httpMessage
-instanceKlass org/gradle/caching/http/internal/httpBuildCacheRequestCustomizer
-instanceKlass org/gradle/caching/http/internal/DefaulthttpBuildCacheServiceFactory
+instanceKlass org/apache/http/HttpRequest
+instanceKlass org/apache/http/HttpMessage
+instanceKlass org/gradle/caching/http/internal/HttpBuildCacheRequestCustomizer
+instanceKlass org/gradle/caching/http/internal/DefaultHttpBuildCacheServiceFactory
 instanceKlass org/gradle/caching/BuildCacheServiceFactory
 instanceKlass org/gradle/caching/configuration/AbstractBuildCache
 instanceKlass org/gradle/caching/configuration/BuildCache
@@ -13225,14 +13225,14 @@ instanceKlass org/gradle/plugin/use/internal/PluginRepositoryHandlerProvider
 instanceKlass org/gradle/api/internal/artifacts/DependencyResolutionServices
 instanceKlass org/gradle/plugin/use/resolve/service/internal/ClientInjectedClasspathPluginResolver
 instanceKlass org/gradle/plugin/internal/PluginUseServices$BuildScopeServices
-instanceKlass org/gradle/authentication/http/httpHeaderAuthentication
+instanceKlass org/gradle/authentication/http/HttpHeaderAuthentication
 instanceKlass org/gradle/authentication/http/DigestAuthentication
 instanceKlass org/gradle/internal/authentication/AbstractAuthentication
 instanceKlass org/gradle/internal/authentication/AuthenticationInternal
 instanceKlass org/gradle/authentication/http/BasicAuthentication
 instanceKlass org/gradle/authentication/Authentication
 instanceKlass org/gradle/internal/authentication/DefaultAuthenticationSchemeRegistry
-instanceKlass org/gradle/internal/resource/transport/http/httpResourcesServices$AuthenticationSchemeAction
+instanceKlass org/gradle/internal/resource/transport/http/HttpResourcesServices$AuthenticationSchemeAction
 instanceKlass org/gradle/api/internal/artifacts/MetadataResolutionContext
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/ivyresolve/ComponentResolvers
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/ivyresolve/ModuleComponentRepository
@@ -13256,7 +13256,7 @@ instanceKlass org/gradle/api/internal/artifacts/DefaultProjectDependencyFactory
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/ivyresolve/verification/DependencyVerificationOverride
 instanceKlass org/gradle/internal/management/DependencyResolutionManagementInternal
 instanceKlass org/gradle/api/initialization/resolve/DependencyResolutionManagement
-instanceKlass org/gradle/internal/verifier/httpRedirectVerifier
+instanceKlass org/gradle/internal/verifier/HttpRedirectVerifier
 instanceKlass org/gradle/internal/resolve/caching/CrossBuildCachingRuleExecutor
 instanceKlass org/gradle/internal/resolve/caching/CachingRuleExecutor
 instanceKlass org/gradle/api/internal/artifacts/repositories/transport/RepositoryTransportFactory
@@ -15457,9 +15457,9 @@ instanceKlass org/gradle/api/plugins/internal/HelpBuiltInCommand
 instanceKlass org/gradle/configuration/project/BuiltInCommand
 instanceKlass org/gradle/plugin/internal/PluginUseServices$GlobalScopeServices
 instanceKlass java/lang/FunctionalInterface
-instanceKlass org/gradle/internal/resource/transport/http/httpClientHelper$Factory
+instanceKlass org/gradle/internal/resource/transport/http/HttpClientHelper$Factory
 instanceKlass org/gradle/internal/resource/transport/http/SslContextFactory
-instanceKlass org/gradle/internal/resource/transport/http/httpResourcesServices$GlobalScopeServices
+instanceKlass org/gradle/internal/resource/transport/http/HttpResourcesServices$GlobalScopeServices
 instanceKlass org/gradle/internal/fingerprint/FileNormalizer
 instanceKlass org/gradle/api/problems/ProblemSpec
 instanceKlass org/gradle/api/problems/internal/DocLink
@@ -17392,7 +17392,7 @@ instanceKlass org/gradle/api/internal/artifacts/ivyservice/resolveengine/graph/b
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/resolveengine/graph/builder/ComponentState$ComponentSelectionState
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/ivyresolve/RepositoryDisabler$NoOpDisabler
 instanceKlass org/gradle/internal/resource/transfer/DefaultExternalResourceConnector$ExternalResourceAccessStats$Mode
-instanceKlass org/gradle/internal/resource/transport/http/httpSettings$RedirectMethodHandlingStrategy
+instanceKlass org/gradle/internal/resource/transport/http/HttpSettings$RedirectMethodHandlingStrategy
 instanceKlass org/gradle/api/artifacts/ResolutionStrategy$SortOrder
 instanceKlass org/gradle/api/internal/artifacts/configurations/ConflictResolution
 instanceKlass org/gradle/api/artifacts/result/ComponentSelectionCause
@@ -18687,7 +18687,7 @@ instanceKlass org/tomlj/TomlInvalidTypeException
 instanceKlass org/gradle/api/internal/artifacts/ivyservice/resolveengine/result/GraphValidationException
 instanceKlass org/gradle/caching/internal/controller/BuildCacheOperationException
 instanceKlass kotlin/reflect/jvm/internal/impl/utils/WrappedValues$WrappedProcessCanceledException
-instanceKlass org/gradle/internal/resource/transport/http/httpErrorStatusCodeException
+instanceKlass org/gradle/internal/resource/transport/http/HttpErrorStatusCodeException
 instanceKlass org/gradle/api/internal/NullNamingPropertyException
 instanceKlass org/gradle/api/internal/NoNamingPropertyException
 instanceKlass org/gradle/internal/locking/InvalidLockFileException
@@ -20027,7 +20027,7 @@ staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics JS_KLIB_INCRE
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics JS_IR_INCREMENTAL Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics FILE_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics BUILD_SCAN_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
-staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics http_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
+staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics HTTP_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics SINGLE_FILE_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics JSON_BUILD_REPORT Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics
 staticfield org/jetbrains/kotlin/statistics/metrics/BooleanMetrics ENABLED_DOKKA Lorg/jetbrains/kotlin/statistics/metrics/BooleanMetrics; org/jetbrains/kotlin/statistics/metrics/BooleanMetrics

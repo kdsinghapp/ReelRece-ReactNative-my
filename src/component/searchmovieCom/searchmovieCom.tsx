@@ -319,7 +319,7 @@ const SearchMovieCom = ({
           </Text>
         </View>
       )}
-      
+
     </View>
   );
 };

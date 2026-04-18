@@ -24,6 +24,10 @@ interface Props {
   isModalOpen?: boolean;
   onTogglePause?: () => void;
   onToggleMute?: () => void;
+  onReadyForDisplay?: () => void;
+  height?: number;
+  containerStyle?: any;
+  resizeMode?: "stretch" | "contain" | "cover";
 }
 
 const CustomVideoPlayer: React.FC<Props> = ({
@@ -32,7 +36,11 @@ const CustomVideoPlayer: React.FC<Props> = ({
   paused = false,
   isModalOpen = false,
   onTogglePause,
-  onToggleMute
+  onToggleMute,
+  onReadyForDisplay,
+  height: propHeight,
+  containerStyle,
+  resizeMode = "stretch"
 }) => {
   const videoRef = useRef(null);
   const hideTimer = useRef(null);
@@ -210,13 +218,13 @@ const CustomVideoPlayer: React.FC<Props> = ({
 
   return (
     <TouchableWithoutFeedback onPress={handleContainerPress}>
-      <View style={styles.container}>
+      <View style={[styles.container, containerStyle]}>
         {/* VIDEO */}
         <Video
           ref={videoRef}
           source={{ uri: videoUrl }}
-          style={[styles.video, { height: height / 3.9 }]}
-          resizeMode="contain"
+          style={[styles.video, { height: propHeight || (height / 3.9) }]}
+          resizeMode={resizeMode}
           paused={finalPaused}
           muted={muted}
           onProgress={(d) => {
@@ -225,6 +233,7 @@ const CustomVideoPlayer: React.FC<Props> = ({
             }
           }}
           onLoad={(d) => setDuration(d.duration)}
+          onReadyForDisplay={onReadyForDisplay}
           progressUpdateInterval={250}
           playInBackground={false}
           playWhenInactive={false}
@@ -291,22 +300,22 @@ const CustomVideoPlayer: React.FC<Props> = ({
                   />
                 </View>
               </View>
+
+              {/* TIME DISPLAY MOVED INSIDE OVERLAY */}
+              {!isModalOpen && (
+                <View style={[styles.timeRow, { marginTop: 4 }]}>
+                  <Text style={styles.timeText}>
+                    <Text style={{ color: "white" }}>
+                      {formatTime(currentTime)}
+                    </Text>
+                    <Text style={{ color: "gray" }}>
+                      {" "}{formatTime(duration)}
+                    </Text>
+                  </Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
-        )}
-
-        {/* TIME DISPLAY */}
-        {!isModalOpen && (
-          <View style={[styles.timeRow, { marginLeft: 13 }]}>
-            <Text style={styles.timeText}>
-              <Text style={{ color: "white" }}>
-                {formatTime(currentTime)}
-              </Text>
-              <Text style={{ color: "gray" }}>
-                {" "}{formatTime(duration)}
-              </Text>
-            </Text>
-          </View>
         )}
       </View>
     </TouchableWithoutFeedback>
@@ -317,7 +326,7 @@ export default CustomVideoPlayer;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#000",
+    backgroundColor: "transparent",
   },
   video: {
     width: "100%",
@@ -330,7 +339,7 @@ const styles = StyleSheet.create({
   },
   muteButton: {
     position: 'absolute',
-    top: Platform.OS === "ios" ? 33 : 10,
+    top: Platform.OS === "ios" ? 15 : 10,
     right: 10,
     zIndex: 1000,
     borderRadius: 20,
@@ -353,7 +362,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     paddingHorizontal: 10,
-    bottom: 15,
+    bottom: 5,
   },
   progressWrapper: {
     width: "100%",
@@ -369,7 +378,7 @@ const styles = StyleSheet.create({
   timeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 6,
+    marginTop: 2,
   },
   timeText: {
     color: "#fff",
