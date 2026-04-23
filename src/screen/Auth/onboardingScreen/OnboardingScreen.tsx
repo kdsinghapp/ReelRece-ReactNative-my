@@ -12,6 +12,8 @@ import {
   Animated,
   Easing,
   BackHandler,
+  TextInput,
+  Keyboard,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -26,12 +28,12 @@ import { useCompareContext } from '../../../context/CompareContext';
 import { fetchRankingRatedMovies, fetchRankingSuggestionMovies } from '@redux/feature/rankingSlice';
 import { searchMovies, deleteRatedMovie, getHubMovies, thumbsDownMovie, getThumbsDownMovies } from '@redux/Api/movieApi';
 import { RootState, AppDispatch } from '@redux/store';
-import RankingWithInfo from '../../../component/ranking/RankingWithInfo';
 import { Movie } from '../../../types/api.types';
+import RankingCard from '@components/ranking/RankingCard';
 import DislikeStep from './DislikeStep';
 import imageIndex from '@assets/imageIndex';
 import { t } from 'i18next';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import OutlineTextIOS from '@components/NumbetTextIOS';
 import LayeredShadowText from '@components/common/LayeredShadowText/LayeredShadowText';
 
@@ -104,13 +106,13 @@ const SLOT_GAP = 8;
 const HORIZONTAL_PADDING = 16;
 const totalSlotWidth = width - HORIZONTAL_PADDING * 2 - SLOT_GAP * (SLOT_COUNT - 1);
 const slotWidth = totalSlotWidth / SLOT_COUNT;
-const slotHeight = slotWidth * 1.40;
+const slotHeight = slotWidth / 0.795;
 
 const GRID_COLS = 3;
 const GRID_GAP = 12;
 const totalGridWidth = width - HORIZONTAL_PADDING * 2 - GRID_GAP * (GRID_COLS - 1);
 const gridItemWidth = totalGridWidth / GRID_COLS;
-const gridItemHeight = gridItemWidth * 1.45;
+const gridItemHeight = gridItemWidth / 0.795;
 
 const OnboardingScreen = () => {
   const [currentPhase, setCurrentPhase] = useState<'slides' | 'rating' | 'dislike'>('slides');
@@ -133,8 +135,8 @@ const OnboardingScreen = () => {
       image: imageIndex.step3,
       title: t('onboarding.title1'),
       title1: '',
-      desc: '',
-      playImg: imageIndex.WatchNowButton2,
+      desc: 'Every rating improves accuracy and tailor suggestions to your unique preferences.',
+      playImg: imageIndex.WatchNowButton2
     },
   ];
 
@@ -180,7 +182,7 @@ const OnboardingScreen = () => {
         // This prevents the 'lag' because as soon as an item is in Redux, it moves from 
         // the optimistic list to the base list without being removed from the final merged display.
         const pendingItems = prev.filter(m => !ratedMovieFromRedux.some(r => r.imdb_id === m.imdb_id));
-        
+
         // We also want to make sure we include any NEW items that appeared in Redux but weren't in our prev
         // Actually, ratedMovieFromRedux is already handled in mergedRatedMovies useMemo (line 289),
         // so optimisticRatedMovies ONLY needs to hold the pending delta now.
@@ -359,17 +361,42 @@ const OnboardingScreen = () => {
       <TouchableOpacity
         style={[
           styles.gridItem,
-          isRated && styles.gridItemRated
+          isRated && styles.gridSelectedGlow
         ]}
         activeOpacity={0.8}
         onPress={() => !isRated && openFeedbackModal(item, undefined, { isOnboarding: true })}
         disabled={isRated}
       >
-        <FastImage
-          source={{ uri: posterUrl, priority: FastImage.priority.high }}
-          style={styles.gridPoster}
-          resizeMode={FastImage.resizeMode.stretch}
-        />
+        {isRated ? (
+          <LinearGradient
+            colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gridItemGradient}
+          >
+            <View style={[styles.gridItemInner]}>
+              <FastImage
+                source={{ uri: posterUrl, priority: FastImage.priority.high }}
+                style={styles.gridPoster}
+                resizeMode={FastImage.resizeMode.stretch}
+              />
+              <View style={{ backgroundColor: '#00000099', height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+              {item?.rec_score !== undefined && (
+                <View style={styles.gridScoreBadge}>
+                  <RankingCard ranked={item.rec_score} />
+                </View>
+              )}
+            </View>
+          </LinearGradient>
+        ) : (
+          <View style={styles.gridItemInner}>
+            <FastImage
+              source={{ uri: posterUrl, priority: FastImage.priority.high }}
+              style={styles.gridPoster}
+              resizeMode={FastImage.resizeMode.stretch}
+            />
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -393,10 +420,15 @@ const OnboardingScreen = () => {
               <FloatingColumn key={i} posters={column} columnIndex={i} isAtTop={i % 2 === 0} />
             ))}
           </View>
-          <LinearGradient
-            colors={['rgba(0,108,157,0.35)', 'rgba(0,24,35,0.75)']}
-            locations={[0, 0.5]}
-            style={StyleSheet.absoluteFill}
+          <Image
+            source={imageIndex.welcomefullbg}
+            style={styles.fullOverlay}
+            resizeMode="stretch"
+          />
+          <Image
+            source={imageIndex.onboardingbox}
+            style={styles.bottomOverlay}
+            resizeMode="stretch"
           />
           <Animated.View
             style={[
@@ -415,8 +447,8 @@ const OnboardingScreen = () => {
               <View style={styles.bottomContainerSlides}>
                 <Image source={slide.playImg} style={styles.playBtn} />
                 <View style={styles.textBox}>
-                  <Text style={styles.titleSlides}>{slide.title}</Text>
-                  {slide.title1 ? <Text style={styles.titleSlides}>{slide.title1}</Text> : null}
+                  <Text style={styles.titleSlides}>{slide.title}{slide.title1 && '\n' + slide.title1}</Text>
+                  {/* {slide.title1 ? <Text style={styles.titleSlides}>{slide.title1}</Text> : null} */}
                   {slide.desc ? <Text style={styles.descSlides}>{slide.desc}</Text> : null}
                 </View>
               </View>
@@ -442,95 +474,121 @@ const OnboardingScreen = () => {
       />
     );
   }
-
+  const insets = useSafeAreaInsets()
   return (
-    <SafeAreaView style={styles.root} edges={['top']}>
+    <SafeAreaView style={styles.root} edges={[]}>
+      <View style={{ backgroundColor: Color.gray, height: insets.top }} />
       <View style={styles.container}>
         {/* Header */}
-        {currentRatedCount === 0 && (
-          <Image
-            source={imageIndex.appLogo}
-            style={styles.headerImage}
-            resizeMode="contain"
-          />
-        )}
-        <>
-          <Text style={styles.title}>Pick and Rate 6 Titles</Text>
-          <Text style={styles.subtitle}>Your ratings guide us to titles that fit your taste.</Text>
-        </>
-
-        {currentRatedCount > 0 && (
-
-          <View style={styles.slotsRow}>
-            {slots.map((item: any, index: number) => {
-              const posterUrl = item?.cover_image_url;
-              return (
-                <View style={{ width: slotWidth, height: slotHeight, marginRight: index < SLOT_COUNT - 1 ? SLOT_GAP : 0 }}>
-                  <View key={`${item?.imdb_id || index}`} style={styles.slot}>
-                    {posterUrl && (
-                      <View>
-                        <FastImage
-                          source={{ uri: posterUrl }}
-                          style={styles.slotPoster}
-                          resizeMode={FastImage.resizeMode.stretch}
-                        />
-                        <TouchableOpacity
-                          style={styles.removeBtn}
-                          onPress={() => handleRemoveMovie(item)}
-                        >
-                          <Image
-                            source={imageIndex.closeCircle}
-                            style={styles.removeIcon}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    )}
-
-
-                  </View>
-                  <View style={styles.slotPlaceholder}>
-                    {Platform.OS === 'ios' ? (
-                      <OutlineTextIOS text={String(index + 1)} fontSize={40} />
-                    ) : (
-                      <LayeredShadowText text={String(index + 1)} fontSize={40} marginRight={0} />
-                    )}
-                  </View>
-                </View>
-              )
-
-            })}
-          </View>
-        )}
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <SearchBarCustom
-            placeholder="Search movies, shows ..."
-            onSearchChange={handleSearchChange}
-            value={searchQuery}
-          />
+        <View style={{ backgroundColor: Color.gray }}>
+          {currentRatedCount === 0 && (
+            <Image
+              source={imageIndex.appLogo}
+              style={styles.headerImage}
+              resizeMode="contain"
+            />
+          )}
+          <>
+            <Text style={styles.title}>Pick and Rate 6 Titles</Text>
+            <Text style={styles.subtitle}>Your ratings guide us to titles that fit your taste.</Text>
+          </>
         </View>
+        <View style={{ paddingHorizontal: HORIZONTAL_PADDING, backgroundColor: Color.gray }}>
 
-        {/* Grid of Movies */}
-        {isSearching || (suggestionLoading && displayMovies.length === 0) ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={Color.primary} />
+          {currentRatedCount > 0 && (
+
+            <View style={styles.slotsRow}>
+              {slots.map((item: any, index: number) => {
+                const posterUrl = item?.cover_image_url;
+                return (
+                  <View style={{ width: slotWidth, height: slotHeight, marginRight: index < SLOT_COUNT - 1 ? SLOT_GAP : 0 }}>
+                    <View key={`${item?.imdb_id || index}`} style={styles.slot}>
+                      {posterUrl && (
+                        <View>
+                          <FastImage
+                            source={{ uri: posterUrl }}
+                            style={styles.slotPoster}
+                            resizeMode={FastImage.resizeMode.stretch}
+                          />
+                          <TouchableOpacity
+                            style={styles.removeBtn}
+                            onPress={() => handleRemoveMovie(item)}
+                          >
+                            <Image
+                              source={imageIndex.closeCircle}
+                              style={styles.removeIcon}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+
+                    </View>
+                    <View style={styles.slotPlaceholder}>
+                      {Platform.OS === 'ios' ? (
+                        <OutlineTextIOS text={String(index + 1)} fontSize={40} />
+                      ) : (
+                        <LayeredShadowText text={String(index + 1)} fontSize={40} marginRight={0} />
+                      )}
+                    </View>
+                  </View>
+                )
+
+              })}
+            </View>
+          )}
+        </View>
+        {/* Search Bar & List Wrapper */}
+        <View style={{ paddingHorizontal: HORIZONTAL_PADDING, flex: 1 }}>
+
+          <View style={styles.searchContainer}>
+            {/* <SearchBarCustom
+              placeholder="Search movies, shows ..."
+              onSearchChange={handleSearchChange}
+              value={searchQuery}
+
+            /> */}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+              <Image source={imageIndex.search} style={styles.searchImg} resizeMode='contain' />
+              <TextInput
+                placeholder={'Search movies, shows ...'}
+                placeholderTextColor={Color.lightGrayText}
+                value={searchQuery}
+                onChangeText={handleSearchChange}
+                style={styles.inputStyle}
+                returnKeyType="search"
+                onSubmitEditing={Keyboard.dismiss}
+              />
+            </View>
+            <TouchableOpacity onPress={() => setSearchQuery('')} >
+              <Image source={imageIndex.closeWhite} style={styles.crossImg} resizeMode='contain' />
+            </TouchableOpacity>
           </View>
-        ) : (
-          <FlatList
-            data={displayMovies}
-            renderItem={renderGridItem}
-            keyExtractor={(item) => item.imdb_id || String(Math.random())}
-            numColumns={GRID_COLS}
-            columnWrapperStyle={styles.gridColumnWrapper}
-            contentContainerStyle={styles.gridContentContainer}
-            showsVerticalScrollIndicator={false}
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={() =>
-              (!searchQuery.trim() && suggestionLoading) ? <ActivityIndicator size="small" color={Color.primary} /> : null
-            }
-          />
-        )}
+
+
+          {/* Grid of Movies */}
+          {isSearching || (suggestionLoading && displayMovies.length === 0) ? (
+            <View style={styles.center}>
+              <ActivityIndicator size="large" color={Color.primary} />
+            </View>
+          ) : (
+            <FlatList
+              data={displayMovies}
+              renderItem={renderGridItem}
+              keyExtractor={(item) => item.imdb_id || String(Math.random())}
+              numColumns={GRID_COLS}
+              columnWrapperStyle={styles.gridColumnWrapper}
+              contentContainerStyle={styles.gridContentContainer}
+              showsVerticalScrollIndicator={false}
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.5}
+              ListFooterComponent={() =>
+                (!searchQuery.trim() && suggestionLoading) ? <ActivityIndicator size="small" color={Color.primary} /> : null
+              }
+            />
+          )}
+
+        </View>
 
         {/* Bottom Button */}
         <View style={styles.bottomContainer}>
@@ -563,7 +621,6 @@ const OnboardingScreen = () => {
         </View>
       </View>
 
-      
     </SafeAreaView>
   );
 };
@@ -577,20 +634,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: HORIZONTAL_PADDING,
+
   },
   headerImage: {
-    width: 60,
-    height: 72,
+    width: 41,
+    height: 48,
     marginTop: 10,
     marginBottom: 0,
     alignSelf: 'center'
   },
   title: {
     color: '#FFF',
-    fontSize: 22,
+    fontSize: 16,
     marginTop: 10,
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
     textAlign: 'center',
   },
   subtitle: {
@@ -605,12 +662,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
+    backgroundColor: Color.gray
   },
   slot: {
     width: slotWidth - 8,
     height: slotHeight,
     borderRadius: 8,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#2D2D2E',
+    overflow: 'hidden',
+  },
+  slotGradient: {
+    width: slotWidth - 8,
+    height: slotHeight,
+    borderRadius: 8,
+    padding: 2, // 2px border
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slotInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 6,
+    backgroundColor: '#111111',
     overflow: 'hidden',
   },
   slotPoster: {
@@ -637,7 +710,14 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsBold,
   },
   searchContainer: {
-    marginBottom: 10,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderRadius: 30,
+    backgroundColor: Color.gray,
+    alignItems: 'center',
+    marginVertical: 16,
+
   },
   gridContentContainer: {
     paddingBottom: 80,
@@ -651,16 +731,60 @@ const styles = StyleSheet.create({
     width: gridItemWidth,
     height: gridItemHeight,
     borderRadius: 8,
-    overflow: 'hidden',
+    // overflow: 'hidden', // removed to allow glow visibility
     position: 'relative',
+    backgroundColor: '#1A1A1A',
+  },
+  gridItemGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    padding: 2, // Exactly 2px border
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gridItemInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 7,
+    backgroundColor: '#111111',
+    overflow: 'hidden',
   },
   gridItemRated: {
-    borderWidth: 1.5,
-    borderColor: '#00E5FF',
+    // Legacy border - replaced by gradient
+  },
+  gridSelectedGlow: {
+    shadowColor: '#00A8F5',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowRadius: 12,
+        shadowOpacity: 1
+      },
+      android: {
+        elevation: 8
+      }
+    })
   },
   gridPoster: {
     width: '100%',
     height: '100%',
+  },
+  gridScoreBadge: {
+    position: 'absolute',
+    bottom: 1,
+    left: 3,
+    zIndex: 20,
+  },
+  slotScoreBadge: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    zIndex: 20,
+    transform: [{ scale: 0.7 }], // Scale down for smaller slots
   },
   rankingOverlay: {
     position: 'absolute',
@@ -669,9 +793,11 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 0,
     left: HORIZONTAL_PADDING,
     right: HORIZONTAL_PADDING,
+    backgroundColor: '#000',
+    paddingVertical: 12
   },
   bottomButton: {
     height: 50,
@@ -747,8 +873,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   playBtn: {
-    width: 69,
-    height: 69,
+    width: 68,
+    height: 68,
   },
   textBox: {
     paddingHorizontal: 30,
@@ -757,16 +883,16 @@ const styles = StyleSheet.create({
   },
   titleSlides: {
     color: '#FFF',
-    fontSize: 20,
+    fontSize: 16,
     textAlign: 'center',
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsSemiBold,
   },
   descSlides: {
     color: '#FFF',
     fontSize: 14,
     marginTop: 8,
     textAlign: 'center',
-    lineHeight: 20,
+    // lineHeight: 20,
     fontFamily: font.PoppinsRegular,
   },
   btnWrap: {
@@ -775,7 +901,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 28,
   },
   step1Wrap: {
     flex: 1,
@@ -863,5 +989,38 @@ const styles = StyleSheet.create({
   dislikeSmallIcon: {
     width: 14,
     height: 14,
+  },
+  fullOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1
+  },
+  bottomOverlay: {
+    position: "absolute",
+    width: "100%",
+    height: "60%",
+    bottom: 0,
+    left: 0,
+    zIndex: 1
+  },
+
+  searchImg: {
+    height: 20,
+    width: 20,
+    marginRight: 6,
+  },
+  inputStyle: {
+    // color: Color.black,
+    fontFamily: font.PoppinsMedium,
+    width: '85%',
+    height: 45,
+    color: Color.whiteText,
+  },
+  crossImg: {
+    height: 14,
+    width: 14,
   },
 });

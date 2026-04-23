@@ -1,5 +1,5 @@
 
-import {  StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { hp } from '@utils/Constant';
 import { Color } from '@theme/color';
 
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 20,
   },
-  inputView: { marginTop: ResponsiveSize.marginTop(1), paddingVertical: hp(1), },
+  inputView: { marginTop: 8, },
   txtHeading: {
     color: Color.whiteText,
     textAlign: "center",
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     alignSelf: 'center',
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
     marginBottom: 20,
     marginHorizontal: 15,
   },
@@ -76,9 +76,8 @@ const styles = StyleSheet.create({
   titlSub: {
     color: Color.whiteText,
     fontSize: 14,
-    bottom: 5,
+    // bottom: 5,
     marginTop: 30,
-    lineHeight: 22,
     textAlign: 'center',
   },
   subTitle: { lineHeight: 20, marginTop: -8, color: Color.textGray, },

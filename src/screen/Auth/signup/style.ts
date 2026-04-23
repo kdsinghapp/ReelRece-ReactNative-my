@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
     borderRadius: 10,
-    marginHorizontal:14
+    marginHorizontal: 10
   },
   iconImage: {
     height: 24,

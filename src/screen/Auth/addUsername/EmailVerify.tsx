@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View, 
+  View,
   Image,
   TouchableOpacity,
   TextInput,
@@ -131,7 +131,7 @@ const EmailVerify = () => {
               }}
             />
           </View>
-     
+
 
           <CustomText
 
@@ -175,7 +175,7 @@ const EmailVerify = () => {
                 style={[
                   styles.otpBox,
                   // focusedIndex === index && { borderColor: Color.whiteText, borderWidth: 1 },
-                  (focusedIndex === index || code[index] !== '') && { borderColor: Color.whiteText, borderWidth: 1 },
+                  (focusedIndex === index || code[index] !== '') && { borderColor: Color.primary, borderWidth: 1 },
                 ]}
                 maxLength={1}
                 keyboardType="numeric"
@@ -218,17 +218,17 @@ const EmailVerify = () => {
             disabled={resendLoading}
           >
             <CustomText
-              size={16}
+              size={14}
               color={Color.whiteText}
               style={styles.resendText}
-              font={font.PoppinsRegular}
+              font={font.PoppinsMedium}
             >
               Didn’t receive the code?
               <CustomText
-                size={16}
+                size={14}
                 color={resendLoading ? Color.textGray : Color.primary}
                 style={styles.resendLink}
-                font={font.PoppinsRegular}
+                font={font.PoppinsMedium}
               > {resendLoading ? " Sending..." : t("common.resend")}
               </CustomText>
             </CustomText>

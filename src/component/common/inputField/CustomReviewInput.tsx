@@ -8,7 +8,10 @@ import {
   StyleSheet,
   TextInputProps,
   Platform,
+  Dimensions,
 } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 interface CustomReviewInputProps extends TextInputProps {
   text: string;
@@ -66,10 +69,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     minHeight: 50,
     maxHeight: 200, // Approximately 10-12 lines
-    backgroundColor: Color.grey,
+    backgroundColor: Color.gray,
     borderRadius: 10,
     borderWidth: 1, // border dikhane ke liye zaroori
     paddingHorizontal: 12,
+    width: width * 0.90,
+    alignSelf: 'center',
   },
   input: {
     flex: 1,

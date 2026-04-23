@@ -46,7 +46,7 @@ const ButtonCustom: React.FC<CustomButtonProps> = ({
           size={14}
           color={Color.primary}
           style={[styles.buttonText, textStyle]}
-          font={font.PoppinsMedium}
+          font={font.PoppinsSemiBold}
         >
           {title}
         </CustomText>
@@ -94,10 +94,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: Color.whiteText,
-    fontSize: 14,
     lineHeight: 24,
-    // marginVertical:12,
-    fontFamily: font.PoppinsSemiBold,
+    // marginVertical:12, 
   },
   disabledButton: {
   },

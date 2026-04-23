@@ -20,7 +20,7 @@ const RankingTabs = ({ activeTab, onTabPress }: RankingTabsProps) => {
           activeOpacity={0.7}
         >
           <Image
-            source={imageIndex.rankingTab}
+            source={imageIndex.rankTab}
             style={[styles.icon,]}
             resizeMode="contain"
           />
@@ -33,7 +33,7 @@ const RankingTabs = ({ activeTab, onTabPress }: RankingTabsProps) => {
           activeOpacity={0.7}
         >
           <Image
-            source={imageIndex.thumpDown}
+            source={imageIndex.disLikeTab}
             style={[styles.icon]}
             resizeMode="contain"
           />

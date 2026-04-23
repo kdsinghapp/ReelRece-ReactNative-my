@@ -29,7 +29,7 @@ const ProfileCard = ({
     setImageLoading,
     loaderFollow,
     onSuggested,
-
+    similarity,
 }: {
     imageUri?: string;
     name?: string;
@@ -48,9 +48,9 @@ const ProfileCard = ({
     setImageLoading?: (v: boolean) => void;
     loaderFollow?: boolean;
     onSuggested?: () => void;
+    similarity?: number | null;
 }) => {
     const navigation = useNavigation();
-
     return (
         <View style={styles.profileContainer}>
             {/* <Image source={{ uri: imageUri }} style={styles.profileImage} resizeMode='contain' /> */}
@@ -81,6 +81,17 @@ const ProfileCard = ({
             <View style={{ alignItems: 'center', marginTop: 10 }}>
                 {username && (
                     <Text allowFontScaling={false} style={styles.usernameText}>@{username}</Text>
+                )}
+                {butt && similarity !== undefined && similarity !== null && (
+                    <Text
+                        allowFontScaling={false}
+                        style={[
+                            styles.similarityText,
+                            { color: similarity >= 0 ? '#4ADE80' : '#EF4444' }
+                        ]}
+                    >
+                        {similarity > 0 ? '+' : ''}{similarity}% {t("common.similarity")}
+                    </Text>
                 )}
                 {!butt && bio ? (
                     <Text allowFontScaling={false} style={styles.bioTextTop}>{bio}</Text>
@@ -246,6 +257,11 @@ const styles = StyleSheet.create({
     followButtonText: {
         color: Color.whiteText,
        
+    },
+    similarityText: {
+        fontSize: 13,
+        fontFamily: font.PoppinsMedium,
+        marginTop: 2,
     },
 });
 

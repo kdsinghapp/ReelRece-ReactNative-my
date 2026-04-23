@@ -24,7 +24,7 @@
 		79BDC3F8E92444D68A32551A /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 985A85FD827D4AE09A6E8281 /* Poppins-Medium.ttf */; };
 		7DF9697970444C1E9E2C7AD9 /* Poppins-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 46430D51D5F34F9C81B15B8D /* Poppins-BlackItalic.ttf */; };
 		8112AE89011146D2BA862985 /* Poppins-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 973D8BD57D9346479DB506CB /* Poppins-ExtraBoldItalic.ttf */; };
-		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		81AB9BB82411601600AC10FF /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* Launch.storyboard */; };
 		8E69219B1D564455B81DAEA5 /* sackersgothicstd-medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 48E45A79528B46A9BAFA441A /* sackersgothicstd-medium.otf */; };
 		BAF6BC2444C84CE1AB653820 /* Poppins-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ED257D096F3C404FB640B311 /* Poppins-SemiBoldItalic.ttf */; };
 		C3AF7FA5739140E8B230638B /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3B649319C22D468C99B3C2E5 /* Poppins-Bold.ttf */; };
@@ -57,7 +57,7 @@
 		7DBA37F72ED73C270060CFC3 /* reelrecs-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "reelrecs-Bridging-Header.h"; sourceTree = "<group>"; };
 		7E80ADCC2B3647F4A372BA8E /* Poppins-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-MediumItalic.ttf"; path = "../assets/fonts/Poppins-MediumItalic.ttf"; sourceTree = "<group>"; };
 		8082842083FA4A24B8E41796 /* sackersgothicstd-light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "sackersgothicstd-light.otf"; path = "../assets/fonts/sackersgothicstd-light.otf"; sourceTree = "<group>"; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = reelrecs/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		81AB9BB72411601600AC10FF /* Launch.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Launch.storyboard; path = reelrecs/Launch.storyboard; sourceTree = "<group>"; };
 		8414E07371974ED3A9E63CF5 /* Poppins-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-LightItalic.ttf"; path = "../assets/fonts/Poppins-LightItalic.ttf"; sourceTree = "<group>"; };
 		973D8BD57D9346479DB506CB /* Poppins-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBoldItalic.ttf"; path = "../assets/fonts/Poppins-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
 		985A85FD827D4AE09A6E8281 /* Poppins-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Medium.ttf"; path = "../assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
@@ -90,7 +90,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
-				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
+				81AB9BB72411601600AC10FF /* Launch.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 			);
 			name = reelrecs;
@@ -234,7 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				81AB9BB82411601600AC10FF /* Launch.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				FA502F9A3CDA46608EAC67A0 /* sackersgothicstd-heavy.otf in Resources */,
 				64C417C9E34F486DBFDFD2A2 /* sackersgothicstd-light.otf in Resources */,

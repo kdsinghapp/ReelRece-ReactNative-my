@@ -2,7 +2,7 @@
 import { StyleSheet } from 'react-native';
 import { hp, wp } from '@utils/Constant';
 import { Color } from '@theme/color';
- import font from '@theme/font';
+import font from '@theme/font';
 import ResponsiveSize from '@utils/ResponsiveSize';
 
 const styles = StyleSheet.create({
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     color: Color.primary,
     bottom: 2,
   },
-  inputView: { marginTop: ResponsiveSize.marginTop(1), paddingVertical: hp(1), },
+  inputView: { marginTop: 0, paddingVertical: 8, },
   txtHeading: {
     color: Color.whiteText,
     textAlign: "center",
@@ -39,9 +39,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   redText: {
-   color: 'red', fontSize: 12,
-      fontFamily:font.PoppinsRegular,
-      lineHeight:16,
+    color: 'red', fontSize: 12,
+    fontFamily: font.PoppinsRegular,
+    lineHeight: 16,
   },
   pass: {
     color: Color.primary,
@@ -57,23 +57,23 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
     borderRadius: 10,
-   },
+  },
   iconImage: {
     height: 33,
     width: 33,
     resizeMode: 'contain',
   },
-  tite:{
-    fontSize: 16, lineHeight: 20, color: Color.whiteText,  
+  tite: {
+    fontSize: 16, lineHeight: 20, color: Color.whiteText,
   },
   titlSub: {
     color: Color.whiteText,
-     fontSize: 14,
-    bottom: 5,
-    marginTop:35,
-    lineHeight:22
+    fontSize: 14,
+    // bottom: 5,
+    marginTop: 30,
+    lineHeight: 22
   },
-  subTitle: { lineHeight: 16, marginTop: 33, marginBottom: 15, fontSize: 16, color: Color.whiteText, textAlign: "center",fontFamily:font.PoppinsBold },
+  subTitle: { lineHeight: 16, marginTop: 33, marginBottom: 15, fontSize: 16, color: Color.whiteText, textAlign: "center", fontFamily: font.PoppinsBold },
   icon: {
     width: 24,
     height: 24,

@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  TouchableWithoutFeedback,
   Dimensions,
   StyleSheet,
   Image,
@@ -70,12 +69,12 @@ const CountryModal: React.FC<CountryModalProps> = ({ isVisible, onClose, onSelec
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? 12 : 12 }]}>
+          <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top : 12 }]}>
             <TouchableOpacity
               onPress={onClose}
               style={styles.backButton}
@@ -115,7 +114,7 @@ const CountryModal: React.FC<CountryModalProps> = ({ isVisible, onClose, onSelec
             keyboardDismissMode="on-drag"
           />
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };

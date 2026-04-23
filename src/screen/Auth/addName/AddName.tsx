@@ -85,7 +85,7 @@ export default function AddName() {
             </CustomText>
           </View>
           <CustomText
-            size={16}
+            size={14}
             color={Color.whiteText}
             style={styles.titlSub}
             font={font.PoppinsRegular}
@@ -112,21 +112,21 @@ export default function AddName() {
             ) : null}
 
             <View style={{ marginTop: 0 }}>
-                <InputFieldCustom
+              <InputFieldCustom
                 text={lastName}
                 onChangeText={setLastName}
                 placeholder={t("login.lastname", "Last name")}
-                />
-                {lastNameError ? (
+              />
+              {lastNameError ? (
                 <CustomText
-                    size={14}
-                    color={'red'}
-                    style={styles.redText}
-                    font={font.PoppinsRegular}
+                  size={14}
+                  color={'red'}
+                  style={styles.redText}
+                  font={font.PoppinsRegular}
                 >
-                    {lastNameError}
+                  {lastNameError}
                 </CustomText>
-                ) : null}
+              ) : null}
             </View>
           </View>
           <View style={{

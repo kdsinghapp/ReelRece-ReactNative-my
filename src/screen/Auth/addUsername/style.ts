@@ -2,10 +2,10 @@
 import { Dimensions, StyleSheet } from 'react-native';
 import { hp, wp } from '@utils/Constant';
 import { Color } from '@theme/color';
- 
+
 import font from '@theme/font';
 import ResponsiveSize from '@utils/ResponsiveSize';
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   mainView: { flex: 1, backgroundColor: Color.background },
   text: {
     fontSize: 16,
@@ -14,14 +14,14 @@ import ResponsiveSize from '@utils/ResponsiveSize';
     color: Color.primary,
     bottom: 2,
   },
-    backIcon:{
-    height:24,
-    width:24,
-    resizeMode:'contain',
-    marginHorizontal:16,
+  backIcon: {
+    height: 24,
+    width: 24,
+    resizeMode: 'contain',
+    marginHorizontal: 16,
     marginTop: 20,
   },
-  inputView: { marginTop: ResponsiveSize.marginTop(1), paddingVertical: hp(1), },
+  inputView: { paddingTop: 8, paddingBottom: 12 },
   txtHeading: {
     color: Color.whiteText,
     textAlign: "center",
@@ -32,7 +32,7 @@ import ResponsiveSize from '@utils/ResponsiveSize';
   loginHeading: {
     color: Color.whiteText,
     textAlign: "center",
-    fontFamily:font.PoppinsSemiBold,
+    fontFamily: font.PoppinsSemiBold,
     fontSize: 20,
     //  marginTop: 30,
 
@@ -52,7 +52,7 @@ import ResponsiveSize from '@utils/ResponsiveSize';
   //   color:  Color.whiteText,
   //   marginHorizontal: 5,
   // },
-  
+
   titlView: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -62,9 +62,9 @@ import ResponsiveSize from '@utils/ResponsiveSize';
     marginHorizontal: 15,
   },
   redText: {
-     color: 'red', fontSize: 12,
-        fontFamily:font.PoppinsRegular,
-        lineHeight:16,
+    color: 'red', fontSize: 12,
+    fontFamily: font.PoppinsRegular,
+    lineHeight: 16,
   },
   pass: {
     color: Color.primary,
@@ -80,98 +80,99 @@ import ResponsiveSize from '@utils/ResponsiveSize';
   iconButton: {
     padding: 8,
     borderRadius: 10,
-   },
+  },
   iconImage: {
     height: 33,
     width: 33,
     resizeMode: 'contain',
   },
-  tite:{
-    fontSize: 16, lineHeight: 20, color: Color.whiteText,  
+  tite: {
+    fontSize: 16, lineHeight: 20, color: Color.whiteText,
   },
   titlSub: {
     color: Color.whiteText,
-     fontSize: 14,
-    bottom: 5,
-    marginTop:30,
-    lineHeight:22
+    fontSize: 14,
+    // bottom: 5,
+    marginTop: 30,
+    // lineHeight: 22
   },
-  subTitle: { lineHeight: 20, marginTop:-8,   color: Color.textGray,   },
+  subTitle: { lineHeight: 20, marginTop: -8, color: Color.textGray, },
 
-// email verify
+  // email verify
 
-logoContainer: {
-  alignItems: 'center',
-marginTop: 30,
-  
-},
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 30,
 
-appName: {
-  color:  Color.whiteText,
-  fontSize: 16,
-  fontFamily:font.PoppinsBold,
-  lineHeight:20,
-  // fontWeight: 'bold',
-},
-verifyTitle: {
-  color:  Color.whiteText,
-  fontSize: 20,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginTop: 20,
-},
-instructionText: {
-  color:  Color.whiteText,
-  textAlign: 'center',
-    marginTop:30,
+  },
 
-},
-emailText: {
-  color: Color.primary ,
-  textAlign: 'center',
-  marginTop: 16,
-  // fontWeight: '600',
-},
-otpContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginTop: 30,
-  marginHorizontal: Dimensions.get('window').width * 0.12,
-},
-otpBox: {
-  backgroundColor: Color.grey700,
-  borderRadius: 8,
-  height: 50,
-  width: 50,
-  color:  Color.whiteText,
-  fontSize: 20,
-  textAlign: 'center',
-  borderWidth: 1,
-  borderColor: '#555',
- 
+  appName: {
+    color: Color.whiteText,
+    fontSize: 16,
+    fontFamily: font.PoppinsBold,
+    lineHeight: 20,
+    // fontWeight: 'bold',
+  },
+  verifyTitle: {
+    color: Color.whiteText,
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  instructionText: {
+    color: Color.whiteText,
+    textAlign: 'center',
+    marginTop: 30,
 
-},
-verifyButton: {
-  backgroundColor: Color.primary,
-  borderRadius: 8,
-  paddingVertical: 14,
-    marginTop:30,
-  marginHorizontal: 20,
-  alignItems: 'center',
-},
-verifyButtonText: {
-  color:  Color.whiteText,
-  fontSize: 16,
-  fontWeight: 'bold',
-},
-resendText: {
-  textAlign: 'center',
-  // marginTop: 25,
-  // backgroundColor:Color.primary,
-},
-resendLink: {
-  color: '#00BFFF',
-},
+  },
+  emailText: {
+    color: Color.primary,
+    textAlign: 'center',
+    marginTop: 16,
+    // fontWeight: '600',
+  },
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 30,
+    marginHorizontal: Dimensions.get('window').width * 0.12,
+  },
+  otpBox: {
+    backgroundColor: Color.grey700,
+    borderRadius: 8,
+    height: 50,
+    width: 50,
+    color: Color.whiteText,
+    fontSize: 14,
+    textAlign: 'center',
+    borderWidth: 1,
+    borderColor: '#555',
+    fontFamily: font.PoppinsMedium,
+
+
+  },
+  verifyButton: {
+    backgroundColor: Color.primary,
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginTop: 30,
+    marginHorizontal: 20,
+    alignItems: 'center',
+  },
+  verifyButtonText: {
+    color: Color.whiteText,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  resendText: {
+    textAlign: 'center',
+    // marginTop: 25,
+    // backgroundColor:Color.primary,
+  },
+  resendLink: {
+    color: '#00BFFF',
+  },
 
 });
 export default styles;

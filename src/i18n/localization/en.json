@@ -56,7 +56,8 @@
     "unknown": "Unknown",
     "editField": "Edit Field",
     "offline": "You're offline now.",
-    "finished": "Finished"
+    "finished": "Finished",
+    "similarity": "Similarity"
   },
   "welcome": {
     "title": "Find Great Shows and Movies in Seconds",
@@ -151,13 +152,13 @@
     "yourscore": "Your Score",
     "friendscore": "Friend Score",
     "platform": "Platform",
-    "services": "Services.",
+    "services": "Services:",
     "selectall": "Select All",
     "apply": "Apply",
     "simplily": "Simplily your Streaming experience. Discover new conent across all your services-all in one app",
     "ratingscoreshows": "This score shows the rating from your friend for this title.",
     "frienddes": "This score shows the rating from your friend for this title.",
-     "frienddes1": "This is an average of the scores your friends gave this movie.",
+    "frienddes1": "This is an average of the scores your friends gave this movie.",
     "nofrienddes": "No friends have rated this movie yet.",
     "restoresettings": "Restore From Settings",
     "haveyou": "Have you had a chance to watch these yet?",
@@ -270,9 +271,9 @@
   },
   "modal": {
     "howWasIt": "How was it?",
-    "loveIt": "Love It",
-    "itWasOkay": "It Was Okay",
-    "didntLikeIt": "Didn't Like It",
+    "loveIt": "Loved It",
+    "itWasOkay": "It was Okay",
+    "didntLikeIt": "Disliked It",
     "writeReview": "Write a review"
   },
   "helpsetting": {

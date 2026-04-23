@@ -1,5 +1,6 @@
 import { ActivityIndicator, Dimensions, FlatList, Image, Keyboard, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
+import LinearGradient from 'react-native-linear-gradient'
 import ScreenNameEnum from '@routes/screenName.enum'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { Color } from '@theme/color'
@@ -302,32 +303,6 @@ const StreamService = () => {
     });
 
 
-
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [
-    //     {
-    //       name: ScreenNameEnum.TabNavigator,
-    //       state: {
-    //         index: 0,
-    //         routes: [
-    //           {
-    //             name: ScreenNameEnum.RankingTab,
-    //             state: {
-    //               index: 0,
-    //               routes: [
-    //                 {
-    //                   name: ScreenNameEnum.RankingScreen,
-    //                   params: { openTooltipModal: true },
-    //                 },
-    //               ],
-    //             },
-    //           },
-    //         ],
-    //       },
-    //     },
-    //   ],
-    // });
   };
 
 
@@ -340,23 +315,54 @@ const StreamService = () => {
       <TouchableOpacity
         onPress={() => toggleSelection(item?.supported_platform)}
         activeOpacity={0.7}
-        style={[styles.item, isSelected && styles.selectedItemGlow]}
+        style={styles.itemWrapper}
       >
-        {item?.image_url ? (
-          <FastImage
-            source={{
-              uri: item?.image_url,
-              priority: FastImage.priority.low,
-              cache: FastImage.cacheControl.web
-            }}
-            style={[styles.image, isSelected && styles.imageActive]}
-            resizeMode={FastImage.resizeMode.contain}
-          />
+        {isSelected ? (
+          <LinearGradient
+            colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.gradientBorder, styles.selectedItemGlow]}
+          >
+            <View style={styles.innerContainer}>
+              {item?.image_url ? (
+                <FastImage
+                  source={{
+                    uri: item?.image_url,
+                    priority: FastImage.priority.low,
+                    cache: FastImage.cacheControl.web,
+                  }}
+                  style={styles.imageInsideBorder}
+                  resizeMode={FastImage.resizeMode.contain}
+                />
+              ) : (
+                <View style={[styles.imageInsideBorder, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text style={styles.placeholderText}>
+                    {platformDisplayName.slice(0, 2).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </LinearGradient>
         ) : (
-          <View style={[styles.image, isSelected && styles.imageActive, { justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={styles.placeholderText}>
-              {platformDisplayName.slice(0, 2).toUpperCase()}
-            </Text>
+          <View style={styles.item}>
+            {item?.image_url ? (
+              <FastImage
+                source={{
+                  uri: item?.image_url,
+                  priority: FastImage.priority.low,
+                  cache: FastImage.cacheControl.web,
+                }}
+                style={styles.image}
+                resizeMode={FastImage.resizeMode.contain}
+              />
+            ) : (
+              <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={styles.placeholderText}>
+                  {platformDisplayName.slice(0, 2).toUpperCase()}
+                </Text>
+              </View>
+            )}
           </View>
         )}
       </TouchableOpacity>
@@ -407,7 +413,7 @@ const StreamService = () => {
   const isOnline = useNetworkStatus();
   return (
     <SafeAreaView edges={isOnline ? ['top'] : []} style={styles.container}>
-      <CustomStatusBar backgroundColor={Color.grey} />
+      <CustomStatusBar backgroundColor={Color.gray} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -429,7 +435,7 @@ const StreamService = () => {
                   onPress={() => setIsCountryModalVisible(true)}
                   style={{ alignItems: 'center' }}
                 >
-                  <Text style={[styles.serviceSelectText, { fontSize: 14 }]}>
+                  <Text style={[styles.serviceSelectText, { fontSize: 12 }]}>
                     <Text style={{
                       color: "#CDCDCD"
                     }}>
@@ -471,7 +477,7 @@ const StreamService = () => {
                 <Image source={imageIndex.search} style={styles.searchImg} resizeMode='contain' />
                 <TextInput
                   placeholder={(t("discover.searchStreaming"))}
-                  placeholderTextColor={Color.whiteText}
+                  placeholderTextColor={Color.lightGrayText}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   style={styles.inputStyle}
@@ -487,7 +493,7 @@ const StreamService = () => {
               <TouchableOpacity
                 style={[
                   styles.mostPopularContainer,
-                  filterMode === 'popular' && { backgroundColor: Color.primary }
+                  filterMode === 'popular' && { backgroundColor: Color.primary, borderColor: '#22BAFF' }
                 ]}
                 onPress={() => setFilterMode('popular')}
               >
@@ -496,7 +502,7 @@ const StreamService = () => {
               <TouchableOpacity
                 style={[
                   styles.mostPopularContainer,
-                  filterMode === 'more' && { backgroundColor: Color.primary }
+                  filterMode === 'more' && { backgroundColor: Color.primary, borderColor: '#22BAFF' }
                 ]}
                 onPress={() => setFilterMode('more')}
               >
@@ -597,7 +603,7 @@ const styles = StyleSheet.create({
     backgroundColor: Color.background,
   },
   streamHeader: {
-    backgroundColor: Color.grey,
+    backgroundColor: Color.gray,
     marginHorizontal: 6,
     paddingTop: 14,
   },
@@ -608,32 +614,48 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsBold,
     color: Color.whiteText,
   },
+  itemWrapper: {
+    marginHorizontal: 6,
+    marginVertical: 6,
+  },
   item: {
     width: imageSize,
     height: imageSize,
-    marginHorizontal: 6,
-    marginVertical: 6,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,
     backgroundColor: '#2A2A2A',
   },
+  gradientBorder: {
+    width: imageSize,
+    height: imageSize,
+    borderRadius: 16,
+    padding: 1.5, // The border thickness
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 15,
+    backgroundColor: '#111111', // Dark background as in the image
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   selectedItemGlow: {
-    shadowOffset: { width: 3, height: 5 },
-    shadowOpacity: 0.8,
-    shadowRadius: 16,
-    elevation: 3,
-    // backgroundColor: Color.primary,
-    // borderWidth: 2,
-    // borderColor: `${Color.primary}100`,
+    shadowColor: '#00A8F5',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 8,
     // Platform-specific optimizations
     ...Platform.select({
       ios: {
-        shadowRadius: 40,
-        shadowOpacity: 1
+        shadowRadius: 15,
+        shadowOpacity: 0.8
       },
       android: {
-        elevation: 4
+        elevation: 10
       }
     })
   },
@@ -648,10 +670,13 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Color.grey,
+    backgroundColor: Color.gray,
     borderRadius: 18,
     marginHorizontal: 8,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Color.grey
+
 
   },
   mostPopularText: {
@@ -662,10 +687,14 @@ const styles = StyleSheet.create({
 
   },
   image: {
-    width: '97%',
-    height: '97%',
-    borderRadius: 16,
-    // borderColor:Color.red
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+  },
+  imageInsideBorder: {
+    width: '99%',
+    height: '99%',
+    borderRadius: 14,
   },
   placeholderText: {
     color: Color.whiteText,
@@ -700,8 +729,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   selectedItem: {
-    width: 45,
-    height: 45,
+    width: 40,
+    height: 40,
     marginRight: 6,
     justifyContent: 'center',
     alignItems: 'center',
@@ -737,7 +766,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderRadius: 30,
-    backgroundColor: Color.grey,
+    backgroundColor: Color.gray,
     alignItems: 'center',
     marginVertical: 16,
 
@@ -748,27 +777,29 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   inputStyle: {
-    color: Color.whiteText,
+    // color: Color.black,
     fontFamily: font.PoppinsMedium,
     width: '85%',
     height: 45,
+    color: Color.whiteText,
   },
   crossImg: {
     height: 14,
     width: 14,
   },
   selectedImage: {
-    width: '80%',
-    height: '80%',
+    width: '100%',
+    height: '100%',
     borderRadius: 8,
   },
   selectText: {
-    fontSize: 15,
-    fontFamily: font.PoppinsBold,
+    fontSize: 14,
+    fontFamily: font.PoppinsSemiBold,
     color: Color.whiteText,
     // marginBottom:4,
     alignSelf: 'center',
-    marginTop: 5
+    // marginTop: -15
+    marginTop: Platform.OS === 'ios' ? -5 : -22,
   },
   serviceCountComntainer: {
     flexDirection: 'row',

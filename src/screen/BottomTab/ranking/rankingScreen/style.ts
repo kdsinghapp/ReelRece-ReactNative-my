@@ -1,10 +1,10 @@
 
 import { StyleSheet } from 'react-native';
- import { Color } from '@theme/color';
+import { Color } from '@theme/color';
 import font from '@theme/font';
- 
+
 const styles = StyleSheet.create({
-   scoreBox: {
+  scoreBox: {
     padding: 5,
     borderRadius: 12,
     width: '100%',
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15
   },
- 
+
   searchBar: {
     flexDirection: 'row',
     backgroundColor: '#333',
@@ -42,9 +42,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: Color.whiteText,
-    fontSize: 15,
+    fontSize: 14,
 
-    fontFamily: font.PoppinsBold,
+    fontFamily: font.PoppinsMedium,
 
     marginTop: 20,
     lineHeight: 22,
@@ -55,11 +55,11 @@ const styles = StyleSheet.create({
     color: '#CDCDCD',
     fontSize: 14
 
-  }, 
+  },
   movieCardButton: {
     flexDirection: 'row',
     flex: 1
-  }, 
+  },
   titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
- 
+
   maincontainer: {
     flex: 1,
     backgroundColor: Color.background,
@@ -109,13 +109,13 @@ const styles = StyleSheet.create({
 
   movieCard: {
     flexDirection: 'row',
-    marginTop: 16,
+    marginTop: 12,
   },
   poster: {
     width: 98,
     height: 135,
     borderRadius: 8,
-    
+
   },
   info: {
     flex: 1,
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iconprimary: {
-    marginHorizontal: 3, 
-    flex: 1, 
+    marginHorizontal: 3,
+    flex: 1,
   },
   discoverprimaryContainer: {
     backgroundColor: '#008ac9',

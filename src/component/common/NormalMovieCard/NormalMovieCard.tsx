@@ -1,6 +1,6 @@
 // NormalMovieCard.tsx
 import React, { memo, useEffect, useState } from 'react';
-import { View,  Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Color } from '@theme/color';
 import imageIndex from '@assets/imageIndex';
 import font from '@theme/font';
@@ -8,7 +8,7 @@ import font from '@theme/font';
 import { useNavigation } from '@react-navigation/native';
 import ScreenNameEnum from '@routes/screenName.enum';
 import { useBookmarks } from '@hooks/useBookmark';
- import FastImage from 'react-native-fast-image';
+import FastImage from 'react-native-fast-image';
 import CustomText from '@components/common/CustomText/CustomText';
 const NormalMovieCard = ({
   item,
@@ -64,7 +64,7 @@ const NormalMovieCard = ({
 
     } catch (error: unknown) {
       const err = error as { message?: string };
-       setIsSaved((prev: boolean) => !prev);
+      setIsSaved((prev: boolean) => !prev);
 
     };
   };
@@ -82,8 +82,6 @@ const NormalMovieCard = ({
   return (
     <View style={styles.movieCard}>
       <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)} >
-        {/* <Image source={{ uri: item?.cover_image_url }}
-          style={styles.poster} /> */}
         <FastImage source={{
           uri: item?.cover_image_url,
           priority: FastImage.priority.low,
@@ -98,29 +96,29 @@ const NormalMovieCard = ({
       <View style={styles.info}>
         {/* Title and Close Icon */}
         <View style={styles.titleRow}>
-         <View style={{flex:1,flexDirection:'row',}}>
-           <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.titleContainer}>
-            <CustomText
-              size={16}
-              color={Color.whiteText}
-              style={[styles.title]}
-              font={font.PoppinsMedium}
-              numberOfLines={2}
-            >
-              {item?.title}
-            </CustomText>
+          <View style={{ flex: 1, flexDirection: 'row', }}>
+            <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)} style={styles.titleContainer}>
+              <CustomText
+                size={16}
+                color={Color.whiteText}
+                style={[styles.title]}
+                font={font.PoppinsMedium}
+                numberOfLines={2}
+              >
+                {item?.title}
+              </CustomText>
 
-            <CustomText
-              size={14}
-              color={Color.placeHolder}
-              style={styles.year}
-              font={font.PoppinsRegular}
-            >
-              {item?.release_year}
-            </CustomText>
-          </TouchableOpacity>
-         </View>
-          <TouchableOpacity style={{alignSelf:'flex',marginRight:6,}} onPress={onPressClose}>
+              <CustomText
+                size={14}
+                color={Color.placeHolder}
+                style={styles.year}
+                font={font.PoppinsRegular}
+              >
+                {item?.release_year}
+              </CustomText>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={{ marginRight: 0, }} onPress={onPressClose}>
             <Image
               resizeMode="contain"
               source={imageIndex.close}
@@ -133,9 +131,9 @@ const NormalMovieCard = ({
 
 
 
-          <View style={styles.bottomRow}>
+        <View style={styles.bottomRow}>
 
-{/* <TouchableOpacity style={{alignSelf:'flex-end',marginRight:6,}} onPress={onPressClose}>
+          {/* <TouchableOpacity style={{alignSelf:'flex-end',marginRight:6,}} onPress={onPressClose}>
             <Image
               resizeMode="contain"
               source={imageIndex.close}
@@ -143,7 +141,7 @@ const NormalMovieCard = ({
             />
           </TouchableOpacity> */}
 
-{/* 
+          {/* 
           <TouchableOpacity onPress={() => handleNavigation(item?.imdb_id, token)}>
             
 
@@ -177,7 +175,7 @@ const NormalMovieCard = ({
           </View>
         </View>
       </View>
-   
+
     </View>
   );
 };
@@ -226,8 +224,8 @@ const styles = StyleSheet.create({
     // justifyContent: 'space-between',
     // alignItems: 'center',
     // justifyContent:'flex-start',
-    alignSelf:'flex-end',
-    zIndex:11,
+    alignSelf: 'flex-end',
+    zIndex: 11,
     // marginBottom:'50%',
     // marginTop:6,
     // flex:1,
@@ -242,18 +240,18 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
     // backgroundColor:'green',
     // marginTop:'40%',
-    alignSelf:'center',
-    
+    alignSelf: 'center',
+
     // justifyContent:'flex-end'
   },
   iconprimary: {
-    marginHorizontal: 2,
+    marginHorizontal: 0,
     height: 35,
     width: 30,
   },
   iconImage: {
     height: 20,
     width: 20,
-    marginLeft: 10,
+    marginLeft: 12,
   },
 });

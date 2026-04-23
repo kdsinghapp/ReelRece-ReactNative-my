@@ -30,8 +30,8 @@ export default function InputFieldCustom({ validSuccess = undefined, ...props })
               borderRadius: 10,
               paddingHorizontal: 12,
               alignItems: 'center',
-              // borderWidth: 0.8,
-              // borderColor: showBorder ? Color.whiteText : 'transparent',
+              borderWidth: isFocused ? 1 : 0,
+              borderColor: isFocused ? Color.primary : 'transparent',
             },
             props.style,
           ]}

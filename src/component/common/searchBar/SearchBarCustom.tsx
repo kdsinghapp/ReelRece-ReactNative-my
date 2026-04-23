@@ -5,7 +5,7 @@ import font from "@theme/font";
 import { t } from "i18next";
 import React from "react";
 import { View, TextInput, Image, StyleSheet, TouchableOpacity, Pressable } from "react-native";
- 
+
 interface SearchBarProps {
   placeholder?: string;
   onSearchChange?: (text: string) => void;
@@ -88,29 +88,29 @@ const styles = StyleSheet.create({
   },
 
   searchBar: {
-  backgroundColor: Color.grey,
-  borderRadius: 44,
-  flexDirection: "row",
-  alignItems: "center",
-  paddingHorizontal: 14,
-  marginVertical: 8,
-  height: 45,
-},
+    backgroundColor: Color.gray,
+    borderRadius: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    marginVertical: 8,
+    height: 45,
+  },
 
-input: {
-  flex: 1,
-  fontSize: 14,
-  color: Color.whiteText,
-  marginLeft: 4,
-  paddingVertical: 0,     // 🔥 Fix vertical alignment
-  includeFontPadding: false,
-  fontFamily: font.PoppinsRegular,
-},
-icon: {
-  height: 20,
-  width: 20,
-  marginRight:0,
-},
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: Color.whiteText,
+    marginLeft: 4,
+    paddingVertical: 0,     // 🔥 Fix vertical alignment
+    includeFontPadding: false,
+    fontFamily: font.PoppinsRegular,
+  },
+  icon: {
+    height: 20,
+    width: 20,
+    marginRight: 0,
+  },
 
   // searchBar: {
   //   backgroundColor: Color.grey,

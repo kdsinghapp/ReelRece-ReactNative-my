@@ -1,6 +1,6 @@
 import imageIndex from "@assets/imageIndex";
 import React, { useEffect, useRef, useState } from "react";
-import { View, Image, Animated, Dimensions, StyleSheet } from "react-native";
+import { View, Image, Animated, Dimensions, StyleSheet, ImageBackground } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import useWelcome from "./useWelcome";
 import { useSelector, useDispatch } from "react-redux";
@@ -104,25 +104,16 @@ const Welcome = () => {
       </View>
 
       <View style={styles.container}>
-        <View style={styles.overlayLeft} />
-
-        <LinearGradient
-          colors={[
-            "rgba(0, 0, 0, 0.11)",
-            "rgba(0, 0, 0, 0.9)",
-            "rgba(0, 0, 0, 0.9)",
-          ]}
-          locations={[0, 0.4, 0.7]}
-          style={styles.gradientOverlay}
+        <Image
+          source={imageIndex.welcomefullbg}
+          style={styles.fullOverlay}
+          resizeMode="stretch"
         />
-
-        <View style={styles.overlayColor} />
-
-        <LinearGradient
-          colors={["rgba(0, 108, 157,0.2)", "rgba(0, 108, 157,0.25)"]}
-          style={styles.overlayRight}
+        <Image
+          source={imageIndex.welcomebox}
+          style={styles.bottomOverlay}
+          resizeMode="stretch"
         />
-
         <View style={styles.contentWrapper}>
           <View style={styles.contentWrapp}>
             <Image source={imageIndex.appLogo} style={styles.logo} resizeMode="stretch" />
@@ -186,7 +177,7 @@ const FloatingColumn = ({ posters, columnIndex, isAtTop }) => {
         styles.column,
         {
           left: columnIndex * (columnWidth + horizontalGap),
-          top: isAtTop ? 104 : 0,
+          top: 0,
           transform: [{ translateY }],
         },
       ]}
@@ -213,11 +204,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   posterWrapper: {
-    position: "relative",
-    width: width + columnWidth,
-    height: "100%",
-    top: -124,
-    left: -(columnWidth / 2),
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
   },
   column: {
@@ -233,34 +224,21 @@ const styles = StyleSheet.create({
     marginBottom: posterGap,
     borderRadius: 12,
   },
-  overlayLeft: {
+  fullOverlay: {
     position: "absolute",
-    width: columnWidth / 2,
-    height: "100%",
     top: 0,
     left: 0,
-  },
-  overlayRight: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    top: 0,
     right: 0,
+    bottom: 0,
+    zIndex: 1
   },
-  gradientOverlay: {
+  bottomOverlay: {
     position: "absolute",
     width: "100%",
-    height: "28%",
-    bottom: "17%",
+    height: "60%",
+    bottom: 0,
     left: 0,
-  },
-  overlayColor: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    top: "80%",
-    left: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.99)",
+    zIndex: 1
   },
   logo: {
     width: 56,
@@ -270,12 +248,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   heading: {
-    fontSize: 28,
     color: Color.whiteText,
     textAlign: "center",
   },
   subHeading: {
-    fontSize: 16,
     color: Color.whiteText,
     textAlign: "center",
     marginBottom: 24,
@@ -285,7 +261,7 @@ const styles = StyleSheet.create({
   contentWrapper: {
     marginHorizontal: 16,
     position: "absolute",
-    bottom: 62,
+    bottom: 42,
     left: 0,
     right: 0,
     zIndex: 10,

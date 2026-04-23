@@ -221,7 +221,7 @@ const PlatformModals = ({ visible, onClose, reset, onApply, platformsData, selec
                                 style={[styles.buttonTxt, {
                                     color: Color.whiteText
                                 }]}
-                                font={font.PoppinsMedium}
+                                font={font.PoppinsSemiBold}
                             >
                                 {(t("discover.apply"))}
                             </CustomText>
@@ -278,11 +278,12 @@ const styles = StyleSheet.create({
         maxHeight: '80%',
     },
     modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
+        fontSize: 16,
+        fontFamily: font.PoppinsSemiBold,
+        marginBottom: 24,
         textAlign: 'center',
         color: Color.whiteText,
+        marginTop: 10
     },
     countersContainer: {
         flexDirection: 'row',
@@ -328,7 +329,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     dataSelectContainer: {
-        marginVertical: 10,
+        marginBottom: 10,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -423,7 +424,6 @@ const styles = StyleSheet.create({
     buttonTxt: {
         fontSize: 14,
         color: '#CDCDCD',
-        fontFamily: font.PoppinsRegular
     },
 
 

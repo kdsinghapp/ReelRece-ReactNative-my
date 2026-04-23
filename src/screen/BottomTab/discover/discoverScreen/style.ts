@@ -26,16 +26,11 @@ const styles = StyleSheet.create({
   },
   rating: {
     position: 'absolute',
-    bottom: 2,
-    left: 0,
-    paddingHorizontal: 2,
-    paddingVertical: 0,
+    bottom: 3,
+    left: 1,
     borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-
   },
   filterText: {
     color: Color.whiteText,
@@ -125,18 +120,17 @@ const styles = StyleSheet.create({
   },
   noMoreMovie: { fontSize: 16, color: Color.grey200, fontFamily: font.PoppinsMedium, marginTop: 20, marginBottom: 40, },
   thumbsDownButton: {
-    position: 'relative',
-    top: 8,
-    right: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
-    padding: 6,
+    position: 'absolute',
+    bottom: 6,
+    right: 4,
+    // backgroundColor: 'rgba(0,0,0,0.5)',
+    // borderRadius: 20,
+    // padding: 6,
     zIndex: 10,
   },
   thumbsDownIcon: {
-    width: 20,
-    height: 20,
-    tintColor: Color.whiteText,
+    width: 24,
+    height: 24,
   },
 });
 export default styles;

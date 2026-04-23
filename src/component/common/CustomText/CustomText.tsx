@@ -11,12 +11,12 @@ interface CustomTextProps extends TextProps {
   letterSpacing?: number;
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   style?: TextStyle | TextStyle[];
-  numberOfLines?:number;
+  numberOfLines?: number;
 }
 
 const CustomText: React.FC<CustomTextProps> = ({
   children,
-  font ,
+  font,
   size = 14,
   color = Color.whiteText,
   lineHeight,
@@ -27,8 +27,8 @@ const CustomText: React.FC<CustomTextProps> = ({
   disabled,
   ...props
 }) => {
-   return (
-    <Text 
+  return (
+    <Text
       disabled={disabled}
       allowFontScaling={false}
       numberOfLines={numberOfLines}
@@ -40,7 +40,12 @@ const CustomText: React.FC<CustomTextProps> = ({
           color,
           textAlign: align,
           lineHeight: lineHeight ?? size * 1.2,
-          letterSpacing: letterSpacing ?? 0.2,
+          letterSpacing: letterSpacing ?? (
+            size === 12 ? size * -0.025 :
+              size === 13 ? size * -0.01 :
+                size === 14 ? size * -0.01 :
+                  size === 16 ? 0 : 0.2
+          ),
         },
         style,
       ]}

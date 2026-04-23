@@ -526,6 +526,7 @@ const OtherProfile = () => {
             onFollowing={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { tabToOpen: 1, type: 'Following', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
             onSuggested={() => (navigation as { navigate: (s: string, p?: object) => void }).navigate(ScreenNameEnum.Followers, { id: 2, type: 'Suggested', userName: otherUserData?.name, user_name: otherUserData?.username, followersCount: otherUserData?.followers_count ?? otherUserData?.followers, followingCount: otherUserData?.following_count ?? otherUserData?.following })}
             isFollowing={isFollowing}
+            similarity={otherUserData?.profile_similarity}
           />
         </View>
       );

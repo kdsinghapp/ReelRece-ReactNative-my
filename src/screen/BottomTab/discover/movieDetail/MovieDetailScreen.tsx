@@ -942,11 +942,12 @@ const MovieDetailScreen = () => {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingHorizontal: 4, alignItems: 'center' }}
+                  contentContainerStyle={{ paddingRight: 4, alignItems: 'center' }}
                 >
                   <View style={{
-                    flexDirection: 'row', alignItems: 'center',
-
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 16,
                   }}>
                     {
                       item?.release_year && (
@@ -956,7 +957,7 @@ const MovieDetailScreen = () => {
                           style={styles.subInfo}
                           font={font.PoppinsRegular}
                         >
-                          {item?.release_year},{' '}
+                          {item?.release_year}
                         </CustomText>
                       )
                     }
@@ -969,7 +970,7 @@ const MovieDetailScreen = () => {
                         style={styles.subInfo}
                         font={font.PoppinsRegular}
                       >
-                        {formatRuntime(item?.runtime)},{' '}
+                        {formatRuntime(item?.runtime)}
                       </CustomText>
                     }
                     <CustomText
@@ -978,14 +979,14 @@ const MovieDetailScreen = () => {
                       style={styles.subInfo}
                       font={font.PoppinsRegular}
                     >
-                      {t("movieDetail.subtitle")},{' '}
+                      {t("movieDetail.subtitle")}
                     </CustomText>
 
-                    {item?.genres && item.genres.length > 0 && (
-                      <Text style={styles.genresText} allowFontScaling={false}>
-                        {item?.genres.join(', ')}
+                    {item?.genres && item.genres.length > 0 && item.genres.map((genre: string, idx: number) => (
+                      <Text key={idx} style={styles.genresText} allowFontScaling={false}>
+                        {genre}
                       </Text>
-                    )}
+                    ))}
                   </View>
                 </ScrollView>
               </View>

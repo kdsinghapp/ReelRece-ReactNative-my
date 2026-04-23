@@ -5,7 +5,7 @@ import {
   ScrollView,
 } from 'react-native';
 import React from 'react';
-  import Styles from './style';
+import Styles from './style';
 import styles from './style';
 import { Color } from '@theme/color';
 import usePasswordReset from './usePasswordReset';
@@ -36,7 +36,7 @@ export default function PasswordReset() {
     showToast,
   } = useToastMessage();
   return (
-    <SafeAreaView  edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
+    <SafeAreaView edges={isOnline ? ['top'] : []} style={{ flex: 1, backgroundColor: Color.background, paddingTop: 15 }}>
       <CustomStatusBar backgroundColor="transparent" translucent />
 
       {loading && <LoadingModal />}
@@ -50,11 +50,11 @@ export default function PasswordReset() {
           <View
             style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}
           >
-        <Image
+            <Image
               source={imageIndex.appLogowithName}
               style={styles.imgLogo} resizeMode='contain'
             />
-           
+
             {/* <Text style={styles.txtHeading}>ReelRecs</Text> */}
           </View>
 
@@ -66,7 +66,7 @@ export default function PasswordReset() {
               style={styles.loginHeading}
               font={font.PoppinsSemiBold}
             >
-                           {t("login.password_reset",)}
+              {t("login.password_reset",)}
 
             </CustomText>
             {/* <Text style={styles.loginHeading}>Password Reset</Text> */}
@@ -80,9 +80,9 @@ export default function PasswordReset() {
             style={styles.titlSub}
             font={font.PoppinsRegular}
           >
-                                       {t("login.enteryouremail",)}
+            {t("login.enteryouremail",)}
 
-          
+
           </CustomText>
 
           {/* <Text style={styles.titlSub}>
@@ -93,7 +93,7 @@ export default function PasswordReset() {
             <InputFieldCustom
               text={email}
               onChangeText={handleIdentityText}
-              placeholder=  {t("login.email",)}
+              placeholder={t("login.email",)}
             />
             {emailError ? (
               <Text style={Styles.redText}>{emailError}</Text>
@@ -101,12 +101,12 @@ export default function PasswordReset() {
           </View>
 
           <View style={{ marginTop: 20 }}>
- {/* {t("login.email",)} */}
+            {/* {t("login.email",)} */}
             <ButtonCustom
-              title=  {t("login.requestpassword",)}
-                 textStyle={{
-                            color:Color.whiteText
-                          }}
+              title={t("login.requestpassword",)}
+              textStyle={{
+                color: Color.whiteText
+              }}
               onPress={() => {
                 handleSendResetOTP();
 

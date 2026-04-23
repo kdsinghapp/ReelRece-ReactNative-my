@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
+import LinearGradient from 'react-native-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Color } from '@theme/color';
 import font from '@theme/font';
@@ -25,7 +26,7 @@ const GRID_COLS = 3;
 const GRID_GAP = 12;
 const totalGridWidth = width - HORIZONTAL_PADDING * 2 - GRID_GAP * (GRID_COLS - 1);
 const gridItemWidth = totalGridWidth / GRID_COLS;
-const gridItemHeight = gridItemWidth * 1.45;
+const gridItemHeight = gridItemWidth / 0.795;
 
 interface DislikeStepProps {
   onNext: () => void;
@@ -104,21 +105,49 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
     return (
       <TouchableOpacity
-        style={[styles.dislikeGridItem, !hasImage && styles.noImageItem]}
+        style={[
+          styles.dislikeGridItem,
+          !hasImage && styles.noImageItem,
+          isDisliked && styles.gridSelectedGlow
+        ]}
         onPress={() => hasImage && toggleDislike(item)}
         activeOpacity={hasImage ? 0.9 : 1}
         disabled={!hasImage}
       >
-        {hasImage ? (
-          <FastImage
-            source={{ uri: item.cover_image_url }}
-            style={styles.gridPoster}
-            resizeMode={FastImage.resizeMode.stretch}
-          />
+        {isDisliked ? (
+          <LinearGradient
+            // colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+            colors={['#fff', '#fff', '#fff']}
+
+
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gridItemGradient}
+          >
+            <View style={styles.gridItemInner}>
+              <FastImage
+                source={{ uri: item.cover_image_url }}
+                style={styles.gridPoster}
+                resizeMode={FastImage.resizeMode.stretch}
+              />
+              <View style={{ backgroundColor: '#00000099', height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+
+            </View>
+          </LinearGradient>
         ) : (
-          <View style={styles.noImagePlaceholder}>
-            <Text style={styles.noImageText}>No Image</Text>
-          </View>
+          hasImage ? (
+            <View style={styles.gridItemInner}>
+              <FastImage
+                source={{ uri: item.cover_image_url }}
+                style={styles.gridPoster}
+                resizeMode={FastImage.resizeMode.stretch}
+              />
+            </View>
+          ) : (
+            <View style={styles.noImagePlaceholder}>
+              <Text style={styles.noImageText}>No Image</Text>
+            </View>
+          )
         )}
 
         {hasImage && (
@@ -127,7 +156,7 @@ const DislikeStep = ({ onNext, token }: DislikeStepProps) => {
 
           ]}>
             <Image
-              source={isDisliked ? imageIndex.Dislikebutton1 : imageIndex.Dislikebutton}
+              source={isDisliked ? imageIndex.disLikeFill : imageIndex.disLikeUnFill}
               style={[
                 styles.dislikeSmallIcon,
 
@@ -224,10 +253,11 @@ const styles = StyleSheet.create({
   },
   dislikeTitle: {
     color: '#FFF',
-    fontSize: 22,
-    fontFamily: font.PoppinsBold,
+    fontSize: 16,
+    fontFamily: font.PoppinsSemiBold,
     textAlign: 'center',
     marginBottom: 8,
+    lineHeight: 19.2
   },
   subTextContainer: {
     flexDirection: 'row',
@@ -248,6 +278,8 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsRegular,
     textAlign: 'center',
     lineHeight: 20,
+    width: '80%',
+    alignSelf: 'center',
   },
   inlineDislikeIcon: {
     width: 16,
@@ -269,8 +301,40 @@ const styles = StyleSheet.create({
     width: gridItemWidth,
     height: gridItemHeight,
     borderRadius: 8,
-    overflow: 'hidden',
+    // overflow: 'hidden',
     marginBottom: GRID_GAP,
+    backgroundColor: '#1A1A1A',
+  },
+  gridItemGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    padding: 2, // 2px border
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gridItemInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 6,
+    backgroundColor: '#111111',
+    overflow: 'hidden',
+  },
+  gridSelectedGlow: {
+    shadowColor: '#00A8F5',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowRadius: 12,
+        shadowOpacity: 1
+      },
+      android: {
+        elevation: 8
+      }
+    })
   },
   gridPoster: {
     width: '100%',
@@ -283,8 +347,8 @@ const styles = StyleSheet.create({
   },
   dislikeIconBadge: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
+    bottom: 4,
+    right: 4,
     // backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 12,
     width: 24,
@@ -299,8 +363,8 @@ const styles = StyleSheet.create({
     borderColor: '#FF3B30',
   },
   dislikeSmallIcon: {
-    width: 29,
-    height: 29,
+    width: 24,
+    height: 24,
   },
   dislikeListContent: {
     paddingHorizontal: 4,
@@ -322,9 +386,12 @@ const styles = StyleSheet.create({
   },
   dislikeBottomBtn: {
     position: 'absolute',
-    bottom: 20,
-    left: HORIZONTAL_PADDING,
-    right: HORIZONTAL_PADDING,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: HORIZONTAL_PADDING,
+    backgroundColor: '#000',
+    paddingVertical: 12
   },
   nextButtonBlue: {
     backgroundColor: '#00A8F5',

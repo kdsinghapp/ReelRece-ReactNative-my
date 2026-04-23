@@ -381,22 +381,21 @@ const DiscoverScreen = () => {
               title={t('discover.recscore')}
               description={t('discover.recscoredes')}
             />
-            <TouchableOpacity
-              style={styles.thumbsDownButton}
-              onPress={() => handleThumbsDown(item)}
-              activeOpacity={0.7}
-            >
-
-
-              <Image
-                source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.dislike1 : imageIndex.thumpDown}
-                style={[
-                  styles.thumbsDownIcon,
-                  dislikedIds.has(String(item.imdb_id)) && { tintColor: Color.primary }
-                ]}
-              />
-            </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={styles.thumbsDownButton}
+            onPress={() => handleThumbsDown(item)}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={dislikedIds.has(String(item.imdb_id)) ? imageIndex.disLikeFill : imageIndex.disLikeUnFill}
+              style={[
+                styles.thumbsDownIcon,
+                // dislikedIds.has(String(item.imdb_id)) && { tintColor: Color.primary }
+              ]}
+            />
+          </TouchableOpacity>
         </TouchableOpacity>
       );
     },
@@ -462,7 +461,7 @@ const DiscoverScreen = () => {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
             source={imageIndex.reelRecsHome}
-            resizeMode="cover"
+            resizeMode="contain"
             style={{ height: 43, width: 130, right: 4.2 }}
           />
         </View>

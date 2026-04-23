@@ -21,6 +21,7 @@ import { Color } from '@theme/color';
 import font from '@theme/font';
 import FastImage from 'react-native-fast-image';
 import { Grayscale } from 'react-native-color-matrix-image-filters';
+import LinearGradient from 'react-native-linear-gradient';
 import { postComment } from '@redux/Api/commentService';
 import { fileLogger } from '@utils/FileLogger';
 import CustomText from '@components/common/CustomText/CustomText';
@@ -28,6 +29,7 @@ import CustomReviewInput from '@components/common/inputField/CustomReviewInput';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { t } from 'i18next';
 import { wp } from '@utils/Constant';
+import ButtonCustom from '@components/common/button/ButtonCustom';
 
 export interface MovieForComparison {
   title: string;
@@ -107,6 +109,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [showFeedback, setShowFeedback] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [preferenceMsg, setPreferenceMsg] = useState<boolean>(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   // Comparison: first image = main movie only (never change on select). Second = comparison candidates.
   const rightCardAnim = useRef(new Animated.Value(0)).current;
@@ -133,10 +136,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
       reviewInputRef.current?.blur();
       Keyboard.dismiss();
     } else {
-      // Auto scroll when keyboard opens
       const keyboardShowListener = Keyboard.addListener(
         Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
         () => {
+          setIsKeyboardVisible(true);
           if (showFeedback) {
             setTimeout(() => {
               scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -144,7 +147,16 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
           }
         }
       );
-      return () => keyboardShowListener.remove();
+      const keyboardHideListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        () => {
+          setIsKeyboardVisible(false);
+        }
+      );
+      return () => {
+        keyboardShowListener.remove();
+        keyboardHideListener.remove();
+      };
     }
   }, [visible, showFeedback]);
 
@@ -402,10 +414,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)' }}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.90)' }}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 85 : 0}
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -427,7 +439,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   pointerEvents={isComparison ? 'auto' : 'none'}
                 >
                   <Animated.View style={{ transform: [{ translateX: comparisonHeadingAnim }] }}>
-                    <CustomText size={20} color={Color.placeHolder} style={styles.comparisonHeading} font={font.PoppinsBold}>
+                    <CustomText color={Color.placeHolder} style={styles.comparisonHeading}>
                       Which do you prefer?
                     </CustomText>
                   </Animated.View>
@@ -444,11 +456,29 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           <View style={[styles.posterWrapper, styles.posterWrapperLeft]}>
                             <Grayscale amount={comparisonSelected === 'second' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
                               {leftPosterSource && (
-                                <FastImage
-                                  style={[styles.comparisonPoster, { borderWidth: comparisonSelected === 'first' ? 2 : 0 }]}
-                                  source={leftPosterSource}
-                                  resizeMode={FastImage.resizeMode.stretch}
-                                />
+                                comparisonSelected === 'first' ? (
+                                  <LinearGradient
+                                    colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+                                    locations={[0.2, 0.5, 0.8]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.gradientBorder}
+                                  >
+                                    <View style={styles.selectedPosterInner}>
+                                      <FastImage
+                                        style={styles.comparisonPoster}
+                                        source={leftPosterSource}
+                                        resizeMode={FastImage.resizeMode.stretch}
+                                      />
+                                    </View>
+                                  </LinearGradient>
+                                ) : (
+                                  <FastImage
+                                    style={styles.comparisonPoster}
+                                    source={leftPosterSource}
+                                    resizeMode={FastImage.resizeMode.stretch}
+                                  />
+                                )
                               )}
                             </Grayscale>
                           </View>
@@ -461,6 +491,12 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                         </View>
                       </TouchableOpacity>
                     </Animated.View>
+
+                    {/* Dynamic 'Or' Label */}
+                    <View style={styles.orContainer}>
+                      <Image source={imageIndex.orCircle} style={styles.orImage} resizeMode="contain" />
+                    </View>
+
                     {rightMovie && (
                       <Animated.View key="comparison-right-card" style={[styles.movieCardComparison, { transform: [{ translateX: rightCardAnim }] }]}>
                         <TouchableOpacity
@@ -473,23 +509,45 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           <View>
                             <View style={styles.posterWrapper}>
                               <Grayscale amount={comparisonSelected === 'first' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
-                                <FastImage
-                                  key={rightMovie.poster?.uri}
-                                  style={[
-                                    styles.comparisonPoster,
-                                    { borderWidth: comparisonSelected === 'second' ? 1 : 0, borderColor: comparisonSelected === 'second' ? Color.primary : 'transparent' },
-                                  ]}
-                                  source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
-                                  resizeMode={FastImage.resizeMode.contain}
-                                  onLoad={() => {
-                                    if (!rightCardSlideInDoneRef.current) {
-                                      rightCardSlideInDoneRef.current = true;
-                                      runRightCardSlideIn();
-                                    }
-                                  }}
-                                />
+                                {comparisonSelected === 'second' ? (
+                                   <LinearGradient
+                                     colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+                                     locations={[0.2, 0.5, 0.8]}
+                                     start={{ x: 0, y: 0 }}
+                                     end={{ x: 1, y: 1 }}
+                                     style={styles.gradientBorder}
+                                   >
+                                     <View style={styles.selectedPosterInner}>
+                                       <FastImage
+                                         key={rightMovie.poster?.uri}
+                                         style={styles.comparisonPoster}
+                                         source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                                         resizeMode={FastImage.resizeMode.contain}
+                                         onLoad={() => {
+                                           if (!rightCardSlideInDoneRef.current) {
+                                             rightCardSlideInDoneRef.current = true;
+                                             runRightCardSlideIn();
+                                           }
+                                         }}
+                                       />
+                                     </View>
+                                   </LinearGradient>
+                                 ) : (
+                                   <FastImage
+                                     key={rightMovie.poster?.uri}
+                                     style={styles.comparisonPoster}
+                                     source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                                     resizeMode={FastImage.resizeMode.contain}
+                                     onLoad={() => {
+                                       if (!rightCardSlideInDoneRef.current) {
+                                         rightCardSlideInDoneRef.current = true;
+                                         runRightCardSlideIn();
+                                       }
+                                     }}
+                                   />
+                                 )}
                                 {isOnboarding == false &&
-                                  rightMovie.rating != null && (
+                                   rightMovie.rating != null && (
                                     <View style={styles.ratingBadge}>
                                       <RankingWithInfo
                                         score={Number(rightMovie.rating)}
@@ -519,17 +577,23 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 </View>
               )}
 
-              {/* Feedback Step */}
               <View
                 style={[
                   styles.modalContentWrapper,
+                  isKeyboardVisible && { flex: 1 },
                   isComparison && styles.hiddenStep,
                 ]}
                 pointerEvents={isComparison ? 'none' : 'auto'}
               >
                 <ScrollView
                   ref={scrollViewRef}
-                  contentContainerStyle={styles.scrollContent}
+                  contentContainerStyle={[
+                    styles.scrollContent,
+                    {
+                      justifyContent: isKeyboardVisible ? 'flex-end' : 'center',
+                      paddingBottom: isKeyboardVisible ? (Platform.OS === 'ios' ? 70 : 10) : 70
+                    }
+                  ]}
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
                   onContentSizeChange={() => {
@@ -538,7 +602,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     }
                   }}
                 >
-                  <View style={styles.modalContentInner}>
+                  {isKeyboardVisible && <View style={{ flex: 1 }} />}
+                  <View style={[styles.modalContentInner]}>
                     <Animated.View style={[{ transform: [{ translateX: modalContentAnim }] }]}>
                       <CustomText size={16} color={Color.whiteText} style={styles.heading} font={font.PoppinsSemiBold}>
                         {t('modal.howWasIt')}
@@ -568,59 +633,62 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                         <Text style={styles.continueAlert}>{t('errorMessage.pickOneContinue')}</Text>
                       </View>
                     )}
-                    <Animated.View style={[styles.actionsContainer, { transform: [{ translateX: actionsContainerAnim }] }]}>
-                      <View style={styles.lovedIt}>
-                        <TouchableOpacity onPress={handleLovedIt}>
-                          <Image source={selectedOption === 'lovedIt' ? imageIndex.acrtivePlay : imageIndex.stopPlay} resizeMode="contain" style={styles.icon} />
-                        </TouchableOpacity>
-                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                          {t('modal.loveIt')}
-                        </CustomText>
-                      </View>
-                      <View style={styles.lovedIt}>
-                        <TouchableOpacity onPress={handleOkay}>
-                          <Image source={selectedOption === 'okay' ? imageIndex.modalitWasPoster : imageIndex.play} resizeMode="contain" style={styles.icon} />
-                        </TouchableOpacity>
-                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                          {t('modal.itWasOkay')}
-                        </CustomText>
-                      </View>
-                      <View style={styles.lovedIt}>
-                        <TouchableOpacity onPress={handleDidntLike}>
-                          <Image source={selectedOption === 'notLike' ? imageIndex.redCloseActive : imageIndex.redClose} resizeMode="contain" style={styles.icon} />
-                        </TouchableOpacity>
-                        <CustomText size={14} color={Color.lightGrayText} style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsMedium : font.PoppinsRegular }]} font={font.PoppinsRegular}>
-                          {t('modal.didntLikeIt')}
-                        </CustomText>
-                      </View>
-                    </Animated.View>
-                    {!isOnboarding && showFeedback && (
-                      <Animated.View style={[{ width: '100%', marginTop: 10, transform: [{ translateX: actionsContainerAnim }] }]}>
-                        <View style={styles.reviewConatainer}>
-                          <CustomReviewInput
-                            key={visible ? 'active' : 'inactive'}
-                            ref={reviewInputRef}
-                            placeholder={t('modal.writeReview')}
-                            text={text}
-                            setText={setText}
-                          />
-                        </View>
-                        <TouchableOpacity onPress={() => nextPress()} style={{ width: '100%' }}>
-                          <CustomText size={14} color={Color.primary} style={styles.nextText} font={font.PoppinsRegular}>
-                            {t('common.next')}
+                    {showFeedback && isKeyboardVisible && Platform.OS !== 'ios' && <View style={{ flex: 1 }} />}
+
+                    <Animated.View style={[{ width: '100%', transform: [{ translateX: actionsContainerAnim }] }]}>
+                      {/* Icons */}
+                      <View style={styles.actionsContainer}>
+                        <View style={styles.lovedIt}>
+                          <TouchableOpacity onPress={handleLovedIt}>
+                            <Image source={selectedOption === 'lovedIt' ? imageIndex.acrtivePlay : imageIndex.stopPlay} resizeMode="contain" style={styles.icon} />
+                          </TouchableOpacity>
+                          <CustomText style={[styles.actionText, { fontFamily: selectedOption === 'lovedIt' ? font.PoppinsMedium : font.PoppinsRegular, color: selectedOption === 'lovedIt' ? Color.whiteText : Color.subText }]}>
+                            {t('modal.loveIt')}
                           </CustomText>
-                        </TouchableOpacity>
-                      </Animated.View>
-                    )}
+                        </View>
+                        <View style={styles.lovedIt}>
+                          <TouchableOpacity onPress={handleOkay}>
+                            <Image source={selectedOption === 'okay' ? imageIndex.modalitWasPoster : imageIndex.play} resizeMode="contain" style={styles.icon} />
+                          </TouchableOpacity>
+                          <CustomText style={[styles.actionText, { fontFamily: selectedOption === 'okay' ? font.PoppinsMedium : font.PoppinsRegular, color: selectedOption === 'okay' ? Color.whiteText : Color.subText }]}>
+                            {t('modal.itWasOkay')}
+                          </CustomText>
+                        </View>
+                        <View style={styles.lovedIt}>
+                          <TouchableOpacity onPress={handleDidntLike}>
+                            <Image source={selectedOption === 'notLike' ? imageIndex.redCloseActive : imageIndex.redClose} resizeMode="contain" style={styles.icon} />
+                          </TouchableOpacity>
+                          <CustomText style={[styles.actionText, { fontFamily: selectedOption === 'notLike' ? font.PoppinsMedium : font.PoppinsRegular, color: selectedOption === 'notLike' ? Color.whiteText : Color.subText }]}>
+                            {t('modal.didntLikeIt')}
+                          </CustomText>
+                        </View>
+                      </View>
+
+                      {/* Input and Button */}
+                      {!isOnboarding && showFeedback && (
+                        <>
+                          <View style={styles.reviewConatainer}>
+                            <CustomReviewInput
+                              key={visible ? 'active' : 'inactive'}
+                              ref={reviewInputRef}
+                              placeholder={t('modal.writeReview')}
+                              text={text}
+                              setText={setText}
+                            />
+                          </View>
+                          <ButtonCustom
+                            title={t('common.next')}
+                            onPress={() => nextPress()}
+                            buttonStyle={{ width: screenWidth * 0.90, marginTop: 22, alignSelf: 'center' }}
+                          />
+                        </>
+                      )}
+                    </Animated.View>
                   </View>
                 </ScrollView>
               </View>
 
-              {isComparison && (
-                <View style={styles.orContainer}>
-                  <Image source={imageIndex.orCircle} style={styles.orImage} resizeMode="contain" />
-                </View>
-              )}
+
             </View>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
@@ -672,8 +740,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: Color.whiteText,
-    fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 28,
   },
   poster: {
     width: wp(45),
@@ -691,19 +758,25 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 7,
+    // justifyContent: 'space-between',
+    // gap: 7,
+    width: '100%',
+
   },
   lovedIt: {
     paddingVertical: 10,
-    paddingHorizontal: 8,
+    // paddingHorizontal: 8,
     borderRadius: 50,
     alignItems: "center",
+    // flex: 1,
+    width: '33.3%'
   },
   actionText: {
     fontSize: 14,
-    color: Color.lightGrayText,
+    color: Color.whiteText,
     marginTop: 6,
+    fontFamily: font.PoppinsMedium,
+    textAlign: 'center'
   },
   icon: { height: 40, width: 40 },
   reviewConatainer: {
@@ -740,8 +813,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   comparisonHeading: {
-    marginBottom: 12,
+    marginBottom: 28,
     color: Color.whiteText,
+    fontSize: 16,
+    fontFamily: font.PoppinsSemiBold
   },
   moviesContainer: {
     flexDirection: 'row',
@@ -771,13 +846,27 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(28,28,28,0.95)',
   },
   comparisonPoster: {
-    borderColor: Color.primary,
     borderRadius: 10,
     width: '100%',
     height: '100%',
   },
+  gradientBorder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedPosterInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
   comparisonTitle: {
-    marginTop: 8,
+    marginTop: 16,
     marginLeft: 1,
   },
   comparisonYear: {
@@ -787,13 +876,14 @@ const styles = StyleSheet.create({
   },
   orContainer: {
     position: 'absolute',
-    top: '43%',
+    top: ((wp(45) * 1.5) / 2),
     left: '50%',
     transform: [{ translateX: -16 }, { translateY: -16 }],
     width: 32,
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   orImage: {
     height: 34,

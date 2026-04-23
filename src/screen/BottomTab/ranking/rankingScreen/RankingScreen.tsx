@@ -1,7 +1,7 @@
 
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ScrollView, StatusBar, Image, ActivityIndicator, Platform, LayoutAnimation, UIManager, Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, Image, ActivityIndicator, Platform, LayoutAnimation, UIManager, Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,7 +44,7 @@ import NetInfo from '@react-native-community/netinfo';
 import RankingTabs from './RankingTabs';
 import DislikedMoviesTab from './DislikedMoviesTab';
 
-const ITEM_HEIGHT = 180; // Adjust based on your movie card height
+const ITEM_HEIGHT = 159; // Adjust based on your movie card height (135 poster + 24 gap)
 
 const rankingItemStyles = StyleSheet.create({
   row: { left: 0, right: 0 },
@@ -241,15 +241,12 @@ const RankingScreen = () => {
   const ratedPage = useSelector((state: RootState) => state.ranking.ratedPage);
   const ratedHasMore = useSelector((state: RootState) => state.ranking.ratedHasMore);
   const suggestionMoviesFromRedux = useSelector((state: RootState) => state.ranking.suggestionMovies);
-  const suggestionPage = useSelector((state: RootState) => state.ranking.suggestionPage);
-  const suggestionHasMore = useSelector((state: RootState) => state.ranking.suggestionHasMore);
   const loadingRated = useSelector((state: RootState) => state.ranking.loadingRated);
   const suggestionLoading = useSelector((state: RootState) => state.ranking.loadingSuggestion);
   const [filteredMovies, setFilteredMovies] = useState(suggestionMoviesFromRedux);
 
   const [flatlistTop, setFlatlistTop] = useState<number | null>(null);
   const [firstRankIconPosition, setFirstRankIconPosition] = useState<{ x: number; y: number } | null>(null);
-  const listRef = useRef(null);
   const [hasSeenTooltip, setHasSeenTooltip] = useState(false);
   const [TooltipModal, setTooltipModal] = useState<boolean>(openTooltipModal || false);
   const [displayMovies, setDisplayMovies] = useState([]);
@@ -736,25 +733,9 @@ const RankingScreen = () => {
     setDisplayMovies(filteredMovies.slice(0, suggestionVisibleCount));
   }, [filteredMovies, suggestionVisibleCount]);
 
-  const getRankingItemLayout = useCallback(
-    (_: unknown, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index,
-    }),
-    []
-  );
-
   const rankingData = useMemo(
     () => order.slice(0, visibleCount),
     [order, visibleCount]
-  );
-
-  const rankingKeyExtractor = useCallback((id: string, index: number) => id || `ranking-${index}`, []);
-
-  const rankingExtraData = useMemo(
-    () => [activeDragId, loadingIds],
-    [activeDragId, loadingIds]
   );
 
   const renderRankingItem = useCallback(
@@ -790,28 +771,12 @@ const RankingScreen = () => {
     [activeDragId, loadingIds, token, getPanResponder, handleNavigation, swapItems, onStartDragStable]
   );
 
-  const handleSuggestionEndReached = useCallback(() => {
-    if (suggestionVisibleCount < filteredMovies.length) {
-      setSuggestionVisibleCount(prev => Math.min(prev + SUGGESTION_LOAD_MORE_SIZE, filteredMovies.length));
-    } else if (suggestionHasMore && !suggestionLoading) {
-      dispatch(fetchRankingSuggestionMovies(suggestionPage + 1));
-    }
-  }, [suggestionVisibleCount, filteredMovies.length, suggestionHasMore, suggestionLoading, suggestionPage, dispatch]);
 
   const suggestionKeyExtractor = useCallback((item: { imdb_id?: string }, index: number) => {
     return item?.imdb_id ?? `suggestion-${index}`;
   }, []);
 
-  const suggestionListFooter = useCallback(
-    () => (
-      suggestionLoading ? (
-        <View style={{ paddingVertical: 20 }}>
-          <ActivityIndicator size="large" color={Color.primary} />
-        </View>
-      ) : null
-    ),
-    [suggestionLoading]
-  );
+
 
   const combinedData = useMemo(() => {
     const list: any[] = rankingData.map((id, index) => ({ id, type: 'ranking', rankIndex: index }));
@@ -873,7 +838,7 @@ const RankingScreen = () => {
         return (
           <View style={{ paddingHorizontal: 10 }}>
             <Text style={styles.heading}>
-              {(t("discover.haveyou"))} {"\n"}
+              {(t("discover.haveyou"))}{' '}
               <Text style={{ color: Color.whiteText }}>
                 {(t("discover.wed"))}
               </Text>
@@ -884,7 +849,7 @@ const RankingScreen = () => {
       case 'suggestion':
         return (
           <View
-            style={{ paddingHorizontal: 10 }}
+            style={{ paddingHorizontal: 0 }}
             key={`suggestion-wrapper-${item.imdb_id}`}
             onLayout={item.suggestionIndex === 1 ? handleLayout : undefined}
           >
@@ -918,10 +883,6 @@ const RankingScreen = () => {
     markTooltipSeen();
   }, []);
 
-  const extraDataSuggestion = useMemo(
-    () => [suggestionLoading, suggestionHasMore],
-    [suggestionLoading, suggestionHasMore]
-  );
 
   const rankingListHeader = useCallback(() => (
     <View>
@@ -983,8 +944,6 @@ const RankingScreen = () => {
           )
         )}
       </View>
-
-
       <SlideInTooltipModal
         visible={TooltipModal && firstRankIconPosition != null}
         onClose={handleCloseTooltip}

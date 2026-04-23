@@ -56,7 +56,7 @@ const GenreModal = ({
             styles.genreText,
             isSelected && styles.selectedGenreText,
           ]}
-          font={font.PoppinsRegular}
+
         >
           {item}
         </CustomText>
@@ -113,7 +113,7 @@ const GenreModal = ({
                   size={14}
                   color={Color.whiteText}
                   style={styles.buttonTxt}
-                  font={font.PoppinsMedium}
+                  font={font.PoppinsSemiBold}
                 >
                   Reset
                 </CustomText>
@@ -133,7 +133,7 @@ const GenreModal = ({
                   size={14}
                   color={Color.whiteText}
                   style={styles.buttonTxt}
-                  font={font.PoppinsBold}
+                  font={font.PoppinsSemiBold}
                 >
 
                   {t("discover.apply")}
@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
-    marginTop: 5,
+    marginBottom: 18,
+    marginTop: 16,
     paddingHorizontal: 20,
   },
   title: {
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   closeImg: {
-    height: 22,
-    width: 22,
+    height: 24,
+    width: 24,
   },
   closeIcon: {
     color: Color.whiteText,
@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
   genreText: {
     alignSelf: 'center',
     textAlign: 'center',
+    fontFamily: font.PoppinsRegular,
   },
   separator: {
     height: 1,
@@ -220,11 +221,12 @@ const styles = StyleSheet.create({
   },
 
   selectedGenreButton: {
-    backgroundColor: Color.primary, // या जो भी highlight color हो
+    borderWidth: 1,
+    borderColor: Color.primary, // या जो भी highlight color हो
   },
   selectedGenreText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontFamily: font.PoppinsMedium,
   },
 
 

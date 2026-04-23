@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: font.PoppinsRegular,
     lineHeight: 16,
-    marginRight: 12,
   },
   scoreValue: {
     color: Color.whiteText,

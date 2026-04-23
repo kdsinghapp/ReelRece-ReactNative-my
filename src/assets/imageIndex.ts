@@ -79,6 +79,10 @@ export default {
   arrowDown: require('../assets/images/arrowDown.png'),
   like: require('../assets/images/like.png'),
   disLike: require('../assets/images/disLike.png'),
+  disLikeFill: require('../assets/images/dislikefill.png'),
+  disLikeUnFill: require('../assets/images/dislikeunfill.png'),
+  disLikeTab: require('../assets/images/disliketab.png'),
+  rankTab: require('../assets/images/ranktab.png'),
   Check: require('../assets/images/Check.png'),
   UserAdd: require('../assets/images/UserAdd.png'),
   bellNotification: require('../assets/images/bellNotification.png'),
@@ -142,6 +146,7 @@ export default {
   welcomePost21: require('../assets/welcomePost/welcomePost21.png'),
   welcomePost22: require('../assets/welcomePost/welcomePost22.png'),
   welcomePost23: require('../assets/welcomePost/welcomePost23.png'),
-  // welcomePost24: require('../assets/welcomePost/welcomePost24.png'),
-
+  welcomebox: require('../assets/images/welcomebox.png'),
+  welcomefullbg: require('../assets/images/welcomefullbg.png'),
+  onboardingbox: require('../assets/images/onboardingbox.png'),
 }; 

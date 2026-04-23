@@ -86,9 +86,8 @@ const DislikedMoviesTab = ({ token }: DislikedMoviesTabProps) => {
         onPress={() => handleRemoveDislike(item.imdb_id)}
       >
         <Image
-          source={imageIndex.dislike1}
+          source={imageIndex.disLikeFill}
           style={styles.badgeIcon}
-          tintColor={Color.whiteText}
         />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -140,10 +139,10 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginBottom: 20,
     paddingHorizontal: 4,
-    marginTop: 6
+    marginTop: 9
   },
   description: {
-    color: 'white',
+    color: Color.subText,
     fontSize: 12.3,
     fontFamily: font.PoppinsRegular,
   },
@@ -168,20 +167,20 @@ const styles = StyleSheet.create({
   },
   dislikeBadge: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
+    bottom: 4,
+    right: 4,
     // backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // borderRadius: 12,
+    // width: 24,
+    // height: 24,
+    // justifyContent: 'center',
+    // alignItems: 'center',
     // borderWidth: 1,
     // borderColor: 'rgba(255,255,255,0.3)',
   },
   badgeIcon: {
-    width: 14,
-    height: 14,
+    width: 24,
+    height: 24,
   },
   emptyText: {
     color: '#666',
