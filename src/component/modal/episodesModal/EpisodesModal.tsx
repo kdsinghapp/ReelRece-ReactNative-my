@@ -16,7 +16,7 @@ import imageIndex from '@assets/imageIndex';
 import { Color } from '@theme/color';
 import font from '@theme/font';
 import CustomText from '@components/common/CustomText/CustomText';
- 
+
 interface Episode {
   id: number;
   title: string;
@@ -98,24 +98,24 @@ const EpisodesModal: React.FC<Props> = ({
   }, [visible, sessionList]);
 
   const getModalHeight = () => {
-    const videoHeight = screenHeight * 0.40;
+    const videoHeight = screenHeight * (Platform.OS === 'android' ? 0.34 : 0.38);
     const availableHeight = screenHeight - videoHeight;
-    
-    let modalHeight = availableHeight  
-    
-    return Math.min(modalHeight, screenHeight * 0.65);
+
+    let modalHeight = availableHeight
+
+    return Math.min(modalHeight, screenHeight * 0.75);
   };
 
- const getModalBottomPadding = () => {
+  const getModalBottomPadding = () => {
     let bottomPadding = 0;
-    
+
     if (Platform.OS === 'ios') {
       bottomPadding = Math.max(insets.bottom, 12);
     } else {
       // For Android with gesture navigation, add more padding
       bottomPadding = Math.max(insets.bottom + 10, 20);
     }
-    
+
     return bottomPadding;
   };
 
@@ -127,8 +127,8 @@ const EpisodesModal: React.FC<Props> = ({
         onPress={() => onSelect(item?.id)}
       >
         <Image
-          source={{ uri: bagImges }}
-          resizeMode='stretch'
+          source={{ uri: item.image || bagImges }}
+          resizeMode="cover"
           style={styles.thumbnail}
         />
         <View style={styles.textContainer}>
@@ -187,7 +187,7 @@ const EpisodesModal: React.FC<Props> = ({
       <View style={styles.mainContainer}>
         {/* This empty view represents the 40% video area */}
         <View style={styles.videoAreaPlaceholder} />
-        
+
         {/* Modal overlay that takes remaining space */}
         <TouchableOpacity
           style={[
@@ -224,26 +224,30 @@ const EpisodesModal: React.FC<Props> = ({
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.sectionHeader}
-              onPress={() => setSessionOption(!sessionOption)}
-            >
-              <View style={styles.emptySpace} />
-              <CustomText
-                size={16}
-                color={Color.whiteText}
-                style={styles.sectionTitle}
-                font={font.PoppinsBold}
+            {((episodes && episodes.length > 0) || (sessionList && sessionList.length > 1)) && (
+              <TouchableOpacity
+                activeOpacity={sessionList?.length > 1 ? 0.8 : 1}
+                style={styles.sectionHeader}
+                onPress={() => sessionList?.length > 1 && setSessionOption(!sessionOption)}
               >
-                {selectedSortId}
-              </CustomText>
-              {sessionOption ? (
-                <Image source={imageIndex.arrowUp} style={styles.arrowStyle} />
-              ) : (
-                <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
-              )}
-            </TouchableOpacity>
+                <View style={styles.emptySpace} />
+                <CustomText
+                  size={16}
+                  color={Color.whiteText}
+                  style={styles.sectionTitle}
+                  font={font.PoppinsBold}
+                >
+                  {selectedSortId}
+                </CustomText>
+                {sessionList?.length > 1 && (
+                  sessionOption ? (
+                    <Image source={imageIndex.arrowUp} style={styles.arrowStyle} />
+                  ) : (
+                    <Image source={imageIndex.arrowDown} style={styles.arrowStyle} />
+                  )
+                )}
+              </TouchableOpacity>
+            )}
 
             {EpisodesLoder ? (
               <View style={styles.loaderContainer}>
@@ -304,10 +308,10 @@ const EpisodesModal: React.FC<Props> = ({
             )}
           </View>
           {/* Add a transparent view at the bottom for gestures */}
-      
-        {Platform.OS === 'android' && insets.bottom > 0 && (
-                  <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
-                )}
+
+          {Platform.OS === 'android' && insets.bottom > 0 && (
+            <View style={[styles.gestureSafeArea, { height: insets.bottom + 10 }]} />
+          )}
         </TouchableOpacity>
       </View>
     </Modal>
@@ -317,13 +321,13 @@ const EpisodesModal: React.FC<Props> = ({
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   videoAreaPlaceholder: {
-    height: '39%', 
+    height: Platform.OS === 'android' ? '36%' : '38%',
   },
   modalOverlay: {
-    flex: 1, 
+    flex: 1,
   },
   androidModalOverlay: {
     marginBottom: Platform.select({
@@ -351,8 +355,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    marginTop: 12,
+    marginBottom: 14,
+    marginTop: 14,
     alignItems: 'center',
   },
   headerText: {
@@ -420,9 +424,10 @@ const styles = StyleSheet.create({
     marginVertical: 3,
   },
   thumbnail: {
-    width: 100,
+    width: 128,
     height: 72,
-    borderRadius: 10,
+    borderRadius: 8,
+    backgroundColor: Color.black,
   },
   textContainer: {
     paddingLeft: 8,

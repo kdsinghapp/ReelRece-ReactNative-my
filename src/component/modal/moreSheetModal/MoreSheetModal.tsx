@@ -22,7 +22,7 @@
 // import RankingCard from '@components/ranking/RankingCard';
 // import CustomText from '@components/common/CustomText/CustomText';
 // import { hp } from '@utils/Constant';
- 
+
 // interface Movie {
 //   id: string;
 //   imdb_id: string;
@@ -96,7 +96,7 @@
 //           styles.modalContent,
 //           {
 //             maxHeight: height - insets.top - 20,
-            
+
 //             paddingBottom: Math.max(insets.bottom, 12),
 //           }
 //         ]}>
@@ -227,9 +227,9 @@
 //     height: CARD_HEIGHT,
 //      backgroundColor: '#1a1a1a',
 //     overflow: 'hidden',
-  
-     
- 
+
+
+
 //   },
 //   movieImage: {
 //     width: '100%',
@@ -304,6 +304,7 @@ import ScreenNameEnum from '@routes/screenName.enum';
 import RankingCard from '@components/ranking/RankingCard';
 import CustomText from '@components/common/CustomText/CustomText';
 import { t } from 'i18next';
+import { height } from '@utils/Constant';
 
 interface Movie {
   id: string;
@@ -377,24 +378,24 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
 
 
   const getModalHeight = () => {
-    const videoHeight = screenHeight * 0.40;
+    const videoHeight = screenHeight * (Platform.OS === 'android' ? 0.34 : 0.38);
     const availableHeight = screenHeight - videoHeight;
-    
-    let modalHeight = availableHeight  
-    
-    return Math.min(modalHeight, screenHeight * 0.65);
+
+    let modalHeight = availableHeight
+
+    return Math.min(modalHeight, screenHeight * 0.75);
   };
 
- const getModalBottomPadding = () => {
+  const getModalBottomPadding = () => {
     let bottomPadding = 0;
-    
+
     if (Platform.OS === 'ios') {
       bottomPadding = Math.max(insets.bottom, 12);
     } else {
       // For Android with gesture navigation, add more padding
       bottomPadding = Math.max(insets.bottom + 10, 20);
     }
-    
+
     return bottomPadding;
   };
 
@@ -423,11 +424,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
     >
       <View style={styles.mainContainer}>
         {/* Video area placeholder (40% of screen) */}
-        <View style={[
-          styles.videoAreaPlaceholder,
-          // { height: screenHeight * (isSmallDevice ? 0.35 : 0.40) }
-        ]} />
-        
+        <View style={styles.videoAreaPlaceholder} />
+
         {/* Modal overlay */}
         <TouchableOpacity
           style={styles.modalOverlay}
@@ -456,8 +454,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                 style={styles.headerText}
                 font={font.PoppinsBold}
               >
-              
-                  {t("movieDetail.morelike")}
+
+                {t("movieDetail.morelike")}
               </CustomText>
               <TouchableOpacity onPress={onClose}>
                 <Image
@@ -470,8 +468,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
             {/* Content */}
             {loading ? (
               <View style={styles.loaderContainer}>
-                <ActivityIndicator 
-                  color={Color.primary} 
+                <ActivityIndicator
+                  color={Color.primary}
                   size={isSmallDevice ? "small" : "large"}
                 />
                 <CustomText
@@ -480,8 +478,8 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.loadingText}
                   font={font.PoppinsRegular}
                 >
-                    {t("emptyState.similar")}
-                   
+                  {t("emptyState.similar")}
+
                 </CustomText>
               </View>
             ) : moreMovie.length > 0 ? (
@@ -500,9 +498,9 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                       onPress={() => goToDetail(item, index)}
                       style={[
                         styles.movieCard,
-                        { 
+                        {
                           width: CARD_WIDTH,
-                          height: CARD_HEIGHT 
+                          height: CARD_HEIGHT
                         }
                       ]}
                     >
@@ -530,9 +528,9 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.emptyText}
                   font={font.PoppinsBold}
                 >
-                                      {t("emptyState.similarmovies")}
+                  {t("emptyState.similarmovies")}
 
-             
+
                 </CustomText>
                 <CustomText
                   size={isSmallDevice ? 13 : 14}
@@ -540,7 +538,7 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
                   style={styles.emptySubText}
                   font={font.PoppinsRegular}
                 >
-                     {t("common.moviesSimilar")}
+                  {t("common.moviesSimilar")}
                 </CustomText>
               </View>
             )}
@@ -559,11 +557,10 @@ const MoreSheetModal: React.FC<MoreSheetModalProps> = ({
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   videoAreaPlaceholder: {
-     height: '39%', 
-    // Height set dynamically
+    height: Platform.OS === 'android' ? height * 0.36 : height * 0.38,
   },
   modalOverlay: {
     flex: 1,

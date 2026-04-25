@@ -45,14 +45,14 @@ const RatingSection = ({ item, onRatingPress }: RatingSectionProps) => {
       backgroundColor: '#1A1A1A',
       paddingTop: 14,
       paddingBottom: 14,
-      paddingHorizontal: 16,
+      paddingHorizontal: 14,
       marginTop: 12,
     }}>
       <View style={{ flex: 1 }}>
-        <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'center' }}>
+        <CustomText size={12} color={Color.whiteText} font={font.PoppinsMedium} style={{ textAlign: 'left' }}>
           {t("movieDetail.howDoYouFeel") || "How do you feel about this one?"}
         </CustomText>
-        <View style={{ width: '90%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, alignSelf: 'center' }} />
+        <View style={{ width: '95%', height: 0.5, backgroundColor: Color.whiteText, marginTop: 4, }} />
       </View>
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {ratingOptions.map((option) => (

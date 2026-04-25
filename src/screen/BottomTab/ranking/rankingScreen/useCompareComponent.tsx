@@ -161,7 +161,7 @@ export const useCompareComponent = (token: string, options?: { onRatingSuccess?:
   const openFeedbackModal = useCallback((
     movie: string | object,
     pref?: 'love' | 'like' | 'dislike',
-    config?: { 
+    config?: {
       isOnboarding?: boolean,
       onModalClose?: () => void,
       onReviewAdded?: (imdb_id: string) => void

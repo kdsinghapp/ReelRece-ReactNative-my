@@ -3,6 +3,8 @@ import { View, Text } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import styles from '../style';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Image } from 'react-native';
+import imageIndex from '@assets/imageIndex';
 
 interface MovieDescriptionSectionProps {
   item: any;
@@ -56,7 +58,7 @@ const MovieDescriptionSection = ({
   return (
     <View style={containerStyle}>
       <View style={innerContainerStyle}>
-        <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true}>
+        <ScrollView nestedScrollEnabled={false} showsVerticalScrollIndicator={false} bounces={true} contentContainerStyle={{ paddingBottom: 38 }}>
           {(item?.plot || item?.description) && (
             <Text style={[styles.description, { marginBottom: 0 }]}>
               {item?.plot || item?.description}
@@ -111,14 +113,16 @@ const MovieDescriptionSection = ({
             </Text>
           )}
 
-          <View style={{ height: 40 }} />
+          {/* <View style={{ height: 40 }} />
           <LinearGradient
             colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.gradient}
-          />
+          /> */}
         </ScrollView>
+        <Image source={imageIndex.desBottom} style={{ height: 38, width: '100%', position: 'absolute', bottom: 0, zIndex: 1 }} resizeMode="stretch" />
+
       </View>
     </View>
   );

@@ -165,12 +165,12 @@ const WatchNowModal = ({
   };
   const insets = useSafeAreaInsets();
   const getModalHeight = () => {
-    const videoHeight = screenHeight * 0.40;
+    const videoHeight = screenHeight * 0.38;
     const availableHeight = screenHeight - videoHeight;
 
     let modalHeight = availableHeight
 
-    return Math.min(modalHeight, screenHeight * 0.65);
+    return Math.min(modalHeight, screenHeight * 0.75);
   };
 
   const getModalBottomPadding = () => {
@@ -223,12 +223,13 @@ const WatchNowModal = ({
         <TouchableOpacity
           style={[
             styles.watchBtn,
-            { backgroundColor: hasUrl ? Color.primary : Color.grey700 },
+            { backgroundColor: hasUrl ? Color.primary : Color.grey },
           ]}
           onPress={() => hasUrl && openDeeplink(item)}
           disabled={!hasUrl}
         >
-          <Text style={styles.watchBtnText}>▶ {t('common.watchNow')}</Text>
+          <Image source={imageIndex.watchPlay} style={styles.watchPlayIcon} />
+          <Text style={styles.watchBtnText}>{t('common.watchNow')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -358,7 +359,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 24,
   },
   headingTitle: {
     color: Color.primary,
@@ -366,25 +367,26 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsSemiBold,
     flex: 1,
     textAlign: 'center',
+    lineHeight: 19.2
   },
   closeImg: {
-    height: 22,
-    width: 22,
+    height: 24,
+    width: 24,
   },
 
   filterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#767676',
+    // marginBottom: 10,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#767676',
     paddingBottom: 20,
   },
   filterButton: {
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Color.grey700,
+    backgroundColor: Color.gray,
     borderWidth: 1,
     borderColor: Color.grey,
   },
@@ -396,7 +398,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   activeFilter: {
-    backgroundColor: Color.primary,
+    backgroundColor: '#00A8F599',
+    borderWidth: 1,
+    borderColor: Color.primary
   },
   filterText: {
     color: Color.whiteText,
@@ -407,7 +411,7 @@ const styles = StyleSheet.create({
   },
   activeFilterText: {
     color: Color.whiteText,
-    fontWeight: 'bold',
+    fontFamily: font.PoppinsSemiBold,
     marginHorizontal: 10,
   },
   platformRow: {
@@ -420,7 +424,8 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     marginRight: 12,
-    borderRadius: 6,
+    borderRadius: 4,
+    backgroundColor: 'transparent'
   },
   platformLogoPlaceholder: {
     backgroundColor: Color.grey700,
@@ -453,7 +458,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     height: 40,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
   watchBtnText: {
     color: Color.whiteText,
@@ -510,14 +516,14 @@ const styles = StyleSheet.create({
 
   mainContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   videoAreaPlaceholder: {
-    height: '39%',
+    height: '38%',
   },
   modalContent: {
     backgroundColor: Color.modalBg,
-    paddingTop: 16,
+    paddingTop: 30,
     paddingHorizontal: 16,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -531,5 +537,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  watchPlayIcon: {
+    height: 11,
+    width: 10,
+    marginRight: 6,
+    resizeMode: "contain",
+    tintColor: Color.whiteText,
   },
 });

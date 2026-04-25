@@ -116,11 +116,11 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
   // sync when modal opens / reviews change
   useEffect(() => {
-    if (visible && reviews && comments.length === 0) {
-      // setCommentText('')
-      setComments((reviews || []).map((r, i) => normalizeComment(r, i)));
+    if (visible && Array.isArray(reviews) && reviews.length > 0 && comments.length === 0) {
+      const normalized = reviews.map((r, i) => normalizeComment(r, i));
+      setComments(normalized);
     }
-  }, [visible, reviews]);
+  }, [visible, reviews, comments.length]);
 
   useEffect(() => {
     if (!visible) return;
@@ -129,15 +129,17 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
     const existingComment = findCurrentUserComment(comments) || findCurrentUserComment(normalizedReviews);
 
     if (existingComment?.comment) {
-      setHasCommented(true);
-      setCommentText(existingComment.comment);
+      if (!hasCommented) setHasCommented(true);
+      // Only set text if it's currently empty (initial load)
+      if (commetText === '') {
+        setCommentText(existingComment.comment);
+      }
       isMyCommnetCheck_Ref.current = true;
       isMyCommnetRef.current = true;
       return;
     }
 
-    setHasCommented(false);
-    setCommentText('');
+    if (hasCommented) setHasCommented(false);
     isMyCommnetCheck_Ref.current = false;
   }, [visible, comments, reviews, findCurrentUserComment]);
 
@@ -306,9 +308,9 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
 
   useEffect(() => {
+    if (commetText !== '') setCommentText('');
+    if (comments.length > 0) setComments([]);
 
-    setCommentText('')
-    setComments([])
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
       setIsKeyboardVisible(true);
     });
@@ -324,7 +326,6 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
 
   const renderItem = useCallback(
     ({ item, index }: { item; index: number }) => {
-      // ✅ check karo ki mera comment hai kya aur 0 index par hai kya
       const isMyTopComment =
         index === 0 && item.user?.username === userData?.username;
 
@@ -376,8 +377,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                   }
                 }}
               >
-                <Text style={styles.name}>{item.user?.name}
-                  <Text style={{ marginLeft: 18, fontSize: 16, fontFamily: font.PoppinsRegular }}> Ranked</Text>
+                <Text style={styles.name}>{item.user?.name || item?.user.username}
+                  <Text style={{ marginLeft: 18, fontSize: 13, fontFamily: font.PoppinsRegular, color: Color.subText }}> ranked</Text>
 
                 </Text>
               </TouchableOpacity>
@@ -425,8 +426,8 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
               >
                 <CustomText
                   size={13}
-                  color={Color.primary}
-                  font={font.PoppinsBold}
+                  color={Color.subText}
+                  font={font.PoppinsMedium}
                 >
                   ...{t("common.seeMore")}
                 </CustomText>
@@ -446,7 +447,7 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
               </CustomText>
             </TouchableOpacity>
           )}
-          <View style={styles.divider} />
+          {/* <View style={styles.divider} /> */}
         </View>
       );
     },
@@ -525,6 +526,9 @@ const CommentModal: React.FC<Props> = ({ visible, onClose, reviews,
                       editable={!!has_rated_movie}
                       onFocus={handleCommentInputFocus}
                       onChangeText={setCommentText}
+                      multiline={true}
+                      numberOfLines={1}
+                      textAlignVertical="center"
                     />
                     {!has_rated_movie && (
                       <TouchableOpacity
@@ -579,10 +583,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     maxHeight:
       Dimensions.get('window').height *
-      (Platform.OS === 'ios' ? 0.63 : 0.58),
+      (Platform.OS === 'ios' ? 0.58 : 0.55),
 
     // maxHeight: Dimensions.get('window').height * 0.63,
-    height: Dimensions.get('window').height * 0.66,
+    height: Dimensions.get('window').height * 0.62,
     // maxHeight: Dimensions.get('window').height * 0.66,
     // minHeight: Dimensions.get('window').height * 0.66,
   },
@@ -601,7 +605,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   reviewContainer: {
-    marginBottom: 14,
+    marginBottom: 40,
     paddingHorizontal: 16,
 
   },
@@ -662,12 +666,11 @@ const styles = StyleSheet.create({
     fontFamily: font.PoppinsMedium,
   },
   inputContainer: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     alignContent: 'center',
-    maxHeight: 50,
+    maxHeight: 120,
     minHeight: 50,
 
     backgroundColor: Color.grey,
@@ -683,23 +686,21 @@ const styles = StyleSheet.create({
     color: Color.whiteText,
     fontSize: 14,
     fontFamily: font.PoppinsRegular,
-    alignItems: 'center',
     justifyContent: 'center',
     textAlignVertical: 'center',
-    lineHeight: 24,
-    maxHeight: 50,
-    // backgroundColor:'red',
-    paddingBottom: 4,
+    lineHeight: 20,
+    maxHeight: 100,
+    paddingTop: 10,
+    paddingBottom: 10,
     minHeight: 50,
-    width: '85%',
-
-    // flex: 1,
+    width: '90%',
   },
   postButton: {
     paddingHorizontal: 12,
     // paddingVertical: 6,
     //   backgroundColor: Color.primary,
     borderRadius: 8,
+    alignSelf: 'center'
   },
 
   postImage: {
@@ -717,9 +718,6 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
 });
-
-
-
 
 export const timeAgo = (dateString: string): string => {
   const now = new Date();

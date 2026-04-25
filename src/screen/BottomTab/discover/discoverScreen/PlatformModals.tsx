@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         marginRight: 12,
-        borderRadius: 10,
+        borderRadius: 4,
     },
     dataSelectContainer: {
         marginBottom: 10,

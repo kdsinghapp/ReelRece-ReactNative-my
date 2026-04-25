@@ -510,44 +510,44 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({
                             <View style={styles.posterWrapper}>
                               <Grayscale amount={comparisonSelected === 'first' ? 1 : 0} style={{ width: '100%', height: '100%' }}>
                                 {comparisonSelected === 'second' ? (
-                                   <LinearGradient
-                                     colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
-                                     locations={[0.2, 0.5, 0.8]}
-                                     start={{ x: 0, y: 0 }}
-                                     end={{ x: 1, y: 1 }}
-                                     style={styles.gradientBorder}
-                                   >
-                                     <View style={styles.selectedPosterInner}>
-                                       <FastImage
-                                         key={rightMovie.poster?.uri}
-                                         style={styles.comparisonPoster}
-                                         source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
-                                         resizeMode={FastImage.resizeMode.contain}
-                                         onLoad={() => {
-                                           if (!rightCardSlideInDoneRef.current) {
-                                             rightCardSlideInDoneRef.current = true;
-                                             runRightCardSlideIn();
-                                           }
-                                         }}
-                                       />
-                                     </View>
-                                   </LinearGradient>
-                                 ) : (
-                                   <FastImage
-                                     key={rightMovie.poster?.uri}
-                                     style={styles.comparisonPoster}
-                                     source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
-                                     resizeMode={FastImage.resizeMode.contain}
-                                     onLoad={() => {
-                                       if (!rightCardSlideInDoneRef.current) {
-                                         rightCardSlideInDoneRef.current = true;
-                                         runRightCardSlideIn();
-                                       }
-                                     }}
-                                   />
-                                 )}
+                                  <LinearGradient
+                                    colors={['#00A8F5', '#A7E3FF', '#00A8F5']}
+                                    locations={[0.2, 0.5, 0.8]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.gradientBorder}
+                                  >
+                                    <View style={styles.selectedPosterInner}>
+                                      <FastImage
+                                        key={rightMovie.poster?.uri}
+                                        style={styles.comparisonPoster}
+                                        source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                                        resizeMode={FastImage.resizeMode.contain}
+                                        onLoad={() => {
+                                          if (!rightCardSlideInDoneRef.current) {
+                                            rightCardSlideInDoneRef.current = true;
+                                            runRightCardSlideIn();
+                                          }
+                                        }}
+                                      />
+                                    </View>
+                                  </LinearGradient>
+                                ) : (
+                                  <FastImage
+                                    key={rightMovie.poster?.uri}
+                                    style={styles.comparisonPoster}
+                                    source={{ ...rightMovie.poster, priority: FastImage.priority.high, cache: FastImage.cacheControl.immutable }}
+                                    resizeMode={FastImage.resizeMode.contain}
+                                    onLoad={() => {
+                                      if (!rightCardSlideInDoneRef.current) {
+                                        rightCardSlideInDoneRef.current = true;
+                                        runRightCardSlideIn();
+                                      }
+                                    }}
+                                  />
+                                )}
                                 {isOnboarding == false &&
-                                   rightMovie.rating != null && (
+                                  rightMovie.rating != null && (
                                     <View style={styles.ratingBadge}>
                                       <RankingWithInfo
                                         score={Number(rightMovie.rating)}

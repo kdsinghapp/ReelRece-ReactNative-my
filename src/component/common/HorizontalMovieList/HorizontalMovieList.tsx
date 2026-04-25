@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
-   Image,
+  Image,
   TouchableOpacity,
   FlatList,
   StyleSheet,
@@ -17,10 +17,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useSelector } from 'react-redux';
 import { RootState } from '@redux/store';
 import FastImage from 'react-native-fast-image';
- import CustomText from '@components/common/CustomText/CustomText';
+import CustomText from '@components/common/CustomText/CustomText';
 import ScoreIntroModal from '@components/modal/ScoreIntroModal/ScoreIntroModal';
 import RankingWithInfo from '@components/ranking/RankingWithInfo';
 import { t } from 'i18next';
+import { width } from '@utils/Constant';
 
 const SHIMMER_COLORS = ['#181818ff', '#464545ff', '#181717ff'];
 const SHIMMER_STYLE = { borderRadius: 8 };
@@ -141,43 +142,43 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
     ({ item }: { item: unknown }) => {
       const movie = item as MovieItem;
       return (
-      <TouchableOpacity
-        onPress={() => goToDetail(movie)}
-        style={styles.movieCardContainer}
-      >
-        {/* <ImageBackground
+        <TouchableOpacity
+          onPress={() => goToDetail(movie)}
+          style={styles.movieCardContainer}
+        >
+          {/* <ImageBackground
           source={{ uri: item.cover_image_url }}
           style={styles.movieCard}
           resizeMode="cover"
         > */}
 
-        <FastImage
-          source={{
-            uri: movie?.cover_image_url,
-            priority: FastImage.priority.low,
-            cache: FastImage.cacheControl.immutable
+          <FastImage
+            source={{
+              uri: movie?.cover_image_url,
+              priority: FastImage.priority.low,
+              cache: FastImage.cacheControl.immutable
 
-          }}
-          style={styles.movieCard}
-          resizeMode={FastImage.resizeMode.stretch}
+            }}
+            style={styles.movieCard}
+            resizeMode={FastImage.resizeMode.stretch}
 
-        />
+          />
 
-        <TouchableOpacity style={styles.rankingOverlay}
-        //  onPress={() => setShowFirstModal(!showFirstModal)}  
-        >
-          {/* {movie?.rec_score && */}
-        
+          <TouchableOpacity style={styles.rankingOverlay}
+          //  onPress={() => setShowFirstModal(!showFirstModal)}  
+          >
+            {/* {movie?.rec_score && */}
+
             <RankingWithInfo
               score={movie?.rec_score ?? '?'}
-              title={scoreType === "Rec" ? t("discover.recscore") :  t("discover.friendscore")  }
-              description={scoreType === "Rec"? t("discover.recscoredes") : t("discover.frienddes")
+              title={scoreType === "Rec" ? t("discover.recscore") : t("discover.friendscore")}
+              description={scoreType === "Rec" ? t("discover.recscoredes") : t("discover.frienddes")
               }
             />
-          {/* } */}
-        </TouchableOpacity>
+            {/* } */}
+          </TouchableOpacity>
 
-        {/* <ImageBackground
+          {/* <ImageBackground
           source={
             typeof item.cover_image_url === 'string'
               ? { uri: item?.cover_image_url }
@@ -210,7 +211,7 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
             }
           </TouchableOpacity>
         </ImageBackground> */}
-      </TouchableOpacity>
+        </TouchableOpacity>
       );
     },
     [goToDetail, scoreType]
@@ -254,7 +255,7 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
           {title}
         </CustomText>
 
-        <TouchableOpacity style={styles.arrowIconContainer}  onPress={handleNavigate}>
+        <TouchableOpacity style={styles.arrowIconContainer} onPress={handleNavigate}>
           <Image source={imageIndex.rightArrow} style={styles.arrowIcon} />
         </TouchableOpacity>
       </View>
@@ -286,15 +287,15 @@ const HorizontalMovieList: React.FC<HorizontalMovieListProps> = ({
             removeClippedSubviews={false}
             nestedScrollEnabled={true}
           />
-           {loading && (
-    // <ActivityIndicator
-    //   size="small"
-    //   color={Color.primary}
-    //   style={{ marginVertical: 10 }}
-    // /> 
-    <>
-    </>
-  )}  
+          {loading && (
+            // <ActivityIndicator
+            //   size="small"
+            //   color={Color.primary}
+            //   style={{ marginVertical: 10 }}
+            // /> 
+            <>
+            </>
+          )}
         </>
       ) : (
         <CustomText
@@ -329,9 +330,9 @@ const styles = StyleSheet.create({
     lineHeight: 19.4,
     fontFamily: font.PoppinsSemiBold,
   },
-  arrowIconContainer:{
-    height:32,
-    width:32,
+  arrowIconContainer: {
+    height: 32,
+    width: 32,
   },
   arrowIcon: {
     height: 24,
@@ -343,22 +344,22 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   movieCardContainer: {
-    width: 110,
+    width: width * 0.25,
     marginRight: 10,
-    justifyContent:'center',
-    alignItems:'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   movieCard: {
-    width: 104,
-    height: 156,
+    width: width * 0.25,
+    height: width * 0.25 * 1.5,
     borderRadius: 8,
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },
   rankingOverlay: {
     position: 'absolute',
-     left: 0,
-    bottom: 0,
+    left: -4,
+    bottom: -1,
   },
   // movieTitle: {
   //   color: Color.whiteText,

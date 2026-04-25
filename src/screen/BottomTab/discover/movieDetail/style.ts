@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: 'center',
+    marginLeft: -7
   },
   scoreBoxYellow: {
     flexDirection: "row",
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     // marginTop: 30,
     alignItems: "center",
     // marginVertical: 24,
-    paddingHorizontal: 24,
+    paddingHorizontal: 14,
   },
 
   footerButton: {

@@ -46,10 +46,10 @@ const CompareModals = ({
     userPreference,
     currentComparisonIndex,
     handleNextComparison,
-     isStepsModalVisible,     
+    isStepsModalVisible,
     currentStep,
     setCurrentStep,
-    setStepsModalVisible,  
+    setStepsModalVisible,
     handleCloseRating,
     hasComparisonsAvailable, // Add this
     isOnboardingFlow,
@@ -65,7 +65,7 @@ const CompareModals = ({
     }
   }, [isStepsModalVisible, dispatch]);
 
-   const wasAnyModalOpen = useRef(false);
+  const wasAnyModalOpen = useRef(false);
 
   useEffect(() => {
     const anyModalOpen = isFeedbackVisible || isComparisonVisible || isStepsModalVisible;
@@ -92,7 +92,7 @@ const CompareModals = ({
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (isStepsModalVisible) return;
     const fetchStep = async () => {
       const step = await getCurrentStep();
@@ -150,23 +150,23 @@ const CompareModals = ({
           firstMovie={
             isComparisonStep && movie
               ? {
-                  title: movie?.title ?? '',
-                  year: String(movie?.release_year ?? ''),
-                  poster: { uri: movie?.cover_image_url ?? '' },
-                  rating: movie?.rating?.toString(),
-                  imdb_id: movie?.imdb_id,
-                }
+                title: movie?.title ?? '',
+                year: String(movie?.release_year ?? ''),
+                poster: { uri: movie?.cover_image_url ?? '' },
+                rating: movie?.rating?.toString(),
+                imdb_id: movie?.imdb_id,
+              }
               : undefined
           }
           secondMovie={
             isComparisonStep && secondMovie
               ? {
-                  title: secondMovie?.title ?? '',
-                  year: String(secondMovie?.release_year ?? ''),
-                  poster: { uri: secondMovie?.cover_image_url ?? '' },
-                  rating: secondMovie?.rating?.toString(),
-                  imdb_id: secondMovie?.imdb_id,
-                }
+                title: secondMovie?.title ?? '',
+                year: String(secondMovie?.release_year ?? ''),
+                poster: { uri: secondMovie?.cover_image_url ?? '' },
+                rating: secondMovie?.rating?.toString(),
+                imdb_id: secondMovie?.imdb_id,
+              }
               : undefined
           }
           onReviewAdded={(imdb_id) => {

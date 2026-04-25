@@ -552,6 +552,7 @@ const MovieDetailScreen = () => {
         id: index + 1,
         title: ep?.episode_name || ep?.title || `Episode ${index + 1}`,
         duration: ep?.runtime ? `${ep.runtime} min` : 'Unknown',
+        image: ep?.image,
       }));
       setEpisodes(formattedEpisodes);
     } catch (error) {
@@ -618,7 +619,7 @@ const MovieDetailScreen = () => {
         id: index + 1,
         title: ep?.episode_name || ep?.title || `Episode ${index + 1}`,
         duration: ep?.runtime ? `${ep.runtime} min` : 'Unknown',
-        image: ep?.image || imageIndex.moviesPoster,
+        image: ep?.image,
       }));
       setEpisodes(formattedEpisodes);
     } catch (err) {
@@ -929,10 +930,12 @@ const MovieDetailScreen = () => {
                 style={styles.title}
                 font={font.PoppinsBold}
                 numberOfLines={1}
-                onTextLayout={(e) => {
-                  const lines = e.nativeEvent.lines.length;
-                  setTitleLinesMap(prev => ({ ...prev, [index]: lines }));
-                }}
+              // onTextLayout={(e) => {
+              //   const lines = e.nativeEvent.lines.length;
+              //   if (titleLinesMap[index] !== lines) {
+              //     setTitleLinesMap(prev => ({ ...prev, [index]: lines }));
+              //   }
+              // }}
 
               >
                 {item?.title}
@@ -1250,9 +1253,10 @@ const MovieDetailScreen = () => {
         maxToRenderPerBatch={3}
         windowSize={5}
         scrollEventThrottle={16}
-        extraData={flatListExtraData}
+        // extraData={flatListExtraData}
         removeClippedSubviews={Platform.OS === 'android'}
         nestedScrollEnabled={Platform.OS === 'android'}
+        keyboardShouldPersistTaps="handled"
       />
       {showFirstModal && (
         <ScoreIntroModal
@@ -1303,7 +1307,7 @@ const MovieDetailScreen = () => {
             setSessionList([]);
           }}
           token={token}
-          bagImges={movieData[currentIndex]?.cover_image_url}
+          bagImges={movieData[currentIndex]?.horizontal_poster_url || movieData[currentIndex]?.cover_image_url}
           imdb_id={movieData[currentIndex]?.imdb_id}
           onFetchEpisodes={handleFetchSeasonEpisodes}
           sessionList={sessionList}
